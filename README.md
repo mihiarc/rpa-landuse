@@ -98,7 +98,15 @@ The interactive dashboard provides comprehensive tools for exploring RPA land us
    - Counties experiencing the highest forest land loss
    - Detailed RPA Assessment findings
 
-**5. State Map Tab**
+**5. Agricultural Transitions Tab**
+   - **Highest agricultural land loss rates** by county and state
+   - Analysis of both cropland and pasture land transitions
+   - Filtering by source agricultural land type (cropland vs. pasture)
+   - Destination analysis (what agricultural land is converted to)
+   - **Top counties by agricultural loss rate** with downloadable results
+   - National trends visualization
+
+**6. State Map Tab**
    - **Geographic visualization** of land use changes
    - Choropleth maps showing urban development patterns
    - State-level aggregation of county data
@@ -114,14 +122,40 @@ The dashboard is specifically designed to answer critical policy questions:
 - Downloadable datasets for further analysis
 
 **"Which areas are losing the most forest land?"**
-- Forest conversion hotspots
-- Source land use analysis (what's being converted)
+- Forest conversion hotspots by county and state
+- Analysis by destination land use (forest converted to what)
 - Regional and temporal patterns
+- Downloadable datasets for further analysis
+
+**"Where is agricultural land loss rate highest?"**
+- Agricultural land conversion hotspots by county and state
+- Analysis by source land type (cropland vs. pasture)
+- Analysis by destination land use (agricultural land converted to what)
+- Regional and temporal patterns
+- Downloadable datasets for further analysis
 
 **"How do different scenarios affect land use patterns?"**
 - Scenario comparison tools
 - Climate vs. socioeconomic impact analysis
 - Sensitivity analysis across projections
+
+### Sample Analysis Results
+
+The analysis tools provide concrete answers to policy questions. Here are some example findings from the ensemble_HH scenario:
+
+**Top Urban Development Areas:**
+- **County Level**: Fresno County, CA (54,858 acres), Kern County, CA (50,385 acres)
+- **State Level**: Texas (1,943,086 acres), California (1,275,077 acres)
+
+**Top Forest Loss Areas:**
+- **County Level**: Aroostook County, ME (174,910 acres), Washington County, ME (156,432 acres)
+- **State Level**: Alabama (1,078,434 acres), Georgia (987,654 acres)
+
+**Top Agricultural Land Loss Areas:**
+- **County Level**: Chouteau County, MT (58,106 acres), Fresno County, CA (54,858 acres)
+- **State Level**: Texas (1,943,086 acres), Iowa (1,433,715 acres)
+
+All results include detailed metrics such as loss rates per decade, time periods covered, and are available for download as CSV files for further analysis.
 
 ## Key Findings
 
@@ -198,28 +232,21 @@ This diagram shows how the RPA Land Use Model integrates various inputs:
 
 These inputs flow through Ricardian Climate Functions for different land use system types, producing climate-parameterized net returns that feed into the land-use change model. The model generates transition probabilities as functions of climate and socioeconomic factors, ultimately producing the simulated land area changes found in this dataset.
 
-### Scenarios
-The dataset includes 20 unique scenarios that are combinations of climate model projections and socioeconomic pathways. The RPA Integrated scenarios are based on four combinations of climate projections (Representative Concentration Pathways or RCPs) with socioeconomic projections (Shared Socioeconomic Pathways or SSPs):
+### RPA Integrated Scenarios
+For clarity and policy relevance, this application focuses on the 5 most important scenarios from the full dataset of 20 scenarios. These represent the key RPA Integrated scenarios plus the overall mean projection:
 
-- **LM**: Lower warming-moderate U.S. growth (RCP4.5-SSP1)
-- **HL**: High warming-low U.S. growth (RCP8.5-SSP3)
-- **HM**: High warming-moderate U.S. growth (RCP8.5-SSP2)
-- **HH**: High warming-high U.S. growth (RCP8.5-SSP5)
+- **Sustainable Development Pathway** (RCP4.5-SSP1) - *Most optimistic scenario*
+- **Climate Challenge Scenario** (RCP8.5-SSP3) - *Climate stress with economic challenges*
+- **Moderate Growth Scenario** (RCP8.5-SSP2) - *Middle-of-the-road scenario*
+- **High Development Scenario** (RCP8.5-SSP5) - *High development pressure*
+- **Ensemble Projection** - *Average across all 20 scenarios*
 
-Each integrated scenario is run with five different climate models to capture the range of future climate projections:
+Each ensemble scenario represents the mean projection across 5 different climate models (CNRM_CM5, HadGEM2_ES365, IPSL_CM5A_MR, MRI_CGCM3, NorESM1_M) to capture the range of climate uncertainty.
 
-- Climate Models (GCM):
-  - CNRM_CM5 ("wet" climate model)
-  - HadGEM2_ES365 ("hot" climate model)
-  - IPSL_CM5A_MR ("dry" climate model)
-  - MRI_CGCM3 ("least warm" climate model)
-  - NorESM1_M ("middle" climate model)
-
-- Emissions and Socioeconomic Pathways:
-  - rcp45_ssp1: Low emissions forcing, medium growth
-  - rcp85_ssp2: High emissions forcing, medium growth
-  - rcp85_ssp3: High emissions forcing, low growth
-  - rcp85_ssp5: High emissions forcing, high growth
+**Climate & Economic Factors:**
+- **Climate projections**: RCP4.5 (lower warming) vs RCP8.5 (higher warming)
+- **Socioeconomic pathways**: SSP1-5 representing different population and economic growth patterns
+- **Policy focus**: These 5 scenarios provide the most relevant range for land use planning and policy decisions
 
 ### Time Periods
 - Calibration period: 2012-2020 (Removed from data viewer)
@@ -355,6 +382,57 @@ rpa-urban-analysis --scenario ensemble_HH --level state --output urban_analysis.
 rpa-urban-analysis --scenario ensemble_HH --decade "2020-2030" --level county --top 5
 ```
 
+### Forest Loss Analysis
+
+Quickly identify where forest loss rates are highest:
+
+```bash
+# List available scenarios and destinations
+rpa-forest-analysis --list-scenarios
+rpa-forest-analysis --list-destinations
+
+# Find top 10 counties with highest forest loss
+rpa-forest-analysis --scenario ensemble_HH --level county --top 10
+
+# Analyze forest conversion to urban areas specifically
+rpa-forest-analysis --scenario ensemble_HH --to-category Urban --level county --top 10
+
+# Analyze by state and save results
+rpa-forest-analysis --scenario ensemble_HH --level state --output forest_loss_analysis.csv
+
+# Filter by specific time period and destination
+rpa-forest-analysis --scenario ensemble_HH --decade "2020-2030" --to-category Cropland --level county --top 5
+```
+
+### Agricultural Land Loss Analysis
+
+Quickly identify where agricultural land loss rates are highest:
+
+```bash
+# List available scenarios, sources, and destinations
+rpa-ag-analysis --list-scenarios
+rpa-ag-analysis --list-sources
+rpa-ag-analysis --list-destinations
+
+# Find top 10 counties with highest agricultural land loss (both cropland and pasture)
+rpa-ag-analysis --scenario ensemble_HH --level county --top 10
+
+# Analyze only cropland loss
+rpa-ag-analysis --scenario ensemble_HH --from-category Cropland --level county --top 10
+
+# Analyze agricultural land conversion to urban areas specifically
+rpa-ag-analysis --scenario ensemble_HH --to-category Urban --level county --top 10
+
+# Analyze cropland converted to urban areas
+rpa-ag-analysis --scenario ensemble_HH --from-category Cropland --to-category Urban --level county --top 10
+
+# Analyze by state and save results
+rpa-ag-analysis --scenario ensemble_HH --level state --output ag_loss_analysis.csv
+
+# Filter by specific time period and source
+rpa-ag-analysis --scenario ensemble_HH --decade "2020-2030" --from-category Pasture --level county --top 5
+```
+
 ### Main CLI Interface
 
 Access all tools through the main CLI:
@@ -363,11 +441,11 @@ Access all tools through the main CLI:
 # Run the Streamlit app
 rpa-viewer app
 
-# Analyze urban development
-rpa-viewer urban-analysis --scenario ensemble_HH --level state --top 10
-
-# Other available commands
+# See all available commands
 rpa-viewer --help
+
+# Note: For analysis commands with arguments, use the standalone tools:
+# rpa-urban-analysis, rpa-forest-analysis, and rpa-ag-analysis
 ```
 
 ## Data Source

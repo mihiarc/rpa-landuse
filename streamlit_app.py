@@ -73,11 +73,52 @@ def load_parquet_data():
     return data
 
 # Load US states GeoJSON
-@st.cache_data
+@st.cache_data(ttl=3600)  # Cache for 1 hour, helps with SSL issues
 def load_us_states():
-    # Use a simplified US states GeoJSON from a public source
-    url = "https://raw.githubusercontent.com/python-visualization/folium/master/examples/data/us-states.json"
-    return gpd.read_file(url)
+    # Skip remote download due to SSL issues on macOS, use local fallback directly
+    try:
+        # Create states boundary from counties data
+        counties_path = "data/counties.geojson"
+        if os.path.exists(counties_path):
+            counties = gpd.read_file(counties_path)
+            # Create a simple state FIPS to name mapping
+            state_fips_to_name = {
+                '01': 'Alabama', '02': 'Alaska', '04': 'Arizona', '05': 'Arkansas', '06': 'California',
+                '08': 'Colorado', '09': 'Connecticut', '10': 'Delaware', '11': 'District of Columbia',
+                '12': 'Florida', '13': 'Georgia', '15': 'Hawaii', '16': 'Idaho', '17': 'Illinois',
+                '18': 'Indiana', '19': 'Iowa', '20': 'Kansas', '21': 'Kentucky', '22': 'Louisiana',
+                '23': 'Maine', '24': 'Maryland', '25': 'Massachusetts', '26': 'Michigan', '27': 'Minnesota',
+                '28': 'Mississippi', '29': 'Missouri', '30': 'Montana', '31': 'Nebraska', '32': 'Nevada',
+                '33': 'New Hampshire', '34': 'New Jersey', '35': 'New Mexico', '36': 'New York',
+                '37': 'North Carolina', '38': 'North Dakota', '39': 'Ohio', '40': 'Oklahoma',
+                '41': 'Oregon', '42': 'Pennsylvania', '44': 'Rhode Island', '45': 'South Carolina',
+                '46': 'South Dakota', '47': 'Tennessee', '48': 'Texas', '49': 'Utah', '50': 'Vermont',
+                '51': 'Virginia', '53': 'Washington', '54': 'West Virginia', '55': 'Wisconsin', '56': 'Wyoming'
+            }
+            
+            # Add state names to counties
+            counties['state_name'] = counties['STATE'].map(state_fips_to_name)
+            
+            # Dissolve counties by state to create state boundaries
+            if 'state_name' in counties.columns:
+                states = counties.dissolve(by='state_name').reset_index()
+                states = states.rename(columns={'state_name': 'name'})
+                st.info("Using local geographic data for state boundaries.")
+                return states
+    except Exception as e:
+        st.warning(f"Could not load local states data: {e}")
+    
+    # If local fallback fails, try remote as last resort
+    try:
+        st.info("Attempting to download remote geographic data...")
+        url = "https://raw.githubusercontent.com/python-visualization/folium/master/examples/data/us-states.json"
+        return gpd.read_file(url)
+    except Exception as e:
+        st.warning(f"Could not load remote states data: {e}")
+        
+        # Final fallback: return None and disable mapping
+        st.warning("Geographic mapping is disabled due to data loading issues.")
+        return None
 
 # Load RPA documentation if available
 @st.cache_data
@@ -128,6 +169,10 @@ def create_state_map(state_data, title):
     # Load GeoJSON of US states
     states_geojson = load_us_states()
     
+    # If states data couldn't be loaded, return None
+    if states_geojson is None:
+        return None
+    
     # Center the map on the continental US
     map_center = [39.8283, -98.5795]
     state_map = folium.Map(location=map_center, zoom_start=4, scrollWheelZoom=False)
@@ -164,7 +209,7 @@ def create_state_map(state_data, title):
     return state_map
 
 # Main layout with tabs
-tab1, tab2, tab3, tab4, tab5 = st.tabs(["Overview", "Data Explorer", "Urbanization Trends", "Forest Transitions", "State Map"])
+tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["Overview", "Data Explorer", "Urbanization Trends", "Forest Transitions", "Agricultural Transitions", "State Map"])
 
 # Load data
 try:
@@ -184,6 +229,22 @@ with tab1:
         - Higher projected population and income growth lead to relatively less forest land, while hotter projected future climates lead to relatively more forest land.
         - Projected future land use change is more sensitive to the variation in economic factors across RPA scenarios than to the variation among climate projections.
         """)
+    
+    st.subheader("RPA Integrated Scenarios")
+    st.markdown("""
+    This application focuses on the 5 most important RPA scenarios for policy analysis:
+    
+    **🌡️ Climate & Economic Scenarios:**
+    - **Sustainable Development Pathway** (RCP4.5-SSP1) - *Most optimistic scenario*
+    - **Climate Challenge Scenario** (RCP8.5-SSP3) - *Climate stress with economic challenges*
+    - **Moderate Growth Scenario** (RCP8.5-SSP2) - *Middle-of-the-road scenario*
+    - **High Development Scenario** (RCP8.5-SSP5) - *High development pressure*
+    - **Ensemble Projection** - *Average across all 20 scenarios*
+    
+    Each scenario represents different combinations of:
+    - **Climate projections** (RCP4.5 = lower warming, RCP8.5 = higher warming)
+    - **Socioeconomic pathways** (SSP1-5 = different population and economic growth patterns)
+    """)
     
     # Add more informative overview
     st.subheader("Data Processing Information")
@@ -253,6 +314,17 @@ with tab3:
     
     # Get county transitions data 
     county_df = data["County-Level Land Use Transitions"]
+    
+    # Filter for only the 5 key RPA scenarios
+    key_scenarios = [
+        'ensemble_LM',    # Lower warming-moderate growth (RCP4.5-SSP1)
+        'ensemble_HL',    # High warming-low growth (RCP8.5-SSP3)
+        'ensemble_HM',    # High warming-moderate growth (RCP8.5-SSP2)
+        'ensemble_HH',    # High warming-high growth (RCP8.5-SSP5)
+        'ensemble_overall' # Overall mean projection
+    ]
+    county_df = county_df[county_df["scenario_name"].isin(key_scenarios)]
+    
     # Filter for urban transitions only (where to_category is 'Urban')
     urban_counties_df = county_df[county_df["to_category"] == "Urban"]
     
@@ -261,10 +333,21 @@ with tab3:
     col1, col2, col3 = st.columns([1, 1, 1])
     
     with col1:
-        # Scenario selection
+        # Scenario selection with descriptions
+        scenario_descriptions = {
+            'ensemble_LM': 'Sustainable Development Pathway',
+            'ensemble_HL': 'Climate Challenge Scenario', 
+            'ensemble_HM': 'Moderate Growth Scenario',
+            'ensemble_HH': 'High Development Scenario',
+            'ensemble_overall': 'Ensemble Projection'
+        }
+        
         scenarios = urban_counties_df["scenario_name"].unique().tolist()
-        scenarios = [str(s) for s in scenarios]
-        selected_scenario = st.selectbox("Select Scenario", options=scenarios, key="urban_scenario")
+        scenario_options = [scenario_descriptions.get(scenario, scenario) for scenario in scenarios]
+        selected_scenario_display = st.selectbox("Select Scenario", options=scenario_options, key="urban_scenario")
+        # Map back to original scenario name
+        scenario_reverse_map = {v: k for k, v in scenario_descriptions.items()}
+        selected_scenario = scenario_reverse_map.get(selected_scenario_display, selected_scenario_display)
     
     with col2:
         # Time period selection
@@ -285,7 +368,11 @@ with tab3:
     
     # Aggregate data based on analysis level
     if analysis_level == "County":
-        group_cols = ["county_name", "state_name", "fips_code"]
+        # Check if fips_code column exists, if not use only county and state
+        if "fips_code" in filtered_data.columns:
+            group_cols = ["county_name", "state_name", "fips_code"]
+        else:
+            group_cols = ["county_name", "state_name"]
         location_col = "county_name"
         location_display = lambda row: f"{row['county_name']}, {row['state_name']}"
     elif analysis_level == "State":
@@ -381,9 +468,10 @@ with tab3:
     if analysis_level == "County":
         column_mapping.update({
             "county_name": "County",
-            "state_name": "State",
-            "fips_code": "FIPS Code"
+            "state_name": "State"
         })
+        if "fips_code" in display_data.columns:
+            column_mapping["fips_code"] = "FIPS Code"
     elif analysis_level == "State":
         column_mapping["state_name"] = "State"
     else:
@@ -463,21 +551,223 @@ with tab3:
 
 # ---- FOREST TRANSITIONS TAB ----
 with tab4:
-    st.header("Forest Land Transitions")
+    st.header("🌲 Where is Forest Loss Rate Highest?")
     
-    col1, col2 = st.columns([1, 1])
+    # Get county transitions data 
+    county_df = data["County-Level Land Use Transitions"]
+    
+    # Filter for only the 5 key RPA scenarios
+    key_scenarios = [
+        'ensemble_LM',    # Lower warming-moderate growth (RCP4.5-SSP1)
+        'ensemble_HL',    # High warming-low growth (RCP8.5-SSP3)
+        'ensemble_HM',    # High warming-moderate growth (RCP8.5-SSP2)
+        'ensemble_HH',    # High warming-high growth (RCP8.5-SSP5)
+        'ensemble_overall' # Overall mean projection
+    ]
+    county_df = county_df[county_df["scenario_name"].isin(key_scenarios)]
+    
+    # Filter for forest transitions only (where from_category is 'Forest')
+    forest_counties_df = county_df[county_df["from_category"] == "Forest"]
+    
+    # Analysis controls
+    st.subheader("Analysis Controls")
+    col1, col2, col3, col4 = st.columns([1, 1, 1, 1])
     
     with col1:
-        from_forest_df = data["Transitions from Forest Land"]
-        # Convert to string for display in selectbox
-        forest_scenarios = from_forest_df["scenario_name"].unique().tolist()
-        forest_scenarios = [str(s) for s in forest_scenarios]
-        selected_scenario_forest = st.selectbox("Select Scenario", 
-                                               options=forest_scenarios,
-                                               key="forest_scenario")
+        # Scenario selection with descriptions
+        scenario_descriptions = {
+            'ensemble_LM': 'Sustainable Development Pathway',
+            'ensemble_HL': 'Climate Challenge Scenario', 
+            'ensemble_HM': 'Moderate Growth Scenario',
+            'ensemble_HH': 'High Development Scenario',
+            'ensemble_overall': 'Ensemble Projection'
+        }
+        
+        scenarios = forest_counties_df["scenario_name"].unique().tolist()
+        scenario_options = [scenario_descriptions.get(scenario, scenario) for scenario in scenarios]
+        selected_scenario_display = st.selectbox("Select Scenario", options=scenario_options, key="forest_scenario")
+        # Map back to original scenario name
+        scenario_reverse_map = {v: k for k, v in scenario_descriptions.items()}
+        selected_scenario = scenario_reverse_map.get(selected_scenario_display, selected_scenario_display)
     
-    # Filter data
-    filtered_forest = from_forest_df[from_forest_df["scenario_name"] == selected_scenario_forest]
+    with col2:
+        # Time period selection
+        decades = forest_counties_df["decade_name"].unique().tolist()
+        decades.sort()
+        selected_decade = st.selectbox("Time Period", options=["All Periods"] + decades, key="forest_decade")
+    
+    with col3:
+        # Analysis level
+        analysis_level = st.selectbox("Analysis Level", 
+                                    options=["County", "State"], 
+                                    key="forest_level")
+    
+    with col4:
+        # Destination filter
+        destinations = forest_counties_df["to_category"].unique().tolist()
+        destinations.sort()
+        selected_destination = st.selectbox("Forest Converted To", 
+                                          options=["All Destinations"] + destinations, 
+                                          key="forest_destination")
+    
+    # Filter data based on selections
+    filtered_data = forest_counties_df[forest_counties_df["scenario_name"] == selected_scenario]
+    if selected_decade != "All Periods":
+        filtered_data = filtered_data[filtered_data["decade_name"] == selected_decade]
+    if selected_destination != "All Destinations":
+        filtered_data = filtered_data[filtered_data["to_category"] == selected_destination]
+    
+    # Aggregate data based on analysis level
+    if analysis_level == "County":
+        # Check if fips_code column exists, if not use only county and state
+        if "fips_code" in filtered_data.columns:
+            group_cols = ["county_name", "state_name", "fips_code"]
+        else:
+            group_cols = ["county_name", "state_name"]
+        location_col = "county_name"
+    else:  # State
+        group_cols = ["state_name"]
+        location_col = "state_name"
+    
+    # Calculate forest loss metrics
+    forest_analysis = filtered_data.groupby(group_cols).agg({
+        "total_area": ["sum", "mean"],
+        "decade_name": "nunique"
+    }).round(2)
+    
+    # Flatten column names
+    forest_analysis.columns = ["total_acres", "avg_acres_per_decade", "num_decades"]
+    forest_analysis = forest_analysis.reset_index()
+    
+    # Calculate forest loss rate (acres per decade)
+    forest_analysis["forest_loss_rate"] = (forest_analysis["total_acres"] / 
+                                         forest_analysis["num_decades"]).round(2)
+    
+    # Sort by total area
+    forest_analysis = forest_analysis.sort_values("total_acres", ascending=False)
+    
+    # Display results
+    destination_text = f" (converted to {selected_destination})" if selected_destination != "All Destinations" else ""
+    st.subheader(f"🏆 Highest Forest Loss Areas ({selected_scenario}){destination_text}")
+    
+    # Top 10 visualization
+    top_10 = forest_analysis.head(10).copy()
+    
+    # Create location labels for display
+    if analysis_level == "County":
+        top_10["location"] = top_10.apply(lambda row: f"{row['county_name']}, {row['state_name']}", axis=1)
+    else:
+        top_10["location"] = top_10[location_col]
+    
+    # Create visualization
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 6))
+    
+    # Total forest loss
+    ax1.barh(range(len(top_10)), top_10["total_acres"])
+    ax1.set_yticks(range(len(top_10)))
+    ax1.set_yticklabels(top_10["location"], fontsize=10)
+    ax1.set_xlabel("Total Acres of Forest Lost")
+    ax1.set_title(f"Top 10 {analysis_level}s by Total Forest Loss")
+    ax1.invert_yaxis()
+    
+    # Forest loss rate
+    ax2.barh(range(len(top_10)), top_10["forest_loss_rate"])
+    ax2.set_yticks(range(len(top_10)))
+    ax2.set_yticklabels(top_10["location"], fontsize=10)
+    ax2.set_xlabel("Acres per Decade")
+    ax2.set_title(f"Top 10 {analysis_level}s by Forest Loss Rate")
+    ax2.invert_yaxis()
+    
+    plt.tight_layout()
+    st.pyplot(fig)
+    
+    # Summary statistics
+    st.subheader("📊 Summary Statistics")
+    col1, col2, col3, col4 = st.columns(4)
+    
+    with col1:
+        st.metric("Total Areas Analyzed", len(forest_analysis))
+    with col2:
+        st.metric("Total Forest Acres Lost", f"{forest_analysis['total_acres'].sum():,.0f}")
+    with col3:
+        st.metric("Average per Area", f"{forest_analysis['total_acres'].mean():,.0f}")
+    with col4:
+        st.metric("Highest Single Area", f"{forest_analysis['total_acres'].max():,.0f}")
+    
+    # Detailed data table
+    st.subheader("📋 Detailed Analysis Results")
+    
+    # Format data for display
+    display_data = forest_analysis.copy()
+    display_data["total_acres"] = display_data["total_acres"].map(lambda x: f"{x:,.0f}")
+    display_data["avg_acres_per_decade"] = display_data["avg_acres_per_decade"].map(lambda x: f"{x:,.1f}")
+    display_data["forest_loss_rate"] = display_data["forest_loss_rate"].map(lambda x: f"{x:,.1f}")
+    
+    # Rename columns for clarity
+    column_mapping = {
+        "total_acres": "Total Forest Acres Lost",
+        "avg_acres_per_decade": "Average Acres per Decade",
+        "num_decades": "Decades Covered",
+        "forest_loss_rate": "Forest Loss Rate (acres/decade)"
+    }
+    
+    if analysis_level == "County":
+        column_mapping.update({
+            "county_name": "County",
+            "state_name": "State"
+        })
+        if "fips_code" in display_data.columns:
+            column_mapping["fips_code"] = "FIPS Code"
+    else:
+        column_mapping["state_name"] = "State"
+    
+    display_data = display_data.rename(columns=column_mapping)
+    
+    # Show data with search/filter capability
+    st.dataframe(display_data, use_container_width=True)
+    
+    # Download functionality
+    st.subheader("💾 Download Analysis Results")
+    
+    # Prepare download data (with original numeric values)
+    download_data = forest_analysis.copy()
+    
+    # Add metadata
+    download_data["scenario"] = selected_scenario
+    download_data["time_period"] = selected_decade
+    download_data["destination"] = selected_destination
+    download_data["analysis_level"] = analysis_level
+    download_data["generated_date"] = pd.Timestamp.now().strftime("%Y-%m-%d %H:%M:%S")
+    
+    # Convert to CSV
+    csv_data = download_data.to_csv(index=False).encode('utf-8')
+    
+    col1, col2 = st.columns(2)
+    with col1:
+        st.download_button(
+            label="📥 Download Full Analysis (CSV)",
+            data=csv_data,
+            file_name=f"forest_loss_analysis_{analysis_level.lower()}_{selected_scenario}_{selected_decade}_{selected_destination}.csv",
+            mime="text/csv",
+            help="Download complete analysis results with all metrics"
+        )
+    
+    with col2:
+        # Top 20 download
+        top_20_data = download_data.head(20).to_csv(index=False).encode('utf-8')
+        st.download_button(
+            label="🏆 Download Top 20 (CSV)",
+            data=top_20_data,
+            file_name=f"top_20_forest_loss_{analysis_level.lower()}_{selected_scenario}.csv",
+            mime="text/csv",
+            help="Download top 20 areas by forest loss"
+        )
+    
+    # National trends visualization
+    st.subheader("📈 National Forest Loss Trends by Destination")
+    
+    from_forest_df = data["Transitions from Forest Land"]
+    filtered_forest = from_forest_df[from_forest_df["scenario_name"] == selected_scenario]
     
     # Aggregate data by destination land use
     forest_to_use = filtered_forest.groupby(["to_category", "decade_name"])["total_area"].sum().reset_index()
@@ -486,26 +776,291 @@ with tab4:
     pivot_forest = forest_to_use.pivot(index="decade_name", columns="to_category", values="total_area")
     
     # Plot the data
-    st.subheader(f"Forest Land Conversion: {selected_scenario_forest}")
-    
-    fig3, ax3 = plt.figure(figsize=(10, 6)), plt.subplot()
-    pivot_forest.plot(kind="bar", ax=ax3)
+    fig3, ax3 = plt.subplots(figsize=(12, 6))
+    pivot_forest.plot(kind="bar", ax=ax3, width=0.8)
     ax3.set_xlabel("Time Period")
-    ax3.set_ylabel("Acres")
-    ax3.set_title(f"Forest Land Conversion by Destination: {selected_scenario_forest}")
+    ax3.set_ylabel("Acres of Forest Lost")
+    ax3.set_title(f"National Forest Land Conversion by Destination: {selected_scenario}")
+    ax3.legend(title="Converted To", bbox_to_anchor=(1.05, 1), loc='upper left')
+    ax3.grid(True, alpha=0.3)
+    plt.xticks(rotation=45)
     plt.tight_layout()
     
     st.pyplot(fig3)
     
-    with st.expander("Show Data Table"):
+    with st.expander("📊 Show National Trends Data"):
         st.dataframe(pivot_forest)
 
-# ---- STATE MAP TAB ----
+# ---- AGRICULTURAL TRANSITIONS TAB ----
 with tab5:
+    st.header("🌾 Where is Agricultural Land Loss Rate Highest?")
+    
+    # Get county transitions data 
+    county_df = data["County-Level Land Use Transitions"]
+    
+    # Filter for only the 5 key RPA scenarios
+    key_scenarios = [
+        'ensemble_LM',    # Lower warming-moderate growth (RCP4.5-SSP1)
+        'ensemble_HL',    # High warming-low growth (RCP8.5-SSP3)
+        'ensemble_HM',    # High warming-moderate growth (RCP8.5-SSP2)
+        'ensemble_HH',    # High warming-high growth (RCP8.5-SSP5)
+        'ensemble_overall' # Overall mean projection
+    ]
+    county_df = county_df[county_df["scenario_name"].isin(key_scenarios)]
+    
+    # Filter for agricultural transitions only (where from_category is 'Cropland' or 'Pasture')
+    ag_counties_df = county_df[county_df["from_category"].isin(["Cropland", "Pasture"])]
+    
+    # Analysis controls
+    st.subheader("Analysis Controls")
+    col1, col2, col3, col4 = st.columns([1, 1, 1, 1])
+    
+    with col1:
+        # Scenario selection with descriptions
+        scenario_descriptions = {
+            'ensemble_LM': 'Sustainable Development Pathway',
+            'ensemble_HL': 'Climate Challenge Scenario', 
+            'ensemble_HM': 'Moderate Growth Scenario',
+            'ensemble_HH': 'High Development Scenario',
+            'ensemble_overall': 'Ensemble Projection'
+        }
+        
+        scenarios = ag_counties_df["scenario_name"].unique().tolist()
+        scenario_options = [scenario_descriptions.get(scenario, scenario) for scenario in scenarios]
+        selected_scenario_display = st.selectbox("Select Scenario", options=scenario_options, key="ag_scenario")
+        # Map back to original scenario name
+        scenario_reverse_map = {v: k for k, v in scenario_descriptions.items()}
+        selected_scenario = scenario_reverse_map.get(selected_scenario_display, selected_scenario_display)
+    
+    with col2:
+        # Time period selection
+        decades = ag_counties_df["decade_name"].unique().tolist()
+        decades.sort()
+        selected_decade = st.selectbox("Time Period", options=["All Periods"] + decades, key="ag_decade")
+    
+    with col3:
+        # Analysis level
+        analysis_level = st.selectbox("Analysis Level", 
+                                    options=["County", "State"], 
+                                    key="ag_level")
+    
+    with col4:
+        # Source filter
+        sources = ["Both Cropland & Pasture"] + ag_counties_df["from_category"].unique().tolist()
+        selected_source = st.selectbox("Agricultural Land Type", 
+                                     options=sources, 
+                                     key="ag_source")
+    
+    # Additional filter for destination
+    col5, col6 = st.columns([1, 1])
+    with col5:
+        destinations = ag_counties_df["to_category"].unique().tolist()
+        destinations.sort()
+        selected_destination = st.selectbox("Agricultural Land Converted To", 
+                                          options=["All Destinations"] + destinations, 
+                                          key="ag_destination")
+    
+    # Filter data based on selections
+    filtered_data = ag_counties_df[ag_counties_df["scenario_name"] == selected_scenario]
+    if selected_decade != "All Periods":
+        filtered_data = filtered_data[filtered_data["decade_name"] == selected_decade]
+    if selected_source != "Both Cropland & Pasture":
+        filtered_data = filtered_data[filtered_data["from_category"] == selected_source]
+    if selected_destination != "All Destinations":
+        filtered_data = filtered_data[filtered_data["to_category"] == selected_destination]
+    
+    # Aggregate data based on analysis level
+    if analysis_level == "County":
+        # Check if fips_code column exists, if not use only county and state
+        if "fips_code" in filtered_data.columns:
+            group_cols = ["county_name", "state_name", "fips_code"]
+        else:
+            group_cols = ["county_name", "state_name"]
+        location_col = "county_name"
+    else:  # State
+        group_cols = ["state_name"]
+        location_col = "state_name"
+    
+    # Calculate agricultural loss metrics
+    ag_analysis = filtered_data.groupby(group_cols).agg({
+        "total_area": ["sum", "mean"],
+        "decade_name": "nunique"
+    }).round(2)
+    
+    # Flatten column names
+    ag_analysis.columns = ["total_acres", "avg_acres_per_decade", "num_decades"]
+    ag_analysis = ag_analysis.reset_index()
+    
+    # Calculate agricultural loss rate (acres per decade)
+    ag_analysis["ag_loss_rate"] = (ag_analysis["total_acres"] / 
+                                 ag_analysis["num_decades"]).round(2)
+    
+    # Sort by total area
+    ag_analysis = ag_analysis.sort_values("total_acres", ascending=False)
+    
+    # Display results
+    source_text = f" ({selected_source})" if selected_source != "Both Cropland & Pasture" else " (Cropland + Pasture)"
+    destination_text = f" (converted to {selected_destination})" if selected_destination != "All Destinations" else ""
+    st.subheader(f"🏆 Highest Agricultural Land Loss Areas ({selected_scenario}){source_text}{destination_text}")
+    
+    # Top 10 visualization
+    top_10 = ag_analysis.head(10).copy()
+    
+    # Create location labels for display
+    if analysis_level == "County":
+        top_10["location"] = top_10.apply(lambda row: f"{row['county_name']}, {row['state_name']}", axis=1)
+    else:
+        top_10["location"] = top_10[location_col]
+    
+    # Create visualization
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 6))
+    
+    # Total agricultural loss
+    ax1.barh(range(len(top_10)), top_10["total_acres"])
+    ax1.set_yticks(range(len(top_10)))
+    ax1.set_yticklabels(top_10["location"], fontsize=10)
+    ax1.set_xlabel("Total Acres of Agricultural Land Lost")
+    ax1.set_title(f"Top 10 {analysis_level}s by Total Agricultural Land Loss")
+    ax1.invert_yaxis()
+    
+    # Agricultural loss rate
+    ax2.barh(range(len(top_10)), top_10["ag_loss_rate"])
+    ax2.set_yticks(range(len(top_10)))
+    ax2.set_yticklabels(top_10["location"], fontsize=10)
+    ax2.set_xlabel("Acres per Decade")
+    ax2.set_title(f"Top 10 {analysis_level}s by Agricultural Loss Rate")
+    ax2.invert_yaxis()
+    
+    plt.tight_layout()
+    st.pyplot(fig)
+    
+    # Summary statistics
+    st.subheader("📊 Summary Statistics")
+    col1, col2, col3, col4 = st.columns(4)
+    
+    with col1:
+        st.metric("Total Areas Analyzed", len(ag_analysis))
+    with col2:
+        st.metric("Total Agricultural Acres Lost", f"{ag_analysis['total_acres'].sum():,.0f}")
+    with col3:
+        st.metric("Average per Area", f"{ag_analysis['total_acres'].mean():,.0f}")
+    with col4:
+        st.metric("Highest Single Area", f"{ag_analysis['total_acres'].max():,.0f}")
+    
+    # Detailed data table
+    st.subheader("📋 Detailed Analysis Results")
+    
+    # Format data for display
+    display_data = ag_analysis.copy()
+    display_data["total_acres"] = display_data["total_acres"].map(lambda x: f"{x:,.0f}")
+    display_data["avg_acres_per_decade"] = display_data["avg_acres_per_decade"].map(lambda x: f"{x:,.1f}")
+    display_data["ag_loss_rate"] = display_data["ag_loss_rate"].map(lambda x: f"{x:,.1f}")
+    
+    # Rename columns for clarity
+    column_mapping = {
+        "total_acres": "Total Agricultural Acres Lost",
+        "avg_acres_per_decade": "Average Acres per Decade",
+        "num_decades": "Decades Covered",
+        "ag_loss_rate": "Agricultural Loss Rate (acres/decade)"
+    }
+    
+    if analysis_level == "County":
+        column_mapping.update({
+            "county_name": "County",
+            "state_name": "State"
+        })
+        if "fips_code" in display_data.columns:
+            column_mapping["fips_code"] = "FIPS Code"
+    else:
+        column_mapping["state_name"] = "State"
+    
+    display_data = display_data.rename(columns=column_mapping)
+    
+    # Show data with search/filter capability
+    st.dataframe(display_data, use_container_width=True)
+    
+    # Download functionality
+    st.subheader("💾 Download Analysis Results")
+    
+    # Prepare download data (with original numeric values)
+    download_data = ag_analysis.copy()
+    
+    # Add metadata
+    download_data["scenario"] = selected_scenario
+    download_data["time_period"] = selected_decade
+    download_data["source_category"] = selected_source
+    download_data["destination"] = selected_destination
+    download_data["analysis_level"] = analysis_level
+    download_data["generated_date"] = pd.Timestamp.now().strftime("%Y-%m-%d %H:%M:%S")
+    
+    # Convert to CSV
+    csv_data = download_data.to_csv(index=False).encode('utf-8')
+    
+    col1, col2 = st.columns(2)
+    with col1:
+        st.download_button(
+            label="📥 Download Full Analysis (CSV)",
+            data=csv_data,
+            file_name=f"ag_loss_analysis_{analysis_level.lower()}_{selected_scenario}_{selected_decade}_{selected_source}_{selected_destination}.csv",
+            mime="text/csv",
+            help="Download complete analysis results with all metrics"
+        )
+    
+    with col2:
+        # Top 20 download
+        top_20_data = download_data.head(20).to_csv(index=False).encode('utf-8')
+        st.download_button(
+            label="🏆 Download Top 20 (CSV)",
+            data=top_20_data,
+            file_name=f"top_20_ag_loss_{analysis_level.lower()}_{selected_scenario}.csv",
+            mime="text/csv",
+            help="Download top 20 areas by agricultural land loss"
+        )
+    
+    # National trends visualization
+    st.subheader("📈 National Agricultural Land Loss Trends by Source")
+    
+    # Create trends data by aggregating cropland and pasture separately
+    ag_trends = ag_counties_df[ag_counties_df["scenario_name"] == selected_scenario]
+    
+    # Aggregate data by source land use
+    ag_to_use = ag_trends.groupby(["from_category", "decade_name"])["total_area"].sum().reset_index()
+    
+    # Pivot table for plotting
+    pivot_ag = ag_to_use.pivot(index="decade_name", columns="from_category", values="total_area")
+    
+    # Plot the data
+    fig3, ax3 = plt.subplots(figsize=(12, 6))
+    pivot_ag.plot(kind="bar", ax=ax3, width=0.8)
+    ax3.set_xlabel("Time Period")
+    ax3.set_ylabel("Acres of Agricultural Land Lost")
+    ax3.set_title(f"National Agricultural Land Loss by Source: {selected_scenario}")
+    ax3.legend(title="Source Land Use", bbox_to_anchor=(1.05, 1), loc='upper left')
+    ax3.grid(True, alpha=0.3)
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+    
+    st.pyplot(fig3)
+    
+    with st.expander("📊 Show National Trends Data"):
+        st.dataframe(pivot_ag)
+
+# ---- STATE MAP TAB ----
+with tab6:
     st.header("State-Level Land Use Change Map")
     
     # Get county transitions data
     county_df = data["County-Level Land Use Transitions"]
+    
+    # Filter for only the 5 key RPA scenarios
+    key_scenarios = [
+        'ensemble_LM',    # Lower warming-moderate growth (RCP4.5-SSP1)
+        'ensemble_HL',    # High warming-low growth (RCP8.5-SSP3)
+        'ensemble_HM',    # High warming-moderate growth (RCP8.5-SSP2)
+        'ensemble_HH',    # High warming-high growth (RCP8.5-SSP5)
+        'ensemble_overall' # Overall mean projection
+    ]
+    county_df = county_df[county_df["scenario_name"].isin(key_scenarios)]
     
     # Controls for map
     col1, col2, col3 = st.columns([1, 1, 1])
@@ -532,14 +1087,25 @@ with tab5:
         transition_filter = transition_mapping[selected_transition]
     
     with col2:
-        # Scenario selection
+        # Scenario selection with descriptions
+        scenario_descriptions = {
+            'ensemble_LM': 'Lower Warming, Moderate Growth',
+            'ensemble_HL': 'High Warming, Low Growth', 
+            'ensemble_HM': 'High Warming, Moderate Growth',
+            'ensemble_HH': 'High Warming, High Growth',
+            'ensemble_overall': 'Overall Mean Projection'
+        }
+        
         map_scenarios = county_df["scenario_name"].unique().tolist()
-        map_scenarios = [str(s) for s in map_scenarios]
-        selected_map_scenario = st.selectbox(
+        scenario_options = [scenario_descriptions.get(scenario, scenario) for scenario in map_scenarios]
+        selected_scenario_display = st.selectbox(
             "Scenario", 
-            options=map_scenarios,
+            options=scenario_options,
             key="map_scenario"
         )
+        # Map back to original scenario name
+        scenario_reverse_map = {v: k for k, v in scenario_descriptions.items()}
+        selected_map_scenario = scenario_reverse_map.get(selected_scenario_display, selected_scenario_display)
     
     with col3:
         # Decade selection
@@ -567,7 +1133,11 @@ with tab5:
     
     # Display the map
     st.subheader("Land Use Change by State")
-    folium_static(state_map, width=1000, height=600)
+    if state_map is not None:
+        folium_static(state_map, width=1000, height=600)
+    else:
+        st.error("Geographic mapping is currently unavailable due to data loading issues.")
+        st.info("You can still view the data in the table below.")
     
     # Add data table below the map
     with st.expander("Show State Data Table"):

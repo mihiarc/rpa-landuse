@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-Urban Development Analysis Tool
+Agricultural Land Loss Analysis Tool
 
-This module provides command-line tools for analyzing urban development rates
-from the RPA land use data.
+This module provides command-line tools for analyzing agricultural land loss rates
+from the RPA land use data. Includes both cropland and pasture land transitions.
 """
 
 import pandas as pd
@@ -12,8 +12,8 @@ import sys
 from pathlib import Path
 
 
-def load_urban_data(data_path="semantic_layers/base_analysis"):
-    """Load urban development data from parquet files."""
+def load_ag_data(data_path="semantic_layers/base_analysis"):
+    """Load agricultural land loss data from parquet files."""
     try:
         county_transitions = pd.read_parquet(
             Path(data_path) / "county_transitions.parquet"
@@ -31,25 +31,30 @@ def load_urban_data(data_path="semantic_layers/base_analysis"):
             county_transitions["scenario_name"].isin(key_scenarios)
         ]
         
-        # Filter for urban transitions only
-        urban_data = county_transitions[county_transitions["to_category"] == "Urban"]
-        return urban_data
+        # Filter for agricultural transitions only (from cropland or pasture to other land uses)
+        ag_data = county_transitions[
+            county_transitions["from_category"].isin(["Cropland", "Pasture"])
+        ]
+        return ag_data
     except FileNotFoundError as e:
         print(f"Error: Could not find data files in {data_path}")
         print("Make sure you're running from the project root directory")
         sys.exit(1)
 
 
-def analyze_urban_development(data, scenario=None, decade=None, level="county", top_n=10):
+def analyze_ag_loss(data, scenario=None, decade=None, level="county", top_n=10, 
+                   from_category=None, to_category=None):
     """
-    Analyze urban development rates.
+    Analyze agricultural land loss rates.
     
     Args:
-        data: DataFrame with urban transition data
+        data: DataFrame with agricultural transition data
         scenario: Scenario name to filter by (optional)
         decade: Decade to filter by (optional)  
-        level: Analysis level ('county', 'state', 'region')
+        level: Analysis level ('county', 'state')
         top_n: Number of top results to return
+        from_category: Filter by source land use ('Cropland', 'Pasture', or None for both)
+        to_category: Filter by destination land use (optional)
     
     Returns:
         DataFrame with analysis results
@@ -62,6 +67,12 @@ def analyze_urban_development(data, scenario=None, decade=None, level="county", 
     
     if decade:
         filtered_data = filtered_data[filtered_data["decade_name"] == decade]
+    
+    if from_category:
+        filtered_data = filtered_data[filtered_data["from_category"] == from_category]
+    
+    if to_category:
+        filtered_data = filtered_data[filtered_data["to_category"] == to_category]
     
     # Group by analysis level
     if level == "county":
@@ -81,8 +92,8 @@ def analyze_urban_development(data, scenario=None, decade=None, level="county", 
     analysis.columns = ["total_acres", "avg_acres_per_decade", "num_decades"]
     analysis = analysis.reset_index()
     
-    # Calculate urbanization rate
-    analysis["urbanization_rate"] = (analysis["total_acres"] / analysis["num_decades"]).round(2)
+    # Calculate agricultural loss rate
+    analysis["ag_loss_rate"] = (analysis["total_acres"] / analysis["num_decades"]).round(2)
     
     # Sort and return top N
     analysis = analysis.sort_values("total_acres", ascending=False)
@@ -90,14 +101,14 @@ def analyze_urban_development(data, scenario=None, decade=None, level="county", 
 
 
 def main():
-    """Command-line interface for urban development analysis."""
+    """Command-line interface for agricultural land loss analysis."""
     parser = argparse.ArgumentParser(
-        description="Analyze urban development rates from RPA data"
+        description="Analyze agricultural land loss rates from RPA data"
     )
     
     parser.add_argument(
         "--scenario", 
-        help="Filter by scenario name (e.g., 'HH_CNRM_CM5')"
+        help="Filter by scenario name (e.g., 'ensemble_HH')"
     )
     
     parser.add_argument(
@@ -107,7 +118,7 @@ def main():
     
     parser.add_argument(
         "--level", 
-        choices=["county", "state", "region"],
+        choices=["county", "state"],
         default="county",
         help="Analysis level (default: county)"
     )
@@ -117,6 +128,18 @@ def main():
         type=int, 
         default=10,
         help="Number of top results to show (default: 10)"
+    )
+    
+    parser.add_argument(
+        "--from-category",
+        choices=["Cropland", "Pasture"],
+        help="Filter by source agricultural land use (default: both cropland and pasture)"
+    )
+    
+    parser.add_argument(
+        "--to-category",
+        choices=["Urban", "Forest", "Rangeland"],
+        help="Filter by destination land use (what agricultural land is converted to)"
     )
     
     parser.add_argument(
@@ -136,11 +159,23 @@ def main():
         help="List available decades"
     )
     
+    parser.add_argument(
+        "--list-sources",
+        action="store_true", 
+        help="List available source agricultural land uses"
+    )
+    
+    parser.add_argument(
+        "--list-destinations",
+        action="store_true", 
+        help="List available destination land uses"
+    )
+    
     args = parser.parse_args()
     
     # Load data
-    print("Loading urban development data...")
-    data = load_urban_data()
+    print("Loading agricultural land loss data...")
+    data = load_ag_data()
     
     # List options if requested
     if args.list_scenarios:
@@ -157,19 +192,41 @@ def main():
             print(f"  {decade}")
         return
     
+    if args.list_sources:
+        sources = data["from_category"].unique()
+        print("\nAvailable source agricultural land uses:")
+        for source in sorted(sources):
+            print(f"  {source}")
+        return
+    
+    if args.list_destinations:
+        destinations = data["to_category"].unique()
+        print("\nAvailable destination land uses:")
+        for dest in sorted(destinations):
+            print(f"  {dest}")
+        return
+    
     # Perform analysis
-    print(f"\nAnalyzing urban development at {args.level} level...")
+    print(f"\nAnalyzing agricultural land loss at {args.level} level...")
     if args.scenario:
         print(f"Scenario: {args.scenario}")
     if args.decade:
         print(f"Decade: {args.decade}")
+    if args.from_category:
+        print(f"Source agricultural land: {args.from_category}")
+    else:
+        print("Source agricultural land: Both Cropland and Pasture")
+    if args.to_category:
+        print(f"Agricultural land converted to: {args.to_category}")
     
-    results = analyze_urban_development(
+    results = analyze_ag_loss(
         data, 
         scenario=args.scenario,
         decade=args.decade,
         level=args.level,
-        top_n=args.top
+        top_n=args.top,
+        from_category=args.from_category,
+        to_category=args.to_category
     )
     
     if len(results) == 0:
@@ -177,7 +234,9 @@ def main():
         return
     
     # Display results
-    print(f"\n🏆 Top {len(results)} {args.level}s by urban development:")
+    source_text = f" ({args.from_category})" if args.from_category else " (Cropland + Pasture)"
+    conversion_text = f" (converted to {args.to_category})" if args.to_category else ""
+    print(f"\n🌾 Top {len(results)} {args.level}s by agricultural land loss{source_text}{conversion_text}:")
     print("=" * 80)
     
     for i, row in results.iterrows():
@@ -187,15 +246,24 @@ def main():
             location = row[results.columns[0]]  # First column is the location
         
         print(f"{i+1:2d}. {location}")
-        print(f"    Total acres urbanized: {row['total_acres']:,.0f}")
-        print(f"    Urbanization rate: {row['urbanization_rate']:,.1f} acres/decade")
+        print(f"    Total agricultural acres lost: {row['total_acres']:,.0f}")
+        print(f"    Agricultural loss rate: {row['ag_loss_rate']:,.1f} acres/decade")
         print(f"    Average per decade: {row['avg_acres_per_decade']:,.1f} acres")
         print(f"    Time periods covered: {row['num_decades']} decades")
         print()
     
     # Save to file if requested
     if args.output:
-        results.to_csv(args.output, index=False)
+        # Add metadata to results
+        results_with_metadata = results.copy()
+        results_with_metadata["scenario"] = args.scenario or "All scenarios"
+        results_with_metadata["time_period"] = args.decade or "All periods"
+        results_with_metadata["source_category"] = args.from_category or "Cropland + Pasture"
+        results_with_metadata["destination"] = args.to_category or "All destinations"
+        results_with_metadata["analysis_level"] = args.level
+        results_with_metadata["generated_date"] = pd.Timestamp.now().strftime("%Y-%m-%d %H:%M:%S")
+        
+        results_with_metadata.to_csv(args.output, index=False)
         print(f"Results saved to {args.output}")
 
 

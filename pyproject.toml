@@ -56,6 +56,8 @@ dev = [
 [project.scripts]
 rpa-viewer = "rpa_landuse.cli:main"
 rpa-urban-analysis = "rpa_landuse.commands.urban_analysis:main"
+rpa-forest-analysis = "rpa_landuse.commands.forest_analysis:main"
+rpa-ag-analysis = "rpa_landuse.commands.ag_analysis:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}

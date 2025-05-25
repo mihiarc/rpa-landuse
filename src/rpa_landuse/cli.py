@@ -62,6 +62,16 @@ def analyze_urban_development(args):
     from rpa_landuse.commands.urban_analysis import main as urban_main
     sys.exit(urban_main())
 
+def analyze_forest_loss(args):
+    """Analyze forest loss rates."""
+    from rpa_landuse.commands.forest_analysis import main as forest_main
+    sys.exit(forest_main())
+
+def analyze_ag_loss(args):
+    """Analyze agricultural land loss rates."""
+    from rpa_landuse.commands.ag_analysis import main as ag_main
+    sys.exit(ag_main())
+
 def initialize_db(args):
     """Initialize the database schema and optionally import data."""
     from rpa_landuse.db.schema_manager import SchemaManager
@@ -143,6 +153,16 @@ def main():
         "urban-analysis", help="Analyze urban development rates and identify hotspots"
     )
     
+    # Forest loss analysis command
+    forest_parser = subparsers.add_parser(
+        "forest-analysis", help="Analyze forest loss rates and identify hotspots"
+    )
+    
+    # Agricultural land loss analysis command
+    ag_parser = subparsers.add_parser(
+        "ag-analysis", help="Analyze agricultural land loss rates and identify hotspots (cropland and pasture)"
+    )
+    
     # DB init command
     db_parser = subparsers.add_parser("init-db", help="Initialize the database")
     db_parser.add_argument(
@@ -175,6 +195,10 @@ def main():
         query_natural_language(args)
     elif args.command == "urban-analysis":
         analyze_urban_development(args)
+    elif args.command == "forest-analysis":
+        analyze_forest_loss(args)
+    elif args.command == "ag-analysis":
+        analyze_ag_loss(args)
     elif args.command == "init-db":
         initialize_db(args)
 
