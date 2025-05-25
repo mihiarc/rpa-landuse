@@ -20,25 +20,33 @@ classifiers = [
     "Intended Audience :: Science/Research",
 ]
 dependencies = [
-    "numpy>=1.22.0,<2.0.0",
-    "pandas>=1.5.3,<2.3.0",
+    "numpy>=1.22.0,<3.0.0",
+    "pandas>=1.5.3,<3.0.0",
     "duckdb>=0.9.2",
     "pyarrow>=10.0.0",
-    "matplotlib>=3.5.0,<3.8.0",
+    "matplotlib>=3.5.0",
     "streamlit>=1.31",
+    "streamlit-folium>=0.15.0",
     "httpx>=0.22.0",
     "python-dotenv>=1.0.0",
     "tqdm>=4.65.0",
     "scipy>=1.8.0",
-    "pandasai",
-    "openai",
-    "pandasai-openai",
+    "geopandas>=0.14.0",
+    "folium>=0.15.0",
+    "seaborn>=0.12.0",
 ]
 
+[project.optional-dependencies]
+ai = [
+    "pandasai>=3.0.0b0",
+    "openai>=1.0.0",
+    "pandasai-openai>=0.1.5",
+]
 dev = [
     "pytest>=7.4.0",
     "flake8>=6.1.0",
     "black>=23.9.0",
+    "mypy>=1.0.0",
 ]
 
 [project.urls]
@@ -47,6 +55,7 @@ dev = [
 
 [project.scripts]
 rpa-viewer = "rpa_landuse.cli:main"
+rpa-urban-analysis = "rpa_landuse.commands.urban_analysis:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}
@@ -57,7 +66,7 @@ rpa_landuse = ["**/*.sql"]
 
 [tool.black]
 line-length = 88
-target-version = ["py39", "py310", "py311"]
+target-version = ["py311"]
 
 [tool.flake8]
 max-line-length = 88

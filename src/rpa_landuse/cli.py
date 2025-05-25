@@ -57,6 +57,11 @@ def query_natural_language(args):
     from rpa_landuse.commands.query_pandasai import main as query_pandasai_main
     sys.exit(query_pandasai_main())
 
+def analyze_urban_development(args):
+    """Analyze urban development rates."""
+    from rpa_landuse.commands.urban_analysis import main as urban_main
+    sys.exit(urban_main())
+
 def initialize_db(args):
     """Initialize the database schema and optionally import data."""
     from rpa_landuse.db.schema_manager import SchemaManager
@@ -133,6 +138,11 @@ def main():
         "pandasai-query", help="Query data using natural language with PandasAI"
     )
     
+    # Urban development analysis command
+    urban_parser = subparsers.add_parser(
+        "urban-analysis", help="Analyze urban development rates and identify hotspots"
+    )
+    
     # DB init command
     db_parser = subparsers.add_parser("init-db", help="Initialize the database")
     db_parser.add_argument(
@@ -163,6 +173,8 @@ def main():
         query_database(args)
     elif args.command == "pandasai-query":
         query_natural_language(args)
+    elif args.command == "urban-analysis":
+        analyze_urban_development(args)
     elif args.command == "init-db":
         initialize_db(args)
 

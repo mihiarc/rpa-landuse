@@ -1,0 +1,7 @@
+streamlit>=1.45.0
+pandas>=2.2.0
+matplotlib>=3.7.5
+pyarrow>=14.0.0
+folium>=0.14.0
+streamlit-folium>=0.13.0
+geopandas>=0.13.0 

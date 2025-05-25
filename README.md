@@ -14,54 +14,114 @@ The Assessment evaluates conditions across all ownerships nationwide and project
 
 The results inform resource managers and policymakers as they develop strategies to sustain natural resources. Important differences are found regionally and locally, highlighting the need for flexible adaptation and management strategies. The USDA Forest Service uses these results to inform strategic planning and forest planning.
 
+## Project Overview
+
+This project provides an **interactive data science platform** for exploring and analyzing RPA land use change projections. It combines:
+
+- **High-performance data processing** using DuckDB for handling large geospatial datasets
+- **Interactive web visualization** with Streamlit for policy makers and researchers
+- **Comprehensive analysis tools** for urbanization trends and forest land transitions
+- **Downloadable datasets** for further analysis and research
+
+### Key Features
+
+🌍 **Geographic Analysis**: County-level data for the entire conterminous United States  
+📊 **Scenario Modeling**: 20 different climate and socioeconomic scenarios  
+🏙️ **Urbanization Focus**: Detailed analysis of where urban development rates are highest  
+🌲 **Forest Transitions**: Track forest land conversion patterns  
+📈 **Interactive Visualizations**: Dynamic charts, maps, and data exploration  
+💾 **Data Export**: Download processed datasets for external analysis  
+
+## Technical Architecture
+
+### Data Layer
+- **DuckDB Database** (`data/database/rpa.db` - 1.9GB): Full dataset with optimized queries
+- **Processed Parquet Files** (`semantic_layers/`): Optimized views for web deployment
+- **Geographic Data** (`data/counties.geojson`): County boundaries for mapping
+
+### Application Layer
+- **Streamlit Web App** (`app.py`, `streamlit_app.py`): Interactive dashboard
+- **Python Package** (`src/rpa_landuse/`): Core functionality and CLI tools
+- **Data Processing Pipeline** (`scripts/`): ETL operations and optimization
+
+### Deployment
+- **Streamlit Cloud** ready with optimized datasets
+- **GitHub Actions** for CI/CD workflows
+- **Docker** support for containerized deployment
+
 ## Streamlit Interactive Dashboard
 
-This project includes an interactive Streamlit dashboard for exploring and visualizing the RPA land use data. The dashboard provides an intuitive interface to investigate land use transitions, focusing on urbanization trends and forest land changes across different scenarios and regions.
+The interactive dashboard provides comprehensive tools for exploring RPA land use data with a focus on answering key policy questions like "Where is urban development rate highest?"
 
 ### Running the Dashboard
 
-1. Ensure you have set up the virtual environment using the provided script:
+1. Set up the environment (see setup instructions below):
    ```bash
    ./setup_venv.sh
    ```
 
-2. With the virtual environment activated, run the Streamlit app:
+2. Install the package in development mode:
    ```bash
    source .venv/bin/activate
-   streamlit run app.py
+   pip install -e .
    ```
 
-3. The app will open in your default web browser at `http://localhost:8501`
+3. Run the Streamlit app:
+   ```bash
+   streamlit run streamlit_app.py
+   ```
+
+4. The app will open at `http://localhost:8501`
 
 ### Dashboard Features
 
-The interactive dashboard includes the following tabs:
+**1. Overview Tab**
+   - RPA Assessment methodology and key findings
+   - Data processing information
+   - Scenario descriptions and time periods
 
-1. **Overview**
-   - Display of all RPA Assessment scenarios
-   - Land use categories information
-   - Key findings from the RPA Assessment
-   - Time periods covered in the projections
-
-2. **Urbanization Trends**
-   - Interactive charts showing transitions to urban land by scenario
-   - Visualizations of forest, cropland, and pasture conversion to urban areas over time
-   - Top counties by urbanization rate
-   - Filtering options by scenario
-
-3. **Forest Transitions**
-   - Forest land conversion patterns by destination land use type
-   - Time series analysis of forest land changes
-   - Top counties experiencing forest land loss
-   - Detailed information from the RPA Assessment about forest projections
-
-4. **Data Explorer**
-   - Interactive exploration of all available datasets
+**2. Data Explorer Tab**
+   - Interactive exploration of all datasets
    - Column information and data previews
+   - **Download functionality** for CSV export
    - Basic statistics for each dataset
-   - Data download functionality in CSV format
 
-The dashboard automatically updates when new selections are made, allowing for interactive exploration of the land use projections across different scenarios, time periods, and geographic regions.
+**3. Urbanization Trends Tab**
+   - **Highest urban development rates** by county and region
+   - Interactive charts showing transitions to urban land by scenario
+   - Time series analysis of forest, cropland, and pasture conversion
+   - **Top counties by urbanization rate** with downloadable results
+   - Filtering by scenario and time period
+
+**4. Forest Transitions Tab**
+   - Forest land conversion patterns by destination land use
+   - Counties experiencing the highest forest land loss
+   - Detailed RPA Assessment findings
+
+**5. State Map Tab**
+   - **Geographic visualization** of land use changes
+   - Choropleth maps showing urban development patterns
+   - State-level aggregation of county data
+
+### Answering Key Questions
+
+The dashboard is specifically designed to answer critical policy questions:
+
+**"Where is the urban development rate highest?"**
+- County-level rankings of urban development
+- Regional comparisons across scenarios
+- Time-series analysis of development patterns
+- Downloadable datasets for further analysis
+
+**"Which areas are losing the most forest land?"**
+- Forest conversion hotspots
+- Source land use analysis (what's being converted)
+- Regional and temporal patterns
+
+**"How do different scenarios affect land use patterns?"**
+- Scenario comparison tools
+- Climate vs. socioeconomic impact analysis
+- Sensitivity analysis across projections
 
 ## Key Findings
 
@@ -187,37 +247,127 @@ Transitions between five main land use types:
 
 ### Requirements
 
-- Python 3.11 or higher
-- Python package manager (pip, recommended)
-- The following Python packages:
-  - pandas, numpy
-  - duckdb, pyarrow
-  - streamlit
-  - matplotlib
-  - python-dotenv
+- **Python 3.11** (specified in `.python-version`)
+- **Git** for version control
+- **Virtual environment** support (venv or conda)
+
+### Core Dependencies
+
+- **Data Processing**: pandas, numpy, duckdb, pyarrow
+- **Web Framework**: streamlit, streamlit-folium
+- **Visualization**: matplotlib, seaborn, folium
+- **Geospatial**: geopandas, shapely
+- **AI/ML**: pandasai, openai (optional)
+- **Utilities**: python-dotenv, tqdm, httpx
 
 ### Environment Setup
 
-The simplest way to set up the environment is to use the provided script:
-
+**Option 1: UV Package Manager (Recommended)**
 ```bash
-./setup_venv.sh
+# Install UV if not already installed
+pip install uv
+
+# Create virtual environment with Python 3.11
+python3.11 -m venv .venv
+source .venv/bin/activate
+
+# Install dependencies using UV (much faster!)
+uv pip install -r requirements.txt
+
+# Install package in development mode
+uv pip install -e .
+
+# Optional: Install AI features
+uv pip install -e ".[ai]" --prerelease=allow
+
+# Optional: Install development tools
+uv pip install -e ".[dev]"
 ```
 
-This script will:
-1. Create a Python virtual environment using pip
-2. Install all required dependencies
-3. Set up the package in development mode
-
-You can also manually install the required packages:
-
+**Option 2: Automated Setup Script**
 ```bash
-# Create and activate a virtual environment
-python -m venv .venv
+# Use the provided setup script (uses pip)
+./setup_venv.sh
+
+# Activate the virtual environment
+source .venv/bin/activate
+
+# Install in development mode
+uv pip install -e .
+```
+
+**Option 3: Traditional pip**
+```bash
+# Ensure Python 3.11 is available
+python3.11 --version
+
+# Create virtual environment with Python 3.11
+python3.11 -m venv .venv
 source .venv/bin/activate
 
 # Install dependencies
 pip install -r requirements.txt
+
+# Install package in development mode
+pip install -e .
+```
+
+### Verification
+
+After setup, verify the installation:
+```bash
+# Check Python version
+python --version  # Should show Python 3.11.x
+
+# Test package import
+python -c "import rpa_landuse; print(rpa_landuse.__version__)"
+
+# Test CLI commands
+rpa-viewer --help
+rpa-urban-analysis --help
+
+# Run tests (if available)
+pytest tests/
+
+# Start the application
+streamlit run streamlit_app.py
+```
+
+## Command Line Tools
+
+The package includes several command-line tools for data analysis:
+
+### Urban Development Analysis
+
+Quickly identify where urban development rates are highest:
+
+```bash
+# List available scenarios
+rpa-urban-analysis --list-scenarios
+
+# Find top 10 counties with highest urban development
+rpa-urban-analysis --scenario ensemble_HH --level county --top 10
+
+# Analyze by state and save results
+rpa-urban-analysis --scenario ensemble_HH --level state --output urban_analysis.csv
+
+# Filter by specific time period
+rpa-urban-analysis --scenario ensemble_HH --decade "2020-2030" --level county --top 5
+```
+
+### Main CLI Interface
+
+Access all tools through the main CLI:
+
+```bash
+# Run the Streamlit app
+rpa-viewer app
+
+# Analyze urban development
+rpa-viewer urban-analysis --scenario ensemble_HH --level state --top 10
+
+# Other available commands
+rpa-viewer --help
 ```
 
 ## Data Source
