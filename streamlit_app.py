@@ -330,7 +330,7 @@ with tab3:
     
     # Analysis controls
     st.subheader("Analysis Controls")
-    col1, col2, col3 = st.columns([1, 1, 1])
+    col1, col2 = st.columns([1, 1])
     
     with col1:
         # Scenario selection with descriptions
@@ -350,12 +350,6 @@ with tab3:
         selected_scenario = scenario_reverse_map.get(selected_scenario_display, selected_scenario_display)
     
     with col2:
-        # Time period selection
-        decades = urban_counties_df["decade_name"].unique().tolist()
-        decades.sort()
-        selected_decade = st.selectbox("Time Period", options=["All Periods"] + decades, key="urban_decade")
-    
-    with col3:
         # Analysis level
         analysis_level = st.selectbox("Analysis Level", 
                                     options=["County", "State"], 
@@ -363,8 +357,6 @@ with tab3:
     
     # Filter data based on selections
     filtered_data = urban_counties_df[urban_counties_df["scenario_name"] == selected_scenario]
-    if selected_decade != "All Periods":
-        filtered_data = filtered_data[filtered_data["decade_name"] == selected_decade]
     
     # Aggregate data based on analysis level
     if analysis_level == "County":
@@ -402,9 +394,9 @@ with tab3:
     urban_analysis = urban_analysis.sort_values("total_acres", ascending=False)
     
     # Display results
-    st.subheader(f"🏆 Highest Urban Development Areas ({selected_scenario})")
+    st.subheader(f"📈 Urban Development Trends ({selected_scenario_display})")
     
-    # Top 10 visualization
+    # Get top locations for temporal analysis
     top_10 = urban_analysis.head(10).copy()
     
     # Create location labels for display
@@ -413,27 +405,51 @@ with tab3:
     else:
         top_10["location"] = top_10[location_col]
     
-    # Create visualization
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 6))
-    
-    # Total urbanization
-    ax1.barh(range(len(top_10)), top_10["total_acres"])
-    ax1.set_yticks(range(len(top_10)))
-    ax1.set_yticklabels(top_10["location"], fontsize=10)
-    ax1.set_xlabel("Total Acres Converted to Urban")
-    ax1.set_title(f"Top 10 {analysis_level}s by Total Urban Development")
-    ax1.invert_yaxis()
-    
-    # Urbanization rate
-    ax2.barh(range(len(top_10)), top_10["urbanization_rate"])
-    ax2.set_yticks(range(len(top_10)))
-    ax2.set_yticklabels(top_10["location"], fontsize=10)
-    ax2.set_xlabel("Acres per Decade")
-    ax2.set_title(f"Top 10 {analysis_level}s by Urbanization Rate")
-    ax2.invert_yaxis()
-    
-    plt.tight_layout()
-    st.pyplot(fig)
+    # Create temporal visualization for top counties/states
+    if len(top_10) > 0:
+        # Get temporal data for top locations
+        if analysis_level == "County":
+            top_locations = top_10[["county_name", "state_name"]].head(5)  # Top 5 for readability
+            temporal_data = []
+            for _, row in top_locations.iterrows():
+                location_data = filtered_data[
+                    (filtered_data["county_name"] == row["county_name"]) & 
+                    (filtered_data["state_name"] == row["state_name"])
+                ]
+                if len(location_data) > 0:
+                    location_summary = location_data.groupby("decade_name")["total_area"].sum().reset_index()
+                    location_summary["location"] = f"{row['county_name']}, {row['state_name']}"
+                    temporal_data.append(location_summary)
+        else:  # State level
+            top_locations = top_10[["state_name"]].head(5)
+            temporal_data = []
+            for _, row in top_locations.iterrows():
+                location_data = filtered_data[filtered_data["state_name"] == row["state_name"]]
+                if len(location_data) > 0:
+                    location_summary = location_data.groupby("decade_name")["total_area"].sum().reset_index()
+                    location_summary["location"] = row["state_name"]
+                    temporal_data.append(location_summary)
+        
+        # Create line chart
+        if temporal_data:
+            fig, ax = plt.subplots(figsize=(14, 8))
+            
+            for location_data in temporal_data:
+                ax.plot(location_data["decade_name"], location_data["total_area"], 
+                       marker='o', linewidth=2.5, markersize=6, label=location_data["location"].iloc[0])
+            
+            ax.set_xlabel("Time Period", fontsize=12)
+            ax.set_ylabel("Acres Converted to Urban", fontsize=12)
+            ax.set_title(f"Urban Development Trends: Top 5 {analysis_level}s ({selected_scenario_display})", fontsize=14)
+            ax.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
+            ax.grid(True, alpha=0.3)
+            plt.xticks(rotation=45)
+            plt.tight_layout()
+            st.pyplot(fig)
+        else:
+            st.warning("No temporal data available for visualization.")
+    else:
+        st.warning("No data available for the selected criteria.")
     
     # Summary statistics
     st.subheader("📊 Summary Statistics")
@@ -490,7 +506,7 @@ with tab3:
     
     # Add metadata
     download_data["scenario"] = selected_scenario
-    download_data["time_period"] = selected_decade
+    download_data["time_period"] = "All Periods"
     download_data["analysis_level"] = analysis_level
     download_data["generated_date"] = pd.Timestamp.now().strftime("%Y-%m-%d %H:%M:%S")
     
@@ -502,7 +518,7 @@ with tab3:
         st.download_button(
             label="📥 Download Full Analysis (CSV)",
             data=csv_data,
-            file_name=f"urban_development_analysis_{analysis_level.lower()}_{selected_scenario}_{selected_decade}.csv",
+            file_name=f"urban_development_analysis_{analysis_level.lower()}_{selected_scenario}_all_periods.csv",
             mime="text/csv",
             help="Download complete analysis results with all metrics"
         )
@@ -571,7 +587,7 @@ with tab4:
     
     # Analysis controls
     st.subheader("Analysis Controls")
-    col1, col2, col3, col4 = st.columns([1, 1, 1, 1])
+    col1, col2, col3 = st.columns([1, 1, 1])
     
     with col1:
         # Scenario selection with descriptions
@@ -591,18 +607,12 @@ with tab4:
         selected_scenario = scenario_reverse_map.get(selected_scenario_display, selected_scenario_display)
     
     with col2:
-        # Time period selection
-        decades = forest_counties_df["decade_name"].unique().tolist()
-        decades.sort()
-        selected_decade = st.selectbox("Time Period", options=["All Periods"] + decades, key="forest_decade")
-    
-    with col3:
         # Analysis level
         analysis_level = st.selectbox("Analysis Level", 
                                     options=["County", "State"], 
                                     key="forest_level")
     
-    with col4:
+    with col3:
         # Destination filter
         destinations = forest_counties_df["to_category"].unique().tolist()
         destinations.sort()
@@ -612,8 +622,6 @@ with tab4:
     
     # Filter data based on selections
     filtered_data = forest_counties_df[forest_counties_df["scenario_name"] == selected_scenario]
-    if selected_decade != "All Periods":
-        filtered_data = filtered_data[filtered_data["decade_name"] == selected_decade]
     if selected_destination != "All Destinations":
         filtered_data = filtered_data[filtered_data["to_category"] == selected_destination]
     
@@ -648,9 +656,9 @@ with tab4:
     
     # Display results
     destination_text = f" (converted to {selected_destination})" if selected_destination != "All Destinations" else ""
-    st.subheader(f"🏆 Highest Forest Loss Areas ({selected_scenario}){destination_text}")
+    st.subheader(f"📈 Forest Loss Trends ({selected_scenario_display}){destination_text}")
     
-    # Top 10 visualization
+    # Get top locations for temporal analysis
     top_10 = forest_analysis.head(10).copy()
     
     # Create location labels for display
@@ -659,27 +667,52 @@ with tab4:
     else:
         top_10["location"] = top_10[location_col]
     
-    # Create visualization
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 6))
-    
-    # Total forest loss
-    ax1.barh(range(len(top_10)), top_10["total_acres"])
-    ax1.set_yticks(range(len(top_10)))
-    ax1.set_yticklabels(top_10["location"], fontsize=10)
-    ax1.set_xlabel("Total Acres of Forest Lost")
-    ax1.set_title(f"Top 10 {analysis_level}s by Total Forest Loss")
-    ax1.invert_yaxis()
-    
-    # Forest loss rate
-    ax2.barh(range(len(top_10)), top_10["forest_loss_rate"])
-    ax2.set_yticks(range(len(top_10)))
-    ax2.set_yticklabels(top_10["location"], fontsize=10)
-    ax2.set_xlabel("Acres per Decade")
-    ax2.set_title(f"Top 10 {analysis_level}s by Forest Loss Rate")
-    ax2.invert_yaxis()
-    
-    plt.tight_layout()
-    st.pyplot(fig)
+    # Create temporal visualization for top counties/states
+    if len(top_10) > 0:
+        # Get temporal data for top locations
+        if analysis_level == "County":
+            top_locations = top_10[["county_name", "state_name"]].head(5)  # Top 5 for readability
+            temporal_data = []
+            for _, row in top_locations.iterrows():
+                location_data = filtered_data[
+                    (filtered_data["county_name"] == row["county_name"]) & 
+                    (filtered_data["state_name"] == row["state_name"])
+                ]
+                if len(location_data) > 0:
+                    location_summary = location_data.groupby("decade_name")["total_area"].sum().reset_index()
+                    location_summary["location"] = f"{row['county_name']}, {row['state_name']}"
+                    temporal_data.append(location_summary)
+        else:  # State level
+            top_locations = top_10[["state_name"]].head(5)
+            temporal_data = []
+            for _, row in top_locations.iterrows():
+                location_data = filtered_data[filtered_data["state_name"] == row["state_name"]]
+                if len(location_data) > 0:
+                    location_summary = location_data.groupby("decade_name")["total_area"].sum().reset_index()
+                    location_summary["location"] = row["state_name"]
+                    temporal_data.append(location_summary)
+        
+        # Create line chart
+        if temporal_data:
+            fig, ax = plt.subplots(figsize=(14, 8))
+            
+            for location_data in temporal_data:
+                ax.plot(location_data["decade_name"], location_data["total_area"], 
+                       marker='o', linewidth=2.5, markersize=6, label=location_data["location"].iloc[0])
+            
+            ax.set_xlabel("Time Period", fontsize=12)
+            ax.set_ylabel("Acres of Forest Lost", fontsize=12)
+            destination_text = f" (to {selected_destination})" if selected_destination != "All Destinations" else ""
+            ax.set_title(f"Forest Loss Trends: Top 5 {analysis_level}s{destination_text} ({selected_scenario_display})", fontsize=14)
+            ax.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
+            ax.grid(True, alpha=0.3)
+            plt.xticks(rotation=45)
+            plt.tight_layout()
+            st.pyplot(fig)
+        else:
+            st.warning("No temporal data available for visualization.")
+    else:
+        st.warning("No data available for the selected criteria.")
     
     # Summary statistics
     st.subheader("📊 Summary Statistics")
@@ -734,7 +767,7 @@ with tab4:
     
     # Add metadata
     download_data["scenario"] = selected_scenario
-    download_data["time_period"] = selected_decade
+    download_data["time_period"] = "All Periods"
     download_data["destination"] = selected_destination
     download_data["analysis_level"] = analysis_level
     download_data["generated_date"] = pd.Timestamp.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -747,7 +780,7 @@ with tab4:
         st.download_button(
             label="📥 Download Full Analysis (CSV)",
             data=csv_data,
-            file_name=f"forest_loss_analysis_{analysis_level.lower()}_{selected_scenario}_{selected_decade}_{selected_destination}.csv",
+            file_name=f"forest_loss_analysis_{analysis_level.lower()}_{selected_scenario}_all_periods_{selected_destination}.csv",
             mime="text/csv",
             help="Download complete analysis results with all metrics"
         )
@@ -813,7 +846,7 @@ with tab5:
     
     # Analysis controls
     st.subheader("Analysis Controls")
-    col1, col2, col3, col4 = st.columns([1, 1, 1, 1])
+    col1, col2, col3 = st.columns([1, 1, 1])
     
     with col1:
         # Scenario selection with descriptions
@@ -833,18 +866,12 @@ with tab5:
         selected_scenario = scenario_reverse_map.get(selected_scenario_display, selected_scenario_display)
     
     with col2:
-        # Time period selection
-        decades = ag_counties_df["decade_name"].unique().tolist()
-        decades.sort()
-        selected_decade = st.selectbox("Time Period", options=["All Periods"] + decades, key="ag_decade")
-    
-    with col3:
         # Analysis level
         analysis_level = st.selectbox("Analysis Level", 
                                     options=["County", "State"], 
                                     key="ag_level")
     
-    with col4:
+    with col3:
         # Source filter
         sources = ["Both Cropland & Pasture"] + ag_counties_df["from_category"].unique().tolist()
         selected_source = st.selectbox("Agricultural Land Type", 
@@ -852,8 +879,8 @@ with tab5:
                                      key="ag_source")
     
     # Additional filter for destination
-    col5, col6 = st.columns([1, 1])
-    with col5:
+    col4, col5 = st.columns([1, 1])
+    with col4:
         destinations = ag_counties_df["to_category"].unique().tolist()
         destinations.sort()
         selected_destination = st.selectbox("Agricultural Land Converted To", 
@@ -862,8 +889,6 @@ with tab5:
     
     # Filter data based on selections
     filtered_data = ag_counties_df[ag_counties_df["scenario_name"] == selected_scenario]
-    if selected_decade != "All Periods":
-        filtered_data = filtered_data[filtered_data["decade_name"] == selected_decade]
     if selected_source != "Both Cropland & Pasture":
         filtered_data = filtered_data[filtered_data["from_category"] == selected_source]
     if selected_destination != "All Destinations":
@@ -901,7 +926,7 @@ with tab5:
     # Display results
     source_text = f" ({selected_source})" if selected_source != "Both Cropland & Pasture" else " (Cropland + Pasture)"
     destination_text = f" (converted to {selected_destination})" if selected_destination != "All Destinations" else ""
-    st.subheader(f"🏆 Highest Agricultural Land Loss Areas ({selected_scenario}){source_text}{destination_text}")
+    st.subheader(f"📈 Agricultural Land Loss Trends ({selected_scenario_display}){source_text}{destination_text}")
     
     # Top 10 visualization
     top_10 = ag_analysis.head(10).copy()
@@ -912,27 +937,53 @@ with tab5:
     else:
         top_10["location"] = top_10[location_col]
     
-    # Create visualization
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 6))
-    
-    # Total agricultural loss
-    ax1.barh(range(len(top_10)), top_10["total_acres"])
-    ax1.set_yticks(range(len(top_10)))
-    ax1.set_yticklabels(top_10["location"], fontsize=10)
-    ax1.set_xlabel("Total Acres of Agricultural Land Lost")
-    ax1.set_title(f"Top 10 {analysis_level}s by Total Agricultural Land Loss")
-    ax1.invert_yaxis()
-    
-    # Agricultural loss rate
-    ax2.barh(range(len(top_10)), top_10["ag_loss_rate"])
-    ax2.set_yticks(range(len(top_10)))
-    ax2.set_yticklabels(top_10["location"], fontsize=10)
-    ax2.set_xlabel("Acres per Decade")
-    ax2.set_title(f"Top 10 {analysis_level}s by Agricultural Loss Rate")
-    ax2.invert_yaxis()
-    
-    plt.tight_layout()
-    st.pyplot(fig)
+    # Create temporal visualization for top counties/states
+    if len(top_10) > 0:
+        # Get temporal data for top locations
+        if analysis_level == "County":
+            top_locations = top_10[["county_name", "state_name"]].head(5)  # Top 5 for readability
+            temporal_data = []
+            for _, row in top_locations.iterrows():
+                location_data = filtered_data[
+                    (filtered_data["county_name"] == row["county_name"]) & 
+                    (filtered_data["state_name"] == row["state_name"])
+                ]
+                if len(location_data) > 0:
+                    location_summary = location_data.groupby("decade_name")["total_area"].sum().reset_index()
+                    location_summary["location"] = f"{row['county_name']}, {row['state_name']}"
+                    temporal_data.append(location_summary)
+        else:  # State level
+            top_locations = top_10[["state_name"]].head(5)
+            temporal_data = []
+            for _, row in top_locations.iterrows():
+                location_data = filtered_data[filtered_data["state_name"] == row["state_name"]]
+                if len(location_data) > 0:
+                    location_summary = location_data.groupby("decade_name")["total_area"].sum().reset_index()
+                    location_summary["location"] = row["state_name"]
+                    temporal_data.append(location_summary)
+        
+        # Create line chart
+        if temporal_data:
+            fig, ax = plt.subplots(figsize=(14, 8))
+            
+            for location_data in temporal_data:
+                ax.plot(location_data["decade_name"], location_data["total_area"], 
+                       marker='o', linewidth=2.5, markersize=6, label=location_data["location"].iloc[0])
+            
+            ax.set_xlabel("Time Period", fontsize=12)
+            ax.set_ylabel("Acres of Agricultural Land Lost", fontsize=12)
+            source_text = f" ({selected_source})" if selected_source != "Both Cropland & Pasture" else " (Cropland + Pasture)"
+            destination_text = f" to {selected_destination}" if selected_destination != "All Destinations" else ""
+            ax.set_title(f"Agricultural Land Loss Trends: Top 5 {analysis_level}s{source_text}{destination_text} ({selected_scenario_display})", fontsize=14)
+            ax.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
+            ax.grid(True, alpha=0.3)
+            plt.xticks(rotation=45)
+            plt.tight_layout()
+            st.pyplot(fig)
+        else:
+            st.warning("No temporal data available for visualization.")
+    else:
+        st.warning("No data available for the selected criteria.")
     
     # Summary statistics
     st.subheader("📊 Summary Statistics")
@@ -987,7 +1038,7 @@ with tab5:
     
     # Add metadata
     download_data["scenario"] = selected_scenario
-    download_data["time_period"] = selected_decade
+    download_data["time_period"] = "All Periods"
     download_data["source_category"] = selected_source
     download_data["destination"] = selected_destination
     download_data["analysis_level"] = analysis_level
@@ -1001,7 +1052,7 @@ with tab5:
         st.download_button(
             label="📥 Download Full Analysis (CSV)",
             data=csv_data,
-            file_name=f"ag_loss_analysis_{analysis_level.lower()}_{selected_scenario}_{selected_decade}_{selected_source}_{selected_destination}.csv",
+            file_name=f"ag_loss_analysis_{analysis_level.lower()}_{selected_scenario}_all_periods_{selected_source}_{selected_destination}.csv",
             mime="text/csv",
             help="Download complete analysis results with all metrics"
         )
