@@ -55,17 +55,17 @@ def analyze_urban_development(data, scenario=None, decade=None, level="county", 
         group_cols = ["county_name", "state_name", "fips_code"]
     elif level == "state":
         group_cols = ["state_name"]
-    else:  # region
-        group_cols = ["region_name"] if "region_name" in filtered_data.columns else ["state_name"]
+    else:  # region - fallback to state since region_name doesn't exist
+        group_cols = ["state_name"]
     
     # Calculate metrics
     analysis = filtered_data.groupby(group_cols).agg({
-        "total_area": ["sum", "mean", "count"],
+        "total_area": ["sum", "mean"],
         "decade_name": "nunique"
     }).round(2)
     
     # Flatten column names
-    analysis.columns = ["total_acres", "avg_acres_per_transition", "num_transitions", "num_decades"]
+    analysis.columns = ["total_acres", "avg_acres_per_decade", "num_decades"]
     analysis = analysis.reset_index()
     
     # Calculate urbanization rate
@@ -176,7 +176,8 @@ def main():
         print(f"{i+1:2d}. {location}")
         print(f"    Total acres urbanized: {row['total_acres']:,.0f}")
         print(f"    Urbanization rate: {row['urbanization_rate']:,.1f} acres/decade")
-        print(f"    Number of transitions: {row['num_transitions']}")
+        print(f"    Average per decade: {row['avg_acres_per_decade']:,.1f} acres")
+        print(f"    Time periods covered: {row['num_decades']} decades")
         print()
     
     # Save to file if requested

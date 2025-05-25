@@ -275,7 +275,7 @@ with tab3:
     with col3:
         # Analysis level
         analysis_level = st.selectbox("Analysis Level", 
-                                    options=["County", "State", "Region"], 
+                                    options=["County", "State"], 
                                     key="urban_level")
     
     # Filter data based on selections
@@ -292,19 +292,19 @@ with tab3:
         group_cols = ["state_name"]
         location_col = "state_name"
         location_display = lambda row: row['state_name']
-    else:  # Region
-        group_cols = ["region_name"] if "region_name" in filtered_data.columns else ["state_name"]
-        location_col = group_cols[0]
-        location_display = lambda row: row[location_col]
+    else:  # Region - fallback to state since region_name doesn't exist
+        group_cols = ["state_name"]
+        location_col = "state_name"
+        location_display = lambda row: row['state_name']
     
     # Calculate urbanization metrics
     urban_analysis = filtered_data.groupby(group_cols).agg({
-        "total_area": ["sum", "mean", "count"],
+        "total_area": ["sum", "mean"],
         "decade_name": "nunique"
     }).round(2)
     
     # Flatten column names
-    urban_analysis.columns = ["total_acres", "avg_acres_per_transition", "num_transitions", "num_decades"]
+    urban_analysis.columns = ["total_acres", "avg_acres_per_decade", "num_decades"]
     urban_analysis = urban_analysis.reset_index()
     
     # Calculate urbanization rate (acres per decade)
@@ -367,14 +367,13 @@ with tab3:
     # Format data for display
     display_data = urban_analysis.copy()
     display_data["total_acres"] = display_data["total_acres"].map(lambda x: f"{x:,.0f}")
-    display_data["avg_acres_per_transition"] = display_data["avg_acres_per_transition"].map(lambda x: f"{x:,.1f}")
+    display_data["avg_acres_per_decade"] = display_data["avg_acres_per_decade"].map(lambda x: f"{x:,.1f}")
     display_data["urbanization_rate"] = display_data["urbanization_rate"].map(lambda x: f"{x:,.1f}")
     
     # Rename columns for clarity
     column_mapping = {
         "total_acres": "Total Acres Urbanized",
-        "avg_acres_per_transition": "Avg Acres per Transition",
-        "num_transitions": "Number of Transitions",
+        "avg_acres_per_decade": "Average Acres per Decade",
         "num_decades": "Decades Covered",
         "urbanization_rate": "Urbanization Rate (acres/decade)"
     }
