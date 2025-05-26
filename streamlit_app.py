@@ -6,6 +6,7 @@ import json
 import folium
 from streamlit_folium import folium_static
 import geopandas as gpd
+import plotly.graph_objects as go
 
 # Set page configuration
 st.set_page_config(
@@ -162,6 +163,80 @@ def aggregate_to_state_level(county_df, transition_type, scenario, decade):
     state_df.columns = ["name", "total_area"]
     
     return state_df
+
+# Create Sankey diagram for land use transitions
+def create_sankey_diagram(transitions_data, title, scenario_name):
+    """
+    Create a Sankey diagram showing land use transitions
+    
+    Args:
+        transitions_data: DataFrame with from_category, to_category, and total_area columns
+        title: Title for the diagram
+        scenario_name: Scenario name for filtering
+    
+    Returns:
+        Plotly figure object
+    """
+    # Filter data for the specific scenario
+    filtered_data = transitions_data[transitions_data["scenario_name"] == scenario_name]
+    
+    # Aggregate data across all time periods
+    sankey_data = filtered_data.groupby(["from_category", "to_category"])["total_area"].sum().reset_index()
+    
+    # Filter out transitions where land use stays the same (e.g., Urban to Urban)
+    sankey_data = sankey_data[sankey_data["from_category"] != sankey_data["to_category"]]
+    
+    # Get unique land use categories
+    all_categories = list(set(sankey_data["from_category"].unique()) | set(sankey_data["to_category"].unique()))
+    
+    # Create node indices
+    node_indices = {category: i for i, category in enumerate(all_categories)}
+    
+    # Prepare data for Sankey
+    source = [node_indices[cat] for cat in sankey_data["from_category"]]
+    target = [node_indices[cat] for cat in sankey_data["to_category"]]
+    value = sankey_data["total_area"].tolist()
+    
+    # Define colors for different land use types
+    color_map = {
+        'Forest': '#228B22',      # Forest Green
+        'Cropland': '#FFD700',    # Gold
+        'Pasture': '#90EE90',     # Light Green
+        'Urban': '#FF6347',       # Tomato Red
+        'Other': '#D3D3D3',       # Light Gray
+        'Range': '#DEB887',       # Burlywood
+        'Water': '#4169E1',       # Royal Blue
+        'Federal': '#8B4513'      # Saddle Brown
+    }
+    
+    # Assign colors to nodes
+    node_colors = [color_map.get(cat, '#D3D3D3') for cat in all_categories]
+    
+    # Create Sankey diagram
+    fig = go.Figure(data=[go.Sankey(
+        node=dict(
+            pad=15,
+            thickness=20,
+            line=dict(color="black", width=0.5),
+            label=all_categories,
+            color=node_colors
+        ),
+        link=dict(
+            source=source,
+            target=target,
+            value=value,
+            color='rgba(255, 0, 255, 0.4)'  # Semi-transparent links
+        )
+    )])
+    
+    fig.update_layout(
+        title_text=title,
+        font_size=12,
+        height=600,
+        margin=dict(l=0, r=0, t=50, b=0)
+    )
+    
+    return fig
 
 # Create choropleth map
 def create_state_map(state_data, title):
@@ -328,32 +403,35 @@ with tab3:
     # Filter for urban transitions only (where to_category is 'Urban')
     urban_counties_df = county_df[county_df["to_category"] == "Urban"]
     
-    # Analysis controls
-    st.subheader("Analysis Controls")
-    col1, col2 = st.columns([1, 1])
+    # Fixed settings - no user controls needed
+    selected_scenario = 'ensemble_overall'  # Ensemble Projection
+    selected_scenario_display = 'Ensemble Projection'
+    analysis_level = "State"
     
-    with col1:
-        # Scenario selection with descriptions
-        scenario_descriptions = {
-            'ensemble_LM': 'Sustainable Development Pathway',
-            'ensemble_HL': 'Climate Challenge Scenario', 
-            'ensemble_HM': 'Moderate Growth Scenario',
-            'ensemble_HH': 'High Development Scenario',
-            'ensemble_overall': 'Ensemble Projection'
-        }
-        
-        scenarios = urban_counties_df["scenario_name"].unique().tolist()
-        scenario_options = [scenario_descriptions.get(scenario, scenario) for scenario in scenarios]
-        selected_scenario_display = st.selectbox("Select Scenario", options=scenario_options, key="urban_scenario")
-        # Map back to original scenario name
-        scenario_reverse_map = {v: k for k, v in scenario_descriptions.items()}
-        selected_scenario = scenario_reverse_map.get(selected_scenario_display, selected_scenario_display)
+    # 1. NATIONAL SANKEY DIAGRAM
+    st.subheader("🌊 National Land Use Transitions to Urban")
     
-    with col2:
-        # Analysis level
-        analysis_level = st.selectbox("Analysis Level", 
-                                    options=["County", "State"], 
-                                    key="urban_level")
+    # Get transitions to urban data from county-level data
+    urban_transitions = county_df[
+        (county_df["to_category"] == "Urban") & 
+        (county_df["scenario_name"] == selected_scenario)
+    ]
+    
+    # Create Sankey diagram
+    sankey_fig = create_sankey_diagram(
+        urban_transitions, 
+        f"National Land Use Transitions to Urban Areas ({selected_scenario_display})",
+        selected_scenario
+    )
+    
+    st.plotly_chart(sankey_fig, use_container_width=True, key="urban_sankey")
+    
+    with st.expander("📊 Show National Transitions Data"):
+        # Show aggregated transition data
+        transition_summary = urban_transitions.groupby(["from_category", "to_category"])["total_area"].sum().reset_index()
+        transition_summary["total_area"] = transition_summary["total_area"].map(lambda x: f"{x:,.0f}")
+        transition_summary.columns = ["From Land Use", "To Land Use", "Total Acres Converted"]
+        st.dataframe(transition_summary)
     
     # Filter data based on selections
     filtered_data = urban_counties_df[urban_counties_df["scenario_name"] == selected_scenario]
@@ -393,8 +471,8 @@ with tab3:
     # Sort by total area
     urban_analysis = urban_analysis.sort_values("total_acres", ascending=False)
     
-    # Display results
-    st.subheader(f"📈 Urban Development Trends ({selected_scenario_display})")
+    # 2. TOP COUNTIES/STATES TEMPORAL TRENDS
+    st.subheader(f"📈 Urban Development Trends: Top {analysis_level}s ({selected_scenario_display})")
     
     # Get top locations for temporal analysis
     top_10 = urban_analysis.head(10).copy()
@@ -409,7 +487,7 @@ with tab3:
     if len(top_10) > 0:
         # Get temporal data for top locations
         if analysis_level == "County":
-            top_locations = top_10[["county_name", "state_name"]].head(5)  # Top 5 for readability
+            top_locations = top_10[["county_name", "state_name"]].head(10)  # Top 10
             temporal_data = []
             for _, row in top_locations.iterrows():
                 location_data = filtered_data[
@@ -419,31 +497,82 @@ with tab3:
                 if len(location_data) > 0:
                     location_summary = location_data.groupby("decade_name")["total_area"].sum().reset_index()
                     location_summary["location"] = f"{row['county_name']}, {row['state_name']}"
+                    # Calculate percentage change from first period
+                    if len(location_summary) > 1:
+                        baseline = location_summary["total_area"].iloc[0]
+                        if baseline > 0:
+                            location_summary["pct_change"] = ((location_summary["total_area"] - baseline) / baseline * 100).round(1)
+                        else:
+                            location_summary["pct_change"] = 0
+                    else:
+                        location_summary["pct_change"] = 0
                     temporal_data.append(location_summary)
         else:  # State level
-            top_locations = top_10[["state_name"]].head(5)
+            top_locations = top_10[["state_name"]].head(10)  # Top 10
             temporal_data = []
             for _, row in top_locations.iterrows():
                 location_data = filtered_data[filtered_data["state_name"] == row["state_name"]]
                 if len(location_data) > 0:
                     location_summary = location_data.groupby("decade_name")["total_area"].sum().reset_index()
                     location_summary["location"] = row["state_name"]
+                    # Calculate percentage change from first period
+                    if len(location_summary) > 1:
+                        baseline = location_summary["total_area"].iloc[0]
+                        if baseline > 0:
+                            location_summary["pct_change"] = ((location_summary["total_area"] - baseline) / baseline * 100).round(1)
+                        else:
+                            location_summary["pct_change"] = 0
+                    else:
+                        location_summary["pct_change"] = 0
                     temporal_data.append(location_summary)
         
-        # Create line chart
+        # Create publication-quality line chart
         if temporal_data:
-            fig, ax = plt.subplots(figsize=(14, 8))
+            # Set dark mode style
+            plt.style.use('dark_background')
+            fig, ax = plt.subplots(figsize=(12, 8), dpi=300)
+            fig.patch.set_facecolor('#0E1117')  # Streamlit dark background
+            ax.set_facecolor('#0E1117')
             
-            for location_data in temporal_data:
-                ax.plot(location_data["decade_name"], location_data["total_area"], 
-                       marker='o', linewidth=2.5, markersize=6, label=location_data["location"].iloc[0])
+            # Color palette for better distinction in dark mode
+            colors = plt.cm.Set1(range(len(temporal_data)))
             
-            ax.set_xlabel("Time Period", fontsize=12)
-            ax.set_ylabel("Acres Converted to Urban", fontsize=12)
-            ax.set_title(f"Urban Development Trends: Top 5 {analysis_level}s ({selected_scenario_display})", fontsize=14)
-            ax.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
-            ax.grid(True, alpha=0.3)
-            plt.xticks(rotation=45)
+            for i, location_data in enumerate(temporal_data):
+                # Extract end years from decade names (e.g., "2020-2030" -> "2030")
+                end_years = [decade.split('-')[1] for decade in location_data["decade_name"]]
+                
+                ax.plot(end_years, location_data["pct_change"], 
+                       marker='o', linewidth=2.5, markersize=8, 
+                       label=location_data["location"].iloc[0],
+                       color=colors[i], markerfacecolor='#0E1117', 
+                       markeredgewidth=2, markeredgecolor=colors[i])
+            
+            # Styling for dark mode
+            ax.set_xlabel("Year", fontsize=14, fontweight='bold', color='white')
+            ax.set_ylabel("Percentage Change from Baseline (%)", fontsize=14, fontweight='bold', color='white')
+            ax.set_title(f"Urban Development Trends: Top 10 {analysis_level}s ({selected_scenario_display})", 
+                        fontsize=16, fontweight='bold', pad=20, color='white')
+            
+            # Legend at bottom, horizontal
+            ax.legend(bbox_to_anchor=(0.5, -0.15), loc='upper center', 
+                     ncol=2, frameon=False, fontsize=11, labelcolor='white')
+            
+            # Grid and styling for dark mode
+            ax.grid(True, alpha=0.3, linestyle='--', color='white')
+            ax.spines['top'].set_visible(False)
+            ax.spines['right'].set_visible(False)
+            ax.spines['left'].set_linewidth(0.5)
+            ax.spines['left'].set_color('white')
+            ax.spines['bottom'].set_linewidth(0.5)
+            ax.spines['bottom'].set_color('white')
+            
+            # Tick styling for dark mode
+            ax.tick_params(axis='both', which='major', labelsize=12, colors='white')
+            plt.xticks(rotation=0)  # Keep x-axis labels horizontal
+            
+            # Add horizontal line at 0%
+            ax.axhline(y=0, color='white', linestyle='-', alpha=0.5, linewidth=0.8)
+            
             plt.tight_layout()
             st.pyplot(fig)
         else:
@@ -451,7 +580,7 @@ with tab3:
     else:
         st.warning("No data available for the selected criteria.")
     
-    # Summary statistics
+    # 3. SUMMARY STATISTICS AND DATA TABLE
     st.subheader("📊 Summary Statistics")
     col1, col2, col3, col4 = st.columns(4)
     
@@ -498,7 +627,7 @@ with tab3:
     # Show data with search/filter capability
     st.dataframe(display_data, use_container_width=True)
     
-    # Download functionality
+    # 4. DOWNLOAD FUNCTIONALITY
     st.subheader("💾 Download Analysis Results")
     
     # Prepare download data (with original numeric values)
@@ -533,37 +662,6 @@ with tab3:
             mime="text/csv",
             help="Download top 20 areas by urban development"
         )
-    
-    # National trends visualization
-    st.subheader("📈 National Urbanization Trends")
-    
-    urbanization_df = data["Urbanization Trends By Decade"]
-    filtered_urban = urbanization_df[urbanization_df["scenario_name"] == selected_scenario]
-    
-    # Plot the data
-    fig3, ax3 = plt.subplots(figsize=(12, 6))
-    ax3.plot(filtered_urban["decade_name"], filtered_urban["forest_to_urban"], 
-             marker='o', linewidth=2, label="Forest to Urban")
-    ax3.plot(filtered_urban["decade_name"], filtered_urban["cropland_to_urban"], 
-             marker='s', linewidth=2, label="Cropland to Urban")
-    ax3.plot(filtered_urban["decade_name"], filtered_urban["pasture_to_urban"], 
-             marker='^', linewidth=2, label="Pasture to Urban")
-    
-    ax3.set_xlabel("Time Period")
-    ax3.set_ylabel("Acres Converted")
-    ax3.set_title(f"National Land Conversion to Urban Areas: {selected_scenario}")
-    ax3.legend()
-    ax3.grid(True, alpha=0.3)
-    plt.xticks(rotation=45)
-    plt.tight_layout()
-    
-    st.pyplot(fig3)
-    
-    with st.expander("📊 Show National Trends Data"):
-        display_trends = filtered_urban.copy()
-        for col in display_trends.select_dtypes(include=['object']).columns:
-            display_trends[col] = display_trends[col].astype(str)
-        st.dataframe(display_trends)
 
 # ---- FOREST TRANSITIONS TAB ----
 with tab4:
@@ -587,38 +685,43 @@ with tab4:
     
     # Analysis controls
     st.subheader("Analysis Controls")
-    col1, col2, col3 = st.columns([1, 1, 1])
     
-    with col1:
-        # Scenario selection with descriptions
-        scenario_descriptions = {
-            'ensemble_LM': 'Sustainable Development Pathway',
-            'ensemble_HL': 'Climate Challenge Scenario', 
-            'ensemble_HM': 'Moderate Growth Scenario',
-            'ensemble_HH': 'High Development Scenario',
-            'ensemble_overall': 'Ensemble Projection'
-        }
-        
-        scenarios = forest_counties_df["scenario_name"].unique().tolist()
-        scenario_options = [scenario_descriptions.get(scenario, scenario) for scenario in scenarios]
-        selected_scenario_display = st.selectbox("Select Scenario", options=scenario_options, key="forest_scenario")
-        # Map back to original scenario name
-        scenario_reverse_map = {v: k for k, v in scenario_descriptions.items()}
-        selected_scenario = scenario_reverse_map.get(selected_scenario_display, selected_scenario_display)
+    # Fixed settings - no user controls for scenario and analysis level
+    selected_scenario = 'ensemble_overall'  # Ensemble Projection
+    selected_scenario_display = 'Ensemble Projection'
+    analysis_level = "State"
     
-    with col2:
-        # Analysis level
-        analysis_level = st.selectbox("Analysis Level", 
-                                    options=["County", "State"], 
-                                    key="forest_level")
+    # Keep only the destination filter
+    destinations = forest_counties_df["to_category"].unique().tolist()
+    destinations.sort()
+    selected_destination = st.selectbox("Forest Converted To", 
+                                      options=["All Destinations"] + destinations, 
+                                      key="forest_destination")
     
-    with col3:
-        # Destination filter
-        destinations = forest_counties_df["to_category"].unique().tolist()
-        destinations.sort()
-        selected_destination = st.selectbox("Forest Converted To", 
-                                          options=["All Destinations"] + destinations, 
-                                          key="forest_destination")
+    # 1. NATIONAL SANKEY DIAGRAM
+    st.subheader("🌊 National Forest Land Transitions")
+    
+    # Get transitions from forest data from county-level data
+    forest_transitions = county_df[
+        (county_df["from_category"] == "Forest") & 
+        (county_df["scenario_name"] == selected_scenario)
+    ]
+    
+    # Create Sankey diagram
+    sankey_fig = create_sankey_diagram(
+        forest_transitions, 
+        f"National Forest Land Transitions ({selected_scenario_display})",
+        selected_scenario
+    )
+    
+    st.plotly_chart(sankey_fig, use_container_width=True, key="forest_sankey")
+    
+    with st.expander("📊 Show National Forest Transitions Data"):
+        # Show aggregated transition data
+        transition_summary = forest_transitions.groupby(["from_category", "to_category"])["total_area"].sum().reset_index()
+        transition_summary["total_area"] = transition_summary["total_area"].map(lambda x: f"{x:,.0f}")
+        transition_summary.columns = ["From Land Use", "To Land Use", "Total Acres Converted"]
+        st.dataframe(transition_summary)
     
     # Filter data based on selections
     filtered_data = forest_counties_df[forest_counties_df["scenario_name"] == selected_scenario]
@@ -654,9 +757,9 @@ with tab4:
     # Sort by total area
     forest_analysis = forest_analysis.sort_values("total_acres", ascending=False)
     
-    # Display results
+    # 2. TOP COUNTIES/STATES TEMPORAL TRENDS
     destination_text = f" (converted to {selected_destination})" if selected_destination != "All Destinations" else ""
-    st.subheader(f"📈 Forest Loss Trends ({selected_scenario_display}){destination_text}")
+    st.subheader(f"📈 Forest Loss Trends: Top {analysis_level}s ({selected_scenario_display}){destination_text}")
     
     # Get top locations for temporal analysis
     top_10 = forest_analysis.head(10).copy()
@@ -671,7 +774,7 @@ with tab4:
     if len(top_10) > 0:
         # Get temporal data for top locations
         if analysis_level == "County":
-            top_locations = top_10[["county_name", "state_name"]].head(5)  # Top 5 for readability
+            top_locations = top_10[["county_name", "state_name"]].head(10)  # Top 10
             temporal_data = []
             for _, row in top_locations.iterrows():
                 location_data = filtered_data[
@@ -681,32 +784,83 @@ with tab4:
                 if len(location_data) > 0:
                     location_summary = location_data.groupby("decade_name")["total_area"].sum().reset_index()
                     location_summary["location"] = f"{row['county_name']}, {row['state_name']}"
+                    # Calculate percentage change from first period
+                    if len(location_summary) > 1:
+                        baseline = location_summary["total_area"].iloc[0]
+                        if baseline > 0:
+                            location_summary["pct_change"] = ((location_summary["total_area"] - baseline) / baseline * 100).round(1)
+                        else:
+                            location_summary["pct_change"] = 0
+                    else:
+                        location_summary["pct_change"] = 0
                     temporal_data.append(location_summary)
         else:  # State level
-            top_locations = top_10[["state_name"]].head(5)
+            top_locations = top_10[["state_name"]].head(10)  # Top 10
             temporal_data = []
             for _, row in top_locations.iterrows():
                 location_data = filtered_data[filtered_data["state_name"] == row["state_name"]]
                 if len(location_data) > 0:
                     location_summary = location_data.groupby("decade_name")["total_area"].sum().reset_index()
                     location_summary["location"] = row["state_name"]
+                    # Calculate percentage change from first period
+                    if len(location_summary) > 1:
+                        baseline = location_summary["total_area"].iloc[0]
+                        if baseline > 0:
+                            location_summary["pct_change"] = ((location_summary["total_area"] - baseline) / baseline * 100).round(1)
+                        else:
+                            location_summary["pct_change"] = 0
+                    else:
+                        location_summary["pct_change"] = 0
                     temporal_data.append(location_summary)
         
-        # Create line chart
+        # Create publication-quality line chart
         if temporal_data:
-            fig, ax = plt.subplots(figsize=(14, 8))
+            # Set dark mode style
+            plt.style.use('dark_background')
+            fig, ax = plt.subplots(figsize=(12, 8), dpi=300)
+            fig.patch.set_facecolor('#0E1117')  # Streamlit dark background
+            ax.set_facecolor('#0E1117')
             
-            for location_data in temporal_data:
-                ax.plot(location_data["decade_name"], location_data["total_area"], 
-                       marker='o', linewidth=2.5, markersize=6, label=location_data["location"].iloc[0])
+            # Color palette for better distinction in dark mode
+            colors = plt.cm.Set1(range(len(temporal_data)))
             
-            ax.set_xlabel("Time Period", fontsize=12)
-            ax.set_ylabel("Acres of Forest Lost", fontsize=12)
+            for i, location_data in enumerate(temporal_data):
+                # Extract end years from decade names (e.g., "2020-2030" -> "2030")
+                end_years = [decade.split('-')[1] for decade in location_data["decade_name"]]
+                
+                ax.plot(end_years, location_data["pct_change"], 
+                       marker='o', linewidth=2.5, markersize=8, 
+                       label=location_data["location"].iloc[0],
+                       color=colors[i], markerfacecolor='#0E1117', 
+                       markeredgewidth=2, markeredgecolor=colors[i])
+            
+            # Styling for dark mode
+            ax.set_xlabel("Year", fontsize=14, fontweight='bold', color='white')
+            ax.set_ylabel("Percentage Change from Baseline (%)", fontsize=14, fontweight='bold', color='white')
             destination_text = f" (to {selected_destination})" if selected_destination != "All Destinations" else ""
-            ax.set_title(f"Forest Loss Trends: Top 5 {analysis_level}s{destination_text} ({selected_scenario_display})", fontsize=14)
-            ax.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
-            ax.grid(True, alpha=0.3)
-            plt.xticks(rotation=45)
+            ax.set_title(f"Forest Loss Trends: Top 10 {analysis_level}s{destination_text} ({selected_scenario_display})", 
+                        fontsize=16, fontweight='bold', pad=20, color='white')
+            
+            # Legend at bottom, horizontal
+            ax.legend(bbox_to_anchor=(0.5, -0.15), loc='upper center', 
+                     ncol=2, frameon=False, fontsize=11, labelcolor='white')
+            
+            # Grid and styling for dark mode
+            ax.grid(True, alpha=0.3, linestyle='--', color='white')
+            ax.spines['top'].set_visible(False)
+            ax.spines['right'].set_visible(False)
+            ax.spines['left'].set_linewidth(0.5)
+            ax.spines['left'].set_color('white')
+            ax.spines['bottom'].set_linewidth(0.5)
+            ax.spines['bottom'].set_color('white')
+            
+            # Tick styling for dark mode
+            ax.tick_params(axis='both', which='major', labelsize=12, colors='white')
+            plt.xticks(rotation=0)  # Keep x-axis labels horizontal
+            
+            # Add horizontal line at 0%
+            ax.axhline(y=0, color='white', linestyle='-', alpha=0.5, linewidth=0.8)
+            
             plt.tight_layout()
             st.pyplot(fig)
         else:
@@ -714,7 +868,7 @@ with tab4:
     else:
         st.warning("No data available for the selected criteria.")
     
-    # Summary statistics
+    # 3. SUMMARY STATISTICS AND DATA TABLE
     st.subheader("📊 Summary Statistics")
     col1, col2, col3, col4 = st.columns(4)
     
@@ -759,7 +913,7 @@ with tab4:
     # Show data with search/filter capability
     st.dataframe(display_data, use_container_width=True)
     
-    # Download functionality
+    # 4. DOWNLOAD FUNCTIONALITY
     st.subheader("💾 Download Analysis Results")
     
     # Prepare download data (with original numeric values)
@@ -795,34 +949,6 @@ with tab4:
             mime="text/csv",
             help="Download top 20 areas by forest loss"
         )
-    
-    # National trends visualization
-    st.subheader("📈 National Forest Loss Trends by Destination")
-    
-    from_forest_df = data["Transitions from Forest Land"]
-    filtered_forest = from_forest_df[from_forest_df["scenario_name"] == selected_scenario]
-    
-    # Aggregate data by destination land use
-    forest_to_use = filtered_forest.groupby(["to_category", "decade_name"])["total_area"].sum().reset_index()
-    
-    # Pivot table for plotting
-    pivot_forest = forest_to_use.pivot(index="decade_name", columns="to_category", values="total_area")
-    
-    # Plot the data
-    fig3, ax3 = plt.subplots(figsize=(12, 6))
-    pivot_forest.plot(kind="bar", ax=ax3, width=0.8)
-    ax3.set_xlabel("Time Period")
-    ax3.set_ylabel("Acres of Forest Lost")
-    ax3.set_title(f"National Forest Land Conversion by Destination: {selected_scenario}")
-    ax3.legend(title="Converted To", bbox_to_anchor=(1.05, 1), loc='upper left')
-    ax3.grid(True, alpha=0.3)
-    plt.xticks(rotation=45)
-    plt.tight_layout()
-    
-    st.pyplot(fig3)
-    
-    with st.expander("📊 Show National Trends Data"):
-        st.dataframe(pivot_forest)
 
 # ---- AGRICULTURAL TRANSITIONS TAB ----
 with tab5:
@@ -846,46 +972,54 @@ with tab5:
     
     # Analysis controls
     st.subheader("Analysis Controls")
-    col1, col2, col3 = st.columns([1, 1, 1])
+    
+    # Fixed settings - no user controls for scenario and analysis level
+    selected_scenario = 'ensemble_overall'  # Ensemble Projection
+    selected_scenario_display = 'Ensemble Projection'
+    analysis_level = "State"
+    
+    # Keep the source and destination filters
+    col1, col2 = st.columns([1, 1])
     
     with col1:
-        # Scenario selection with descriptions
-        scenario_descriptions = {
-            'ensemble_LM': 'Sustainable Development Pathway',
-            'ensemble_HL': 'Climate Challenge Scenario', 
-            'ensemble_HM': 'Moderate Growth Scenario',
-            'ensemble_HH': 'High Development Scenario',
-            'ensemble_overall': 'Ensemble Projection'
-        }
-        
-        scenarios = ag_counties_df["scenario_name"].unique().tolist()
-        scenario_options = [scenario_descriptions.get(scenario, scenario) for scenario in scenarios]
-        selected_scenario_display = st.selectbox("Select Scenario", options=scenario_options, key="ag_scenario")
-        # Map back to original scenario name
-        scenario_reverse_map = {v: k for k, v in scenario_descriptions.items()}
-        selected_scenario = scenario_reverse_map.get(selected_scenario_display, selected_scenario_display)
-    
-    with col2:
-        # Analysis level
-        analysis_level = st.selectbox("Analysis Level", 
-                                    options=["County", "State"], 
-                                    key="ag_level")
-    
-    with col3:
         # Source filter
         sources = ["Both Cropland & Pasture"] + ag_counties_df["from_category"].unique().tolist()
         selected_source = st.selectbox("Agricultural Land Type", 
                                      options=sources, 
                                      key="ag_source")
     
-    # Additional filter for destination
-    col4, col5 = st.columns([1, 1])
-    with col4:
+    with col2:
         destinations = ag_counties_df["to_category"].unique().tolist()
         destinations.sort()
         selected_destination = st.selectbox("Agricultural Land Converted To", 
                                           options=["All Destinations"] + destinations, 
                                           key="ag_destination")
+    
+    # 1. NATIONAL SANKEY DIAGRAM
+    st.subheader("🌊 National Agricultural Land Transitions")
+    
+    # Get agricultural transitions data from county-level data
+    ag_transitions = ag_counties_df[ag_counties_df["scenario_name"] == selected_scenario]
+    
+    # Apply source filter if specified
+    if selected_source != "Both Cropland & Pasture":
+        ag_transitions = ag_transitions[ag_transitions["from_category"] == selected_source]
+    
+    # Create Sankey diagram
+    sankey_fig = create_sankey_diagram(
+        ag_transitions, 
+        f"National Agricultural Land Transitions ({selected_scenario_display})",
+        selected_scenario
+    )
+    
+    st.plotly_chart(sankey_fig, use_container_width=True, key="ag_sankey")
+    
+    with st.expander("📊 Show National Agricultural Transitions Data"):
+        # Show aggregated transition data
+        transition_summary = ag_transitions.groupby(["from_category", "to_category"])["total_area"].sum().reset_index()
+        transition_summary["total_area"] = transition_summary["total_area"].map(lambda x: f"{x:,.0f}")
+        transition_summary.columns = ["From Land Use", "To Land Use", "Total Acres Converted"]
+        st.dataframe(transition_summary)
     
     # Filter data based on selections
     filtered_data = ag_counties_df[ag_counties_df["scenario_name"] == selected_scenario]
@@ -923,10 +1057,10 @@ with tab5:
     # Sort by total area
     ag_analysis = ag_analysis.sort_values("total_acres", ascending=False)
     
-    # Display results
+    # 2. TOP COUNTIES/STATES TEMPORAL TRENDS
     source_text = f" ({selected_source})" if selected_source != "Both Cropland & Pasture" else " (Cropland + Pasture)"
     destination_text = f" (converted to {selected_destination})" if selected_destination != "All Destinations" else ""
-    st.subheader(f"📈 Agricultural Land Loss Trends ({selected_scenario_display}){source_text}{destination_text}")
+    st.subheader(f"📈 Agricultural Land Loss Trends: Top {analysis_level}s ({selected_scenario_display}){source_text}{destination_text}")
     
     # Top 10 visualization
     top_10 = ag_analysis.head(10).copy()
@@ -941,7 +1075,7 @@ with tab5:
     if len(top_10) > 0:
         # Get temporal data for top locations
         if analysis_level == "County":
-            top_locations = top_10[["county_name", "state_name"]].head(5)  # Top 5 for readability
+            top_locations = top_10[["county_name", "state_name"]].head(10)  # Top 10
             temporal_data = []
             for _, row in top_locations.iterrows():
                 location_data = filtered_data[
@@ -951,33 +1085,84 @@ with tab5:
                 if len(location_data) > 0:
                     location_summary = location_data.groupby("decade_name")["total_area"].sum().reset_index()
                     location_summary["location"] = f"{row['county_name']}, {row['state_name']}"
+                    # Calculate percentage change from first period
+                    if len(location_summary) > 1:
+                        baseline = location_summary["total_area"].iloc[0]
+                        if baseline > 0:
+                            location_summary["pct_change"] = ((location_summary["total_area"] - baseline) / baseline * 100).round(1)
+                        else:
+                            location_summary["pct_change"] = 0
+                    else:
+                        location_summary["pct_change"] = 0
                     temporal_data.append(location_summary)
         else:  # State level
-            top_locations = top_10[["state_name"]].head(5)
+            top_locations = top_10[["state_name"]].head(10)  # Top 10
             temporal_data = []
             for _, row in top_locations.iterrows():
                 location_data = filtered_data[filtered_data["state_name"] == row["state_name"]]
                 if len(location_data) > 0:
                     location_summary = location_data.groupby("decade_name")["total_area"].sum().reset_index()
                     location_summary["location"] = row["state_name"]
+                    # Calculate percentage change from first period
+                    if len(location_summary) > 1:
+                        baseline = location_summary["total_area"].iloc[0]
+                        if baseline > 0:
+                            location_summary["pct_change"] = ((location_summary["total_area"] - baseline) / baseline * 100).round(1)
+                        else:
+                            location_summary["pct_change"] = 0
+                    else:
+                        location_summary["pct_change"] = 0
                     temporal_data.append(location_summary)
         
-        # Create line chart
+        # Create publication-quality line chart
         if temporal_data:
-            fig, ax = plt.subplots(figsize=(14, 8))
+            # Set dark mode style
+            plt.style.use('dark_background')
+            fig, ax = plt.subplots(figsize=(12, 8), dpi=300)
+            fig.patch.set_facecolor('#0E1117')  # Streamlit dark background
+            ax.set_facecolor('#0E1117')
             
-            for location_data in temporal_data:
-                ax.plot(location_data["decade_name"], location_data["total_area"], 
-                       marker='o', linewidth=2.5, markersize=6, label=location_data["location"].iloc[0])
+            # Color palette for better distinction in dark mode
+            colors = plt.cm.Set1(range(len(temporal_data)))
             
-            ax.set_xlabel("Time Period", fontsize=12)
-            ax.set_ylabel("Acres of Agricultural Land Lost", fontsize=12)
+            for i, location_data in enumerate(temporal_data):
+                # Extract end years from decade names (e.g., "2020-2030" -> "2030")
+                end_years = [decade.split('-')[1] for decade in location_data["decade_name"]]
+                
+                ax.plot(end_years, location_data["pct_change"], 
+                       marker='o', linewidth=2.5, markersize=8, 
+                       label=location_data["location"].iloc[0],
+                       color=colors[i], markerfacecolor='#0E1117', 
+                       markeredgewidth=2, markeredgecolor=colors[i])
+            
+            # Styling for dark mode
+            ax.set_xlabel("Year", fontsize=14, fontweight='bold', color='white')
+            ax.set_ylabel("Percentage Change from Baseline (%)", fontsize=14, fontweight='bold', color='white')
             source_text = f" ({selected_source})" if selected_source != "Both Cropland & Pasture" else " (Cropland + Pasture)"
             destination_text = f" to {selected_destination}" if selected_destination != "All Destinations" else ""
-            ax.set_title(f"Agricultural Land Loss Trends: Top 5 {analysis_level}s{source_text}{destination_text} ({selected_scenario_display})", fontsize=14)
-            ax.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
-            ax.grid(True, alpha=0.3)
-            plt.xticks(rotation=45)
+            ax.set_title(f"Agricultural Land Loss Trends: Top 10 {analysis_level}s{source_text}{destination_text} ({selected_scenario_display})", 
+                        fontsize=16, fontweight='bold', pad=20, color='white')
+            
+            # Legend at bottom, horizontal
+            ax.legend(bbox_to_anchor=(0.5, -0.15), loc='upper center', 
+                     ncol=2, frameon=False, fontsize=11, labelcolor='white')
+            
+            # Grid and styling for dark mode
+            ax.grid(True, alpha=0.3, linestyle='--', color='white')
+            ax.spines['top'].set_visible(False)
+            ax.spines['right'].set_visible(False)
+            ax.spines['left'].set_linewidth(0.5)
+            ax.spines['left'].set_color('white')
+            ax.spines['bottom'].set_linewidth(0.5)
+            ax.spines['bottom'].set_color('white')
+            
+            # Tick styling for dark mode
+            ax.tick_params(axis='both', which='major', labelsize=12, colors='white')
+            plt.xticks(rotation=0)  # Keep x-axis labels horizontal
+            
+            # Add horizontal line at 0%
+            ax.axhline(y=0, color='white', linestyle='-', alpha=0.5, linewidth=0.8)
+            
             plt.tight_layout()
             st.pyplot(fig)
         else:
@@ -985,7 +1170,7 @@ with tab5:
     else:
         st.warning("No data available for the selected criteria.")
     
-    # Summary statistics
+    # 3. SUMMARY STATISTICS AND DATA TABLE
     st.subheader("📊 Summary Statistics")
     col1, col2, col3, col4 = st.columns(4)
     
@@ -1030,7 +1215,7 @@ with tab5:
     # Show data with search/filter capability
     st.dataframe(display_data, use_container_width=True)
     
-    # Download functionality
+    # 4. DOWNLOAD FUNCTIONALITY
     st.subheader("💾 Download Analysis Results")
     
     # Prepare download data (with original numeric values)
@@ -1067,34 +1252,6 @@ with tab5:
             mime="text/csv",
             help="Download top 20 areas by agricultural land loss"
         )
-    
-    # National trends visualization
-    st.subheader("📈 National Agricultural Land Loss Trends by Source")
-    
-    # Create trends data by aggregating cropland and pasture separately
-    ag_trends = ag_counties_df[ag_counties_df["scenario_name"] == selected_scenario]
-    
-    # Aggregate data by source land use
-    ag_to_use = ag_trends.groupby(["from_category", "decade_name"])["total_area"].sum().reset_index()
-    
-    # Pivot table for plotting
-    pivot_ag = ag_to_use.pivot(index="decade_name", columns="from_category", values="total_area")
-    
-    # Plot the data
-    fig3, ax3 = plt.subplots(figsize=(12, 6))
-    pivot_ag.plot(kind="bar", ax=ax3, width=0.8)
-    ax3.set_xlabel("Time Period")
-    ax3.set_ylabel("Acres of Agricultural Land Lost")
-    ax3.set_title(f"National Agricultural Land Loss by Source: {selected_scenario}")
-    ax3.legend(title="Source Land Use", bbox_to_anchor=(1.05, 1), loc='upper left')
-    ax3.grid(True, alpha=0.3)
-    plt.xticks(rotation=45)
-    plt.tight_layout()
-    
-    st.pyplot(fig3)
-    
-    with st.expander("📊 Show National Trends Data"):
-        st.dataframe(pivot_ag)
 
 # ---- STATE MAP TAB ----
 with tab6:
