@@ -14,8 +14,6 @@ The tests are organized by land use categories:
 import json
 import os
 import pytest
-import pandas as pd
-import duckdb
 import re
 from pathlib import Path
 import sys
