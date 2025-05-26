@@ -232,8 +232,8 @@ def create_sankey_diagram(transitions_data, title, scenario_name):
     fig.update_layout(
         title_text=title,
         font_size=12,
-        height=600,
-        margin=dict(l=0, r=0, t=50, b=0)
+        height=700,
+        margin=dict(l=20, r=20, t=80, b=50)
     )
     
     return fig
