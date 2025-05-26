@@ -284,7 +284,7 @@ def create_state_map(state_data, title):
     return state_map
 
 # Main layout with tabs
-tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["Overview", "Data Explorer", "Urbanization Trends", "Forest Transitions", "Agricultural Transitions", "State Map"])
+tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs(["Overview", "Data Explorer", "Land Use Flow Diagrams", "Urbanization Trends", "Forest Transitions", "Agricultural Transitions", "State Map"])
 
 # Load data
 try:
@@ -383,8 +383,228 @@ with tab2:
         mime='text/csv',
     )
 
-# ---- URBANIZATION TRENDS TAB ----
+# ---- LAND USE FLOW DIAGRAMS TAB ----
 with tab3:
+    st.header("🌊 Land Use Transition Flow Diagrams")
+    
+    st.markdown("""
+    Sankey diagrams show the flow of land from one use type to another. The width of each flow 
+    represents the total acres converted between land use categories over the selected time period.
+    """)
+    
+    # Get county transitions data 
+    county_df = data["County-Level Land Use Transitions"]
+    
+    # Filter for only the 5 key RPA scenarios
+    key_scenarios = [
+        'ensemble_LM',    # Lower warming-moderate growth (RCP4.5-SSP1)
+        'ensemble_HL',    # High warming-low growth (RCP8.5-SSP3)
+        'ensemble_HM',    # High warming-moderate growth (RCP8.5-SSP2)
+        'ensemble_HH',    # High warming-high growth (RCP8.5-SSP5)
+        'ensemble_overall' # Overall mean projection
+    ]
+    county_df = county_df[county_df["scenario_name"].isin(key_scenarios)]
+    
+    # Controls for Sankey diagram
+    st.subheader("Diagram Controls")
+    
+    col1, col2, col3 = st.columns([1, 1, 1])
+    
+    with col1:
+        # Scenario selection
+        scenario_descriptions = {
+            'ensemble_LM': 'Sustainable Development (RCP4.5-SSP1)',
+            'ensemble_HL': 'Climate Challenge (RCP8.5-SSP3)', 
+            'ensemble_HM': 'Moderate Growth (RCP8.5-SSP2)',
+            'ensemble_HH': 'High Development (RCP8.5-SSP5)',
+            'ensemble_overall': 'Ensemble Projection (All Scenarios)'
+        }
+        
+        sankey_scenarios = county_df["scenario_name"].unique().tolist()
+        scenario_options = [scenario_descriptions.get(scenario, scenario) for scenario in sankey_scenarios]
+        selected_scenario_display = st.selectbox(
+            "Climate & Economic Scenario", 
+            options=scenario_options,
+            index=4,  # Default to Ensemble Projection
+            key="sankey_scenario"
+        )
+        # Map back to original scenario name
+        scenario_reverse_map = {v: k for k, v in scenario_descriptions.items()}
+        selected_sankey_scenario = scenario_reverse_map.get(selected_scenario_display, selected_scenario_display)
+    
+    with col2:
+        # Time period selection
+        sankey_decades = county_df["decade_name"].unique().tolist()
+        sankey_decades.sort()
+        selected_time_period = st.selectbox(
+            "Time Period", 
+            options=["All Periods"] + sankey_decades,
+            key="sankey_time"
+        )
+    
+    with col3:
+        # Geographic scope
+        geographic_scope = st.selectbox(
+            "Geographic Scope",
+            options=["National", "By State"],
+            key="sankey_scope"
+        )
+    
+    # Advanced filters
+    with st.expander("🔍 Advanced Filters"):
+        col1, col2 = st.columns([1, 1])
+        
+        with col1:
+            # From land use filter
+            all_from_categories = county_df["from_category"].unique().tolist()
+            all_from_categories.sort()
+            selected_from_categories = st.multiselect(
+                "From Land Use Types (leave empty for all)",
+                options=all_from_categories,
+                key="sankey_from"
+            )
+        
+        with col2:
+            # To land use filter
+            all_to_categories = county_df["to_category"].unique().tolist()
+            all_to_categories.sort()
+            selected_to_categories = st.multiselect(
+                "To Land Use Types (leave empty for all)",
+                options=all_to_categories,
+                key="sankey_to"
+            )
+        
+        # Minimum flow threshold
+        min_threshold = st.slider(
+            "Minimum Flow Threshold (acres)",
+            min_value=0,
+            max_value=100000,
+            value=1000,
+            step=1000,
+            help="Hide flows smaller than this threshold to reduce clutter",
+            key="sankey_threshold"
+        )
+    
+    # Filter data based on selections
+    filtered_sankey_data = county_df[county_df["scenario_name"] == selected_sankey_scenario]
+    
+    # Apply time period filter
+    if selected_time_period != "All Periods":
+        filtered_sankey_data = filtered_sankey_data[filtered_sankey_data["decade_name"] == selected_time_period]
+    
+    # Apply land use filters
+    if selected_from_categories:
+        filtered_sankey_data = filtered_sankey_data[filtered_sankey_data["from_category"].isin(selected_from_categories)]
+    
+    if selected_to_categories:
+        filtered_sankey_data = filtered_sankey_data[filtered_sankey_data["to_category"].isin(selected_to_categories)]
+    
+    # Create Sankey diagram(s)
+    if geographic_scope == "National":
+        # Single national diagram
+        st.subheader(f"🌊 National Land Use Transitions")
+        
+        # Aggregate data
+        sankey_data = filtered_sankey_data.groupby(["from_category", "to_category"])["total_area"].sum().reset_index()
+        
+        # Apply threshold filter
+        sankey_data = sankey_data[sankey_data["total_area"] >= min_threshold]
+        
+        # Filter out transitions where land use stays the same
+        sankey_data = sankey_data[sankey_data["from_category"] != sankey_data["to_category"]]
+        
+        if len(sankey_data) > 0:
+            # Create title
+            time_text = f" ({selected_time_period})" if selected_time_period != "All Periods" else " (2020-2070)"
+            sankey_title = f"National Land Use Transitions - {selected_scenario_display}{time_text}"
+            
+            # Create Sankey diagram
+            sankey_fig = create_sankey_diagram(
+                filtered_sankey_data, 
+                sankey_title,
+                selected_sankey_scenario
+            )
+            
+            st.plotly_chart(sankey_fig, use_container_width=True, key="national_sankey")
+            
+            # Show summary statistics
+            with st.expander("📊 Flow Summary Statistics"):
+                summary_stats = sankey_data.copy()
+                summary_stats["total_area"] = summary_stats["total_area"].map(lambda x: f"{x:,.0f}")
+                summary_stats.columns = ["From Land Use", "To Land Use", "Total Acres Converted"]
+                summary_stats = summary_stats.sort_values("Total Acres Converted", ascending=False)
+                st.dataframe(summary_stats, use_container_width=True)
+                
+                # Download option
+                csv_data = sankey_data.to_csv(index=False).encode('utf-8')
+                st.download_button(
+                    label="📥 Download Flow Data (CSV)",
+                    data=csv_data,
+                    file_name=f"land_use_flows_{selected_sankey_scenario}_{selected_time_period}.csv",
+                    mime="text/csv"
+                )
+        else:
+            st.warning("No data available for the selected filters. Try adjusting your criteria.")
+    
+    else:
+        # Multiple state diagrams
+        st.subheader(f"🌊 Land Use Transitions by State")
+        
+        # Get available states
+        available_states = filtered_sankey_data["state_name"].unique().tolist()
+        available_states.sort()
+        
+        # State selection
+        selected_states = st.multiselect(
+            "Select States to Display (max 4 for readability)",
+            options=available_states,
+            default=available_states[:2] if len(available_states) >= 2 else available_states,
+            max_selections=4,
+            key="sankey_states"
+        )
+        
+        if selected_states:
+            # Create diagrams for each selected state
+            for state in selected_states:
+                state_data = filtered_sankey_data[filtered_sankey_data["state_name"] == state]
+                
+                # Aggregate data for this state
+                state_sankey_data = state_data.groupby(["from_category", "to_category"])["total_area"].sum().reset_index()
+                
+                # Apply threshold filter
+                state_sankey_data = state_sankey_data[state_sankey_data["total_area"] >= min_threshold]
+                
+                # Filter out transitions where land use stays the same
+                state_sankey_data = state_sankey_data[state_sankey_data["from_category"] != state_sankey_data["to_category"]]
+                
+                if len(state_sankey_data) > 0:
+                    # Create title
+                    time_text = f" ({selected_time_period})" if selected_time_period != "All Periods" else " (2020-2070)"
+                    state_title = f"{state} Land Use Transitions - {selected_scenario_display}{time_text}"
+                    
+                    # Create Sankey diagram
+                    state_fig = create_sankey_diagram(
+                        state_data, 
+                        state_title,
+                        selected_sankey_scenario
+                    )
+                    
+                    st.plotly_chart(state_fig, use_container_width=True, key=f"sankey_{state}")
+                    
+                    # Show summary for this state
+                    with st.expander(f"📊 {state} Flow Summary"):
+                        state_summary = state_sankey_data.copy()
+                        state_summary["total_area"] = state_summary["total_area"].map(lambda x: f"{x:,.0f}")
+                        state_summary.columns = ["From Land Use", "To Land Use", "Total Acres Converted"]
+                        state_summary = state_summary.sort_values("Total Acres Converted", ascending=False)
+                        st.dataframe(state_summary, use_container_width=True)
+                else:
+                    st.info(f"No significant transitions found for {state} with current filters.")
+        else:
+            st.info("Please select at least one state to display diagrams.")
+
+# ---- URBANIZATION TRENDS TAB ----
+with tab4:
     st.header("🏙️ Where is Urban Development Rate Highest?")
     
     # Get county transitions data 
@@ -407,31 +627,6 @@ with tab3:
     selected_scenario = 'ensemble_overall'  # Ensemble Projection
     selected_scenario_display = 'Ensemble Projection'
     analysis_level = "State"
-    
-    # 1. NATIONAL SANKEY DIAGRAM
-    st.subheader("🌊 National Land Use Transitions to Urban")
-    
-    # Get transitions to urban data from county-level data
-    urban_transitions = county_df[
-        (county_df["to_category"] == "Urban") & 
-        (county_df["scenario_name"] == selected_scenario)
-    ]
-    
-    # Create Sankey diagram
-    sankey_fig = create_sankey_diagram(
-        urban_transitions, 
-        f"National Land Use Transitions to Urban Areas ({selected_scenario_display})",
-        selected_scenario
-    )
-    
-    st.plotly_chart(sankey_fig, use_container_width=True, key="urban_sankey")
-    
-    with st.expander("📊 Show National Transitions Data"):
-        # Show aggregated transition data
-        transition_summary = urban_transitions.groupby(["from_category", "to_category"])["total_area"].sum().reset_index()
-        transition_summary["total_area"] = transition_summary["total_area"].map(lambda x: f"{x:,.0f}")
-        transition_summary.columns = ["From Land Use", "To Land Use", "Total Acres Converted"]
-        st.dataframe(transition_summary)
     
     # Filter data based on selections
     filtered_data = urban_counties_df[urban_counties_df["scenario_name"] == selected_scenario]
@@ -471,7 +666,7 @@ with tab3:
     # Sort by total area
     urban_analysis = urban_analysis.sort_values("total_acres", ascending=False)
     
-    # 2. TOP COUNTIES/STATES TEMPORAL TRENDS
+    # 1. TOP COUNTIES/STATES TEMPORAL TRENDS
     st.subheader(f"📈 Urban Development Trends: Top {analysis_level}s ({selected_scenario_display})")
     
     # Get top locations for temporal analysis
@@ -580,7 +775,7 @@ with tab3:
     else:
         st.warning("No data available for the selected criteria.")
     
-    # 3. SUMMARY STATISTICS AND DATA TABLE
+    # 2. SUMMARY STATISTICS AND DATA TABLE
     st.subheader("📊 Summary Statistics")
     col1, col2, col3, col4 = st.columns(4)
     
@@ -627,7 +822,7 @@ with tab3:
     # Show data with search/filter capability
     st.dataframe(display_data, use_container_width=True)
     
-    # 4. DOWNLOAD FUNCTIONALITY
+    # 3. DOWNLOAD FUNCTIONALITY
     st.subheader("💾 Download Analysis Results")
     
     # Prepare download data (with original numeric values)
@@ -664,7 +859,7 @@ with tab3:
         )
 
 # ---- FOREST TRANSITIONS TAB ----
-with tab4:
+with tab5:
     st.header("🌲 Where is Forest Loss Rate Highest?")
     
     # Get county transitions data 
@@ -697,31 +892,6 @@ with tab4:
     selected_destination = st.selectbox("Forest Converted To", 
                                       options=["All Destinations"] + destinations, 
                                       key="forest_destination")
-    
-    # 1. NATIONAL SANKEY DIAGRAM
-    st.subheader("🌊 National Forest Land Transitions")
-    
-    # Get transitions from forest data from county-level data
-    forest_transitions = county_df[
-        (county_df["from_category"] == "Forest") & 
-        (county_df["scenario_name"] == selected_scenario)
-    ]
-    
-    # Create Sankey diagram
-    sankey_fig = create_sankey_diagram(
-        forest_transitions, 
-        f"National Forest Land Transitions ({selected_scenario_display})",
-        selected_scenario
-    )
-    
-    st.plotly_chart(sankey_fig, use_container_width=True, key="forest_sankey")
-    
-    with st.expander("📊 Show National Forest Transitions Data"):
-        # Show aggregated transition data
-        transition_summary = forest_transitions.groupby(["from_category", "to_category"])["total_area"].sum().reset_index()
-        transition_summary["total_area"] = transition_summary["total_area"].map(lambda x: f"{x:,.0f}")
-        transition_summary.columns = ["From Land Use", "To Land Use", "Total Acres Converted"]
-        st.dataframe(transition_summary)
     
     # Filter data based on selections
     filtered_data = forest_counties_df[forest_counties_df["scenario_name"] == selected_scenario]
@@ -757,7 +927,7 @@ with tab4:
     # Sort by total area
     forest_analysis = forest_analysis.sort_values("total_acres", ascending=False)
     
-    # 2. TOP COUNTIES/STATES TEMPORAL TRENDS
+    # 1. TOP COUNTIES/STATES TEMPORAL TRENDS
     destination_text = f" (converted to {selected_destination})" if selected_destination != "All Destinations" else ""
     st.subheader(f"📈 Forest Loss Trends: Top {analysis_level}s ({selected_scenario_display}){destination_text}")
     
@@ -951,7 +1121,7 @@ with tab4:
         )
 
 # ---- AGRICULTURAL TRANSITIONS TAB ----
-with tab5:
+with tab6:
     st.header("🌾 Where is Agricultural Land Loss Rate Highest?")
     
     # Get county transitions data 
@@ -995,32 +1165,6 @@ with tab5:
                                           options=["All Destinations"] + destinations, 
                                           key="ag_destination")
     
-    # 1. NATIONAL SANKEY DIAGRAM
-    st.subheader("🌊 National Agricultural Land Transitions")
-    
-    # Get agricultural transitions data from county-level data
-    ag_transitions = ag_counties_df[ag_counties_df["scenario_name"] == selected_scenario]
-    
-    # Apply source filter if specified
-    if selected_source != "Both Cropland & Pasture":
-        ag_transitions = ag_transitions[ag_transitions["from_category"] == selected_source]
-    
-    # Create Sankey diagram
-    sankey_fig = create_sankey_diagram(
-        ag_transitions, 
-        f"National Agricultural Land Transitions ({selected_scenario_display})",
-        selected_scenario
-    )
-    
-    st.plotly_chart(sankey_fig, use_container_width=True, key="ag_sankey")
-    
-    with st.expander("📊 Show National Agricultural Transitions Data"):
-        # Show aggregated transition data
-        transition_summary = ag_transitions.groupby(["from_category", "to_category"])["total_area"].sum().reset_index()
-        transition_summary["total_area"] = transition_summary["total_area"].map(lambda x: f"{x:,.0f}")
-        transition_summary.columns = ["From Land Use", "To Land Use", "Total Acres Converted"]
-        st.dataframe(transition_summary)
-    
     # Filter data based on selections
     filtered_data = ag_counties_df[ag_counties_df["scenario_name"] == selected_scenario]
     if selected_source != "Both Cropland & Pasture":
@@ -1057,7 +1201,7 @@ with tab5:
     # Sort by total area
     ag_analysis = ag_analysis.sort_values("total_acres", ascending=False)
     
-    # 2. TOP COUNTIES/STATES TEMPORAL TRENDS
+    # 1. TOP COUNTIES/STATES TEMPORAL TRENDS
     source_text = f" ({selected_source})" if selected_source != "Both Cropland & Pasture" else " (Cropland + Pasture)"
     destination_text = f" (converted to {selected_destination})" if selected_destination != "All Destinations" else ""
     st.subheader(f"📈 Agricultural Land Loss Trends: Top {analysis_level}s ({selected_scenario_display}){source_text}{destination_text}")
@@ -1170,7 +1314,7 @@ with tab5:
     else:
         st.warning("No data available for the selected criteria.")
     
-    # 3. SUMMARY STATISTICS AND DATA TABLE
+    # 2. SUMMARY STATISTICS AND DATA TABLE
     st.subheader("📊 Summary Statistics")
     col1, col2, col3, col4 = st.columns(4)
     
@@ -1215,7 +1359,7 @@ with tab5:
     # Show data with search/filter capability
     st.dataframe(display_data, use_container_width=True)
     
-    # 4. DOWNLOAD FUNCTIONALITY
+    # 3. DOWNLOAD FUNCTIONALITY
     st.subheader("💾 Download Analysis Results")
     
     # Prepare download data (with original numeric values)
@@ -1254,7 +1398,7 @@ with tab5:
         )
 
 # ---- STATE MAP TAB ----
-with tab6:
+with tab7:
     st.header("State-Level Land Use Change Map")
     
     # Get county transitions data
