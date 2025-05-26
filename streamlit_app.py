@@ -2,6 +2,7 @@ import os
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
+import numpy as np
 import json
 import folium
 from streamlit_folium import folium_static
@@ -729,10 +730,22 @@ with tab4:
             fig.patch.set_facecolor('#0E1117')  # Streamlit dark background
             ax.set_facecolor('#0E1117')
             
-            # Color palette for better distinction in dark mode
-            colors = plt.cm.Set1(range(len(temporal_data)))
+            # Sort temporal_data by percentage change (highest to lowest)
+            # Calculate final percentage change for each location to sort properly
+            location_pct_changes = []
+            for location_data in temporal_data:
+                # Get the final percentage change value (last time period)
+                final_pct_change = location_data["pct_change"].iloc[-1] if len(location_data) > 0 else 0
+                location_pct_changes.append((final_pct_change, location_data))
             
-            for i, location_data in enumerate(temporal_data):
+            # Sort by final percentage change (descending) and extract sorted data
+            location_pct_changes.sort(key=lambda x: x[0], reverse=True)
+            temporal_data_sorted = [item[1] for item in location_pct_changes]
+            
+            # Use viridis color palette for better distinction in dark mode
+            colors = plt.cm.viridis(np.linspace(0, 1, len(temporal_data_sorted)))
+            
+            for i, location_data in enumerate(temporal_data_sorted):
                 # Extract end years from decade names (e.g., "2020-2030" -> "2030")
                 end_years = [decade.split('-')[1] for decade in location_data["decade_name"]]
                 
@@ -780,13 +793,13 @@ with tab4:
     col1, col2, col3, col4 = st.columns(4)
     
     with col1:
-        st.metric("Total Areas Analyzed", len(urban_analysis))
+        st.metric("Total States", len(urban_analysis))
     with col2:
         st.metric("Total Acres Urbanized", f"{urban_analysis['total_acres'].sum():,.0f}")
     with col3:
-        st.metric("Average per Area", f"{urban_analysis['total_acres'].mean():,.0f}")
+        st.metric("Average per State", f"{urban_analysis['total_acres'].mean():,.0f}")
     with col4:
-        st.metric("Highest Single Area", f"{urban_analysis['total_acres'].max():,.0f}")
+        st.metric("Highest Single State", f"{urban_analysis['total_acres'].max():,.0f}")
     
     # Detailed data table
     st.subheader("📋 Detailed Analysis Results")
@@ -991,10 +1004,22 @@ with tab5:
             fig.patch.set_facecolor('#0E1117')  # Streamlit dark background
             ax.set_facecolor('#0E1117')
             
-            # Color palette for better distinction in dark mode
-            colors = plt.cm.Set1(range(len(temporal_data)))
+            # Sort temporal_data by percentage change (highest to lowest)
+            # Calculate final percentage change for each location to sort properly
+            location_pct_changes = []
+            for location_data in temporal_data:
+                # Get the final percentage change value (last time period)
+                final_pct_change = location_data["pct_change"].iloc[-1] if len(location_data) > 0 else 0
+                location_pct_changes.append((final_pct_change, location_data))
             
-            for i, location_data in enumerate(temporal_data):
+            # Sort by final percentage change (descending) and extract sorted data
+            location_pct_changes.sort(key=lambda x: x[0], reverse=True)
+            temporal_data_sorted = [item[1] for item in location_pct_changes]
+            
+            # Use viridis color palette for better distinction in dark mode
+            colors = plt.cm.viridis(np.linspace(0, 1, len(temporal_data_sorted)))
+            
+            for i, location_data in enumerate(temporal_data_sorted):
                 # Extract end years from decade names (e.g., "2020-2030" -> "2030")
                 end_years = [decade.split('-')[1] for decade in location_data["decade_name"]]
                 
@@ -1043,13 +1068,13 @@ with tab5:
     col1, col2, col3, col4 = st.columns(4)
     
     with col1:
-        st.metric("Total Areas Analyzed", len(forest_analysis))
+        st.metric("Total States", len(forest_analysis))
     with col2:
-        st.metric("Total Forest Acres Lost", f"{forest_analysis['total_acres'].sum():,.0f}")
+        st.metric("Total Forest Acres Transitioned", f"{forest_analysis['total_acres'].sum():,.0f}")
     with col3:
-        st.metric("Average per Area", f"{forest_analysis['total_acres'].mean():,.0f}")
+        st.metric("Average per State", f"{forest_analysis['total_acres'].mean():,.0f}")
     with col4:
-        st.metric("Highest Single Area", f"{forest_analysis['total_acres'].max():,.0f}")
+        st.metric("Highest Single State", f"{forest_analysis['total_acres'].max():,.0f}")
     
     # Detailed data table
     st.subheader("📋 Detailed Analysis Results")
@@ -1062,10 +1087,10 @@ with tab5:
     
     # Rename columns for clarity
     column_mapping = {
-        "total_acres": "Total Forest Acres Lost",
+        "total_acres": "Total Forest Acres Transitioned",
         "avg_acres_per_decade": "Average Acres per Decade",
         "num_decades": "Decades Covered",
-        "forest_loss_rate": "Forest Loss Rate (acres/decade)"
+        "forest_loss_rate": "Forest Transition Rate (acres/decade)"
     }
     
     if analysis_level == "County":
@@ -1266,10 +1291,22 @@ with tab6:
             fig.patch.set_facecolor('#0E1117')  # Streamlit dark background
             ax.set_facecolor('#0E1117')
             
-            # Color palette for better distinction in dark mode
-            colors = plt.cm.Set1(range(len(temporal_data)))
+            # Sort temporal_data by percentage change (highest to lowest)
+            # Calculate final percentage change for each location to sort properly
+            location_pct_changes = []
+            for location_data in temporal_data:
+                # Get the final percentage change value (last time period)
+                final_pct_change = location_data["pct_change"].iloc[-1] if len(location_data) > 0 else 0
+                location_pct_changes.append((final_pct_change, location_data))
             
-            for i, location_data in enumerate(temporal_data):
+            # Sort by final percentage change (descending) and extract sorted data
+            location_pct_changes.sort(key=lambda x: x[0], reverse=True)
+            temporal_data_sorted = [item[1] for item in location_pct_changes]
+            
+            # Use viridis color palette for better distinction in dark mode
+            colors = plt.cm.viridis(np.linspace(0, 1, len(temporal_data_sorted)))
+            
+            for i, location_data in enumerate(temporal_data_sorted):
                 # Extract end years from decade names (e.g., "2020-2030" -> "2030")
                 end_years = [decade.split('-')[1] for decade in location_data["decade_name"]]
                 
@@ -1319,13 +1356,13 @@ with tab6:
     col1, col2, col3, col4 = st.columns(4)
     
     with col1:
-        st.metric("Total Areas Analyzed", len(ag_analysis))
+        st.metric("Total States", len(ag_analysis))
     with col2:
-        st.metric("Total Agricultural Acres Lost", f"{ag_analysis['total_acres'].sum():,.0f}")
+        st.metric("Total Agricultural Acres Transitioned", f"{ag_analysis['total_acres'].sum():,.0f}")
     with col3:
-        st.metric("Average per Area", f"{ag_analysis['total_acres'].mean():,.0f}")
+        st.metric("Average per State", f"{ag_analysis['total_acres'].mean():,.0f}")
     with col4:
-        st.metric("Highest Single Area", f"{ag_analysis['total_acres'].max():,.0f}")
+        st.metric("Highest Single State", f"{ag_analysis['total_acres'].max():,.0f}")
     
     # Detailed data table
     st.subheader("📋 Detailed Analysis Results")
@@ -1338,10 +1375,10 @@ with tab6:
     
     # Rename columns for clarity
     column_mapping = {
-        "total_acres": "Total Agricultural Acres Lost",
+        "total_acres": "Total Agricultural Acres Transitioned",
         "avg_acres_per_decade": "Average Acres per Decade",
         "num_decades": "Decades Covered",
-        "ag_loss_rate": "Agricultural Loss Rate (acres/decade)"
+        "ag_loss_rate": "Agricultural Transition Rate (acres/decade)"
     }
     
     if analysis_level == "County":
