@@ -8,6 +8,8 @@ import folium
 from streamlit_folium import folium_static
 import geopandas as gpd
 import plotly.graph_objects as go
+import requests
+import tempfile
 
 # Set page configuration
 st.set_page_config(
@@ -75,15 +77,42 @@ def load_parquet_data():
     return data
 
 # Load US states GeoJSON
-@st.cache_data(ttl=3600)  # Cache for 1 hour, helps with SSL issues
+@st.cache_data(ttl=3600)  # Cache for 1 hour
 def load_us_states():
-    # Skip remote download due to SSL issues on macOS, use local fallback directly
+    """Load US states geographic data without any projection system dependencies"""
+    
+    # Method 1: Try to download remote GeoJSON and parse it directly
     try:
-        # Create states boundary from counties data
+        st.info("Downloading US states geographic data...")
+        
+        url = "https://raw.githubusercontent.com/python-visualization/folium/master/examples/data/us-states.json"
+        
+        # Download with SSL verification disabled
+        response = requests.get(url, verify=False)
+        response.raise_for_status()
+        
+        # Parse JSON directly - no GeoPandas needed for this step
+        import json
+        geojson_data = json.loads(response.text)
+        
+        st.success("✅ Downloaded US states data successfully.")
+        return geojson_data  # Return raw GeoJSON for Folium
+            
+    except Exception as e:
+        st.warning(f"Could not download remote states data: {e}")
+    
+    # Method 2: Try to read local counties and create states manually
+    try:
+        st.info("Creating states from local counties data...")
+        
         counties_path = "data/counties.geojson"
         if os.path.exists(counties_path):
-            counties = gpd.read_file(counties_path)
-            # Create a simple state FIPS to name mapping
+            # Read the file as plain JSON first
+            import json
+            with open(counties_path, 'r') as f:
+                counties_geojson = json.load(f)
+            
+            # Create state FIPS to name mapping
             state_fips_to_name = {
                 '01': 'Alabama', '02': 'Alaska', '04': 'Arizona', '05': 'Arkansas', '06': 'California',
                 '08': 'Colorado', '09': 'Connecticut', '10': 'Delaware', '11': 'District of Columbia',
@@ -98,29 +127,104 @@ def load_us_states():
                 '51': 'Virginia', '53': 'Washington', '54': 'West Virginia', '55': 'Wisconsin', '56': 'Wyoming'
             }
             
-            # Add state names to counties
-            counties['state_name'] = counties['STATE'].map(state_fips_to_name)
+            # Group counties by state and create simplified state boundaries
+            state_features = {}
+            for feature in counties_geojson['features']:
+                state_fips = feature['properties']['STATE']
+                state_name = state_fips_to_name.get(state_fips)
+                
+                if state_name:
+                    if state_name not in state_features:
+                        state_features[state_name] = {
+                            "type": "Feature",
+                            "properties": {"name": state_name},
+                            "geometry": {
+                                "type": "MultiPolygon",
+                                "coordinates": []
+                            }
+                        }
+                    
+                    # Add county geometry to state (simplified approach)
+                    geom = feature['geometry']
+                    if geom['type'] == 'Polygon':
+                        state_features[state_name]['geometry']['coordinates'].append(geom['coordinates'])
+                    elif geom['type'] == 'MultiPolygon':
+                        state_features[state_name]['geometry']['coordinates'].extend(geom['coordinates'])
             
-            # Dissolve counties by state to create state boundaries
-            if 'state_name' in counties.columns:
-                states = counties.dissolve(by='state_name').reset_index()
-                states = states.rename(columns={'state_name': 'name'})
-                st.info("Using local geographic data for state boundaries.")
-                return states
+            # Create final GeoJSON
+            states_geojson = {
+                "type": "FeatureCollection",
+                "features": list(state_features.values())
+            }
+            
+            st.success("✅ Created states from local counties data.")
+            return states_geojson
+            
     except Exception as e:
-        st.warning(f"Could not load local states data: {e}")
+        st.warning(f"Could not create states from counties: {e}")
     
-    # If local fallback fails, try remote as last resort
+    # Method 3: Create a minimal hardcoded states GeoJSON
     try:
-        st.info("Attempting to download remote geographic data...")
-        url = "https://raw.githubusercontent.com/python-visualization/folium/master/examples/data/us-states.json"
-        return gpd.read_file(url)
-    except Exception as e:
-        st.warning(f"Could not load remote states data: {e}")
+        st.info("Using minimal hardcoded states data...")
         
-        # Final fallback: return None and disable mapping
-        st.warning("Geographic mapping is disabled due to data loading issues.")
-        return None
+        # Create basic rectangular boundaries for major states
+        minimal_states = {
+            "type": "FeatureCollection",
+            "features": [
+                {
+                    "type": "Feature",
+                    "properties": {"name": "California"},
+                    "geometry": {
+                        "type": "Polygon",
+                        "coordinates": [[[-124.0, 42.0], [-114.0, 42.0], [-114.0, 32.0], [-124.0, 32.0], [-124.0, 42.0]]]
+                    }
+                },
+                {
+                    "type": "Feature",
+                    "properties": {"name": "Texas"},
+                    "geometry": {
+                        "type": "Polygon",
+                        "coordinates": [[[-106.0, 36.0], [-94.0, 36.0], [-94.0, 25.0], [-106.0, 25.0], [-106.0, 36.0]]]
+                    }
+                },
+                {
+                    "type": "Feature",
+                    "properties": {"name": "Florida"},
+                    "geometry": {
+                        "type": "Polygon",
+                        "coordinates": [[[-87.0, 31.0], [-80.0, 31.0], [-80.0, 24.0], [-87.0, 24.0], [-87.0, 31.0]]]
+                    }
+                },
+                {
+                    "type": "Feature",
+                    "properties": {"name": "New York"},
+                    "geometry": {
+                        "type": "Polygon",
+                        "coordinates": [[[-79.0, 45.0], [-71.0, 45.0], [-71.0, 40.0], [-79.0, 40.0], [-79.0, 45.0]]]
+                    }
+                },
+                {
+                    "type": "Feature",
+                    "properties": {"name": "Illinois"},
+                    "geometry": {
+                        "type": "Polygon",
+                        "coordinates": [[[-91.0, 42.5], [-87.0, 42.5], [-87.0, 37.0], [-91.0, 37.0], [-91.0, 42.5]]]
+                    }
+                }
+            ]
+        }
+        
+        st.info("✅ Using minimal geographic data (5 major states).")
+        st.warning("⚠️ Limited to 5 major states due to system issues.")
+        return minimal_states
+        
+    except Exception as e:
+        st.warning(f"Minimal approach failed: {e}")
+    
+    # Final fallback: return None to disable mapping
+    st.error("❌ Geographic mapping is disabled - all methods failed.")
+    st.info("The data table will still be available below.")
+    return None
 
 # Load RPA documentation if available
 @st.cache_data
@@ -241,8 +345,8 @@ def create_sankey_diagram(transitions_data, title, scenario_name):
 
 # Create choropleth map
 def create_state_map(state_data, title):
-    """Create a folium choropleth map of states"""
-    # Load GeoJSON of US states
+    """Create a folium choropleth map of states using raw GeoJSON"""
+    # Load GeoJSON of US states (now returns raw GeoJSON dict)
     states_geojson = load_us_states()
     
     # If states data couldn't be loaded, return None
@@ -253,28 +357,42 @@ def create_state_map(state_data, title):
     map_center = [39.8283, -98.5795]
     state_map = folium.Map(location=map_center, zoom_start=4, scrollWheelZoom=False)
     
-    # Create choropleth layer
-    choropleth = folium.Choropleth(
-        geo_data=states_geojson,
-        name="choropleth",
-        data=state_data,
-        columns=["name", "total_area"],
-        key_on="feature.properties.name",
-        fill_color="YlOrRd",
-        fill_opacity=0.7,
-        line_opacity=0.2,
-        legend_name="Acres Changed",
-        highlight=True
-    ).add_to(state_map)
-    
-    # Add tooltips
-    choropleth.geojson.add_child(
-        folium.features.GeoJsonTooltip(
-            fields=["name"],
-            aliases=["State:"],
-            style=("background-color: white; color: #333333; font-family: arial; font-size: 12px; padding: 10px;")
+    try:
+        # Create choropleth layer using raw GeoJSON
+        choropleth = folium.Choropleth(
+            geo_data=states_geojson,  # Raw GeoJSON dict
+            name="choropleth",
+            data=state_data,
+            columns=["name", "total_area"],
+            key_on="feature.properties.name",
+            fill_color="YlOrRd",
+            fill_opacity=0.7,
+            line_opacity=0.2,
+            legend_name="Acres Changed",
+            highlight=True
+        ).add_to(state_map)
+        
+        # Add tooltips
+        choropleth.geojson.add_child(
+            folium.features.GeoJsonTooltip(
+                fields=["name"],
+                aliases=["State:"],
+                style=("background-color: white; color: #333333; font-family: arial; font-size: 12px; padding: 10px;")
+            )
         )
-    )
+        
+    except Exception as e:
+        st.warning(f"Could not create choropleth layer: {e}")
+        # Add basic GeoJSON layer without data binding
+        folium.GeoJson(
+            states_geojson,
+            style_function=lambda feature: {
+                'fillColor': '#ffff00',
+                'color': 'black',
+                'weight': 2,
+                'fillOpacity': 0.7,
+            }
+        ).add_to(state_map)
     
     # Add title as a caption
     title_html = f'''
