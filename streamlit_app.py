@@ -10,6 +10,7 @@ import geopandas as gpd
 import plotly.graph_objects as go
 import requests
 import tempfile
+import duckdb
 
 # Set page configuration
 st.set_page_config(
@@ -457,13 +458,152 @@ with tab1:
 with tab2:
     st.header("Data Explorer")
     
-    # Select dataset to explore
-    dataset_options = list(data.keys())
-    selected_dataset = st.selectbox("Select Dataset", options=dataset_options)
+    # Load data using database views for spatial levels
+    @st.cache_data
+    def load_spatial_data(spatial_level, scenario_filter=None, geographic_filter=None, filter_value=None):
+        """Load data from database views based on spatial level, scenario, and optional geographic filter."""
+        import duckdb
+        
+        db_path = "data/database/rpa.db"
+        
+        try:
+            conn = duckdb.connect(db_path)
+            
+            # Map spatial levels to view names
+            view_mapping = {
+                "County": '"County-Level Land Use Transitions"',
+                "State": '"State-Level Land Use Transitions"',
+                "Region": '"Region-Level Land Use Transitions"',
+                "Subregion": '"Subregion-Level Land Use Transitions"', 
+                "National": '"National-Level Land Use Transitions"'
+            }
+            
+            view_name = view_mapping.get(spatial_level)
+            if view_name:
+                # Build the query with optional filtering
+                query = f'SELECT * FROM {view_name}'
+                
+                # Add filters
+                conditions = []
+                
+                # Add scenario filter if specified
+                if scenario_filter and scenario_filter != "Overall Mean":
+                    conditions.append(f"scenario_name = '{scenario_filter}'")
+                
+                # Add geographic filter if specified
+                if geographic_filter and filter_value and filter_value != "All":
+                    if geographic_filter == "state":
+                        conditions.append(f"state_name = '{filter_value}'")
+                    elif geographic_filter == "region":
+                        conditions.append(f"region = '{filter_value}'")
+                    elif geographic_filter == "subregion":
+                        conditions.append(f"subregion = '{filter_value}'")
+                
+                # Add WHERE clause if we have conditions
+                if conditions:
+                    query += " WHERE " + " AND ".join(conditions)
+                
+                df = conn.execute(query).df()
+                conn.close()
+                return df
+            else:
+                conn.close()
+                return None
+                
+        except Exception as e:
+            st.error(f"Error loading {spatial_level} data: {e}")
+            return None
     
-    # Show dataset
-    st.subheader(f"Exploring: {selected_dataset}")
-    selected_df = data[selected_dataset]
+    @st.cache_data
+    def get_geographic_options():
+        """Get available states, regions, and subregions for filtering."""
+        import duckdb
+        
+        db_path = "data/database/rpa.db"
+        
+        try:
+            conn = duckdb.connect(db_path)
+            
+            # Get unique values for filtering
+            states = conn.execute('SELECT DISTINCT state_name FROM "County-Level Land Use Transitions" ORDER BY state_name').fetchall()
+            regions = conn.execute('SELECT DISTINCT region FROM "County-Level Land Use Transitions" WHERE region IS NOT NULL ORDER BY region').fetchall()
+            subregions = conn.execute('SELECT DISTINCT subregion FROM "County-Level Land Use Transitions" WHERE subregion IS NOT NULL ORDER BY subregion').fetchall()
+            
+            conn.close()
+            
+            return {
+                'states': [row[0] for row in states],
+                'regions': [row[0] for row in regions],
+                'subregions': [row[0] for row in subregions]
+            }
+        except Exception as e:
+            st.error(f"Error loading geographic options: {e}")
+            return {'states': [], 'regions': [], 'subregions': []}
+    
+    # Select RPA scenario to explore
+    scenario_descriptions = {
+        'Overall Mean': 'Ensemble Projection (Average of All Scenarios)',
+        'ensemble_LM': 'Sustainable Development (RCP4.5-SSP1)',
+        'ensemble_HL': 'Climate Challenge (RCP8.5-SSP3)', 
+        'ensemble_HM': 'Moderate Growth (RCP8.5-SSP2)',
+        'ensemble_HH': 'High Development (RCP8.5-SSP5)'
+    }
+    
+    scenario_options = list(scenario_descriptions.keys())
+    selected_scenario_display = st.selectbox("Select RPA Scenario", options=scenario_options)
+    
+    # Map display name back to database scenario name
+    if selected_scenario_display == 'Overall Mean':
+        selected_scenario = 'ensemble_overall'
+    else:
+        selected_scenario = selected_scenario_display
+    
+    # Add spatial level selector
+    spatial_levels = ["County", "Subregion", "Region", "State", "National"]
+    selected_spatial_level = st.selectbox("Select Spatial Level", options=spatial_levels)
+    
+    # Add geographic filtering for County level
+    geographic_filter = None
+    filter_value = None
+    
+    if selected_spatial_level == "County":
+        st.subheader("🌍 Geographic Filter")
+        
+        # Get available options
+        geo_options = get_geographic_options()
+        
+        # Filter type selection
+        filter_options = ["All Counties", "Counties by State", "Counties by Region", "Counties by Subregion"]
+        selected_filter = st.selectbox("Show:", options=filter_options)
+        
+        if selected_filter == "Counties by State":
+            geographic_filter = "state"
+            filter_value = st.selectbox("Select State:", options=["All"] + geo_options['states'])
+        elif selected_filter == "Counties by Region":
+            geographic_filter = "region"
+            filter_value = st.selectbox("Select Region:", options=["All"] + geo_options['regions'])
+        elif selected_filter == "Counties by Subregion":
+            geographic_filter = "subregion"
+            filter_value = st.selectbox("Select Subregion:", options=["All"] + geo_options['subregions'])
+    
+    # Load data from database views
+    selected_df = load_spatial_data(selected_spatial_level, selected_scenario, geographic_filter, filter_value)
+    
+    if selected_df is not None:
+        # Successfully loaded from database views
+        scenario_text = scenario_descriptions[selected_scenario_display]
+        
+        if selected_spatial_level == "County" and geographic_filter and filter_value and filter_value != "All":
+            st.subheader(f"Exploring: Counties in {filter_value} ({geographic_filter.title()})")
+            st.info(f"📊 Showing {len(selected_df):,} rows | Scenario: {scenario_text}")
+        else:
+            st.subheader(f"Exploring: {selected_spatial_level} Level Land Use Transitions")
+            st.info(f"📊 Scenario: {scenario_text} | Spatial Level: {selected_spatial_level}")
+    
+    else:
+        # Fallback message
+        st.error("Unable to load data from database views. Please check that the database is available.")
+        st.stop()
     
     # Add info message about acres conversion
     st.info("Note: All area values are displayed in acres.")
@@ -494,11 +634,48 @@ with tab2:
     st.dataframe(preview_df)
     
     # Allow download
-    csv = selected_df.to_csv(index=False).encode('utf-8')
+    # Prepare download data with better column ordering
+    download_df = selected_df.copy()
+    
+    # Reorder columns for better readability, putting identifiers first
+    if selected_spatial_level == "County":
+        # For county data, ensure FIPS code is first, followed by names
+        id_columns = ["fips_code", "county_name", "state_name"]
+        if "region" in download_df.columns:
+            id_columns.append("region")
+        if "subregion" in download_df.columns:
+            id_columns.append("subregion")
+    elif selected_spatial_level == "State":
+        id_columns = ["state_name"]
+    elif selected_spatial_level == "Region":
+        id_columns = ["region"]
+    elif selected_spatial_level == "Subregion":
+        id_columns = ["subregion"]
+    else:
+        id_columns = []
+    
+    # Get data columns (metrics)
+    data_columns = ["scenario_name", "decade_name", "from_category", "to_category", "total_area"]
+    
+    # Reorder all columns: IDs -> Data -> Remaining
+    available_id_cols = [col for col in id_columns if col in download_df.columns]
+    available_data_cols = [col for col in data_columns if col in download_df.columns]
+    remaining_cols = [col for col in download_df.columns if col not in available_id_cols + available_data_cols]
+    
+    # Final column order
+    final_column_order = available_id_cols + available_data_cols + remaining_cols
+    download_df = download_df[final_column_order]
+    
+    # Show info about FIPS codes if included
+    if "fips_code" in download_df.columns:
+        st.info("💡 Downloads include FIPS codes for easy integration with mapping and other datasets")
+    
+    csv = download_df.to_csv(index=False).encode('utf-8')
+    scenario_name = selected_scenario_display.replace(' ', '_').replace('(', '').replace(')', '')
     st.download_button(
         label="Download data as CSV",
         data=csv,
-        file_name=f'{selected_dataset}.csv',
+        file_name=f'{scenario_name}_{selected_spatial_level}_level.csv',
         mime='text/csv',
     )
 
@@ -726,7 +903,87 @@ with tab3:
 with tab4:
     st.header("🏙️ Where is Urban Development Rate Highest?")
     
-    # Get county transitions data 
+    # Load data using database views for spatial levels (reuse function from Data Explorer)
+    @st.cache_data
+    def load_urbanization_data(spatial_level, scenario_filter=None):
+        """Load urbanization data from database views based on spatial level and scenario."""
+        import duckdb
+        
+        db_path = "data/database/rpa.db"
+        
+        try:
+            conn = duckdb.connect(db_path)
+            
+            # Map spatial levels to view names
+            view_mapping = {
+                "County": '"County-Level Land Use Transitions"',
+                "State": '"State-Level Land Use Transitions"',
+                "Region": '"Region-Level Land Use Transitions"',
+                "Subregion": '"Subregion-Level Land Use Transitions"', 
+                "National": '"National-Level Land Use Transitions"'
+            }
+            
+            view_name = view_mapping.get(spatial_level)
+            if view_name:
+                # Build the query with filters for urban transitions
+                query = f'SELECT * FROM {view_name} WHERE to_category = \'Urban\''
+                
+                # Add scenario filter if specified
+                if scenario_filter and scenario_filter != "Overall Mean":
+                    query += f" AND scenario_name = '{scenario_filter}'"
+                
+                df = conn.execute(query).df()
+                conn.close()
+                return df
+            else:
+                conn.close()
+                return None
+                
+        except Exception as e:
+            st.error(f"Error loading {spatial_level} urbanization data: {e}")
+            return None
+    
+    # Analysis controls
+    st.subheader("Analysis Controls")
+    
+    col1, col2 = st.columns([1, 1])
+    
+    with col1:
+        # Add scenario selector
+        scenario_descriptions = {
+            'Overall Mean': 'Ensemble Projection (Average of All Scenarios)',
+            'ensemble_LM': 'Sustainable Development (RCP4.5-SSP1)',
+            'ensemble_HL': 'Climate Challenge (RCP8.5-SSP3)', 
+            'ensemble_HM': 'Moderate Growth (RCP8.5-SSP2)',
+            'ensemble_HH': 'High Development (RCP8.5-SSP5)'
+        }
+        
+        scenario_options = list(scenario_descriptions.keys())
+        selected_scenario_display = st.selectbox("Select RPA Scenario", options=scenario_options, key="urban_scenario")
+        
+        # Map display name back to database scenario name
+        if selected_scenario_display == 'Overall Mean':
+            selected_scenario = 'ensemble_overall'
+        else:
+            selected_scenario = selected_scenario_display
+    
+    with col2:
+        # Add spatial level selector for data extraction
+        spatial_levels = ["County", "State", "Subregion", "Region", "National"]
+        selected_spatial_level = st.selectbox("Data Extraction Level", options=spatial_levels, 
+                                            index=1,  # Default to State
+                                            key="urban_spatial",
+                                            help="Choose spatial level for data download and detailed analysis")
+    
+    # Load data at selected spatial level
+    spatial_data = load_urbanization_data(selected_spatial_level, selected_scenario)
+    
+    if spatial_data is None:
+        st.error("Unable to load urbanization data from database views.")
+        st.stop()
+    
+    # For visualization, always use state-level aggregation for readability
+    # Get county transitions data for visualization
     county_df = data["County-Level Land Use Transitions"]
     
     # Filter for only the 5 key RPA scenarios
@@ -742,103 +999,54 @@ with tab4:
     # Filter for urban transitions only (where to_category is 'Urban')
     urban_counties_df = county_df[county_df["to_category"] == "Urban"]
     
-    # Fixed settings - no user controls needed
-    selected_scenario = 'ensemble_overall'  # Ensemble Projection
-    selected_scenario_display = 'Ensemble Projection'
-    analysis_level = "State"
+    # Filter data for visualization (always use state level for charts)
+    viz_data = urban_counties_df[urban_counties_df["scenario_name"] == selected_scenario]
     
-    # Filter data based on selections
-    filtered_data = urban_counties_df[urban_counties_df["scenario_name"] == selected_scenario]
-    
-    # Aggregate data based on analysis level
-    if analysis_level == "County":
-        # Check if fips_code column exists, if not use only county and state
-        if "fips_code" in filtered_data.columns:
-            group_cols = ["county_name", "state_name", "fips_code"]
-        else:
-            group_cols = ["county_name", "state_name"]
-        location_col = "county_name"
-        location_display = lambda row: f"{row['county_name']}, {row['state_name']}"
-    elif analysis_level == "State":
-        group_cols = ["state_name"]
-        location_col = "state_name"
-        location_display = lambda row: row['state_name']
-    else:  # Region - fallback to state since region_name doesn't exist
-        group_cols = ["state_name"]
-        location_col = "state_name"
-        location_display = lambda row: row['state_name']
-    
-    # Calculate urbanization metrics
-    urban_analysis = filtered_data.groupby(group_cols).agg({
+    # Aggregate visualization data to state level for charts
+    viz_analysis = viz_data.groupby(["state_name"]).agg({
         "total_area": ["sum", "mean"],
         "decade_name": "nunique"
     }).round(2)
     
-    # Flatten column names
-    urban_analysis.columns = ["total_acres", "avg_acres_per_decade", "num_decades"]
-    urban_analysis = urban_analysis.reset_index()
+    # Flatten column names for visualization
+    viz_analysis.columns = ["total_acres", "avg_acres_per_decade", "num_decades"]
+    viz_analysis = viz_analysis.reset_index()
     
-    # Calculate urbanization rate (acres per decade)
-    urban_analysis["urbanization_rate"] = (urban_analysis["total_acres"] / 
-                                         urban_analysis["num_decades"]).round(2)
+    # Calculate urbanization rate for visualization
+    viz_analysis["urbanization_rate"] = (viz_analysis["total_acres"] / 
+                                       viz_analysis["num_decades"]).round(2)
     
-    # Sort by total area
-    urban_analysis = urban_analysis.sort_values("total_acres", ascending=False)
+    # Sort by total area for visualization
+    viz_analysis = viz_analysis.sort_values("total_acres", ascending=False)
     
-    # 1. TOP COUNTIES/STATES TEMPORAL TRENDS
-    st.subheader(f"📈 Urban Development Trends: Top {analysis_level}s ({selected_scenario_display})")
+    # 1. TOP STATES TEMPORAL TRENDS (for visualization)
+    st.subheader(f"📈 Urban Development Trends: Top States ({scenario_descriptions[selected_scenario_display]})")
+    st.info(f"📊 Visualization shows state-level data | Data extraction/download uses {selected_spatial_level} level")
     
-    # Get top locations for temporal analysis
-    top_10 = urban_analysis.head(10).copy()
+    # Get top locations for temporal analysis (always states for visualization)
+    top_10_viz = viz_analysis.head(10).copy()
+    top_10_viz["location"] = top_10_viz["state_name"]
     
-    # Create location labels for display
-    if analysis_level == "County":
-        top_10["location"] = top_10.apply(lambda row: f"{row['county_name']}, {row['state_name']}", axis=1)
-    else:
-        top_10["location"] = top_10[location_col]
-    
-    # Create temporal visualization for top counties/states
-    if len(top_10) > 0:
-        # Get temporal data for top locations
-        if analysis_level == "County":
-            top_locations = top_10[["county_name", "state_name"]].head(10)  # Top 10
-            temporal_data = []
-            for _, row in top_locations.iterrows():
-                location_data = filtered_data[
-                    (filtered_data["county_name"] == row["county_name"]) & 
-                    (filtered_data["state_name"] == row["state_name"])
-                ]
-                if len(location_data) > 0:
-                    location_summary = location_data.groupby("decade_name")["total_area"].sum().reset_index()
-                    location_summary["location"] = f"{row['county_name']}, {row['state_name']}"
-                    # Calculate percentage change from first period
-                    if len(location_summary) > 1:
-                        baseline = location_summary["total_area"].iloc[0]
-                        if baseline > 0:
-                            location_summary["pct_change"] = ((location_summary["total_area"] - baseline) / baseline * 100).round(1)
-                        else:
-                            location_summary["pct_change"] = 0
+    # Create temporal visualization for top states
+    if len(top_10_viz) > 0:
+        # Get temporal data for top states
+        top_states = top_10_viz[["state_name"]].head(10)  # Top 10
+        temporal_data = []
+        for _, row in top_states.iterrows():
+            state_data = viz_data[viz_data["state_name"] == row["state_name"]]
+            if len(state_data) > 0:
+                state_summary = state_data.groupby("decade_name")["total_area"].sum().reset_index()
+                state_summary["location"] = row["state_name"]
+                # Calculate percentage change from first period
+                if len(state_summary) > 1:
+                    baseline = state_summary["total_area"].iloc[0]
+                    if baseline > 0:
+                        state_summary["pct_change"] = ((state_summary["total_area"] - baseline) / baseline * 100).round(1)
                     else:
-                        location_summary["pct_change"] = 0
-                    temporal_data.append(location_summary)
-        else:  # State level
-            top_locations = top_10[["state_name"]].head(10)  # Top 10
-            temporal_data = []
-            for _, row in top_locations.iterrows():
-                location_data = filtered_data[filtered_data["state_name"] == row["state_name"]]
-                if len(location_data) > 0:
-                    location_summary = location_data.groupby("decade_name")["total_area"].sum().reset_index()
-                    location_summary["location"] = row["state_name"]
-                    # Calculate percentage change from first period
-                    if len(location_summary) > 1:
-                        baseline = location_summary["total_area"].iloc[0]
-                        if baseline > 0:
-                            location_summary["pct_change"] = ((location_summary["total_area"] - baseline) / baseline * 100).round(1)
-                        else:
-                            location_summary["pct_change"] = 0
-                    else:
-                        location_summary["pct_change"] = 0
-                    temporal_data.append(location_summary)
+                        state_summary["pct_change"] = 0
+                else:
+                    state_summary["pct_change"] = 0
+                temporal_data.append(state_summary)
         
         # Create publication-quality line chart
         if temporal_data:
@@ -849,10 +1057,8 @@ with tab4:
             ax.set_facecolor('#0E1117')
             
             # Sort temporal_data by percentage change (highest to lowest)
-            # Calculate final percentage change for each location to sort properly
             location_pct_changes = []
             for location_data in temporal_data:
-                # Get the final percentage change value (last time period)
                 final_pct_change = location_data["pct_change"].iloc[-1] if len(location_data) > 0 else 0
                 location_pct_changes.append((final_pct_change, location_data))
             
@@ -876,7 +1082,7 @@ with tab4:
             # Styling for dark mode
             ax.set_xlabel("Year", fontsize=14, fontweight='bold', color='white')
             ax.set_ylabel("Percentage Change from Baseline (%)", fontsize=14, fontweight='bold', color='white')
-            ax.set_title(f"Urban Development Trends: Top 10 {analysis_level}s ({selected_scenario_display})", 
+            ax.set_title(f"Urban Development Trends: Top 10 States ({scenario_descriptions[selected_scenario_display]})", 
                         fontsize=16, fontweight='bold', pad=20, color='white')
             
             # Legend at bottom, horizontal
@@ -906,88 +1112,233 @@ with tab4:
     else:
         st.warning("No data available for the selected criteria.")
     
-    # 2. SUMMARY STATISTICS AND DATA TABLE
-    st.subheader("📊 Summary Statistics")
-    col1, col2, col3, col4 = st.columns(4)
+    # 2. SUMMARY STATISTICS FOR SELECTED SPATIAL LEVEL
+    st.subheader(f"📊 Summary Statistics ({selected_spatial_level} Level)")
     
-    with col1:
-        st.metric("Total States", len(urban_analysis))
-    with col2:
-        st.metric("Total Acres Urbanized", f"{urban_analysis['total_acres'].sum():,.0f}")
-    with col3:
-        st.metric("Average per State", f"{urban_analysis['total_acres'].mean():,.0f}")
-    with col4:
-        st.metric("Highest Single State", f"{urban_analysis['total_acres'].max():,.0f}")
+    # Calculate metrics for the selected spatial level
+    if selected_spatial_level == "County":
+        group_cols = ["county_name", "state_name"]
+        location_col = "county_name"
+        unit_name = "Counties"
+    elif selected_spatial_level == "State":
+        group_cols = ["state_name"]
+        location_col = "state_name"
+        unit_name = "States"
+    elif selected_spatial_level == "Region":
+        group_cols = ["region"]
+        location_col = "region"
+        unit_name = "Regions"
+    elif selected_spatial_level == "Subregion":
+        group_cols = ["subregion"]
+        location_col = "subregion"
+        unit_name = "Subregions"
+    else:  # National
+        group_cols = []
+        location_col = None
+        unit_name = "National"
     
-    # Detailed data table
-    st.subheader("📋 Detailed Analysis Results")
-    
-    # Format data for display
-    display_data = urban_analysis.copy()
-    display_data["total_acres"] = display_data["total_acres"].map(lambda x: f"{x:,.0f}")
-    display_data["avg_acres_per_decade"] = display_data["avg_acres_per_decade"].map(lambda x: f"{x:,.1f}")
-    display_data["urbanization_rate"] = display_data["urbanization_rate"].map(lambda x: f"{x:,.1f}")
-    
-    # Rename columns for clarity
-    column_mapping = {
-        "total_acres": "Total Acres Urbanized",
-        "avg_acres_per_decade": "Average Acres per Decade",
-        "num_decades": "Decades Covered",
-        "urbanization_rate": "Urbanization Rate (acres/decade)"
-    }
-    
-    if analysis_level == "County":
-        column_mapping.update({
-            "county_name": "County",
-            "state_name": "State"
-        })
-        if "fips_code" in display_data.columns:
-            column_mapping["fips_code"] = "FIPS Code"
-    elif analysis_level == "State":
-        column_mapping["state_name"] = "State"
+    # Aggregate data for selected spatial level
+    if group_cols:
+        spatial_analysis = spatial_data.groupby(group_cols).agg({
+            "total_area": ["sum", "mean"],
+            "decade_name": "nunique"
+        }).round(2)
+        
+        # Flatten column names
+        spatial_analysis.columns = ["total_acres", "avg_acres_per_decade", "num_decades"]
+        spatial_analysis = spatial_analysis.reset_index()
+        
+        # Calculate urbanization rate
+        spatial_analysis["urbanization_rate"] = (spatial_analysis["total_acres"] / 
+                                               spatial_analysis["num_decades"]).round(2)
+        
+        # Sort by total area
+        spatial_analysis = spatial_analysis.sort_values("total_acres", ascending=False)
     else:
-        column_mapping[location_col] = "Region"
+        # National level - simple aggregation
+        spatial_analysis = spatial_data.groupby("decade_name")["total_area"].sum().reset_index()
+        spatial_analysis["location"] = "United States"
     
-    display_data = display_data.rename(columns=column_mapping)
+    # Display summary metrics
+    if group_cols:
+        col1, col2, col3, col4 = st.columns(4)
+        
+        with col1:
+            st.metric(f"Total {unit_name}", len(spatial_analysis))
+        with col2:
+            st.metric("Total Acres Urbanized", f"{spatial_analysis['total_acres'].sum():,.0f}")
+        with col3:
+            st.metric(f"Average per {unit_name[:-1]}", f"{spatial_analysis['total_acres'].mean():,.0f}")
+        with col4:
+            st.metric(f"Highest Single {unit_name[:-1]}", f"{spatial_analysis['total_acres'].max():,.0f}")
+    else:
+        # National level metrics
+        col1, col2 = st.columns(2)
+        with col1:
+            st.metric("Total Acres Urbanized", f"{spatial_analysis['total_area'].sum():,.0f}")
+        with col2:
+            st.metric("Number of Decades", len(spatial_analysis))
     
-    # Show data with search/filter capability
-    st.dataframe(display_data, use_container_width=True)
+    # 3. DETAILED DATA TABLE FOR SELECTED SPATIAL LEVEL
+    st.subheader(f"📋 Detailed Analysis Results ({selected_spatial_level} Level)")
     
-    # 3. DOWNLOAD FUNCTIONALITY
-    st.subheader("💾 Download Analysis Results")
+    if group_cols:
+        # Format data for display
+        display_data = spatial_analysis.copy()
+        display_data["total_acres"] = display_data["total_acres"].map(lambda x: f"{x:,.0f}")
+        display_data["avg_acres_per_decade"] = display_data["avg_acres_per_decade"].map(lambda x: f"{x:,.1f}")
+        display_data["urbanization_rate"] = display_data["urbanization_rate"].map(lambda x: f"{x:,.1f}")
+        
+        # Rename columns for clarity
+        column_mapping = {
+            "total_acres": "Total Acres Urbanized",
+            "avg_acres_per_decade": "Average Acres per Decade",
+            "num_decades": "Decades Covered",
+            "urbanization_rate": "Urbanization Rate (acres/decade)"
+        }
+        
+        if selected_spatial_level == "County":
+            column_mapping.update({
+                "county_name": "County",
+                "state_name": "State"
+            })
+        elif selected_spatial_level == "State":
+            column_mapping["state_name"] = "State"
+        elif selected_spatial_level == "Region":
+            column_mapping["region"] = "Region"
+        elif selected_spatial_level == "Subregion":
+            column_mapping["subregion"] = "Subregion"
+        
+        display_data = display_data.rename(columns=column_mapping)
+        
+        # Show data with search/filter capability
+        st.dataframe(display_data, use_container_width=True)
+    else:
+        # National level data
+        display_data = spatial_analysis.copy()
+        display_data["total_area"] = display_data["total_area"].map(lambda x: f"{x:,.0f}")
+        display_data.columns = ["Decade", "Total Acres Urbanized", "Location"]
+        st.dataframe(display_data, use_container_width=True)
+    
+    # 4. DOWNLOAD FUNCTIONALITY FOR SELECTED SPATIAL LEVEL
+    st.subheader(f"💾 Download Analysis Results ({selected_spatial_level} Level)")
     
     # Prepare download data (with original numeric values)
-    download_data = urban_analysis.copy()
+    if group_cols:
+        download_data = spatial_analysis.copy()
+    else:
+        download_data = spatial_data.copy()
     
     # Add metadata
     download_data["scenario"] = selected_scenario
+    download_data["scenario_description"] = scenario_descriptions[selected_scenario_display]
+    download_data["spatial_level"] = selected_spatial_level
     download_data["time_period"] = "All Periods"
-    download_data["analysis_level"] = analysis_level
     download_data["generated_date"] = pd.Timestamp.now().strftime("%Y-%m-%d %H:%M:%S")
+    
+    # Reorder columns for better readability, putting identifiers first
+    if selected_spatial_level == "County":
+        # For county data, ensure FIPS code is first, followed by names
+        id_columns = ["fips_code", "county_name", "state_name"]
+        if "region" in download_data.columns:
+            id_columns.append("region")
+        if "subregion" in download_data.columns:
+            id_columns.append("subregion")
+    elif selected_spatial_level == "State":
+        id_columns = ["state_name"]
+    elif selected_spatial_level == "Region":
+        id_columns = ["region"]
+    elif selected_spatial_level == "Subregion":
+        id_columns = ["subregion"]
+    else:
+        id_columns = []
+    
+    # Get data columns (metrics)
+    if group_cols:
+        data_columns = ["total_acres", "avg_acres_per_decade", "num_decades", "urbanization_rate"]
+    else:
+        data_columns = ["scenario_name", "decade_name", "total_area", "from_category", "to_category"]
+    
+    # Get metadata columns
+    metadata_columns = ["scenario", "scenario_description", "spatial_level", "time_period", "generated_date"]
+    
+    # Reorder all columns: IDs -> Data -> Metadata
+    available_id_cols = [col for col in id_columns if col in download_data.columns]
+    available_data_cols = [col for col in data_columns if col in download_data.columns]
+    available_meta_cols = [col for col in metadata_columns if col in download_data.columns]
+    
+    # Add any remaining columns that weren't categorized
+    remaining_cols = [col for col in download_data.columns if col not in available_id_cols + available_data_cols + available_meta_cols]
+    
+    # Final column order
+    final_column_order = available_id_cols + available_data_cols + remaining_cols + available_meta_cols
+    download_data = download_data[final_column_order]
+    
+    # Show info about FIPS codes if included
+    if "fips_code" in download_data.columns:
+        st.info("💡 Downloads include FIPS codes for easy integration with mapping and other datasets")
     
     # Convert to CSV
     csv_data = download_data.to_csv(index=False).encode('utf-8')
     
     col1, col2 = st.columns(2)
     with col1:
+        scenario_name = selected_scenario_display.replace(' ', '_').replace('(', '').replace(')', '')
         st.download_button(
-            label="📥 Download Full Analysis (CSV)",
+            label=f"📥 Download Full Analysis ({selected_spatial_level} Level)",
             data=csv_data,
-            file_name=f"urban_development_analysis_{analysis_level.lower()}_{selected_scenario}_all_periods.csv",
+            file_name=f"urban_development_{selected_spatial_level.lower()}_{scenario_name}_all_periods.csv",
             mime="text/csv",
-            help="Download complete analysis results with all metrics"
+            help=f"Download complete urbanization analysis at {selected_spatial_level} level"
         )
     
     with col2:
-        # Top 20 download
-        top_20_data = download_data.head(20).to_csv(index=False).encode('utf-8')
-        st.download_button(
-            label="🏆 Download Top 20 (CSV)",
-            data=top_20_data,
-            file_name=f"top_20_urban_development_{analysis_level.lower()}_{selected_scenario}.csv",
-            mime="text/csv",
-            help="Download top 20 areas by urban development"
-        )
+        # Top 20 download (only for aggregated levels)
+        if group_cols and len(spatial_analysis) > 20:
+            top_20_data = spatial_analysis.head(20).copy()
+            # Add metadata to top 20
+            top_20_data["scenario"] = selected_scenario
+            top_20_data["scenario_description"] = scenario_descriptions[selected_scenario_display]
+            top_20_data["spatial_level"] = selected_spatial_level
+            top_20_data["generated_date"] = pd.Timestamp.now().strftime("%Y-%m-%d %H:%M:%S")
+            
+            # Reorder columns for top 20 as well
+            if selected_spatial_level == "County":
+                id_columns = ["fips_code", "county_name", "state_name"]
+                if "region" in top_20_data.columns:
+                    id_columns.append("region")
+                if "subregion" in top_20_data.columns:
+                    id_columns.append("subregion")
+            elif selected_spatial_level == "State":
+                id_columns = ["state_name"]
+            elif selected_spatial_level == "Region":
+                id_columns = ["region"]
+            elif selected_spatial_level == "Subregion":
+                id_columns = ["subregion"]
+            else:
+                id_columns = []
+            
+            data_columns = ["total_acres", "avg_acres_per_decade", "num_decades", "urbanization_rate"]
+            metadata_columns = ["scenario", "scenario_description", "spatial_level", "generated_date"]
+            
+            available_id_cols = [col for col in id_columns if col in top_20_data.columns]
+            available_data_cols = [col for col in data_columns if col in top_20_data.columns]
+            available_meta_cols = [col for col in metadata_columns if col in top_20_data.columns]
+            remaining_cols = [col for col in top_20_data.columns if col not in available_id_cols + available_data_cols + available_meta_cols]
+            
+            final_column_order = available_id_cols + available_data_cols + remaining_cols + available_meta_cols
+            top_20_data = top_20_data[final_column_order]
+            
+            top_20_csv = top_20_data.to_csv(index=False).encode('utf-8')
+            st.download_button(
+                label=f"🏆 Download Top 20 ({selected_spatial_level})",
+                data=top_20_csv,
+                file_name=f"top_20_urban_development_{selected_spatial_level.lower()}_{scenario_name}.csv",
+                mime="text/csv",
+                help=f"Download top 20 {unit_name.lower()} by urban development"
+            )
+        else:
+            st.info("Top 20 download not applicable for this spatial level or dataset size")
 
 # ---- FOREST TRANSITIONS TAB ----
 with tab5:
@@ -1239,6 +1590,39 @@ with tab5:
     download_data["analysis_level"] = analysis_level
     download_data["generated_date"] = pd.Timestamp.now().strftime("%Y-%m-%d %H:%M:%S")
     
+    # Reorder columns for better readability, putting identifiers first
+    if analysis_level == "County":
+        # For county data, ensure FIPS code is first, followed by names
+        id_columns = ["fips_code", "county_name", "state_name"]
+        if "region" in download_data.columns:
+            id_columns.append("region")
+        if "subregion" in download_data.columns:
+            id_columns.append("subregion")
+    else:  # State
+        id_columns = ["state_name"]
+    
+    # Get data columns (metrics)
+    data_columns = ["total_acres", "avg_acres_per_decade", "num_decades", "forest_loss_rate"]
+    
+    # Get metadata columns
+    metadata_columns = ["scenario", "time_period", "destination", "analysis_level", "generated_date"]
+    
+    # Reorder all columns: IDs -> Data -> Metadata
+    available_id_cols = [col for col in id_columns if col in download_data.columns]
+    available_data_cols = [col for col in data_columns if col in download_data.columns]
+    available_meta_cols = [col for col in metadata_columns if col in download_data.columns]
+    
+    # Add any remaining columns that weren't categorized
+    remaining_cols = [col for col in download_data.columns if col not in available_id_cols + available_data_cols + available_meta_cols]
+    
+    # Final column order
+    final_column_order = available_id_cols + available_data_cols + remaining_cols + available_meta_cols
+    download_data = download_data[final_column_order]
+    
+    # Show info about FIPS codes if included
+    if "fips_code" in download_data.columns:
+        st.info("💡 Downloads include FIPS codes for easy integration with mapping and other datasets")
+    
     # Convert to CSV
     csv_data = download_data.to_csv(index=False).encode('utf-8')
     
@@ -1254,10 +1638,33 @@ with tab5:
     
     with col2:
         # Top 20 download
-        top_20_data = download_data.head(20).to_csv(index=False).encode('utf-8')
+        top_20_data = download_data.head(20).copy()
+        
+        # Reorder columns for top 20 as well
+        if analysis_level == "County":
+            id_columns = ["fips_code", "county_name", "state_name"]
+            if "region" in top_20_data.columns:
+                id_columns.append("region")
+            if "subregion" in top_20_data.columns:
+                id_columns.append("subregion")
+        else:
+            id_columns = ["state_name"]
+        
+        data_columns = ["total_acres", "avg_acres_per_decade", "num_decades", "forest_loss_rate"]
+        metadata_columns = ["scenario", "time_period", "destination", "analysis_level", "generated_date"]
+        
+        available_id_cols = [col for col in id_columns if col in top_20_data.columns]
+        available_data_cols = [col for col in data_columns if col in top_20_data.columns]
+        available_meta_cols = [col for col in metadata_columns if col in top_20_data.columns]
+        remaining_cols = [col for col in top_20_data.columns if col not in available_id_cols + available_data_cols + available_meta_cols]
+        
+        final_column_order = available_id_cols + available_data_cols + remaining_cols + available_meta_cols
+        top_20_data = top_20_data[final_column_order]
+        
+        top_20_csv = top_20_data.to_csv(index=False).encode('utf-8')
         st.download_button(
             label="🏆 Download Top 20 (CSV)",
-            data=top_20_data,
+            data=top_20_csv,
             file_name=f"top_20_forest_loss_{analysis_level.lower()}_{selected_scenario}.csv",
             mime="text/csv",
             help="Download top 20 areas by forest loss"
@@ -1528,6 +1935,39 @@ with tab6:
     download_data["analysis_level"] = analysis_level
     download_data["generated_date"] = pd.Timestamp.now().strftime("%Y-%m-%d %H:%M:%S")
     
+    # Reorder columns for better readability, putting identifiers first
+    if analysis_level == "County":
+        # For county data, ensure FIPS code is first, followed by names
+        id_columns = ["fips_code", "county_name", "state_name"]
+        if "region" in download_data.columns:
+            id_columns.append("region")
+        if "subregion" in download_data.columns:
+            id_columns.append("subregion")
+    else:  # State
+        id_columns = ["state_name"]
+    
+    # Get data columns (metrics)
+    data_columns = ["total_acres", "avg_acres_per_decade", "num_decades", "ag_loss_rate"]
+    
+    # Get metadata columns
+    metadata_columns = ["scenario", "time_period", "source_category", "destination", "analysis_level", "generated_date"]
+    
+    # Reorder all columns: IDs -> Data -> Metadata
+    available_id_cols = [col for col in id_columns if col in download_data.columns]
+    available_data_cols = [col for col in data_columns if col in download_data.columns]
+    available_meta_cols = [col for col in metadata_columns if col in download_data.columns]
+    
+    # Add any remaining columns that weren't categorized
+    remaining_cols = [col for col in download_data.columns if col not in available_id_cols + available_data_cols + available_meta_cols]
+    
+    # Final column order
+    final_column_order = available_id_cols + available_data_cols + remaining_cols + available_meta_cols
+    download_data = download_data[final_column_order]
+    
+    # Show info about FIPS codes if included
+    if "fips_code" in download_data.columns:
+        st.info("💡 Downloads include FIPS codes for easy integration with mapping and other datasets")
+    
     # Convert to CSV
     csv_data = download_data.to_csv(index=False).encode('utf-8')
     
@@ -1543,10 +1983,33 @@ with tab6:
     
     with col2:
         # Top 20 download
-        top_20_data = download_data.head(20).to_csv(index=False).encode('utf-8')
+        top_20_data = download_data.head(20).copy()
+        
+        # Reorder columns for top 20 as well
+        if analysis_level == "County":
+            id_columns = ["fips_code", "county_name", "state_name"]
+            if "region" in top_20_data.columns:
+                id_columns.append("region")
+            if "subregion" in top_20_data.columns:
+                id_columns.append("subregion")
+        else:
+            id_columns = ["state_name"]
+        
+        data_columns = ["total_acres", "avg_acres_per_decade", "num_decades", "ag_loss_rate"]
+        metadata_columns = ["scenario", "time_period", "source_category", "destination", "analysis_level", "generated_date"]
+        
+        available_id_cols = [col for col in id_columns if col in top_20_data.columns]
+        available_data_cols = [col for col in data_columns if col in top_20_data.columns]
+        available_meta_cols = [col for col in metadata_columns if col in top_20_data.columns]
+        remaining_cols = [col for col in top_20_data.columns if col not in available_id_cols + available_data_cols + available_meta_cols]
+        
+        final_column_order = available_id_cols + available_data_cols + remaining_cols + available_meta_cols
+        top_20_data = top_20_data[final_column_order]
+        
+        top_20_csv = top_20_data.to_csv(index=False).encode('utf-8')
         st.download_button(
             label="🏆 Download Top 20 (CSV)",
-            data=top_20_data,
+            data=top_20_csv,
             file_name=f"top_20_ag_loss_{analysis_level.lower()}_{selected_scenario}.csv",
             mime="text/csv",
             help="Download top 20 areas by agricultural land loss"
