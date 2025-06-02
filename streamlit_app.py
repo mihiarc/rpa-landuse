@@ -905,43 +905,184 @@ with tab4:
     
     # Load data using database views for spatial levels (reuse function from Data Explorer)
     @st.cache_data
-    def load_urbanization_data(spatial_level, scenario_filter=None):
-        """Load urbanization data from database views based on spatial level and scenario."""
+    def load_urbanization_data_enhanced(spatial_level, scenario_filter=None):
+        """Load enhanced urbanization data with FIPS, regions, source breakdown, and proper urbanization rates."""
         import duckdb
+        
+        # Define scenario mapping inside the function
+        scenario_descriptions = {
+            'Overall Mean': 'Ensemble Projection (Average of All Scenarios)',
+            'ensemble_LM': 'Sustainable Development (RCP4.5-SSP1)',
+            'ensemble_HL': 'Climate Challenge (RCP8.5-SSP3)', 
+            'ensemble_HM': 'Moderate Growth (RCP8.5-SSP2)',
+            'ensemble_HH': 'High Development (RCP8.5-SSP5)'
+        }
+        
+        # Create reverse mapping for database queries
+        scenario_reverse_mapping = {v: k for k, v in scenario_descriptions.items()}
+        # Handle the special case for 'Overall Mean'
+        scenario_reverse_mapping['Ensemble Projection (Average of All Scenarios)'] = 'ensemble_overall'
         
         db_path = "data/database/rpa.db"
         
         try:
             conn = duckdb.connect(db_path)
             
-            # Map spatial levels to view names
-            view_mapping = {
-                "County": '"County-Level Land Use Transitions"',
-                "State": '"State-Level Land Use Transitions"',
-                "Region": '"Region-Level Land Use Transitions"',
-                "Subregion": '"Subregion-Level Land Use Transitions"', 
-                "National": '"National-Level Land Use Transitions"'
-            }
+            if spatial_level == "County":
+                # Enhanced county query with baseline urban area and proper rate calculations
+                query = '''
+                WITH baseline_urban AS (
+                    SELECT 
+                        fips_code,
+                        county_name,
+                        state_name,
+                        scenario_name,
+                        baseline_acres_2020 as baseline_urban_acres_2020
+                    FROM baseline_county_land_stock
+                    WHERE land_use_code = 'ur'
+                ),
+                new_urban_with_source AS (
+                    SELECT 
+                        fips_code,
+                        county_name,
+                        state_name,
+                        scenario_name,
+                        from_category,
+                        SUM(total_area) as new_urban_acres,
+                        region,
+                        subregion
+                    FROM "County-Level Land Use Transitions"
+                    WHERE to_category = 'Urban' AND from_category != 'Urban'
+                    GROUP BY fips_code, county_name, state_name, scenario_name, from_category, region, subregion
+                ),
+                total_new_urban AS (
+                    SELECT 
+                        fips_code,
+                        county_name,
+                        state_name,
+                        scenario_name,
+                        region,
+                        subregion,
+                        SUM(new_urban_acres) as total_new_urban_acres
+                    FROM new_urban_with_source
+                    GROUP BY fips_code, county_name, state_name, scenario_name, region, subregion
+                )
+                SELECT 
+                    b.fips_code,
+                    t.county_name,
+                    t.state_name,
+                    t.region,
+                    t.subregion,
+                    b.scenario_name,
+                    COALESCE(b.baseline_urban_acres_2020, 0) as baseline_urban_acres_2020,
+                    COALESCE(t.total_new_urban_acres, 0) as total_new_urban_acres,
+                    (COALESCE(b.baseline_urban_acres_2020, 0) + COALESCE(t.total_new_urban_acres, 0)) as projected_urban_acres_2070,
+                    -- Proper urbanization rate as percentage relative to 2020 baseline
+                    CASE 
+                        WHEN COALESCE(b.baseline_urban_acres_2020, 0) > 0 THEN 
+                            (COALESCE(t.total_new_urban_acres, 0) / b.baseline_urban_acres_2020 * 100)
+                        ELSE NULL
+                    END as urbanization_rate_percent,
+                    -- Absolute urban expansion rate (acres per decade)
+                    COALESCE(t.total_new_urban_acres, 0) / 5.0 as urban_expansion_rate_acres_per_decade,
+                    -- Annualized growth rate
+                    CASE 
+                        WHEN COALESCE(b.baseline_urban_acres_2020, 0) > 0 THEN 
+                            (POWER((COALESCE(b.baseline_urban_acres_2020, 0) + COALESCE(t.total_new_urban_acres, 0)) / b.baseline_urban_acres_2020, 1.0/50.0) - 1) * 100
+                        ELSE NULL
+                    END as annualized_urban_growth_rate_percent,
+                    -- Source breakdown pivot (need to handle separately)
+                    s.from_category,
+                    COALESCE(s.new_urban_acres, 0) as source_acres
+                FROM baseline_urban b
+                FULL OUTER JOIN total_new_urban t ON b.fips_code = t.fips_code 
+                    AND b.county_name = t.county_name 
+                    AND b.state_name = t.state_name 
+                    AND b.scenario_name = t.scenario_name
+                LEFT JOIN new_urban_with_source s ON b.fips_code = s.fips_code 
+                    AND b.county_name = s.county_name 
+                    AND b.state_name = s.state_name 
+                    AND b.scenario_name = s.scenario_name
+                WHERE 1=1
+                '''
+                
+                if scenario_filter and scenario_filter != "All Scenarios":
+                    scenario_key = scenario_reverse_mapping.get(scenario_filter, scenario_filter)
+                    query += f" AND b.scenario_name = '{scenario_key}'"
+                
+                query += " ORDER BY COALESCE(t.total_new_urban_acres, 0) DESC"
+                
+            elif spatial_level == "State":
+                # Enhanced state query using baseline_state_land_stock
+                query = '''
+                WITH baseline_urban AS (
+                    SELECT 
+                        state_name,
+                        region,
+                        subregion,
+                        scenario_name,
+                        baseline_acres_2020 as baseline_urban_acres_2020
+                    FROM baseline_state_land_stock
+                    WHERE land_use_code = 'ur'
+                ),
+                new_urban_development AS (
+                    SELECT 
+                        state_name,
+                        region,
+                        subregion,
+                        scenario_name,
+                        SUM(total_area) as total_new_urban_acres
+                    FROM "State-Level Land Use Transitions"
+                    WHERE to_category = 'Urban' AND from_category != 'Urban'
+                    GROUP BY state_name, region, subregion, scenario_name
+                )
+                SELECT 
+                    b.state_name,
+                    b.region,
+                    b.subregion,
+                    b.scenario_name,
+                    COALESCE(b.baseline_urban_acres_2020, 0) as baseline_urban_acres_2020,
+                    COALESCE(t.total_new_urban_acres, 0) as total_new_urban_acres,
+                    (COALESCE(b.baseline_urban_acres_2020, 0) + COALESCE(t.total_new_urban_acres, 0)) as projected_urban_acres_2070,
+                    -- Proper urbanization rate as percentage relative to 2020 baseline
+                    CASE 
+                        WHEN COALESCE(b.baseline_urban_acres_2020, 0) > 0 THEN 
+                            (COALESCE(t.total_new_urban_acres, 0) / b.baseline_urban_acres_2020 * 100)
+                        ELSE NULL
+                    END as urbanization_rate_percent,
+                    -- Absolute urban expansion rate (acres per decade)
+                    COALESCE(t.total_new_urban_acres, 0) / 5.0 as urban_expansion_rate_acres_per_decade,
+                    -- Annualized growth rate
+                    CASE 
+                        WHEN COALESCE(b.baseline_urban_acres_2020, 0) > 0 THEN 
+                            (POWER((COALESCE(b.baseline_urban_acres_2020, 0) + COALESCE(t.total_new_urban_acres, 0)) / b.baseline_urban_acres_2020, 1.0/50.0) - 1) * 100
+                        ELSE NULL
+                    END as annualized_urban_growth_rate_percent
+                FROM baseline_urban b
+                LEFT JOIN new_urban_development t ON b.state_name = t.state_name 
+                    AND b.scenario_name = t.scenario_name
+                WHERE 1=1
+                '''
+                
+                if scenario_filter and scenario_filter != "All Scenarios":
+                    scenario_key = scenario_reverse_mapping.get(scenario_filter, scenario_filter)
+                    query += f" AND b.scenario_name = '{scenario_key}'"
+                
+                query += " ORDER BY COALESCE(t.total_new_urban_acres, 0) DESC"
             
-            view_name = view_mapping.get(spatial_level)
-            if view_name:
-                # Build the query with filters for urban transitions
-                query = f'SELECT * FROM {view_name} WHERE to_category = \'Urban\''
-                
-                # Add scenario filter if specified
-                if scenario_filter and scenario_filter != "Overall Mean":
-                    query += f" AND scenario_name = '{scenario_filter}'"
-                
-                df = conn.execute(query).df()
-                conn.close()
-                return df
-            else:
-                conn.close()
-                return None
-                
+            # Execute query and load data
+            result_df = conn.execute(query).df()
+            conn.close()
+            
+            if result_df.empty:
+                st.warning(f"No data available for {spatial_level} level with the selected scenario.")
+                return pd.DataFrame()
+            
+            return result_df
+            
         except Exception as e:
-            st.error(f"Error loading {spatial_level} urbanization data: {e}")
-            return None
+            st.error(f"Error loading enhanced urbanization data: {str(e)}")
+            return pd.DataFrame()
     
     # Analysis controls
     st.subheader("Analysis Controls")
@@ -957,6 +1098,11 @@ with tab4:
             'ensemble_HM': 'Moderate Growth (RCP8.5-SSP2)',
             'ensemble_HH': 'High Development (RCP8.5-SSP5)'
         }
+        
+        # Create reverse mapping for database queries
+        scenario_reverse_mapping = {v: k for k, v in scenario_descriptions.items()}
+        # Handle the special case for 'Overall Mean'
+        scenario_reverse_mapping['Ensemble Projection (Average of All Scenarios)'] = 'ensemble_overall'
         
         scenario_options = list(scenario_descriptions.keys())
         selected_scenario_display = st.selectbox("Select RPA Scenario", options=scenario_options, key="urban_scenario")
@@ -976,7 +1122,7 @@ with tab4:
                                             help="Choose spatial level for data download and detailed analysis")
     
     # Load data at selected spatial level
-    spatial_data = load_urbanization_data(selected_spatial_level, selected_scenario)
+    spatial_data = load_urbanization_data_enhanced(selected_spatial_level, selected_scenario)
     
     if spatial_data is None:
         st.error("Unable to load urbanization data from database views.")
@@ -1115,230 +1261,329 @@ with tab4:
     # 2. SUMMARY STATISTICS FOR SELECTED SPATIAL LEVEL
     st.subheader(f"📊 Summary Statistics ({selected_spatial_level} Level)")
     
-    # Calculate metrics for the selected spatial level
-    if selected_spatial_level == "County":
-        group_cols = ["county_name", "state_name"]
-        location_col = "county_name"
-        unit_name = "Counties"
-    elif selected_spatial_level == "State":
-        group_cols = ["state_name"]
-        location_col = "state_name"
-        unit_name = "States"
-    elif selected_spatial_level == "Region":
-        group_cols = ["region"]
-        location_col = "region"
-        unit_name = "Regions"
-    elif selected_spatial_level == "Subregion":
-        group_cols = ["subregion"]
-        location_col = "subregion"
-        unit_name = "Subregions"
-    else:  # National
-        group_cols = []
-        location_col = None
-        unit_name = "National"
-    
-    # Aggregate data for selected spatial level
-    if group_cols:
-        spatial_analysis = spatial_data.groupby(group_cols).agg({
-            "total_area": ["sum", "mean"],
-            "decade_name": "nunique"
-        }).round(2)
+    # Check what columns are available in the enhanced data and handle accordingly
+    if spatial_data is not None and not spatial_data.empty:
+        # Debug: Show available columns
+        st.info(f"Available columns in spatial data: {list(spatial_data.columns)}")
         
-        # Flatten column names
-        spatial_analysis.columns = ["total_acres", "avg_acres_per_decade", "num_decades"]
-        spatial_analysis = spatial_analysis.reset_index()
-        
-        # Calculate urbanization rate
-        spatial_analysis["urbanization_rate"] = (spatial_analysis["total_acres"] / 
-                                               spatial_analysis["num_decades"]).round(2)
-        
-        # Sort by total area
-        spatial_analysis = spatial_analysis.sort_values("total_acres", ascending=False)
+        # For enhanced data structure with proper baseline rate calculations
+        if "total_new_urban_acres" in spatial_data.columns and "baseline_urban_acres_2020" in spatial_data.columns:
+            # Use enhanced data structure with proper columns
+            if selected_spatial_level == "County":
+                group_cols = ["county_name", "state_name"]
+                location_col = "county_name"
+                unit_name = "Counties"
+            elif selected_spatial_level == "State":
+                group_cols = ["state_name"]
+                location_col = "state_name"
+                unit_name = "States"
+            elif selected_spatial_level == "Region":
+                group_cols = ["region"]
+                location_col = "region"
+                unit_name = "Regions"
+            elif selected_spatial_level == "Subregion":
+                group_cols = ["subregion"]
+                location_col = "subregion"
+                unit_name = "Subregions"
+            else:  # National
+                group_cols = []
+                location_col = None
+                unit_name = "National"
+            
+            # Aggregate enhanced data for selected spatial level
+            if group_cols:
+                # Check which columns actually exist in the data
+                available_group_cols = [col for col in group_cols if col in spatial_data.columns]
+                
+                st.info(f"Looking for group columns: {group_cols}, Found: {available_group_cols}")
+                
+                if available_group_cols:
+                    try:
+                        # Aggregate using the enhanced columns
+                        spatial_analysis = spatial_data.groupby(available_group_cols).agg({
+                            "total_new_urban_acres": ["sum", "mean"],
+                            "baseline_urban_acres_2020": "first",
+                            "urbanization_rate_percent": "mean",
+                            "urban_expansion_rate_acres_per_decade": "mean"
+                        }).round(2)
+                        
+                        # Flatten column names
+                        spatial_analysis.columns = ["total_new_urban_acres", "avg_new_urban_per_area", "baseline_urban_acres", "avg_urbanization_rate", "avg_expansion_rate"]
+                        spatial_analysis = spatial_analysis.reset_index()
+                        
+                        # Sort by total new urban acres
+                        spatial_analysis = spatial_analysis.sort_values("total_new_urban_acres", ascending=False)
+                        
+                        # Display summary metrics
+                        col1, col2, col3, col4 = st.columns(4)
+                        
+                        with col1:
+                            st.metric(f"Total {unit_name}", len(spatial_analysis))
+                        with col2:
+                            st.metric("Total New Urban Acres", f"{spatial_analysis['total_new_urban_acres'].sum():,.0f}")
+                        with col3:
+                            st.metric(f"Average per {unit_name[:-1]}", f"{spatial_analysis['total_new_urban_acres'].mean():,.0f}")
+                        with col4:
+                            st.metric(f"Highest Single {unit_name[:-1]}", f"{spatial_analysis['total_new_urban_acres'].max():,.0f}")
+                        
+                        # Format data for display
+                        display_data = spatial_analysis.copy()
+                        display_data["total_new_urban_acres"] = display_data["total_new_urban_acres"].map(lambda x: f"{x:,.0f}")
+                        display_data["baseline_urban_acres"] = display_data["baseline_urban_acres"].map(lambda x: f"{x:,.0f}")
+                        display_data["avg_urbanization_rate"] = display_data["avg_urbanization_rate"].map(lambda x: f"{x:,.1f}%")
+                        display_data["avg_expansion_rate"] = display_data["avg_expansion_rate"].map(lambda x: f"{x:,.1f}")
+                        
+                        # Rename columns for clarity
+                        column_mapping = {
+                            "total_new_urban_acres": "Total New Urban Acres",
+                            "baseline_urban_acres": "2020 Baseline Urban Acres",
+                            "avg_urbanization_rate": "Avg Urbanization Rate (%)",
+                            "avg_expansion_rate": "Avg Expansion Rate (acres/decade)"
+                        }
+                        
+                        if selected_spatial_level == "County":
+                            column_mapping.update({
+                                "county_name": "County",
+                                "state_name": "State"
+                            })
+                        elif selected_spatial_level == "State":
+                            column_mapping["state_name"] = "State"
+                        elif selected_spatial_level == "Region":
+                            column_mapping["region"] = "Region"
+                        elif selected_spatial_level == "Subregion":
+                            column_mapping["subregion"] = "Subregion"
+                        
+                        display_data = display_data.rename(columns=column_mapping)
+                    
+                    except Exception as e:
+                        st.error(f"Error during groupby operation: {str(e)}")
+                        st.info("Falling back to basic data display")
+                        display_data = spatial_data.head(20).copy()
+                else:
+                    # No valid grouping columns found
+                    st.warning(f"No valid grouping columns found for {selected_spatial_level} level in the enhanced data.")
+                    st.info(f"Expected columns: {group_cols}")
+                    st.info(f"Available columns: {list(spatial_data.columns)}")
+                    display_data = spatial_data.head(20).copy()
+            else:
+                # National level - simple aggregation
+                try:
+                    spatial_analysis = spatial_data.agg({
+                        "total_new_urban_acres": "sum",
+                        "baseline_urban_acres_2020": "sum"
+                    })
+                    
+                    col1, col2 = st.columns(2)
+                    with col1:
+                        st.metric("Total New Urban Acres", f"{spatial_analysis['total_new_urban_acres']:,.0f}")
+                    with col2:
+                        st.metric("Total Baseline Urban Acres (2020)", f"{spatial_analysis['baseline_urban_acres_2020']:,.0f}")
+                    
+                    display_data = pd.DataFrame({
+                        "Metric": ["Total New Urban Acres", "Total Baseline Urban Acres (2020)"],
+                        "Value": [f"{spatial_analysis['total_new_urban_acres']:,.0f}", f"{spatial_analysis['baseline_urban_acres_2020']:,.0f}"]
+                    })
+                except Exception as e:
+                    st.error(f"Error during national aggregation: {str(e)}")
+                    display_data = spatial_data.head(20).copy()
+                
+        else:
+            # Fallback: no enhanced data structure, show basic info
+            st.info("Enhanced urbanization data structure not available. Showing basic information.")
+            col1, col2 = st.columns(2)
+            with col1:
+                st.metric("Total Records", len(spatial_data))
+            with col2:
+                st.metric("Data Columns", len(spatial_data.columns))
+            
+            display_data = spatial_data.head(10)  # Show first 10 rows
     else:
-        # National level - simple aggregation
-        spatial_analysis = spatial_data.groupby("decade_name")["total_area"].sum().reset_index()
-        spatial_analysis["location"] = "United States"
-    
-    # Display summary metrics
-    if group_cols:
-        col1, col2, col3, col4 = st.columns(4)
-        
-        with col1:
-            st.metric(f"Total {unit_name}", len(spatial_analysis))
-        with col2:
-            st.metric("Total Acres Urbanized", f"{spatial_analysis['total_acres'].sum():,.0f}")
-        with col3:
-            st.metric(f"Average per {unit_name[:-1]}", f"{spatial_analysis['total_acres'].mean():,.0f}")
-        with col4:
-            st.metric(f"Highest Single {unit_name[:-1]}", f"{spatial_analysis['total_acres'].max():,.0f}")
-    else:
-        # National level metrics
-        col1, col2 = st.columns(2)
-        with col1:
-            st.metric("Total Acres Urbanized", f"{spatial_analysis['total_area'].sum():,.0f}")
-        with col2:
-            st.metric("Number of Decades", len(spatial_analysis))
+        st.warning("No spatial data available for analysis.")
+        display_data = pd.DataFrame()
     
     # 3. DETAILED DATA TABLE FOR SELECTED SPATIAL LEVEL
     st.subheader(f"📋 Detailed Analysis Results ({selected_spatial_level} Level)")
     
-    if group_cols:
-        # Format data for display
-        display_data = spatial_analysis.copy()
-        display_data["total_acres"] = display_data["total_acres"].map(lambda x: f"{x:,.0f}")
-        display_data["avg_acres_per_decade"] = display_data["avg_acres_per_decade"].map(lambda x: f"{x:,.1f}")
-        display_data["urbanization_rate"] = display_data["urbanization_rate"].map(lambda x: f"{x:,.1f}")
-        
-        # Rename columns for clarity
-        column_mapping = {
-            "total_acres": "Total Acres Urbanized",
-            "avg_acres_per_decade": "Average Acres per Decade",
-            "num_decades": "Decades Covered",
-            "urbanization_rate": "Urbanization Rate (acres/decade)"
-        }
-        
-        if selected_spatial_level == "County":
-            column_mapping.update({
-                "county_name": "County",
-                "state_name": "State"
-            })
-        elif selected_spatial_level == "State":
-            column_mapping["state_name"] = "State"
-        elif selected_spatial_level == "Region":
-            column_mapping["region"] = "Region"
-        elif selected_spatial_level == "Subregion":
-            column_mapping["subregion"] = "Subregion"
-        
-        display_data = display_data.rename(columns=column_mapping)
-        
+    if not display_data.empty:
         # Show data with search/filter capability
         st.dataframe(display_data, use_container_width=True)
     else:
-        # National level data
-        display_data = spatial_analysis.copy()
-        display_data["total_area"] = display_data["total_area"].map(lambda x: f"{x:,.0f}")
-        display_data.columns = ["Decade", "Total Acres Urbanized", "Location"]
-        st.dataframe(display_data, use_container_width=True)
+        st.info("No detailed data available to display.")
     
-    # 4. DOWNLOAD FUNCTIONALITY FOR SELECTED SPATIAL LEVEL
-    st.subheader(f"💾 Download Analysis Results ({selected_spatial_level} Level)")
+    # 4. ENHANCED DOWNLOAD FUNCTIONALITY FOR SELECTED SPATIAL LEVEL
+    st.subheader(f"💾 Enhanced Download Analysis Results ({selected_spatial_level} Level)")
     
-    # Prepare download data (with original numeric values)
-    if group_cols:
-        download_data = spatial_analysis.copy()
-    else:
-        download_data = spatial_data.copy()
-    
-    # Add metadata
-    download_data["scenario"] = selected_scenario
-    download_data["scenario_description"] = scenario_descriptions[selected_scenario_display]
-    download_data["spatial_level"] = selected_spatial_level
-    download_data["time_period"] = "All Periods"
-    download_data["generated_date"] = pd.Timestamp.now().strftime("%Y-%m-%d %H:%M:%S")
-    
-    # Reorder columns for better readability, putting identifiers first
-    if selected_spatial_level == "County":
-        # For county data, ensure FIPS code is first, followed by names
-        id_columns = ["fips_code", "county_name", "state_name"]
-        if "region" in download_data.columns:
-            id_columns.append("region")
-        if "subregion" in download_data.columns:
-            id_columns.append("subregion")
-    elif selected_spatial_level == "State":
-        id_columns = ["state_name"]
-    elif selected_spatial_level == "Region":
-        id_columns = ["region"]
-    elif selected_spatial_level == "Subregion":
-        id_columns = ["subregion"]
-    else:
-        id_columns = []
-    
-    # Get data columns (metrics)
-    if group_cols:
-        data_columns = ["total_acres", "avg_acres_per_decade", "num_decades", "urbanization_rate"]
-    else:
-        data_columns = ["scenario_name", "decade_name", "total_area", "from_category", "to_category"]
-    
-    # Get metadata columns
-    metadata_columns = ["scenario", "scenario_description", "spatial_level", "time_period", "generated_date"]
-    
-    # Reorder all columns: IDs -> Data -> Metadata
-    available_id_cols = [col for col in id_columns if col in download_data.columns]
-    available_data_cols = [col for col in data_columns if col in download_data.columns]
-    available_meta_cols = [col for col in metadata_columns if col in download_data.columns]
-    
-    # Add any remaining columns that weren't categorized
-    remaining_cols = [col for col in download_data.columns if col not in available_id_cols + available_data_cols + available_meta_cols]
-    
-    # Final column order
-    final_column_order = available_id_cols + available_data_cols + remaining_cols + available_meta_cols
-    download_data = download_data[final_column_order]
-    
-    # Show info about FIPS codes if included
-    if "fips_code" in download_data.columns:
-        st.info("💡 Downloads include FIPS codes for easy integration with mapping and other datasets")
-    
-    # Convert to CSV
-    csv_data = download_data.to_csv(index=False).encode('utf-8')
-    
-    col1, col2 = st.columns(2)
-    with col1:
-        scenario_name = selected_scenario_display.replace(' ', '_').replace('(', '').replace(')', '')
-        st.download_button(
-            label=f"📥 Download Full Analysis ({selected_spatial_level} Level)",
-            data=csv_data,
-            file_name=f"urban_development_{selected_spatial_level.lower()}_{scenario_name}_all_periods.csv",
-            mime="text/csv",
-            help=f"Download complete urbanization analysis at {selected_spatial_level} level"
-        )
-    
-    with col2:
-        # Top 20 download (only for aggregated levels)
-        if group_cols and len(spatial_analysis) > 20:
-            top_20_data = spatial_analysis.head(20).copy()
-            # Add metadata to top 20
-            top_20_data["scenario"] = selected_scenario
-            top_20_data["scenario_description"] = scenario_descriptions[selected_scenario_display]
-            top_20_data["spatial_level"] = selected_spatial_level
-            top_20_data["generated_date"] = pd.Timestamp.now().strftime("%Y-%m-%d %H:%M:%S")
+    # Prepare enhanced download data
+    if selected_spatial_level == "County" and spatial_data is not None and not spatial_data.empty:
+        
+        # For county level, we need to process the source breakdown data
+        # First, aggregate the main metrics without source breakdown
+        main_metrics = spatial_data.groupby([
+            "fips_code", "county_name", "state_name", "region", "subregion", "scenario_name"
+        ]).agg({
+            "baseline_urban_acres_2020": "first",
+            "total_new_urban_acres": "first", 
+            "projected_urban_acres_2070": "first",
+            "urbanization_rate_percent": "first",
+            "urban_expansion_rate_acres_per_decade": "first",
+            "annualized_urban_growth_rate_percent": "first"
+        }).reset_index()
+        
+        # Get source breakdown if available
+        if "from_category" in spatial_data.columns and "source_acres" in spatial_data.columns:
+            source_breakdown = spatial_data[spatial_data["from_category"].notna()].copy()
             
-            # Reorder columns for top 20 as well
-            if selected_spatial_level == "County":
-                id_columns = ["fips_code", "county_name", "state_name"]
-                if "region" in top_20_data.columns:
-                    id_columns.append("region")
-                if "subregion" in top_20_data.columns:
-                    id_columns.append("subregion")
-            elif selected_spatial_level == "State":
-                id_columns = ["state_name"]
-            elif selected_spatial_level == "Region":
-                id_columns = ["region"]
-            elif selected_spatial_level == "Subregion":
-                id_columns = ["subregion"]
+            # Additional safety check: remove any urban-to-urban transitions that might exist
+            source_breakdown = source_breakdown[source_breakdown["from_category"] != "Urban"]
+            
+            # Pivot to get source categories as columns
+            if not source_breakdown.empty:
+                source_pivot = source_breakdown.pivot_table(
+                    index=["fips_code", "county_name", "state_name", "region", "subregion", "scenario_name"],
+                    columns="from_category",
+                    values="source_acres",
+                    fill_value=0
+                ).reset_index()
+                
+                # Flatten column names and add 'acres_from_' prefix
+                source_pivot.columns = [
+                    f"acres_from_{col.lower().replace(' ', '_').replace('-', '_')}" 
+                    if col not in ["fips_code", "county_name", "state_name", "region", "subregion", "scenario_name"]
+                    else col
+                    for col in source_pivot.columns
+                ]
+                
+                # Merge with main metrics
+                download_data = main_metrics.merge(
+                    source_pivot, 
+                    on=["fips_code", "county_name", "state_name", "region", "subregion", "scenario_name"],
+                    how="left"
+                )
+                
+                # Get list of available source columns for info display
+                available_source_cols = [col for col in download_data.columns if col.startswith("acres_from_")]
             else:
-                id_columns = []
-            
-            data_columns = ["total_acres", "avg_acres_per_decade", "num_decades", "urbanization_rate"]
-            metadata_columns = ["scenario", "scenario_description", "spatial_level", "generated_date"]
-            
-            available_id_cols = [col for col in id_columns if col in top_20_data.columns]
-            available_data_cols = [col for col in data_columns if col in top_20_data.columns]
-            available_meta_cols = [col for col in metadata_columns if col in top_20_data.columns]
-            remaining_cols = [col for col in top_20_data.columns if col not in available_id_cols + available_data_cols + available_meta_cols]
-            
-            final_column_order = available_id_cols + available_data_cols + remaining_cols + available_meta_cols
-            top_20_data = top_20_data[final_column_order]
-            
-            top_20_csv = top_20_data.to_csv(index=False).encode('utf-8')
-            st.download_button(
-                label=f"🏆 Download Top 20 ({selected_spatial_level})",
-                data=top_20_csv,
-                file_name=f"top_20_urban_development_{selected_spatial_level.lower()}_{scenario_name}.csv",
-                mime="text/csv",
-                help=f"Download top 20 {unit_name.lower()} by urban development"
-            )
+                download_data = main_metrics.copy()
+                available_source_cols = []
         else:
-            st.info("Top 20 download not applicable for this spatial level or dataset size")
+            download_data = main_metrics.copy()
+            available_source_cols = []
+            
+    elif selected_spatial_level == "State" and spatial_data is not None and not spatial_data.empty:
+        # For state level, data is already aggregated properly
+        download_data = spatial_data.copy()
+        available_source_cols = []
+        
+    else:
+        # Fallback for other spatial levels or empty data
+        download_data = spatial_data.copy() if spatial_data is not None else pd.DataFrame()
+        available_source_cols = []
+    
+    if download_data.empty:
+        st.warning("No data available for download with the current selection.")
+    else:
+        # Reorder columns to put key identifiers first
+        priority_cols = []
+        if "fips_code" in download_data.columns:
+            priority_cols.append("fips_code")
+        if "county_name" in download_data.columns:
+            priority_cols.append("county_name")
+        if "state_name" in download_data.columns:
+            priority_cols.append("state_name")
+        if "region" in download_data.columns:
+            priority_cols.append("region")
+        if "subregion" in download_data.columns:
+            priority_cols.append("subregion")
+        
+        # Add baseline and metrics columns
+        metrics_cols = [
+            "baseline_urban_acres_2020",
+            "total_new_urban_acres", 
+            "projected_urban_acres_2070",
+            "urbanization_rate_percent",
+            "urban_expansion_rate_acres_per_decade",
+            "annualized_urban_growth_rate_percent"
+        ]
+        
+        priority_cols.extend([col for col in metrics_cols if col in download_data.columns])
+        priority_cols.extend(available_source_cols)
+        
+        # Add remaining columns
+        remaining_cols = [col for col in download_data.columns if col not in priority_cols]
+        final_col_order = priority_cols + remaining_cols
+        
+        download_data = download_data[final_col_order]
+        
+        # Round numeric columns for better readability
+        numeric_columns = download_data.select_dtypes(include=[np.number]).columns
+        download_data[numeric_columns] = download_data[numeric_columns].round(2)
+    
+        # Add metadata
+        download_data["scenario"] = selected_scenario
+        download_data["scenario_description"] = scenario_descriptions[selected_scenario_display]
+        download_data["spatial_level"] = selected_spatial_level
+        download_data["time_period"] = "All Periods (2020-2070)"
+        download_data["analysis_type"] = "Enhanced Urbanization Analysis with Baseline Rates"
+        download_data["generated_date"] = pd.Timestamp.now().strftime("%Y-%m-%d %H:%M:%S")
+        
+        # Convert to CSV
+        csv_data = download_data.to_csv(index=False)
+        
+        # Enhanced info about included features
+        info_items = []
+        if "fips_code" in download_data.columns:
+            info_items.append("🗺️ FIPS codes for GIS integration")
+        if "region" in download_data.columns:
+            info_items.append("🌎 Regional classifications (Census regions)")
+        if "subregion" in download_data.columns:
+            info_items.append("📍 Subregional classifications (Census divisions)")
+        if "baseline_urban_acres_2020" in download_data.columns:
+            info_items.append("📊 2020 baseline urban area for proper rate calculations")
+        if "urbanization_rate_percent" in download_data.columns:
+            info_items.append("📈 True urbanization rate (% relative to 2020 baseline)")
+        if available_source_cols:
+            info_items.append(f"🔄 Source land breakdown ({len(available_source_cols)} non-urban categories)")
+        
+        if info_items:
+            st.info("💡 Enhanced exports include: " + " | ".join(info_items))
+        
+        # Important clarification about urban exclusion and rate calculation
+        if available_source_cols or "urbanization_rate_percent" in download_data.columns:
+            st.success("""
+            🎯 **Key Enhancements:**
+            • **NEW urban development only** (excludes urban-to-urban transitions)
+            • **Proper urbanization rate** calculated as percentage relative to 2020 baseline urban area
+            • **Baseline urban area included** for transparency and validation
+            • **Annualized growth rate** for comparing different time horizons
+            """)
+        
+        # Display data preview
+        st.subheader(f"📋 Data Preview ({len(download_data):,} records)")
+        st.dataframe(download_data.head(20), use_container_width=True)
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            scenario_name = selected_scenario_display.replace(' ', '_').replace('(', '').replace(')', '')
+            st.download_button(
+                label=f"📥 Enhanced Download ({selected_spatial_level} Level)",
+                data=csv_data,
+                file_name=f"enhanced_urbanization_analysis_{selected_spatial_level.lower()}_{scenario_name}_all_periods.csv",
+                mime="text/csv",
+                help=f"Download enhanced urbanization analysis with baseline rates, FIPS codes, regions, and source breakdown"
+            )
+        
+        with col2:
+            # Top 20 enhanced download (only for aggregated levels)
+            if len(download_data) > 20:
+                top_20_data = download_data.head(20).copy()
+                top_20_csv = top_20_data.to_csv(index=False)
+                st.download_button(
+                    label=f"📥 Top 20 Download",
+                    data=top_20_csv,
+                    file_name=f"enhanced_urbanization_top20_{selected_spatial_level.lower()}_{scenario_name}.csv",
+                    mime="text/csv",
+                    help="Download top 20 records with highest total new urban acres"
+                )
 
 # ---- FOREST TRANSITIONS TAB ----
 with tab5:
