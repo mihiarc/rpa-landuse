@@ -40,12 +40,6 @@ graph LR
     SSP --> Transition
     
     Transition --> SimulatedChange
-    
-    %% Styling
-    classDef data fill:#ffecb3,stroke:#333,stroke-width:2px
-    classDef process fill:#e0e0e0,stroke:#333,stroke-width:2px
-    classDef output fill:#ffcdd2,stroke:#333,stroke-width:2px,shape:hexagon
-    style RCF fill:#fff5e6,stroke:#be9b3e,stroke-width:3px
 ```
 
 This diagram represents the RPA Land Use Model's data flow and components, showing how various inputs like climate data and soil quality flow through the Ricardian Climate Functions and ultimately produce simulated land area changes. 
