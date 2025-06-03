@@ -230,6 +230,131 @@ LEFT JOIN new_urban_development t ON b.state_name = t.state_name
 ORDER BY COALESCE(t.total_new_urban_acres, 0) DESC;
 
 -- =============================================================================
+-- ENHANCED FOREST LOSS ANALYSIS WITH BASELINE RATES
+-- =============================================================================
+
+-- Enhanced county forest loss analysis with baseline forest area and true percentage rates
+CREATE OR REPLACE VIEW enhanced_county_forest_analysis AS
+WITH baseline_forest AS (
+    SELECT 
+        fips_code,
+        county_name,
+        state_name,
+        region,
+        subregion,
+        scenario_name,
+        baseline_acres_2020 as baseline_forest_acres_2020
+    FROM baseline_county_land_stock
+    WHERE land_use_code = 'fr'  -- Forest land use
+),
+forest_loss_with_destination AS (
+    SELECT 
+        fips_code,
+        county_name,
+        state_name,
+        region,
+        subregion,
+        scenario_name,
+        to_category,
+        SUM(total_area) as forest_lost_acres
+    FROM "County-Level Land Use Transitions"
+    WHERE from_category = 'Forest' AND to_category != 'Forest'  -- Only forest loss (not forest-to-forest)
+    GROUP BY fips_code, county_name, state_name, region, subregion, scenario_name, to_category
+),
+total_forest_loss AS (
+    SELECT 
+        fips_code,
+        county_name,
+        state_name,
+        region,
+        subregion,
+        scenario_name,
+        SUM(forest_lost_acres) as total_forest_lost_acres
+    FROM forest_loss_with_destination
+    GROUP BY fips_code, county_name, state_name, region, subregion, scenario_name
+)
+SELECT 
+    b.fips_code,
+    b.county_name,
+    b.state_name,
+    b.region,
+    b.subregion,
+    b.scenario_name,
+    b.baseline_forest_acres_2020,
+    COALESCE(t.total_forest_lost_acres, 0) as total_forest_lost_acres,
+    (b.baseline_forest_acres_2020 - COALESCE(t.total_forest_lost_acres, 0)) as projected_forest_acres_2070,
+    -- Calculate proper forest loss rate as percentage relative to 2020 baseline
+    CASE 
+        WHEN b.baseline_forest_acres_2020 > 0 THEN 
+            (COALESCE(t.total_forest_lost_acres, 0) / b.baseline_forest_acres_2020 * 100)
+        ELSE NULL
+    END as forest_loss_rate_percent,
+    -- Calculate absolute rate (acres per decade)
+    COALESCE(t.total_forest_lost_acres, 0) / 5.0 as forest_loss_rate_acres_per_decade,
+    -- Calculate annualized percentage loss rate
+    CASE 
+        WHEN b.baseline_forest_acres_2020 > 0 AND (b.baseline_forest_acres_2020 - COALESCE(t.total_forest_lost_acres, 0)) > 0 THEN 
+            (POWER((b.baseline_forest_acres_2020 - COALESCE(t.total_forest_lost_acres, 0)) / b.baseline_forest_acres_2020, 1.0/50.0) - 1) * 100
+        ELSE NULL
+    END as annualized_forest_loss_rate_percent
+FROM baseline_forest b
+LEFT JOIN total_forest_loss t ON b.fips_code = t.fips_code 
+    AND b.county_name = t.county_name 
+    AND b.state_name = t.state_name 
+    AND b.scenario_name = t.scenario_name
+ORDER BY COALESCE(t.total_forest_lost_acres, 0) DESC;
+
+-- Enhanced state forest loss analysis with baseline forest area and true percentage rates
+CREATE OR REPLACE VIEW enhanced_state_forest_analysis AS
+WITH baseline_forest AS (
+    SELECT 
+        state_name,
+        region,
+        subregion,
+        scenario_name,
+        baseline_acres_2020 as baseline_forest_acres_2020
+    FROM baseline_state_land_stock
+    WHERE land_use_code = 'fr'  -- Forest land use
+),
+forest_loss_development AS (
+    SELECT 
+        state_name,
+        region,
+        subregion,
+        scenario_name,
+        SUM(total_area) as total_forest_lost_acres
+    FROM "State-Level Land Use Transitions"
+    WHERE from_category = 'Forest' AND to_category != 'Forest'  -- Only forest loss
+    GROUP BY state_name, region, subregion, scenario_name
+)
+SELECT 
+    b.state_name,
+    b.region,
+    b.subregion,
+    b.scenario_name,
+    b.baseline_forest_acres_2020,
+    COALESCE(t.total_forest_lost_acres, 0) as total_forest_lost_acres,
+    (b.baseline_forest_acres_2020 - COALESCE(t.total_forest_lost_acres, 0)) as projected_forest_acres_2070,
+    -- Calculate proper forest loss rate as percentage relative to 2020 baseline
+    CASE 
+        WHEN b.baseline_forest_acres_2020 > 0 THEN 
+            (COALESCE(t.total_forest_lost_acres, 0) / b.baseline_forest_acres_2020 * 100)
+        ELSE NULL
+    END as forest_loss_rate_percent,
+    -- Calculate absolute rate (acres per decade)
+    COALESCE(t.total_forest_lost_acres, 0) / 5.0 as forest_loss_rate_acres_per_decade,
+    -- Calculate annualized percentage loss rate
+    CASE 
+        WHEN b.baseline_forest_acres_2020 > 0 AND (b.baseline_forest_acres_2020 - COALESCE(t.total_forest_lost_acres, 0)) > 0 THEN 
+            (POWER((b.baseline_forest_acres_2020 - COALESCE(t.total_forest_lost_acres, 0)) / b.baseline_forest_acres_2020, 1.0/50.0) - 1) * 100
+        ELSE NULL
+    END as annualized_forest_loss_rate_percent
+FROM baseline_forest b
+LEFT JOIN forest_loss_development t ON b.state_name = t.state_name 
+    AND b.scenario_name = t.scenario_name
+ORDER BY COALESCE(t.total_forest_lost_acres, 0) DESC;
+
+-- =============================================================================
 -- CREATE INDEXES FOR OPTIMAL PERFORMANCE
 -- =============================================================================
 
@@ -253,4 +378,17 @@ CREATE INDEX IF NOT EXISTS idx_baseline_region_scenario ON baseline_region_land_
 --        urbanization_rate_percent, annualized_urban_growth_rate_percent
 -- FROM enhanced_county_urbanization_analysis 
 -- WHERE scenario_name = 'ensemble_overall' 
--- ORDER BY urbanization_rate_percent DESC LIMIT 10; 
+-- ORDER BY urbanization_rate_percent DESC LIMIT 10;
+
+-- Query to validate baseline forest acres by state (example)
+-- SELECT state_name, scenario_name, baseline_acres_2020 
+-- FROM baseline_state_land_stock 
+-- WHERE land_use_code = 'fo' AND scenario_name = 'ensemble_overall'
+-- ORDER BY baseline_acres_2020 DESC LIMIT 10;
+
+-- Query to validate enhanced forest loss analysis (example)
+-- SELECT county_name, state_name, baseline_forest_acres_2020, total_forest_lost_acres, 
+--        forest_loss_rate_percent, annualized_forest_loss_rate_percent
+-- FROM enhanced_county_forest_analysis 
+-- WHERE scenario_name = 'ensemble_overall' 
+-- ORDER BY forest_loss_rate_percent DESC LIMIT 10; 
