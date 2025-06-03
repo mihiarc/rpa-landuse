@@ -1079,7 +1079,7 @@ with tab4:
                 return pd.DataFrame()
             
             return result_df
-            
+                
         except Exception as e:
             st.error(f"Error loading enhanced urbanization data: {str(e)}")
             return pd.DataFrame()
@@ -1263,9 +1263,6 @@ with tab4:
     
     # Check what columns are available in the enhanced data and handle accordingly
     if spatial_data is not None and not spatial_data.empty:
-        # Debug: Show available columns
-        st.info(f"Available columns in spatial data: {list(spatial_data.columns)}")
-        
         # For enhanced data structure with proper baseline rate calculations
         if "total_new_urban_acres" in spatial_data.columns and "baseline_urban_acres_2020" in spatial_data.columns:
             # Use enhanced data structure with proper columns
@@ -1294,8 +1291,6 @@ with tab4:
             if group_cols:
                 # Check which columns actually exist in the data
                 available_group_cols = [col for col in group_cols if col in spatial_data.columns]
-                
-                st.info(f"Looking for group columns: {group_cols}, Found: {available_group_cols}")
                 
                 if available_group_cols:
                     try:
@@ -1354,7 +1349,7 @@ with tab4:
                             column_mapping["subregion"] = "Subregion"
                         
                         display_data = display_data.rename(columns=column_mapping)
-                    
+                        
                     except Exception as e:
                         st.error(f"Error during groupby operation: {str(e)}")
                         st.info("Falling back to basic data display")
@@ -1386,7 +1381,6 @@ with tab4:
                 except Exception as e:
                     st.error(f"Error during national aggregation: {str(e)}")
                     display_data = spatial_data.head(20).copy()
-                
         else:
             # Fallback: no enhanced data structure, show basic info
             st.info("Enhanced urbanization data structure not available. Showing basic information.")
@@ -1444,7 +1438,7 @@ with tab4:
                     values="source_acres",
                     fill_value=0
                 ).reset_index()
-                
+    
                 # Flatten column names and add 'acres_from_' prefix
                 source_pivot.columns = [
                     f"acres_from_{col.lower().replace(' ', '_').replace('-', '_')}" 
@@ -1507,7 +1501,7 @@ with tab4:
         
         priority_cols.extend([col for col in metrics_cols if col in download_data.columns])
         priority_cols.extend(available_source_cols)
-        
+    
         # Add remaining columns
         remaining_cols = [col for col in download_data.columns if col not in priority_cols]
         final_col_order = priority_cols + remaining_cols
@@ -1525,7 +1519,7 @@ with tab4:
         download_data["time_period"] = "All Periods (2020-2070)"
         download_data["analysis_type"] = "Enhanced Urbanization Analysis with Baseline Rates"
         download_data["generated_date"] = pd.Timestamp.now().strftime("%Y-%m-%d %H:%M:%S")
-        
+    
         # Convert to CSV
         csv_data = download_data.to_csv(index=False)
         
@@ -1560,7 +1554,7 @@ with tab4:
         # Display data preview
         st.subheader(f"📋 Data Preview ({len(download_data):,} records)")
         st.dataframe(download_data.head(20), use_container_width=True)
-        
+    
         col1, col2 = st.columns(2)
         with col1:
             scenario_name = selected_scenario_display.replace(' ', '_').replace('(', '').replace(')', '')
@@ -1589,7 +1583,247 @@ with tab4:
 with tab5:
     st.header("🌲 Where is Forest Loss Rate Highest?")
     
-    # Get county transitions data 
+    # Load data using database views for spatial levels (similar to urbanization tab)
+    @st.cache_data
+    def load_forest_data_enhanced(spatial_level, scenario_filter=None, destination_filter=None):
+        """Load enhanced forest loss data with FIPS, regions, destination breakdown, and proper forest loss rates."""
+        import duckdb
+        
+        # Define scenario mapping inside the function
+        scenario_descriptions = {
+            'Overall Mean': 'Ensemble Projection (Average of All Scenarios)',
+            'ensemble_LM': 'Sustainable Development (RCP4.5-SSP1)',
+            'ensemble_HL': 'Climate Challenge (RCP8.5-SSP3)', 
+            'ensemble_HM': 'Moderate Growth (RCP8.5-SSP2)',
+            'ensemble_HH': 'High Development (RCP8.5-SSP5)'
+        }
+        
+        # Create reverse mapping for database queries
+        scenario_reverse_mapping = {v: k for k, v in scenario_descriptions.items()}
+        # Handle the special case for 'Overall Mean'
+        scenario_reverse_mapping['Ensemble Projection (Average of All Scenarios)'] = 'ensemble_overall'
+        
+        db_path = "data/database/rpa.db"
+        
+        try:
+            conn = duckdb.connect(db_path)
+            
+            if spatial_level == "County":
+                # Enhanced county query with baseline forest area and proper rate calculations
+                query = '''
+                WITH baseline_forest AS (
+                    SELECT 
+                        fips_code,
+                        county_name,
+                        state_name,
+                        scenario_name,
+                        baseline_acres_2020 as baseline_forest_acres_2020
+                    FROM baseline_county_land_stock
+                    WHERE land_use_code = 'fr'
+                ),
+                forest_loss_with_destination AS (
+                    SELECT 
+                        fips_code,
+                        county_name,
+                        state_name,
+                        scenario_name,
+                        to_category,
+                        SUM(total_area) as forest_lost_acres,
+                        region,
+                        subregion
+                    FROM "County-Level Land Use Transitions"
+                    WHERE from_category = 'Forest' AND to_category != 'Forest'
+                    GROUP BY fips_code, county_name, state_name, scenario_name, to_category, region, subregion
+                ),
+                total_forest_loss AS (
+                    SELECT 
+                        fips_code,
+                        county_name,
+                        state_name,
+                        scenario_name,
+                        region,
+                        subregion,
+                        SUM(forest_lost_acres) as total_forest_lost_acres
+                    FROM forest_loss_with_destination
+                    GROUP BY fips_code, county_name, state_name, scenario_name, region, subregion
+                )
+                SELECT 
+                    b.fips_code,
+                    t.county_name,
+                    t.state_name,
+                    t.region,
+                    t.subregion,
+                    b.scenario_name,
+                    COALESCE(b.baseline_forest_acres_2020, 0) as baseline_forest_acres_2020,
+                    COALESCE(t.total_forest_lost_acres, 0) as total_forest_lost_acres,
+                    (COALESCE(b.baseline_forest_acres_2020, 0) - COALESCE(t.total_forest_lost_acres, 0)) as projected_forest_acres_2070,
+                    -- Proper forest loss rate as percentage relative to 2020 baseline
+                    CASE 
+                        WHEN COALESCE(b.baseline_forest_acres_2020, 0) > 0 THEN 
+                            (COALESCE(t.total_forest_lost_acres, 0) / b.baseline_forest_acres_2020 * 100)
+                        ELSE NULL
+                    END as forest_loss_rate_percent,
+                    -- Absolute forest loss rate (acres per decade)
+                    COALESCE(t.total_forest_lost_acres, 0) / 5.0 as forest_loss_rate_acres_per_decade,
+                    -- Annualized loss rate
+                    CASE 
+                        WHEN COALESCE(b.baseline_forest_acres_2020, 0) > 0 AND (COALESCE(b.baseline_forest_acres_2020, 0) - COALESCE(t.total_forest_lost_acres, 0)) > 0 THEN 
+                            (POWER((COALESCE(b.baseline_forest_acres_2020, 0) - COALESCE(t.total_forest_lost_acres, 0)) / b.baseline_forest_acres_2020, 1.0/50.0) - 1) * 100
+                        ELSE NULL
+                    END as annualized_forest_loss_rate_percent,
+                    -- Destination breakdown pivot (need to handle separately)
+                    d.to_category,
+                    COALESCE(d.forest_lost_acres, 0) as destination_acres
+                FROM baseline_forest b
+                FULL OUTER JOIN total_forest_loss t ON b.fips_code = t.fips_code 
+                    AND b.county_name = t.county_name 
+                    AND b.state_name = t.state_name 
+                    AND b.scenario_name = t.scenario_name
+                LEFT JOIN forest_loss_with_destination d ON b.fips_code = d.fips_code 
+                    AND b.county_name = d.county_name 
+                    AND b.state_name = d.state_name 
+                    AND b.scenario_name = d.scenario_name
+                WHERE 1=1
+                '''
+                
+                if scenario_filter and scenario_filter != "All Scenarios":
+                    scenario_key = scenario_reverse_mapping.get(scenario_filter, scenario_filter)
+                    query += f" AND b.scenario_name = '{scenario_key}'"
+                
+                if destination_filter and destination_filter != "All Destinations":
+                    query += f" AND (d.to_category = '{destination_filter}' OR d.to_category IS NULL)"
+                
+                query += " ORDER BY COALESCE(t.total_forest_lost_acres, 0) DESC"
+                
+            elif spatial_level == "State":
+                # Enhanced state query using baseline_state_land_stock
+                query = '''
+                WITH baseline_forest AS (
+                    SELECT 
+                        state_name,
+                        region,
+                        subregion,
+                        scenario_name,
+                        baseline_acres_2020 as baseline_forest_acres_2020
+                    FROM baseline_state_land_stock
+                    WHERE land_use_code = 'fr'
+                ),
+                forest_loss_development AS (
+                    SELECT 
+                        state_name,
+                        region,
+                        subregion,
+                        scenario_name,
+                        SUM(total_area) as total_forest_lost_acres
+                    FROM "State-Level Land Use Transitions"
+                    WHERE from_category = 'Forest' AND to_category != 'Forest'
+                    GROUP BY state_name, region, subregion, scenario_name
+                )
+                SELECT 
+                    b.state_name,
+                    b.region,
+                    b.subregion,
+                    b.scenario_name,
+                    COALESCE(b.baseline_forest_acres_2020, 0) as baseline_forest_acres_2020,
+                    COALESCE(t.total_forest_lost_acres, 0) as total_forest_lost_acres,
+                    (COALESCE(b.baseline_forest_acres_2020, 0) - COALESCE(t.total_forest_lost_acres, 0)) as projected_forest_acres_2070,
+                    -- Proper forest loss rate as percentage relative to 2020 baseline
+                    CASE 
+                        WHEN COALESCE(b.baseline_forest_acres_2020, 0) > 0 THEN 
+                            (COALESCE(t.total_forest_lost_acres, 0) / b.baseline_forest_acres_2020 * 100)
+                        ELSE NULL
+                    END as forest_loss_rate_percent,
+                    -- Absolute forest loss rate (acres per decade)
+                    COALESCE(t.total_forest_lost_acres, 0) / 5.0 as forest_loss_rate_acres_per_decade,
+                    -- Annualized loss rate
+                    CASE 
+                        WHEN COALESCE(b.baseline_forest_acres_2020, 0) > 0 AND (COALESCE(b.baseline_forest_acres_2020, 0) - COALESCE(t.total_forest_lost_acres, 0)) > 0 THEN 
+                            (POWER((COALESCE(b.baseline_forest_acres_2020, 0) - COALESCE(t.total_forest_lost_acres, 0)) / b.baseline_forest_acres_2020, 1.0/50.0) - 1) * 100
+                        ELSE NULL
+                    END as annualized_forest_loss_rate_percent
+                FROM baseline_forest b
+                LEFT JOIN forest_loss_development t ON b.state_name = t.state_name 
+                    AND b.scenario_name = t.scenario_name
+                WHERE 1=1
+                '''
+                
+                if scenario_filter and scenario_filter != "All Scenarios":
+                    scenario_key = scenario_reverse_mapping.get(scenario_filter, scenario_filter)
+                    query += f" AND b.scenario_name = '{scenario_key}'"
+                
+                query += " ORDER BY COALESCE(t.total_forest_lost_acres, 0) DESC"
+            
+            # Execute query and load data
+            result_df = conn.execute(query).df()
+            conn.close()
+            
+            if result_df.empty:
+                st.warning(f"No data available for {spatial_level} level with the selected scenario.")
+                return pd.DataFrame()
+            
+            return result_df
+                
+        except Exception as e:
+            st.error(f"Error loading enhanced forest loss data: {str(e)}")
+            return pd.DataFrame()
+    
+    # Analysis controls
+    st.subheader("Analysis Controls")
+    
+    col1, col2, col3 = st.columns([1, 1, 1])
+    
+    with col1:
+        # Add scenario selector
+        scenario_descriptions = {
+            'Overall Mean': 'Ensemble Projection (Average of All Scenarios)',
+            'ensemble_LM': 'Sustainable Development (RCP4.5-SSP1)',
+            'ensemble_HL': 'Climate Challenge (RCP8.5-SSP3)', 
+            'ensemble_HM': 'Moderate Growth (RCP8.5-SSP2)',
+            'ensemble_HH': 'High Development (RCP8.5-SSP5)'
+        }
+        
+        # Create reverse mapping for database queries
+        scenario_reverse_mapping = {v: k for k, v in scenario_descriptions.items()}
+        # Handle the special case for 'Overall Mean'
+        scenario_reverse_mapping['Ensemble Projection (Average of All Scenarios)'] = 'ensemble_overall'
+        
+        scenario_options = list(scenario_descriptions.keys())
+        selected_scenario_display = st.selectbox("Select RPA Scenario", options=scenario_options, key="forest_scenario")
+        
+        # Map display name back to database scenario name
+        if selected_scenario_display == 'Overall Mean':
+            selected_scenario = 'ensemble_overall'
+        else:
+            selected_scenario = selected_scenario_display
+    
+    with col2:
+        # Add spatial level selector for data extraction
+        spatial_levels = ["County", "State", "Subregion", "Region", "National"]
+        selected_spatial_level = st.selectbox("Data Extraction Level", options=spatial_levels, 
+                                            index=1,  # Default to State
+                                            key="forest_spatial",
+                                            help="Choose spatial level for data download and detailed analysis")
+    
+    with col3:
+        # Keep destination filter
+        # Get destinations from county data for filter options
+        county_df = data["County-Level Land Use Transitions"]
+        forest_counties_df = county_df[county_df["from_category"] == "Forest"]
+        destinations = forest_counties_df["to_category"].unique().tolist()
+        destinations.sort()
+        selected_destination = st.selectbox("Forest Converted To", 
+                                          options=["All Destinations"] + destinations, 
+                                          key="forest_destination")
+    
+    # Load data at selected spatial level
+    spatial_data = load_forest_data_enhanced(selected_spatial_level, selected_scenario, selected_destination)
+    
+    if spatial_data is None:
+        st.error("Unable to load forest loss data from database views.")
+        st.stop()
+    
+    # For visualization, always use state-level aggregation for readability
+    # Get county transitions data for visualization
     county_df = data["County-Level Land Use Transitions"]
     
     # Filter for only the 5 key RPA scenarios
@@ -1605,110 +1839,57 @@ with tab5:
     # Filter for forest transitions only (where from_category is 'Forest')
     forest_counties_df = county_df[county_df["from_category"] == "Forest"]
     
-    # Analysis controls
-    st.subheader("Analysis Controls")
-    
-    # Fixed settings - no user controls for scenario and analysis level
-    selected_scenario = 'ensemble_overall'  # Ensemble Projection
-    selected_scenario_display = 'Ensemble Projection'
-    analysis_level = "State"
-    
-    # Keep only the destination filter
-    destinations = forest_counties_df["to_category"].unique().tolist()
-    destinations.sort()
-    selected_destination = st.selectbox("Forest Converted To", 
-                                      options=["All Destinations"] + destinations, 
-                                      key="forest_destination")
-    
-    # Filter data based on selections
-    filtered_data = forest_counties_df[forest_counties_df["scenario_name"] == selected_scenario]
+    # Filter data for visualization (always use state level for charts)
+    viz_data = forest_counties_df[forest_counties_df["scenario_name"] == selected_scenario]
     if selected_destination != "All Destinations":
-        filtered_data = filtered_data[filtered_data["to_category"] == selected_destination]
+        viz_data = viz_data[viz_data["to_category"] == selected_destination]
     
-    # Aggregate data based on analysis level
-    if analysis_level == "County":
-        # Check if fips_code column exists, if not use only county and state
-        if "fips_code" in filtered_data.columns:
-            group_cols = ["county_name", "state_name", "fips_code"]
-        else:
-            group_cols = ["county_name", "state_name"]
-        location_col = "county_name"
-    else:  # State
-        group_cols = ["state_name"]
-        location_col = "state_name"
-    
-    # Calculate forest loss metrics
-    forest_analysis = filtered_data.groupby(group_cols).agg({
+    # Aggregate visualization data to state level for charts
+    viz_analysis = viz_data.groupby(["state_name"]).agg({
         "total_area": ["sum", "mean"],
         "decade_name": "nunique"
     }).round(2)
     
-    # Flatten column names
-    forest_analysis.columns = ["total_acres", "avg_acres_per_decade", "num_decades"]
-    forest_analysis = forest_analysis.reset_index()
+    # Flatten column names for visualization
+    viz_analysis.columns = ["total_acres", "avg_acres_per_decade", "num_decades"]
+    viz_analysis = viz_analysis.reset_index()
     
-    # Calculate forest loss rate (acres per decade)
-    forest_analysis["forest_loss_rate"] = (forest_analysis["total_acres"] / 
-                                         forest_analysis["num_decades"]).round(2)
+    # Calculate forest loss rate for visualization
+    viz_analysis["forest_loss_rate"] = (viz_analysis["total_acres"] / 
+                                       viz_analysis["num_decades"]).round(2)
     
-    # Sort by total area
-    forest_analysis = forest_analysis.sort_values("total_acres", ascending=False)
+    # Sort by total area for visualization
+    viz_analysis = viz_analysis.sort_values("total_acres", ascending=False)
     
-    # 1. TOP COUNTIES/STATES TEMPORAL TRENDS
+    # 1. TOP STATES TEMPORAL TRENDS (for visualization)
     destination_text = f" (converted to {selected_destination})" if selected_destination != "All Destinations" else ""
-    st.subheader(f"📈 Forest Loss Trends: Top {analysis_level}s ({selected_scenario_display}){destination_text}")
+    st.subheader(f"📈 Forest Loss Trends: Top States ({scenario_descriptions[selected_scenario_display]}){destination_text}")
+    st.info(f"📊 Visualization shows state-level data | Data extraction/download uses {selected_spatial_level} level")
     
-    # Get top locations for temporal analysis
-    top_10 = forest_analysis.head(10).copy()
+    # Get top locations for temporal analysis (always states for visualization)
+    top_10_viz = viz_analysis.head(10).copy()
+    top_10_viz["location"] = top_10_viz["state_name"]
     
-    # Create location labels for display
-    if analysis_level == "County":
-        top_10["location"] = top_10.apply(lambda row: f"{row['county_name']}, {row['state_name']}", axis=1)
-    else:
-        top_10["location"] = top_10[location_col]
-    
-    # Create temporal visualization for top counties/states
-    if len(top_10) > 0:
-        # Get temporal data for top locations
-        if analysis_level == "County":
-            top_locations = top_10[["county_name", "state_name"]].head(10)  # Top 10
-            temporal_data = []
-            for _, row in top_locations.iterrows():
-                location_data = filtered_data[
-                    (filtered_data["county_name"] == row["county_name"]) & 
-                    (filtered_data["state_name"] == row["state_name"])
-                ]
-                if len(location_data) > 0:
-                    location_summary = location_data.groupby("decade_name")["total_area"].sum().reset_index()
-                    location_summary["location"] = f"{row['county_name']}, {row['state_name']}"
-                    # Calculate percentage change from first period
-                    if len(location_summary) > 1:
-                        baseline = location_summary["total_area"].iloc[0]
-                        if baseline > 0:
-                            location_summary["pct_change"] = ((location_summary["total_area"] - baseline) / baseline * 100).round(1)
-                        else:
-                            location_summary["pct_change"] = 0
+    # Create temporal visualization for top states
+    if len(top_10_viz) > 0:
+        # Get temporal data for top states
+        top_states = top_10_viz[["state_name"]].head(10)  # Top 10
+        temporal_data = []
+        for _, row in top_states.iterrows():
+            state_data = viz_data[viz_data["state_name"] == row["state_name"]]
+            if len(state_data) > 0:
+                state_summary = state_data.groupby("decade_name")["total_area"].sum().reset_index()
+                state_summary["location"] = row["state_name"]
+                # Calculate percentage change from first period
+                if len(state_summary) > 1:
+                    baseline = state_summary["total_area"].iloc[0]
+                    if baseline > 0:
+                        state_summary["pct_change"] = ((state_summary["total_area"] - baseline) / baseline * 100).round(1)
                     else:
-                        location_summary["pct_change"] = 0
-                    temporal_data.append(location_summary)
-        else:  # State level
-            top_locations = top_10[["state_name"]].head(10)  # Top 10
-            temporal_data = []
-            for _, row in top_locations.iterrows():
-                location_data = filtered_data[filtered_data["state_name"] == row["state_name"]]
-                if len(location_data) > 0:
-                    location_summary = location_data.groupby("decade_name")["total_area"].sum().reset_index()
-                    location_summary["location"] = row["state_name"]
-                    # Calculate percentage change from first period
-                    if len(location_summary) > 1:
-                        baseline = location_summary["total_area"].iloc[0]
-                        if baseline > 0:
-                            location_summary["pct_change"] = ((location_summary["total_area"] - baseline) / baseline * 100).round(1)
-                        else:
-                            location_summary["pct_change"] = 0
-                    else:
-                        location_summary["pct_change"] = 0
-                    temporal_data.append(location_summary)
+                        state_summary["pct_change"] = 0
+                else:
+                    state_summary["pct_change"] = 0
+                temporal_data.append(state_summary)
         
         # Create publication-quality line chart
         if temporal_data:
@@ -1719,10 +1900,8 @@ with tab5:
             ax.set_facecolor('#0E1117')
             
             # Sort temporal_data by percentage change (highest to lowest)
-            # Calculate final percentage change for each location to sort properly
             location_pct_changes = []
             for location_data in temporal_data:
-                # Get the final percentage change value (last time period)
                 final_pct_change = location_data["pct_change"].iloc[-1] if len(location_data) > 0 else 0
                 location_pct_changes.append((final_pct_change, location_data))
             
@@ -1746,8 +1925,7 @@ with tab5:
             # Styling for dark mode
             ax.set_xlabel("Year", fontsize=14, fontweight='bold', color='white')
             ax.set_ylabel("Percentage Change from Baseline (%)", fontsize=14, fontweight='bold', color='white')
-            destination_text = f" (to {selected_destination})" if selected_destination != "All Destinations" else ""
-            ax.set_title(f"Forest Loss Trends: Top 10 {analysis_level}s{destination_text} ({selected_scenario_display})", 
+            ax.set_title(f"Forest Loss Trends: Top 10 States{destination_text} ({scenario_descriptions[selected_scenario_display]})", 
                         fontsize=16, fontweight='bold', pad=20, color='white')
             
             # Legend at bottom, horizontal
@@ -1777,143 +1955,328 @@ with tab5:
     else:
         st.warning("No data available for the selected criteria.")
     
-    # 3. SUMMARY STATISTICS AND DATA TABLE
-    st.subheader("📊 Summary Statistics")
-    col1, col2, col3, col4 = st.columns(4)
+    # 2. SUMMARY STATISTICS FOR SELECTED SPATIAL LEVEL
+    st.subheader(f"📊 Summary Statistics ({selected_spatial_level} Level)")
     
-    with col1:
-        st.metric("Total States", len(forest_analysis))
-    with col2:
-        st.metric("Total Forest Acres Transitioned", f"{forest_analysis['total_acres'].sum():,.0f}")
-    with col3:
-        st.metric("Average per State", f"{forest_analysis['total_acres'].mean():,.0f}")
-    with col4:
-        st.metric("Highest Single State", f"{forest_analysis['total_acres'].max():,.0f}")
-    
-    # Detailed data table
-    st.subheader("📋 Detailed Analysis Results")
-    
-    # Format data for display
-    display_data = forest_analysis.copy()
-    display_data["total_acres"] = display_data["total_acres"].map(lambda x: f"{x:,.0f}")
-    display_data["avg_acres_per_decade"] = display_data["avg_acres_per_decade"].map(lambda x: f"{x:,.1f}")
-    display_data["forest_loss_rate"] = display_data["forest_loss_rate"].map(lambda x: f"{x:,.1f}")
-    
-    # Rename columns for clarity
-    column_mapping = {
-        "total_acres": "Total Forest Acres Transitioned",
-        "avg_acres_per_decade": "Average Acres per Decade",
-        "num_decades": "Decades Covered",
-        "forest_loss_rate": "Forest Transition Rate (acres/decade)"
-    }
-    
-    if analysis_level == "County":
-        column_mapping.update({
-            "county_name": "County",
-            "state_name": "State"
-        })
-        if "fips_code" in display_data.columns:
-            column_mapping["fips_code"] = "FIPS Code"
-    else:
-        column_mapping["state_name"] = "State"
-    
-    display_data = display_data.rename(columns=column_mapping)
-    
-    # Show data with search/filter capability
-    st.dataframe(display_data, use_container_width=True)
-    
-    # 4. DOWNLOAD FUNCTIONALITY
-    st.subheader("💾 Download Analysis Results")
-    
-    # Prepare download data (with original numeric values)
-    download_data = forest_analysis.copy()
-    
-    # Add metadata
-    download_data["scenario"] = selected_scenario
-    download_data["time_period"] = "All Periods"
-    download_data["destination"] = selected_destination
-    download_data["analysis_level"] = analysis_level
-    download_data["generated_date"] = pd.Timestamp.now().strftime("%Y-%m-%d %H:%M:%S")
-    
-    # Reorder columns for better readability, putting identifiers first
-    if analysis_level == "County":
-        # For county data, ensure FIPS code is first, followed by names
-        id_columns = ["fips_code", "county_name", "state_name"]
-        if "region" in download_data.columns:
-            id_columns.append("region")
-        if "subregion" in download_data.columns:
-            id_columns.append("subregion")
-    else:  # State
-        id_columns = ["state_name"]
-    
-    # Get data columns (metrics)
-    data_columns = ["total_acres", "avg_acres_per_decade", "num_decades", "forest_loss_rate"]
-    
-    # Get metadata columns
-    metadata_columns = ["scenario", "time_period", "destination", "analysis_level", "generated_date"]
-    
-    # Reorder all columns: IDs -> Data -> Metadata
-    available_id_cols = [col for col in id_columns if col in download_data.columns]
-    available_data_cols = [col for col in data_columns if col in download_data.columns]
-    available_meta_cols = [col for col in metadata_columns if col in download_data.columns]
-    
-    # Add any remaining columns that weren't categorized
-    remaining_cols = [col for col in download_data.columns if col not in available_id_cols + available_data_cols + available_meta_cols]
-    
-    # Final column order
-    final_column_order = available_id_cols + available_data_cols + remaining_cols + available_meta_cols
-    download_data = download_data[final_column_order]
-    
-    # Show info about FIPS codes if included
-    if "fips_code" in download_data.columns:
-        st.info("💡 Downloads include FIPS codes for easy integration with mapping and other datasets")
-    
-    # Convert to CSV
-    csv_data = download_data.to_csv(index=False).encode('utf-8')
-    
-    col1, col2 = st.columns(2)
-    with col1:
-        st.download_button(
-            label="📥 Download Full Analysis (CSV)",
-            data=csv_data,
-            file_name=f"forest_loss_analysis_{analysis_level.lower()}_{selected_scenario}_all_periods_{selected_destination}.csv",
-            mime="text/csv",
-            help="Download complete analysis results with all metrics"
-        )
-    
-    with col2:
-        # Top 20 download
-        top_20_data = download_data.head(20).copy()
-        
-        # Reorder columns for top 20 as well
-        if analysis_level == "County":
-            id_columns = ["fips_code", "county_name", "state_name"]
-            if "region" in top_20_data.columns:
-                id_columns.append("region")
-            if "subregion" in top_20_data.columns:
-                id_columns.append("subregion")
+    # Check what columns are available in the enhanced data and handle accordingly
+    if spatial_data is not None and not spatial_data.empty:
+        # For enhanced data structure with proper baseline rate calculations
+        if "total_forest_lost_acres" in spatial_data.columns and "baseline_forest_acres_2020" in spatial_data.columns:
+            # Use enhanced data structure with proper columns
+            if selected_spatial_level == "County":
+                group_cols = ["county_name", "state_name"]
+                location_col = "county_name"
+                unit_name = "Counties"
+            elif selected_spatial_level == "State":
+                group_cols = ["state_name"]
+                location_col = "state_name"
+                unit_name = "States"
+            elif selected_spatial_level == "Region":
+                group_cols = ["region"]
+                location_col = "region"
+                unit_name = "Regions"
+            elif selected_spatial_level == "Subregion":
+                group_cols = ["subregion"]
+                location_col = "subregion"
+                unit_name = "Subregions"
+            else:  # National
+                group_cols = []
+                location_col = None
+                unit_name = "National"
+            
+            # Aggregate enhanced data for selected spatial level
+            if group_cols:
+                # Check which columns actually exist in the data
+                available_group_cols = [col for col in group_cols if col in spatial_data.columns]
+                
+                if available_group_cols:
+                    try:
+                        # Aggregate using the enhanced columns
+                        spatial_analysis = spatial_data.groupby(available_group_cols).agg({
+                            "total_forest_lost_acres": ["sum", "mean"],
+                            "baseline_forest_acres_2020": "first",
+                            "forest_loss_rate_percent": "mean",
+                            "forest_loss_rate_acres_per_decade": "mean"
+                        }).round(2)
+                        
+                        # Flatten column names
+                        spatial_analysis.columns = ["total_forest_lost_acres", "avg_forest_lost_per_area", "baseline_forest_acres", "avg_forest_loss_rate", "avg_loss_rate_per_decade"]
+                        spatial_analysis = spatial_analysis.reset_index()
+                        
+                        # Sort by total forest lost acres
+                        spatial_analysis = spatial_analysis.sort_values("total_forest_lost_acres", ascending=False)
+                        
+                        # Display summary metrics
+                        col1, col2, col3, col4 = st.columns(4)
+                        
+                        with col1:
+                            st.metric(f"Total {unit_name}", len(spatial_analysis))
+                        with col2:
+                            st.metric("Total Forest Acres Lost", f"{spatial_analysis['total_forest_lost_acres'].sum():,.0f}")
+                        with col3:
+                            st.metric(f"Average per {unit_name[:-1]}", f"{spatial_analysis['total_forest_lost_acres'].mean():,.0f}")
+                        with col4:
+                            st.metric(f"Highest Single {unit_name[:-1]}", f"{spatial_analysis['total_forest_lost_acres'].max():,.0f}")
+                        
+                        # Format data for display
+                        display_data = spatial_analysis.copy()
+                        display_data["total_forest_lost_acres"] = display_data["total_forest_lost_acres"].map(lambda x: f"{x:,.0f}")
+                        display_data["baseline_forest_acres"] = display_data["baseline_forest_acres"].map(lambda x: f"{x:,.0f}")
+                        display_data["avg_forest_loss_rate"] = display_data["avg_forest_loss_rate"].map(lambda x: f"{x:,.1f}%")
+                        display_data["avg_loss_rate_per_decade"] = display_data["avg_loss_rate_per_decade"].map(lambda x: f"{x:,.1f}")
+                        
+                        # Rename columns for clarity
+                        column_mapping = {
+                            "total_forest_lost_acres": "Total Forest Acres Lost",
+                            "baseline_forest_acres": "2020 Baseline Forest Acres",
+                            "avg_forest_loss_rate": "Avg Forest Loss Rate (%)",
+                            "avg_loss_rate_per_decade": "Avg Loss Rate (acres/decade)"
+                        }
+                        
+                        if selected_spatial_level == "County":
+                            column_mapping.update({
+                                "county_name": "County",
+                                "state_name": "State"
+                            })
+                        elif selected_spatial_level == "State":
+                            column_mapping["state_name"] = "State"
+                        elif selected_spatial_level == "Region":
+                            column_mapping["region"] = "Region"
+                        elif selected_spatial_level == "Subregion":
+                            column_mapping["subregion"] = "Subregion"
+                        
+                        display_data = display_data.rename(columns=column_mapping)
+                        
+                    except Exception as e:
+                        st.error(f"Error during groupby operation: {str(e)}")
+                        st.info("Falling back to basic data display")
+                        display_data = spatial_data.head(20).copy()
+                else:
+                    # No valid grouping columns found
+                    st.warning(f"No valid grouping columns found for {selected_spatial_level} level in the enhanced data.")
+                    st.info(f"Expected columns: {group_cols}")
+                    st.info(f"Available columns: {list(spatial_data.columns)}")
+                    display_data = spatial_data.head(20).copy()
+            else:
+                # National level - simple aggregation
+                try:
+                    spatial_analysis = spatial_data.agg({
+                        "total_forest_lost_acres": "sum",
+                        "baseline_forest_acres_2020": "sum"
+                    })
+                    
+                    col1, col2 = st.columns(2)
+                    with col1:
+                        st.metric("Total Forest Acres Lost", f"{spatial_analysis['total_forest_lost_acres']:,.0f}")
+                    with col2:
+                        st.metric("Total Baseline Forest Acres (2020)", f"{spatial_analysis['baseline_forest_acres_2020']:,.0f}")
+                    
+                    display_data = pd.DataFrame({
+                        "Metric": ["Total Forest Acres Lost", "Total Baseline Forest Acres (2020)"],
+                        "Value": [f"{spatial_analysis['total_forest_lost_acres']:,.0f}", f"{spatial_analysis['baseline_forest_acres_2020']:,.0f}"]
+                    })
+                except Exception as e:
+                    st.error(f"Error during national aggregation: {str(e)}")
+                    display_data = spatial_data.head(20).copy()
         else:
-            id_columns = ["state_name"]
+            # Fallback: no enhanced data structure, show basic info
+            st.info("Enhanced forest loss data structure not available. Showing basic information.")
+            col1, col2 = st.columns(2)
+            with col1:
+                st.metric("Total Records", len(spatial_data))
+            with col2:
+                st.metric("Data Columns", len(spatial_data.columns))
+            
+            display_data = spatial_data.head(10)  # Show first 10 rows
+    else:
+        st.warning("No spatial data available for analysis.")
+        display_data = pd.DataFrame()
+    
+    # 3. DETAILED DATA TABLE FOR SELECTED SPATIAL LEVEL
+    st.subheader(f"📋 Detailed Analysis Results ({selected_spatial_level} Level)")
+    
+    if not display_data.empty:
+        # Show data with search/filter capability
+        st.dataframe(display_data, use_container_width=True)
+    else:
+        st.info("No detailed data available to display.")
+    
+    # 4. ENHANCED DOWNLOAD FUNCTIONALITY FOR SELECTED SPATIAL LEVEL
+    st.subheader(f"💾 Enhanced Download Analysis Results ({selected_spatial_level} Level)")
+    
+    # Prepare enhanced download data
+    if selected_spatial_level == "County" and spatial_data is not None and not spatial_data.empty:
         
-        data_columns = ["total_acres", "avg_acres_per_decade", "num_decades", "forest_loss_rate"]
-        metadata_columns = ["scenario", "time_period", "destination", "analysis_level", "generated_date"]
+        # For county level, we need to process the destination breakdown data
+        # First, aggregate the main metrics without destination breakdown
+        main_metrics = spatial_data.groupby([
+            "fips_code", "county_name", "state_name", "region", "subregion", "scenario_name"
+        ]).agg({
+            "baseline_forest_acres_2020": "first",
+            "total_forest_lost_acres": "first", 
+            "projected_forest_acres_2070": "first",
+            "forest_loss_rate_percent": "first",
+            "forest_loss_rate_acres_per_decade": "first",
+            "annualized_forest_loss_rate_percent": "first"
+        }).reset_index()
         
-        available_id_cols = [col for col in id_columns if col in top_20_data.columns]
-        available_data_cols = [col for col in data_columns if col in top_20_data.columns]
-        available_meta_cols = [col for col in metadata_columns if col in top_20_data.columns]
-        remaining_cols = [col for col in top_20_data.columns if col not in available_id_cols + available_data_cols + available_meta_cols]
+        # Get destination breakdown if available
+        if "to_category" in spatial_data.columns and "destination_acres" in spatial_data.columns:
+            destination_breakdown = spatial_data[spatial_data["to_category"].notna()].copy()
+            
+            # Additional safety check: remove any forest-to-forest transitions that might exist
+            destination_breakdown = destination_breakdown[destination_breakdown["to_category"] != "Forest"]
+            
+            # Pivot to get destination categories as columns
+            if not destination_breakdown.empty:
+                destination_pivot = destination_breakdown.pivot_table(
+                    index=["fips_code", "county_name", "state_name", "region", "subregion", "scenario_name"],
+                    columns="to_category",
+                    values="destination_acres",
+                    fill_value=0
+                ).reset_index()
+    
+                # Flatten column names and add 'acres_to_' prefix
+                destination_pivot.columns = [
+                    f"acres_to_{col.lower().replace(' ', '_').replace('-', '_')}" 
+                    if col not in ["fips_code", "county_name", "state_name", "region", "subregion", "scenario_name"]
+                    else col
+                    for col in destination_pivot.columns
+                ]
+                
+                # Merge with main metrics
+                download_data = main_metrics.merge(
+                    destination_pivot, 
+                    on=["fips_code", "county_name", "state_name", "region", "subregion", "scenario_name"],
+                    how="left"
+                )
+                
+                # Get list of available destination columns for info display
+                available_destination_cols = [col for col in download_data.columns if col.startswith("acres_to_")]
+            else:
+                download_data = main_metrics.copy()
+                available_destination_cols = []
+        else:
+            download_data = main_metrics.copy()
+            available_destination_cols = []
+            
+    elif selected_spatial_level == "State" and spatial_data is not None and not spatial_data.empty:
+        # For state level, data is already aggregated properly
+        download_data = spatial_data.copy()
+        available_destination_cols = []
         
-        final_column_order = available_id_cols + available_data_cols + remaining_cols + available_meta_cols
-        top_20_data = top_20_data[final_column_order]
+    else:
+        # Fallback for other spatial levels or empty data
+        download_data = spatial_data.copy() if spatial_data is not None else pd.DataFrame()
+        available_destination_cols = []
+    
+    if download_data.empty:
+        st.warning("No data available for download with the current selection.")
+    else:
+        # Reorder columns to put key identifiers first
+        priority_cols = []
+        if "fips_code" in download_data.columns:
+            priority_cols.append("fips_code")
+        if "county_name" in download_data.columns:
+            priority_cols.append("county_name")
+        if "state_name" in download_data.columns:
+            priority_cols.append("state_name")
+        if "region" in download_data.columns:
+            priority_cols.append("region")
+        if "subregion" in download_data.columns:
+            priority_cols.append("subregion")
         
-        top_20_csv = top_20_data.to_csv(index=False).encode('utf-8')
-        st.download_button(
-            label="🏆 Download Top 20 (CSV)",
-            data=top_20_csv,
-            file_name=f"top_20_forest_loss_{analysis_level.lower()}_{selected_scenario}.csv",
-            mime="text/csv",
-            help="Download top 20 areas by forest loss"
-        )
+        # Add baseline and metrics columns
+        metrics_cols = [
+            "baseline_forest_acres_2020",
+            "total_forest_lost_acres", 
+            "projected_forest_acres_2070",
+            "forest_loss_rate_percent",
+            "forest_loss_rate_acres_per_decade",
+            "annualized_forest_loss_rate_percent"
+        ]
+        
+        priority_cols.extend([col for col in metrics_cols if col in download_data.columns])
+        priority_cols.extend(available_destination_cols)
+    
+        # Add remaining columns
+        remaining_cols = [col for col in download_data.columns if col not in priority_cols]
+        final_col_order = priority_cols + remaining_cols
+        
+        download_data = download_data[final_col_order]
+        
+        # Round numeric columns for better readability
+        numeric_columns = download_data.select_dtypes(include=[np.number]).columns
+        download_data[numeric_columns] = download_data[numeric_columns].round(2)
+    
+        # Add metadata
+        download_data["scenario"] = selected_scenario
+        download_data["scenario_description"] = scenario_descriptions[selected_scenario_display]
+        download_data["spatial_level"] = selected_spatial_level
+        download_data["destination_filter"] = selected_destination
+        download_data["time_period"] = "All Periods (2020-2070)"
+        download_data["analysis_type"] = "Enhanced Forest Loss Analysis with Baseline Rates"
+        download_data["generated_date"] = pd.Timestamp.now().strftime("%Y-%m-%d %H:%M:%S")
+    
+        # Convert to CSV
+        csv_data = download_data.to_csv(index=False)
+        
+        # Enhanced info about included features
+        info_items = []
+        if "fips_code" in download_data.columns:
+            info_items.append("🗺️ FIPS codes for GIS integration")
+        if "region" in download_data.columns:
+            info_items.append("🌎 Regional classifications (Census regions)")
+        if "subregion" in download_data.columns:
+            info_items.append("📍 Subregional classifications (Census divisions)")
+        if "baseline_forest_acres_2020" in download_data.columns:
+            info_items.append("📊 2020 baseline forest area for proper rate calculations")
+        if "forest_loss_rate_percent" in download_data.columns:
+            info_items.append("📈 True forest loss rate (% relative to 2020 baseline)")
+        if available_destination_cols:
+            info_items.append(f"🔄 Destination land breakdown ({len(available_destination_cols)} non-forest categories)")
+        
+        if info_items:
+            st.info("💡 Enhanced exports include: " + " | ".join(info_items))
+        
+        # Important clarification about forest exclusion and rate calculation
+        if available_destination_cols or "forest_loss_rate_percent" in download_data.columns:
+            st.success("""
+            🎯 **Key Enhancements:**
+            • **Forest LOSS only** (excludes forest-to-forest transitions)
+            • **Proper forest loss rate** calculated as percentage relative to 2020 baseline forest area
+            • **Baseline forest area included** for transparency and validation
+            • **Annualized loss rate** for comparing different time horizons
+            """)
+        
+        # Display data preview
+        st.subheader(f"📋 Data Preview ({len(download_data):,} records)")
+        st.dataframe(download_data.head(20), use_container_width=True)
+    
+        col1, col2 = st.columns(2)
+        with col1:
+            scenario_name = selected_scenario_display.replace(' ', '_').replace('(', '').replace(')', '')
+            destination_name = selected_destination.replace(' ', '_').replace('(', '').replace(')', '')
+            st.download_button(
+                label=f"📥 Enhanced Download ({selected_spatial_level} Level)",
+                data=csv_data,
+                file_name=f"enhanced_forest_loss_analysis_{selected_spatial_level.lower()}_{scenario_name}_{destination_name}_all_periods.csv",
+                mime="text/csv",
+                help=f"Download enhanced forest loss analysis with baseline rates, FIPS codes, regions, and destination breakdown"
+            )
+        
+        with col2:
+            # Top 20 enhanced download (only for aggregated levels)
+            if len(download_data) > 20:
+                top_20_data = download_data.head(20).copy()
+                top_20_csv = top_20_data.to_csv(index=False)
+                st.download_button(
+                    label=f"📥 Top 20 Download",
+                    data=top_20_csv,
+                    file_name=f"enhanced_forest_loss_top20_{selected_spatial_level.lower()}_{scenario_name}_{destination_name}.csv",
+                    mime="text/csv",
+                    help="Download top 20 records with highest total forest acres lost"
+                )
 
 # ---- AGRICULTURAL TRANSITIONS TAB ----
 with tab6:
