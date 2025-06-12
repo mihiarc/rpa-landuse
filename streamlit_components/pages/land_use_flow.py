@@ -170,7 +170,7 @@ def render_land_use_flow_page(data: Dict[str, pd.DataFrame]):
         sankey_decades.sort()
         selected_time_period = st.selectbox(
             "Time Period", 
-            options=["All Periods"] + sankey_decades,
+            options=["2020-2070"] + sankey_decades,
             key="sankey_time"
         )
     
@@ -221,7 +221,7 @@ def render_land_use_flow_page(data: Dict[str, pd.DataFrame]):
     filtered_sankey_data = county_df[county_df["scenario_name"] == selected_sankey_scenario]
     
     # Apply time period filter
-    if selected_time_period != "All Periods":
+    if selected_time_period != "2020-2070":
         filtered_sankey_data = filtered_sankey_data[filtered_sankey_data["decade_name"] == selected_time_period]
     
     # Apply land use filters
@@ -247,7 +247,7 @@ def render_land_use_flow_page(data: Dict[str, pd.DataFrame]):
         
         if len(sankey_data) > 0:
             # Create title
-            time_text = f" ({selected_time_period})" if selected_time_period != "All Periods" else " (2020-2070)"
+            time_text = f" ({selected_time_period})"
             sankey_title = f"National Land Use Transitions - {selected_scenario_display}{time_text}"
             
             # Create Sankey diagram
@@ -311,7 +311,7 @@ def render_land_use_flow_page(data: Dict[str, pd.DataFrame]):
                 
                 if len(state_sankey_data) > 0:
                     # Create title
-                    time_text = f" ({selected_time_period})" if selected_time_period != "All Periods" else " (2020-2070)"
+                    time_text = f" ({selected_time_period})"
                     state_title = f"{state} Land Use Transitions - {selected_scenario_display}{time_text}"
                     
                     # Create Sankey diagram
