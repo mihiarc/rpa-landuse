@@ -61,7 +61,7 @@ def create_sankey_diagram(transitions_data: pd.DataFrame, title: str,
     # Create Sankey diagram
     fig = go.Figure(data=[go.Sankey(
         node=dict(
-            pad=15,
+            pad=25,  # Increased padding between nodes for better spacing
             thickness=20,
             line=dict(color="black", width=0.5),
             label=all_categories,
@@ -75,11 +75,15 @@ def create_sankey_diagram(transitions_data: pd.DataFrame, title: str,
         )
     )])
     
+    # Calculate dynamic height based on number of categories
+    num_categories = len(all_categories)
+    dynamic_height = max(800, 100 * num_categories)  # At least 100px per category
+    
     fig.update_layout(
         title_text=title,
         font_size=12,
-        height=700,
-        margin=dict(l=20, r=20, t=80, b=50)
+        height=dynamic_height,  # Dynamic height based on categories
+        margin=dict(l=30, r=30, t=80, b=120)  # Increased margins all around
     )
     
     return fig
