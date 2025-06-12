@@ -14,9 +14,9 @@ from streamlit_components.pages.overview import render_overview_page
 from streamlit_components.pages.data_explorer import render_data_explorer_page
 from streamlit_components.pages.urbanization_trends import render_urbanization_trends_page
 from streamlit_components.pages.natural_language_query import render_natural_language_query_page
+from streamlit_components.pages.land_use_flow import render_land_use_flow_page
 
 # Import additional pages as they are created
-# from streamlit_components.pages.land_use_flow import render_land_use_flow_page
 # from streamlit_components.pages.forest_transitions import render_forest_transitions_page
 # from streamlit_components.pages.agricultural_transitions import render_agricultural_transitions_page
 # from streamlit_components.pages.state_map import render_state_map_page
@@ -60,9 +60,7 @@ def main():
         render_data_explorer_page(st.session_state.data)
     
     with tabs[2]:  # Land Use Flow Diagrams
-        st.info("Land Use Flow Diagrams page - Coming soon!")
-        st.markdown("This page will display Sankey diagrams showing land use transitions.")
-        # render_land_use_flow_page(st.session_state.data)
+        render_land_use_flow_page(st.session_state.data)
     
     with tabs[3]:  # Urbanization Trends
         render_urbanization_trends_page(st.session_state.data)
