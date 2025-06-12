@@ -11,6 +11,8 @@ import plotly.graph_objects as go
 import requests
 import tempfile
 import duckdb
+from src.rpa_landuse.pandasai.natural_language_query import NaturalLanguageQuery
+from pandas.io.formats.style import Styler
 
 # Set page configuration
 st.set_page_config(
@@ -404,7 +406,7 @@ def create_state_map(state_data, title):
     return state_map
 
 # Main layout with tabs
-tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs(["Overview", "Data Explorer", "Land Use Flow Diagrams", "Urbanization Trends", "Forest Transitions", "Agricultural Transitions", "State Map"])
+tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8 = st.tabs(["Overview", "Data Explorer", "Land Use Flow Diagrams", "Urbanization Trends", "Forest Transitions", "Agricultural Transitions", "State Map", "Natural Language Query"])
 
 # Load data
 try:
@@ -413,6 +415,443 @@ try:
 except Exception as e:
     st.error(f"Error loading data: {e}")
     st.stop()
+
+# ---- Natural Language Query TAB ----
+with tab8:
+    # Modern glassmorphism styling
+    st.markdown("""
+    <style>
+    .glass-container {
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+        border-radius: 20px;
+        padding: 30px;
+        margin: 20px 0;
+        box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        border: 1px solid rgba(255, 255, 255, 0.18);
+    }
+    
+    .chat-header {
+        text-align: center;
+        background: linear-gradient(90deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4);
+        background-size: 400% 400%;
+        animation: gradient 15s ease infinite;
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-size: 2.5rem;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+    
+    @keyframes gradient {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+    
+    .chat-subtitle {
+        text-align: center;
+        color: #888;
+        font-size: 1.1rem;
+        margin-bottom: 30px;
+    }
+    
+    .example-card {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 15px;
+        padding: 20px;
+        margin: 10px 0;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        transition: all 0.3s ease;
+    }
+    
+    .example-card:hover {
+        background: rgba(255, 255, 255, 0.1);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+    
+    .stats-container {
+        background: linear-gradient(135deg, rgba(96, 165, 250, 0.1), rgba(34, 197, 94, 0.1));
+        border-radius: 15px;
+        padding: 20px;
+        margin: 15px 0;
+        border: 1px solid rgba(96, 165, 250, 0.2);
+    }
+    
+    .query-input {
+        background: rgba(255, 255, 255, 0.1) !important;
+        border: 2px solid rgba(255, 255, 255, 0.2) !important;
+        border-radius: 15px !important;
+        padding: 15px !important;
+        color: white !important;
+        font-size: 1.1rem !important;
+    }
+    
+    .ai-response {
+        background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(59, 130, 246, 0.1));
+        border-radius: 15px;
+        padding: 25px;
+        margin: 20px 0;
+        border-left: 4px solid #22c55e;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    
+    # Header with modern styling
+    st.markdown('<h1 class="chat-header">🤖 Chat with Your Data</h1>', unsafe_allow_html=True)
+    st.markdown('<p class="chat-subtitle">Ask questions about RPA land use projections in natural language</p>', unsafe_allow_html=True)
+    
+    # Initialize chat history in session state
+    if "chat_history" not in st.session_state:
+        st.session_state.chat_history = []
+    
+    # Initialize the NLQ class to get data info
+    try:
+        nlq = NaturalLanguageQuery()
+        data_info = nlq.get_data_info()
+        
+        if data_info["status"] == "Data loaded successfully":
+            # Data overview in glassmorphism container
+            st.markdown('<div class="glass-container">', unsafe_allow_html=True)
+            
+            # Quick stats
+            col1, col2, col3, col4 = st.columns(4)
+            with col1:
+                st.metric("📊 Total Records", f"{data_info['rows']:,}")
+            with col2:
+                st.metric("🏞️ Land Categories", len(data_info['land_use_categories']['from']))
+            with col3:
+                st.metric("🌍 States", len(data_info['states']))
+            with col4:
+                st.metric("📈 Scenarios", len(data_info['scenarios']))
+            
+            # Expandable detailed data info
+            with st.expander("🔍 Detailed Data Information", expanded=False):
+                col1, col2 = st.columns(2)
+                
+                with col1:
+                    st.markdown("**🎯 Available Scenarios:**")
+                    scenarios_display = []
+                    for i, scenario in enumerate(data_info['scenarios'][:8]):
+                        emoji = ["🌱", "🌡️", "🏗️", "🌊", "⚡", "🔥", "🌿", "🌍"][i % 8]
+                        scenarios_display.append(f"{emoji} {scenario}")
+                    st.write("\n".join(scenarios_display))
+                    
+                with col2:
+                    st.markdown("**🏞️ Land Use Categories:**")
+                    st.write("**From:**", ", ".join(data_info['land_use_categories']['from'][:6]))
+                    st.write("**To:**", ", ".join(data_info['land_use_categories']['to'][:6]))
+                    st.markdown("**🗺️ Geographic Coverage:**")
+                    st.write(", ".join(data_info['states'][:10]) + f"... +{len(data_info['states'])-10} more")
+            
+            st.markdown('</div>', unsafe_allow_html=True)
+            
+            # Example questions section
+            st.markdown("### 💡 Try these example questions:")
+            
+            example_questions = [
+                {
+                    "category": "🏙️ Urban Development",
+                    "questions": [
+                        "What are the top 10 counties with the highest projected increase in urban land?",
+                        "Plot urban land growth by state over time",
+                        "Compare urban expansion between different climate scenarios"
+                    ]
+                },
+                {
+                    "category": "🌲 Forest Analysis", 
+                    "questions": [
+                        "Show me the total forest loss for each state in the Pacific Northwest",
+                        "Which counties lose the most forest to urban development?",
+                        "Plot forest loss trends over decades"
+                    ]
+                },
+                {
+                    "category": "🌾 Agricultural Transitions",
+                    "questions": [
+                        "Compare cropland loss between different climate scenarios",
+                        "Show agricultural land conversion by region",
+                        "What percentage of farmland becomes urban in California?"
+                    ]
+                }
+            ]
+            
+            cols = st.columns(3)
+            for i, category in enumerate(example_questions):
+                with cols[i]:
+                    st.markdown(f'<div class="example-card">', unsafe_allow_html=True)
+                    st.markdown(f"**{category['category']}**")
+                    for question in category['questions']:
+                        if st.button(f"📝 {question[:50]}{'...' if len(question) > 50 else ''}", 
+                                   key=f"example_{i}_{question[:20]}", 
+                                   help=question):
+                            st.session_state.current_question = question
+                    st.markdown('</div>', unsafe_allow_html=True)
+            
+            # Chat input
+            st.markdown("### 💬 Ask your question:")
+            
+            # Use session state for question if set by example buttons
+            default_question = st.session_state.get("current_question", "")
+            question = st.text_input(
+                "Your question:", 
+                value=default_question,
+                placeholder="e.g., Show me forest loss by state in the high warming scenario...",
+                help="Ask any question about the RPA land use data in natural language"
+            )
+            
+            # Clear the session state question after using it
+            if "current_question" in st.session_state:
+                del st.session_state.current_question
+
+            # Process question
+            if question:
+                # Add question to chat history
+                st.session_state.chat_history.append({"type": "user", "content": question})
+                
+                try:
+                    with st.spinner("🤖 AI is analyzing your question..."):
+                        if not nlq.df.empty:
+                            answer = nlq.ask(question)
+                            
+                            # Add answer to chat history
+                            st.session_state.chat_history.append({"type": "ai", "content": answer})
+                            
+                            # Display response in modern container
+                            st.markdown('<div class="ai-response">', unsafe_allow_html=True)
+                            
+                            # Handle different response types
+                            if isinstance(answer, tuple) and answer[0] == "chart":
+                                # Display chart
+                                st.markdown("### 📊 Generated Visualization")
+                                st.image(answer[1])
+                                
+                            elif isinstance(answer, (pd.DataFrame, Styler)):
+                                # Display DataFrame with enhanced presentation
+                                st.markdown("### 📋 Query Results")
+                                
+                                # Show summary stats if it's a dataframe
+                                if hasattr(answer, 'data'):  # Styler object
+                                    df_data = answer.data
+                                else:
+                                    df_data = answer
+                                    
+                                if len(df_data) > 0:
+                                    # Enhanced metrics display
+                                    st.markdown('<div class="stats-container">', unsafe_allow_html=True)
+                                    col1, col2, col3, col4 = st.columns(4)
+                                    with col1:
+                                        st.metric("📊 Rows", f"{len(df_data):,}")
+                                    with col2:
+                                        st.metric("📝 Columns", len(df_data.columns))
+                                    with col3:
+                                        if 'Total Area' in df_data.columns or 'total_area' in df_data.columns:
+                                            area_col = 'Total Area' if 'Total Area' in df_data.columns else 'total_area'
+                                            if area_col in df_data.columns:
+                                                total_area = df_data[area_col].sum()
+                                                if total_area > 1000000:
+                                                    st.metric("🏞️ Total Area", f"{total_area/1000000:.1f}M acres")
+                                                elif total_area > 1000:
+                                                    st.metric("🏞️ Total Area", f"{total_area/1000:.1f}K acres")
+                                                else:
+                                                    st.metric("🏞️ Total Area", f"{total_area:.0f} acres")
+                                    with col4:
+                                        # Show date range if available
+                                        if 'decade_name' in df_data.columns:
+                                            st.metric("📅 Time Range", f"{df_data['decade_name'].nunique()} periods")
+                                        else:
+                                            st.metric("💾 Memory", f"{df_data.memory_usage(deep=True).sum() / 1024:.0f} KB")
+                                    st.markdown('</div>', unsafe_allow_html=True)
+                                    
+                                    # Enhanced dataframe display with intelligent column configuration
+                                    column_config = {}
+                                    
+                                    # Auto-detect and configure numeric columns
+                                    if hasattr(answer, 'data'):
+                                        df_for_config = answer.data.copy()
+                                    else:
+                                        df_for_config = answer.copy()
+                                    
+                                    # Smart formatting for all numeric columns
+                                    for col in df_for_config.columns:
+                                        if df_for_config[col].dtype in ['int64', 'float64', 'Int64', 'Float64']:
+                                            # Get max value to determine appropriate formatting
+                                            max_val = df_for_config[col].max() if not df_for_config[col].isna().all() else 0
+                                            
+                                            # Determine if this is an area column
+                                            is_area = any(keyword in col.lower() for keyword in ['area', 'acres', 'conversion', 'change', 'loss', 'gain'])
+                                            
+                                            if is_area:
+                                                if max_val >= 1_000_000_000:  # Billions
+                                                    # Convert to billions and format
+                                                    df_for_config[col] = df_for_config[col] / 1_000_000_000
+                                                    column_config[col] = st.column_config.NumberColumn(
+                                                        col.replace('_', ' ').title(),
+                                                        help="Land area in billion acres",
+                                                        format="%.2f B acres",
+                                                    )
+                                                elif max_val >= 1_000_000:  # Millions
+                                                    # Convert to millions and format
+                                                    df_for_config[col] = df_for_config[col] / 1_000_000
+                                                    column_config[col] = st.column_config.NumberColumn(
+                                                        col.replace('_', ' ').title(),
+                                                        help="Land area in million acres",
+                                                        format="%.1f M acres",
+                                                    )
+                                                elif max_val >= 1_000:  # Thousands
+                                                    # Convert to thousands and format
+                                                    df_for_config[col] = df_for_config[col] / 1_000
+                                                    column_config[col] = st.column_config.NumberColumn(
+                                                        col.replace('_', ' ').title(),
+                                                        help="Land area in thousand acres", 
+                                                        format="%.1f K acres",
+                                                    )
+                                                else:
+                                                    column_config[col] = st.column_config.NumberColumn(
+                                                        col.replace('_', ' ').title(),
+                                                        help="Land area in acres",
+                                                        format="%.0f acres",
+                                                    )
+                                            else:
+                                                # Non-area numeric columns
+                                                if max_val >= 1_000_000:
+                                                    column_config[col] = st.column_config.NumberColumn(
+                                                        col.replace('_', ' ').title(),
+                                                        format="%.1f M",
+                                                    )
+                                                elif max_val >= 1_000:
+                                                    column_config[col] = st.column_config.NumberColumn(
+                                                        col.replace('_', ' ').title(),
+                                                        format="%.1f K",
+                                                    )
+                                                elif max_val < 1 and max_val > 0:
+                                                    column_config[col] = st.column_config.NumberColumn(
+                                                        col.replace('_', ' ').title(),
+                                                        format="%.3f",
+                                                    )
+                                                else:
+                                                    column_config[col] = st.column_config.NumberColumn(
+                                                        col.replace('_', ' ').title(),
+                                                        format="%.0f",
+                                                    )
+                                        
+                                        elif col in ['FIPS Code', 'fips_code', 'fips']:
+                                            column_config[col] = st.column_config.TextColumn(
+                                                "FIPS Code",
+                                                help="Federal Information Processing Standards code",
+                                                width="small"
+                                            )
+                                        elif 'name' in col.lower() or 'region' in col.lower():
+                                            column_config[col] = st.column_config.TextColumn(
+                                                col.replace('_', ' ').title(),
+                                                width="medium"
+                                            )
+                                        elif 'scenario' in col.lower():
+                                            column_config[col] = st.column_config.TextColumn(
+                                                col.replace('_', ' ').title(),
+                                                help="Climate and economic scenario",
+                                                width="medium"
+                                            )
+                                        elif 'decade' in col.lower() or 'year' in col.lower():
+                                            column_config[col] = st.column_config.TextColumn(
+                                                col.replace('_', ' ').title(),
+                                                help="Time period",
+                                                width="small"
+                                            )
+                                    
+                                    # Use the formatted dataframe for display
+                                    display_data = df_for_config if column_config else answer
+                                    
+                                    st.dataframe(
+                                        display_data, 
+                                        use_container_width=True, 
+                                        height=400,
+                                        column_config=column_config if column_config else None
+                                    )
+                                    
+                                    # Enhanced download section
+                                    col1, col2 = st.columns([2, 1])
+                                    with col1:
+                                        # Use original data for CSV download (with full precision)
+                                        if hasattr(answer, 'data'):
+                                            download_df = answer.data.copy()
+                                        else:
+                                            download_df = answer.copy()
+                                        
+                                        # Format numbers for CSV readability
+                                        for col in download_df.columns:
+                                            if download_df[col].dtype in ['int64', 'float64', 'Int64', 'Float64']:
+                                                # Round large numbers to reasonable precision
+                                                max_val = download_df[col].max() if not download_df[col].isna().all() else 0
+                                                if max_val >= 1_000_000:
+                                                    download_df[col] = download_df[col].round(0).astype('Int64')
+                                                elif max_val >= 1_000:
+                                                    download_df[col] = download_df[col].round(1)
+                                                else:
+                                                    download_df[col] = download_df[col].round(3)
+                                        
+                                        csv = download_df.to_csv(index=False)
+                                        st.download_button(
+                                            label="📥 Download Results as CSV",
+                                            data=csv,
+                                            file_name=f"rpa_query_results_{pd.Timestamp.now().strftime('%Y%m%d_%H%M%S')}.csv",
+                                            mime="text/csv",
+                                            use_container_width=True
+                                        )
+                                    with col2:
+                                        st.info(f"💡 **Tip:** Data includes {len(df_data)} records ready for analysis")
+                                else:
+                                    st.info("🔍 No results found for your query. Try rephrasing or asking a different question.")
+                                    
+                            elif isinstance(answer, str) and "Error" in answer:
+                                # Display error message with helpful suggestions
+                                st.error(f"❌ {answer}")
+                                
+                                # Smart suggestions based on error type
+                                st.markdown("### 💡 **Suggestions to improve your query:**")
+                                suggestions = [
+                                    "🎯 **Be more specific** - Include state names, land use categories, or time periods",
+                                    "📊 **Try asking for summaries** - 'Show top 10...' or 'Compare between...'", 
+                                    "🏞️ **Reference available categories** - Forest, Cropland, Urban, Pasture",
+                                    "🌍 **Specify geographic areas** - States, regions, or 'nationwide'",
+                                    "📈 **Ask for visualizations** - 'Plot...', 'Chart...', or 'Graph...'"
+                                ]
+                                for suggestion in suggestions:
+                                    st.markdown(f"• {suggestion}")
+                                    
+                            else:
+                                # Display other responses
+                                st.markdown("### 💬 AI Response")
+                                st.write(answer)
+                            
+                            st.markdown('</div>', unsafe_allow_html=True)
+                        else:
+                            st.error("❌ Could not load data for querying.")
+                            
+                except Exception as e:
+                    st.error(f"❌ An unexpected error occurred: {e}")
+                    st.info("🔧 **Troubleshooting:** Try refreshing the page or simplifying your question.")
+            
+            # Chat history section (optional)
+            if st.session_state.chat_history and st.checkbox("📜 Show Chat History"):
+                st.markdown("### 📜 Conversation History")
+                for i, msg in enumerate(reversed(st.session_state.chat_history[-6:])):  # Show last 6 messages
+                    if msg["type"] == "user":
+                        st.markdown(f"**🙋 You:** {msg['content']}")
+                    else:
+                        st.markdown(f"**🤖 AI:** {str(msg['content'])[:100]}...")
+                    st.markdown("---")
+                
+                if st.button("🗑️ Clear Chat History"):
+                    st.session_state.chat_history = []
+                    st.experimental_rerun()
+                
+    except Exception as e:
+        st.error(f"❌ Failed to initialize the query system: {e}")
+        st.info("🔧 **Solution:** Please check your OpenAI API key and try refreshing the page.")
 
 # ---- OVERVIEW TAB ----
 with tab1:
