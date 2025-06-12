@@ -205,17 +205,6 @@ def render_land_use_flow_page(data: Dict[str, pd.DataFrame]):
                 options=all_to_categories,
                 key="sankey_to"
             )
-        
-        # Minimum flow threshold
-        min_threshold = st.slider(
-            "Minimum Flow Threshold (acres)",
-            min_value=0,
-            max_value=100000,
-            value=1000,
-            step=1000,
-            help="Hide flows smaller than this threshold to reduce clutter",
-            key="sankey_threshold"
-        )
     
     # Filter data based on selections
     filtered_sankey_data = county_df[county_df["scenario_name"] == selected_sankey_scenario]
@@ -238,9 +227,6 @@ def render_land_use_flow_page(data: Dict[str, pd.DataFrame]):
         
         # Aggregate data
         sankey_data = filtered_sankey_data.groupby(["from_category", "to_category"])["total_area"].sum().reset_index()
-        
-        # Apply threshold filter
-        sankey_data = sankey_data[sankey_data["total_area"] >= min_threshold]
         
         # Filter out transitions where land use stays the same
         sankey_data = sankey_data[sankey_data["from_category"] != sankey_data["to_category"]]
@@ -302,9 +288,6 @@ def render_land_use_flow_page(data: Dict[str, pd.DataFrame]):
                 
                 # Aggregate data for this state
                 state_sankey_data = state_data.groupby(["from_category", "to_category"])["total_area"].sum().reset_index()
-                
-                # Apply threshold filter
-                state_sankey_data = state_sankey_data[state_sankey_data["total_area"] >= min_threshold]
                 
                 # Filter out transitions where land use stays the same
                 state_sankey_data = state_sankey_data[state_sankey_data["from_category"] != state_sankey_data["to_category"]]
