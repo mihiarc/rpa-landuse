@@ -110,7 +110,8 @@ def create_bar_chart(df: pd.DataFrame, x_col: str, y_col: str,
     ax.grid(axis='y', alpha=0.3)
     
     # Rotate x-axis labels if needed
-    if len(df[x_col].astype(str).str.len().max()) > 10:
+    max_label_length = df[x_col].astype(str).str.len().max()
+    if max_label_length > 10:
         plt.xticks(rotation=45, ha='right')
     
     plt.tight_layout()
