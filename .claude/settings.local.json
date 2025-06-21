@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:python.langchain.com)",
+      "Bash(uv venv:*)",
+      "Bash(uv pip install:*)",
+      "Bash(ls:*)",
+      "Bash(uv run:*)",
+      "Bash(sqlite3:*)"
+    ],
+    "deny": []
+  }
+}

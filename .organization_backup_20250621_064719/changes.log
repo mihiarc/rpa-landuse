@@ -1,0 +1,7 @@
+Organization Migration Log
+Timestamp: 2025-06-21 06:47:19.081468
+Changes:
+  MOVED: data/inventory.json → data/samples/inventory.json
+  MOVED: data/sample_data.csv → data/samples/sample_data.csv
+  MOVED: data/sensor_data.parquet → data/samples/sensor_data.parquet
+  UPDATED: .gitignore
