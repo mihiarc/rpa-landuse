@@ -1,0 +1,2243 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Analyze county-level land use transitions using LangChain agents and natural language queries">
+      
+      
+        <meta name="author" content="Your Name">
+      
+      
+        <link rel="canonical" href="https://your-domain.com/langchain-landuse/faq/">
+      
+      
+        <link rel="prev" href="../development/testing/">
+      
+      
+        <link rel="next" href="../troubleshooting/">
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.14">
+    
+    
+      
+        <title>FAQ - LangChain Land Use Analysis</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.342714a4.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+  
+
+
+  
+  
+
+<script id="__analytics">function __md_analytics(){function e(){dataLayer.push(arguments)}window.dataLayer=window.dataLayer||[],e("js",new Date),e("config","G-XXXXXXXXXX"),document.addEventListener("DOMContentLoaded",(function(){document.forms.search&&document.forms.search.query.addEventListener("blur",(function(){this.value&&e("event","search",{search_term:this.value})}));document$.subscribe((function(){var t=document.forms.feedback;if(void 0!==t)for(var a of t.querySelectorAll("[type=submit]"))a.addEventListener("click",(function(a){a.preventDefault();var n=document.location.pathname,d=this.getAttribute("data-md-value");e("event","feedback",{page:n,data:d}),t.firstElementChild.disabled=!0;var r=t.querySelector(".md-feedback__note [data-md-value='"+d+"']");r&&(r.hidden=!1)})),t.hidden=!1})),location$.subscribe((function(t){e("config","G-XXXXXXXXXX",{page_path:t.pathname})}))}));var t=document.createElement("script");t.async=!0,t.src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX",document.getElementById("__analytics").insertAdjacentElement("afterEnd",t)}</script>
+  
+    <script>"undefined"!=typeof __md_analytics&&__md_analytics()</script>
+  
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="amber">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#frequently-asked-questions" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="LangChain Land Use Analysis" class="md-header__button md-logo" aria-label="LangChain Land Use Analysis" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            LangChain Land Use Analysis
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              FAQ
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="amber"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="amber"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/yourusername/langchain-landuse" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8M97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    langchain-landuse
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../getting-started/installation/" class="md-tabs__link">
+          
+  
+  
+  Getting Started
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../queries/overview/" class="md-tabs__link">
+          
+  
+  
+  Natural Language Queries
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../data/sources/" class="md-tabs__link">
+          
+  
+  
+  Data & Schemas
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../api/agent/" class="md-tabs__link">
+          
+  
+  
+  API Reference
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../examples/use-cases/" class="md-tabs__link">
+          
+  
+  
+  Examples
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../development/architecture/" class="md-tabs__link">
+          
+  
+  
+  Development
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="./" class="md-tabs__link">
+          
+  
+  
+  Help
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="LangChain Land Use Analysis" class="md-nav__button md-logo" aria-label="LangChain Land Use Analysis" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    LangChain Land Use Analysis
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/yourusername/langchain-landuse" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8M97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    langchain-landuse
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Getting Started
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            Getting Started
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting-started/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Installation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting-started/quickstart/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Quick Start
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting-started/configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Configuration
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Natural Language Queries
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            Natural Language Queries
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../queries/overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../queries/basic-queries/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Basic Queries
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../queries/advanced-queries/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Advanced Queries
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../queries/examples/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Query Examples
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Data & Schemas
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Data & Schemas
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../data/sources/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Data Sources
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../data/schema/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Database Schema
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../data/categories/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Land Use Categories
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../data/processing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Data Processing
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    API Reference
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            API Reference
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/agent/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Data Engineering Agent
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/converters/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Converters
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/tools/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Tools & Utilities
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Examples
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            Examples
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../examples/use-cases/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Use Cases
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../examples/workflows/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Sample Workflows
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../examples/notebooks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Jupyter Notebooks
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Development
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            Development
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../development/architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Architecture
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../development/contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Contributing
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../development/testing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Testing
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    Help
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            Help
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    FAQ
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    FAQ
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#general-questions" class="md-nav__link">
+    <span class="md-ellipsis">
+      General Questions
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="General Questions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-is-this-project" class="md-nav__link">
+    <span class="md-ellipsis">
+      What is this project?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-data-does-it-analyze" class="md-nav__link">
+    <span class="md-ellipsis">
+      What data does it analyze?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#do-i-need-to-know-sql" class="md-nav__link">
+    <span class="md-ellipsis">
+      Do I need to know SQL?
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#setup-questions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Setup Questions
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Setup Questions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-are-the-system-requirements" class="md-nav__link">
+    <span class="md-ellipsis">
+      What are the system requirements?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-do-i-get-an-openai-api-key" class="md-nav__link">
+    <span class="md-ellipsis">
+      How do I get an OpenAI API key?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#which-openai-model-should-i-use" class="md-nav__link">
+    <span class="md-ellipsis">
+      Which OpenAI model should I use?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#can-i-use-it-offline" class="md-nav__link">
+    <span class="md-ellipsis">
+      Can I use it offline?
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#data-questions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Data Questions
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Data Questions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-do-the-land-use-categories-mean" class="md-nav__link">
+    <span class="md-ellipsis">
+      What do the land use categories mean?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#whats-the-difference-between-the-tables" class="md-nav__link">
+    <span class="md-ellipsis">
+      What's the difference between the tables?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-scenarios-are-available" class="md-nav__link">
+    <span class="md-ellipsis">
+      What scenarios are available?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#why-are-areas-in-1000-acres" class="md-nav__link">
+    <span class="md-ellipsis">
+      Why are areas in "1000 acres"?
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#usage-questions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Usage Questions
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Usage Questions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#how-do-i-start-a-query" class="md-nav__link">
+    <span class="md-ellipsis">
+      How do I start a query?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#can-i-export-results" class="md-nav__link">
+    <span class="md-ellipsis">
+      Can I export results?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-do-i-query-specific-years" class="md-nav__link">
+    <span class="md-ellipsis">
+      How do I query specific years?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#can-i-compare-scenarios" class="md-nav__link">
+    <span class="md-ellipsis">
+      Can I compare scenarios?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-do-i-focus-on-specific-counties" class="md-nav__link">
+    <span class="md-ellipsis">
+      How do I focus on specific counties?
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#technical-questions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Technical Questions
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Technical Questions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#how-does-the-natural-language-processing-work" class="md-nav__link">
+    <span class="md-ellipsis">
+      How does the natural language processing work?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#can-i-see-the-generated-sql" class="md-nav__link">
+    <span class="md-ellipsis">
+      Can I see the generated SQL?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-accurate-is-the-sql-generation" class="md-nav__link">
+    <span class="md-ellipsis">
+      How accurate is the SQL generation?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#can-i-write-sql-directly" class="md-nav__link">
+    <span class="md-ellipsis">
+      Can I write SQL directly?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#is-the-data-real-time" class="md-nav__link">
+    <span class="md-ellipsis">
+      Is the data real-time?
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#performance-questions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Performance Questions
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Performance Questions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#why-is-my-query-slow" class="md-nav__link">
+    <span class="md-ellipsis">
+      Why is my query slow?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-can-i-make-queries-faster" class="md-nav__link">
+    <span class="md-ellipsis">
+      How can I make queries faster?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#whats-the-maximum-file-size-i-can-process" class="md-nav__link">
+    <span class="md-ellipsis">
+      What's the maximum file size I can process?
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting-questions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Troubleshooting Questions
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting Questions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#why-does-it-say-database-not-found" class="md-nav__link">
+    <span class="md-ellipsis">
+      Why does it say "Database not found"?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#why-am-i-getting-api-key-errors" class="md-nav__link">
+    <span class="md-ellipsis">
+      Why am I getting API key errors?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#can-i-use-a-different-llm-provider" class="md-nav__link">
+    <span class="md-ellipsis">
+      Can I use a different LLM provider?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-do-i-update-the-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      How do I update the data?
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#advanced-questions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Advanced Questions
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Advanced Questions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#can-i-add-custom-tools" class="md-nav__link">
+    <span class="md-ellipsis">
+      Can I add custom tools?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#can-i-modify-the-land-use-categories" class="md-nav__link">
+    <span class="md-ellipsis">
+      Can I modify the land use categories?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#can-i-integrate-this-with-other-systems" class="md-nav__link">
+    <span class="md-ellipsis">
+      Can I integrate this with other systems?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#can-i-use-my-own-projections" class="md-nav__link">
+    <span class="md-ellipsis">
+      Can I use my own projections?
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#best-practices-questions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Best Practices Questions
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Best Practices Questions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-makes-a-good-query" class="md-nav__link">
+    <span class="md-ellipsis">
+      What makes a good query?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-should-i-explore-the-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      How should I explore the data?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#when-should-i-use-each-table" class="md-nav__link">
+    <span class="md-ellipsis">
+      When should I use each table?
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#getting-more-help" class="md-nav__link">
+    <span class="md-ellipsis">
+      Getting More Help
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Getting More Help">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#where-can-i-find-more-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      Where can I find more examples?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-do-i-report-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      How do I report issues?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#can-i-contribute" class="md-nav__link">
+    <span class="md-ellipsis">
+      Can I contribute?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#where-can-i-learn-more" class="md-nav__link">
+    <span class="md-ellipsis">
+      Where can I learn more?
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Troubleshooting
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="frequently-asked-questions">Frequently Asked Questions<a class="headerlink" href="#frequently-asked-questions" title="Permanent link">&para;</a></h1>
+<p>Common questions about the LangChain Land Use Analysis system.</p>
+<h2 id="general-questions">General Questions<a class="headerlink" href="#general-questions" title="Permanent link">&para;</a></h2>
+<h3 id="what-is-this-project">What is this project?<a class="headerlink" href="#what-is-this-project" title="Permanent link">&para;</a></h3>
+<p>The LangChain Land Use Analysis system allows you to query and analyze county-level land use projections using natural language. Instead of writing SQL, you can ask questions like "Show me forest loss in California" and get meaningful results.</p>
+<h3 id="what-data-does-it-analyze">What data does it analyze?<a class="headerlink" href="#what-data-does-it-analyze" title="Permanent link">&para;</a></h3>
+<p>The system analyzes USDA Forest Service RPA (Resources Planning Act) land use projections:
+- <strong>Coverage</strong>: All US counties
+- <strong>Time Period</strong>: 2020-2100
+- <strong>Scenarios</strong>: Baseline, High Crop Demand, High Forest, High Urban
+- <strong>Land Types</strong>: Crop, Pasture, Forest, Urban, Range</p>
+<h3 id="do-i-need-to-know-sql">Do I need to know SQL?<a class="headerlink" href="#do-i-need-to-know-sql" title="Permanent link">&para;</a></h3>
+<p>No! The agent converts your natural language questions into SQL automatically. You can ask questions in plain English like:
+- "What counties have the most urban growth?"
+- "Show me forest to cropland transitions"
+- "Compare scenarios for agricultural land"</p>
+<h2 id="setup-questions">Setup Questions<a class="headerlink" href="#setup-questions" title="Permanent link">&para;</a></h2>
+<h3 id="what-are-the-system-requirements">What are the system requirements?<a class="headerlink" href="#what-are-the-system-requirements" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Python</strong>: 3.8 or higher</li>
+<li><strong>Memory</strong>: 4GB RAM minimum (8GB recommended)</li>
+<li><strong>Disk Space</strong>: 2GB for data and dependencies</li>
+<li><strong>OS</strong>: Windows, macOS, or Linux</li>
+<li><strong>API Key</strong>: OpenAI API key required</li>
+</ul>
+<h3 id="how-do-i-get-an-openai-api-key">How do I get an OpenAI API key?<a class="headerlink" href="#how-do-i-get-an-openai-api-key" title="Permanent link">&para;</a></h3>
+<ol>
+<li>Visit <a href="https://platform.openai.com/signup">https://platform.openai.com/signup</a></li>
+<li>Create an account</li>
+<li>Go to API keys section</li>
+<li>Create new secret key</li>
+<li>Add to your <code>.env</code> file</li>
+</ol>
+<h3 id="which-openai-model-should-i-use">Which OpenAI model should I use?<a class="headerlink" href="#which-openai-model-should-i-use" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># Recommended (best accuracy)</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="nv">AGENT_MODEL</span><span class="o">=</span>gpt-4-turbo-preview
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="c1"># Budget option (faster, less accurate)</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="nv">AGENT_MODEL</span><span class="o">=</span>gpt-3.5-turbo
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="c1"># High accuracy (more expensive)</span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="nv">AGENT_MODEL</span><span class="o">=</span>gpt-4
+</span></code></pre></div>
+<h3 id="can-i-use-it-offline">Can I use it offline?<a class="headerlink" href="#can-i-use-it-offline" title="Permanent link">&para;</a></h3>
+<p>The data processing and queries work offline, but the natural language interpretation requires an internet connection to reach OpenAI's API.</p>
+<h2 id="data-questions">Data Questions<a class="headerlink" href="#data-questions" title="Permanent link">&para;</a></h2>
+<h3 id="what-do-the-land-use-categories-mean">What do the land use categories mean?<a class="headerlink" href="#what-do-the-land-use-categories-mean" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Crop</strong>: Agricultural land for growing crops</li>
+<li><strong>Pasture</strong>: Land for livestock grazing</li>
+<li><strong>Forest</strong>: Wooded areas (natural and managed)</li>
+<li><strong>Urban</strong>: Developed areas (cities, towns, infrastructure)</li>
+<li><strong>Range</strong>: Natural grasslands and shrublands</li>
+</ul>
+<h3 id="whats-the-difference-between-the-tables">What's the difference between the tables?<a class="headerlink" href="#whats-the-difference-between-the-tables" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Table</th>
+<th>Description</th>
+<th>Use Case</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>landuse_transitions</code></td>
+<td>All transitions including same-to-same</td>
+<td>Complete analysis</td>
+</tr>
+<tr>
+<td><code>landuse_transitions_ag</code></td>
+<td>Crop+Pasture combined as Agriculture</td>
+<td>Simplified agricultural analysis</td>
+</tr>
+<tr>
+<td><code>landuse_changes_only</code></td>
+<td>Excludes unchanged land</td>
+<td>Focus on actual changes</td>
+</tr>
+<tr>
+<td><code>landuse_changes_only_ag</code></td>
+<td>Changes with agricultural aggregation</td>
+<td>Simplified change analysis</td>
+</tr>
+</tbody>
+</table>
+<h3 id="what-scenarios-are-available">What scenarios are available?<a class="headerlink" href="#what-scenarios-are-available" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Baseline</strong>: Most likely future based on current trends</li>
+<li><strong>High Crop Demand</strong>: Increased agricultural pressure</li>
+<li><strong>High Forest</strong>: Strong forest conservation</li>
+<li><strong>High Urban</strong>: Accelerated urbanization</li>
+</ol>
+<h3 id="why-are-areas-in-1000-acres">Why are areas in "1000 acres"?<a class="headerlink" href="#why-are-areas-in-1000-acres" title="Permanent link">&para;</a></h3>
+<p>This unit makes large numbers more manageable. To convert:
+- Acres: multiply by 1,000
+- Square miles: multiply by 1.5625
+- Hectares: multiply by 404.686</p>
+<h2 id="usage-questions">Usage Questions<a class="headerlink" href="#usage-questions" title="Permanent link">&para;</a></h2>
+<h3 id="how-do-i-start-a-query">How do I start a query?<a class="headerlink" href="#how-do-i-start-a-query" title="Permanent link">&para;</a></h3>
+<p>Simply run the agent and type your question:
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/agents/test_agent.py
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>You&gt;<span class="w"> </span>Show<span class="w"> </span>me<span class="w"> </span>urban<span class="w"> </span>growth<span class="w"> </span><span class="k">in</span><span class="w"> </span>Texas<span class="w"> </span>counties
+</span></code></pre></div></p>
+<h3 id="can-i-export-results">Can I export results?<a class="headerlink" href="#can-i-export-results" title="Permanent link">&para;</a></h3>
+<p>Yes! Ask the agent to export:
+<div class="language-text highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>You&gt; Export the results to urban_growth_texas.csv
+</span></code></pre></div></p>
+<p>Supported formats: CSV, JSON, Parquet</p>
+<h3 id="how-do-i-query-specific-years">How do I query specific years?<a class="headerlink" href="#how-do-i-query-specific-years" title="Permanent link">&para;</a></h3>
+<p>Include the year in your question:
+<div class="language-text highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>You&gt; Show me forest area in 2050
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>You&gt; Compare urban growth between 2030 and 2080
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>You&gt; What changes happen in the 2040-2050 decade?
+</span></code></pre></div></p>
+<h3 id="can-i-compare-scenarios">Can I compare scenarios?<a class="headerlink" href="#can-i-compare-scenarios" title="Permanent link">&para;</a></h3>
+<p>Yes! Ask comparison questions:
+<div class="language-text highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>You&gt; Compare forest area between all scenarios in 2100
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>You&gt; Which scenario has the most agricultural land?
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>You&gt; Show the difference between Baseline and High Urban
+</span></code></pre></div></p>
+<h3 id="how-do-i-focus-on-specific-counties">How do I focus on specific counties?<a class="headerlink" href="#how-do-i-focus-on-specific-counties" title="Permanent link">&para;</a></h3>
+<p>Use FIPS codes or descriptions:
+<div class="language-text highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>You&gt; Show data for FIPS 06037 (Los Angeles)
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>You&gt; Analyze California counties (FIPS starting with 06)
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>You&gt; Focus on Midwest agricultural counties
+</span></code></pre></div></p>
+<h2 id="technical-questions">Technical Questions<a class="headerlink" href="#technical-questions" title="Permanent link">&para;</a></h2>
+<h3 id="how-does-the-natural-language-processing-work">How does the natural language processing work?<a class="headerlink" href="#how-does-the-natural-language-processing-work" title="Permanent link">&para;</a></h3>
+<ol>
+<li>Your question → LangChain agent</li>
+<li>Agent uses GPT model to understand intent</li>
+<li>Generates appropriate SQL query</li>
+<li>Executes query on database</li>
+<li>Formats results in natural language</li>
+</ol>
+<h3 id="can-i-see-the-generated-sql">Can I see the generated SQL?<a class="headerlink" href="#can-i-see-the-generated-sql" title="Permanent link">&para;</a></h3>
+<p>Yes, the agent shows the SQL it generates:
+<div class="language-text highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>Query: SELECT * FROM landuse_transitions WHERE ...
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>Results: 123 rows
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>[Table of results]
+</span></code></pre></div></p>
+<h3 id="how-accurate-is-the-sql-generation">How accurate is the SQL generation?<a class="headerlink" href="#how-accurate-is-the-sql-generation" title="Permanent link">&para;</a></h3>
+<p>The GPT-4 models are very accurate for:
+- Basic queries (&gt;95% accuracy)
+- Complex queries (&gt;85% accuracy)
+- Domain-specific terms (understands "forest loss", "urban growth", etc.)</p>
+<h3 id="can-i-write-sql-directly">Can I write SQL directly?<a class="headerlink" href="#can-i-write-sql-directly" title="Permanent link">&para;</a></h3>
+<p>Yes! Use this format:
+<div class="language-text highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>You&gt; Query database.db: SELECT * FROM table WHERE condition
+</span></code></pre></div></p>
+<h3 id="is-the-data-real-time">Is the data real-time?<a class="headerlink" href="#is-the-data-real-time" title="Permanent link">&para;</a></h3>
+<p>No, this is projection data created by USDA models. It represents scenarios of possible futures, not real-time monitoring.</p>
+<h2 id="performance-questions">Performance Questions<a class="headerlink" href="#performance-questions" title="Permanent link">&para;</a></h2>
+<h3 id="why-is-my-query-slow">Why is my query slow?<a class="headerlink" href="#why-is-my-query-slow" title="Permanent link">&para;</a></h3>
+<p>Common causes:
+1. Large result sets - add limits
+2. Complex aggregations - simplify query
+3. Missing indexes - use indexed columns (scenario, year, fips)</p>
+<h3 id="how-can-i-make-queries-faster">How can I make queries faster?<a class="headerlink" href="#how-can-i-make-queries-faster" title="Permanent link">&para;</a></h3>
+<ol>
+<li>Use filtered tables (<code>_changes_only</code>)</li>
+<li>Add LIMIT clauses</li>
+<li>Filter by indexed columns first</li>
+<li>Query specific years instead of all years</li>
+</ol>
+<h3 id="whats-the-maximum-file-size-i-can-process">What's the maximum file size I can process?<a class="headerlink" href="#whats-the-maximum-file-size-i-can-process" title="Permanent link">&para;</a></h3>
+<p>Default limit is 100MB (configurable):
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="nv">MAX_FILE_SIZE_MB</span><span class="o">=</span><span class="m">200</span><span class="w">  </span><span class="c1"># Increase limit</span>
+</span></code></pre></div></p>
+<p>Large files are automatically sampled for preview.</p>
+<h2 id="troubleshooting-questions">Troubleshooting Questions<a class="headerlink" href="#troubleshooting-questions" title="Permanent link">&para;</a></h2>
+<h3 id="why-does-it-say-database-not-found">Why does it say "Database not found"?<a class="headerlink" href="#why-does-it-say-database-not-found" title="Permanent link">&para;</a></h3>
+<p>Run the data conversion first:
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/converters/convert_landuse_with_agriculture.py
+</span></code></pre></div></p>
+<h3 id="why-am-i-getting-api-key-errors">Why am I getting API key errors?<a class="headerlink" href="#why-am-i-getting-api-key-errors" title="Permanent link">&para;</a></h3>
+<ol>
+<li>Check <code>.env</code> file exists in <code>config/</code></li>
+<li>Verify key starts with <code>sk-</code></li>
+<li>Ensure no extra quotes or spaces</li>
+<li>Check API key is active on OpenAI</li>
+</ol>
+<h3 id="can-i-use-a-different-llm-provider">Can I use a different LLM provider?<a class="headerlink" href="#can-i-use-a-different-llm-provider" title="Permanent link">&para;</a></h3>
+<p>Currently supports OpenAI. The architecture allows for other providers (Claude, local models) with code modifications.</p>
+<h3 id="how-do-i-update-the-data">How do I update the data?<a class="headerlink" href="#how-do-i-update-the-data" title="Permanent link">&para;</a></h3>
+<p>Place new JSON data in <code>data/raw/</code> and run:
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/converters/convert_landuse_with_agriculture.py
+</span></code></pre></div></p>
+<h2 id="advanced-questions">Advanced Questions<a class="headerlink" href="#advanced-questions" title="Permanent link">&para;</a></h2>
+<h3 id="can-i-add-custom-tools">Can I add custom tools?<a class="headerlink" href="#can-i-add-custom-tools" title="Permanent link">&para;</a></h3>
+<p>Yes! See the <a href="../development/contributing/">Contributing Guide</a> for instructions on adding tools to the agent.</p>
+<h3 id="can-i-modify-the-land-use-categories">Can I modify the land use categories?<a class="headerlink" href="#can-i-modify-the-land-use-categories" title="Permanent link">&para;</a></h3>
+<p>Yes, edit the <code>LAND_USE_MAP</code> in the converter scripts:
+<div class="language-python highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="n">LAND_USE_MAP</span> <span class="o">=</span> <span class="p">{</span>
+</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>    <span class="s1">&#39;cr&#39;</span><span class="p">:</span> <span class="s1">&#39;Cropland&#39;</span><span class="p">,</span>  <span class="c1"># Change naming</span>
+</span><span id="__span-11-3"><a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>    <span class="s1">&#39;new&#39;</span><span class="p">:</span> <span class="s1">&#39;NewCategory&#39;</span>  <span class="c1"># Add categories</span>
+</span><span id="__span-11-4"><a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="p">}</span>
+</span></code></pre></div></p>
+<h3 id="can-i-integrate-this-with-other-systems">Can I integrate this with other systems?<a class="headerlink" href="#can-i-integrate-this-with-other-systems" title="Permanent link">&para;</a></h3>
+<p>Yes! Options include:
+- Python API for programmatic access
+- Export functions for data pipelines
+- Web service wrapper possible
+- Jupyter notebook integration</p>
+<h3 id="can-i-use-my-own-projections">Can I use my own projections?<a class="headerlink" href="#can-i-use-my-own-projections" title="Permanent link">&para;</a></h3>
+<p>Yes, if your data follows the same JSON structure. See <a href="../data/processing/">Data Processing</a> for format requirements.</p>
+<h2 id="best-practices-questions">Best Practices Questions<a class="headerlink" href="#best-practices-questions" title="Permanent link">&para;</a></h2>
+<h3 id="what-makes-a-good-query">What makes a good query?<a class="headerlink" href="#what-makes-a-good-query" title="Permanent link">&para;</a></h3>
+<p><strong>Good queries are:</strong>
+- Specific: "Show forest loss in California between 2020-2050"
+- Clear: Use standard terms (urban, forest, crop)
+- Focused: One question at a time</p>
+<p><strong>Avoid:</strong>
+- Vague: "Show me some data"
+- Complex: Multiple unrelated questions
+- Ambiguous: "What changes?" (which changes?)</p>
+<h3 id="how-should-i-explore-the-data">How should I explore the data?<a class="headerlink" href="#how-should-i-explore-the-data" title="Permanent link">&para;</a></h3>
+<ol>
+<li>Start broad: "What tables are available?"</li>
+<li>Understand structure: "Describe the main table"</li>
+<li>Look at samples: "Show me 10 example rows"</li>
+<li>Focus analysis: "Now show me specific patterns"</li>
+</ol>
+<h3 id="when-should-i-use-each-table">When should I use each table?<a class="headerlink" href="#when-should-i-use-each-table" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Full analysis</strong>: Use base <code>landuse_transitions</code></li>
+<li><strong>Change focus</strong>: Use <code>landuse_changes_only</code></li>
+<li><strong>Agricultural studies</strong>: Use <code>_ag</code> tables</li>
+<li><strong>Performance critical</strong>: Use filtered views</li>
+</ul>
+<h2 id="getting-more-help">Getting More Help<a class="headerlink" href="#getting-more-help" title="Permanent link">&para;</a></h2>
+<h3 id="where-can-i-find-more-examples">Where can I find more examples?<a class="headerlink" href="#where-can-i-find-more-examples" title="Permanent link">&para;</a></h3>
+<ul>
+<li><a href="../queries/examples/">Query Examples</a> - Extensive query patterns</li>
+<li><a href="../examples/workflows/">Workflows</a> - Step-by-step guides</li>
+<li><a href="../examples/notebooks/">Notebooks</a> - Interactive examples</li>
+</ul>
+<h3 id="how-do-i-report-issues">How do I report issues?<a class="headerlink" href="#how-do-i-report-issues" title="Permanent link">&para;</a></h3>
+<ol>
+<li>Check <a href="../troubleshooting/">Troubleshooting Guide</a></li>
+<li>Search existing GitHub issues</li>
+<li>Create new issue with:</li>
+<li>Error message</li>
+<li>Steps to reproduce</li>
+<li>System information</li>
+</ol>
+<h3 id="can-i-contribute">Can I contribute?<a class="headerlink" href="#can-i-contribute" title="Permanent link">&para;</a></h3>
+<p>Yes! See <a href="../development/contributing/">Contributing Guide</a> for:
+- Code contributions
+- Documentation improvements
+- Bug reports
+- Feature requests</p>
+<h3 id="where-can-i-learn-more">Where can I learn more?<a class="headerlink" href="#where-can-i-learn-more" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>LangChain</strong>: <a href="https://python.langchain.com/">https://python.langchain.com/</a></li>
+<li><strong>OpenAI API</strong>: <a href="https://platform.openai.com/docs">https://platform.openai.com/docs</a></li>
+<li><strong>SQLite</strong>: <a href="https://www.sqlite.org/docs.html">https://www.sqlite.org/docs.html</a></li>
+<li><strong>Project GitHub</strong>: Link to your repository</li>
+</ul>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      &copy; 2025 <a href="https://github.com/yourusername"  target="_blank" rel="noopener">Your Name</a>
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        <div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/yourusername" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8M97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://twitter.com/yourusername" target="_blank" rel="noopener" title="twitter.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M459.37 151.716c.325 4.548.325 9.097.325 13.645 0 138.72-105.583 298.558-298.558 298.558-59.452 0-114.68-17.219-161.137-47.106 8.447.974 16.568 1.299 25.34 1.299 49.055 0 94.213-16.568 130.274-44.832-46.132-.975-84.792-31.188-98.112-72.772 6.498.974 12.995 1.624 19.818 1.624 9.421 0 18.843-1.3 27.614-3.573-48.081-9.747-84.143-51.98-84.143-102.985v-1.299c13.969 7.797 30.214 12.67 47.431 13.319-28.264-18.843-46.781-51.005-46.781-87.391 0-19.492 5.197-37.36 14.294-52.954 51.655 63.675 129.3 105.258 216.365 109.807-1.624-7.797-2.599-15.918-2.599-24.04 0-57.828 46.782-104.934 104.934-104.934 30.213 0 57.502 12.67 76.67 33.137 23.715-4.548 46.456-13.32 66.599-25.34-7.798 24.366-24.366 44.833-46.132 57.827 21.117-2.273 41.584-8.122 60.426-16.243-14.292 20.791-32.161 39.308-52.628 54.253"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tabs", "navigation.sections", "navigation.path", "navigation.top", "search.suggest", "search.highlight", "content.tabs.link", "content.code.annotation", "content.code.copy", "toc.integrate"], "search": "../assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.13a4f30d.min.js"></script>
+      
+    
+  </body>
+</html>
