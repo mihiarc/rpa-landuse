@@ -158,6 +158,53 @@ JOIN dim_landuse tl ON f.to_landuse_id = tl.landuse_id
 GROUP BY s.scenario_name, t.year_range, fl.landuse_name, tl.landuse_name
 ```
 
+### `v_total_land_area`
+Total land area calculations for percentage-based analysis
+```sql
+WITH land_totals AS (
+    SELECT 
+        g.geography_id,
+        g.fips_code,
+        g.state_code,
+        SUM(f.acres) as total_land_acres
+    FROM fact_landuse_transitions f
+    JOIN dim_geography g ON f.geography_id = g.geography_id
+    JOIN dim_time t ON f.time_id = t.time_id
+    JOIN dim_scenario s ON f.scenario_id = s.scenario_id
+    WHERE t.start_year = (SELECT MIN(start_year) FROM dim_time)
+      AND s.scenario_name = (SELECT MIN(scenario_name) FROM dim_scenario)
+    GROUP BY g.geography_id, g.fips_code, g.state_code
+),
+state_totals AS (
+    SELECT 
+        state_code,
+        SUM(total_land_acres) as state_total_acres,
+        COUNT(*) as counties_in_state
+    FROM land_totals
+    GROUP BY state_code
+)
+SELECT 
+    lt.geography_id,
+    lt.fips_code,
+    lt.state_code,
+    lt.total_land_acres as county_total_acres,
+    st.state_total_acres,
+    st.counties_in_state,
+    ROUND((lt.total_land_acres / st.state_total_acres) * 100, 2) as pct_of_state
+FROM land_totals lt
+JOIN state_totals st ON lt.state_code = st.state_code
+```
+
+**Key Features:**
+- **Baseline Consistency**: Uses earliest time period and first scenario for consistent totals
+- **County Level**: Total acres for each county
+- **State Level**: Total acres for each state
+- **Percentage Calculations**: County as percentage of state
+- **Use Cases**: 
+  - "Rank states by percentage of forest loss"
+  - "Counties with highest percentage of agricultural land"
+  - "Urban expansion as percentage of total land area"
+
 ## Performance Optimizations
 
 ### Indexes
