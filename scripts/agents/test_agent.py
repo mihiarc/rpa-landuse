@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Test script for the Data Engineering Agent with Rich terminal output
+Test script for the SQL Query Agent with Rich terminal output
 """
 
 import pandas as pd
@@ -102,12 +102,12 @@ example_panel = Panel(
 console.print(example_panel)
 
 # Import and run the agent
-from data_engineering_agent import DataEngineeringAgent
+from sql_query_agent import SQLQueryAgent
 
 if __name__ == "__main__":
-    console.rule("[bold blue]Data Engineering Agent[/bold blue]", style="blue")
+    console.rule("[bold cyan]SQL Query Agent[/bold cyan]", style="cyan")
     
-    agent = DataEngineeringAgent()
+    agent = SQLQueryAgent()
     
     # Override the chat method to use rich
     original_run = agent.run
@@ -120,38 +120,40 @@ if __name__ == "__main__":
     agent.run = rich_run
     
     # Enhanced chat loop with rich
-    console.print(f"\n🤖 [bold]Agent initialized. Working directory:[/bold] [cyan]{agent.root_dir}[/cyan]")
-    console.print("Type [bold red]'exit'[/bold red] to quit, [bold yellow]'help'[/bold yellow] for available commands\n")
+    console.print(f"\n🔍 [bold]SQL Agent initialized. Database directory:[/bold] [cyan]{agent.root_dir}[/cyan]")
+    console.print("Type [bold red]'exit'[/bold red] to quit, [bold yellow]'help'[/bold yellow] for SQL commands\n")
     
     while True:
         try:
-            user_input = console.input("[bold blue]You>[/bold blue] ").strip()
+            user_input = console.input("[bold cyan]SQL>[/bold cyan] ").strip()
             
             if user_input.lower() == 'exit':
-                console.print("\n[bold red]👋 Goodbye![/bold red]")
+                console.print("\n[bold red]👋 Happy querying![/bold red]")
                 break
             elif user_input.lower() == 'help':
                 help_panel = Panel(
-                    """[bold cyan]Available Capabilities:[/bold cyan]
+                    """[bold cyan]🔍 SQL Query Agent Capabilities:[/bold cyan]
 
-[bold]File Operations:[/bold]
-  • list, read, write, copy, move, delete files
+[bold yellow]🗂️ Database Schema Exploration:[/bold yellow]
+  • List all tables with row counts
+  • Describe table structures, columns, indexes
+  • Get comprehensive database statistics
 
-[bold]Data Formats:[/bold]
-  • CSV, Excel, JSON, Parquet, GeoParquet
+[bold yellow]🔍 SQL Query Execution:[/bold yellow]
+  • Execute SQL queries on SQLite databases
+  • Query data files (CSV, JSON, Parquet) using SQL
+  • Smart query optimization and suggestions
 
-[bold]Data Analysis:[/bold]
-  • analyze files, get statistics, optimize storage
+[bold yellow]💾 Data Export & Analysis:[/bold yellow]
+  • Export query results to various formats
+  • Statistical analysis of query results
 
-[bold]SQL Queries:[/bold]
-  • query your data using SQL syntax
-
-[bold]Transformations:[/bold]
-  • convert between formats with compression
-
-[bold]Visualizations:[/bold]
-  • create plots and charts""",
-                    title="📚 Help",
+[bold green]🚀 Example SQL Commands:[/bold green]
+  • [white]"Show me all tables in processed/landuse_transitions.db"[/white]
+  • [white]"Describe the landuse_transitions table"[/white]
+  • [white]"Query processed/landuse_transitions.db: SELECT scenario, COUNT(*) FROM landuse_transitions GROUP BY scenario LIMIT 10"[/white]
+  • [white]"Get database statistics for processed/landuse_projections.db"[/white]""",
+                    title="📚 SQL Query Help",
                     border_style="yellow"
                 )
                 console.print(help_panel)
@@ -161,7 +163,7 @@ if __name__ == "__main__":
                 
                 # Format the response nicely
                 if "Error" in response:
-                    console.print(Panel(response, title="❌ Error", border_style="red"))
+                    console.print(Panel(response, title="❌ SQL Error", border_style="red"))
                 elif "```" in response:
                     # Extract code blocks
                     parts = response.split("```")
@@ -171,12 +173,12 @@ if __name__ == "__main__":
                         else:
                             # Try to determine language
                             lines = part.split('\n')
-                            lang = lines[0] if lines[0] else "text"
+                            lang = lines[0] if lines[0] else "sql"
                             code = '\n'.join(lines[1:]) if len(lines) > 1 else part
                             syntax = Syntax(code, lang, theme="monokai", line_numbers=True)
                             console.print(syntax)
                 else:
-                    console.print(Panel(response, title="🤖 Agent Response", border_style="green"))
+                    console.print(Panel(response, title="🔍 Query Results", border_style="green"))
                 console.print()
         
         except KeyboardInterrupt:

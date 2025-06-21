@@ -1,7 +1,7 @@
 """
-Data Engineering Agent for Local File Analysis
-This agent provides capabilities for analyzing and processing data files in your project folder.
-Supports CSV, Excel, JSON, Parquet, and GeoParquet formats.
+SQL Query Agent for Local Database Analysis
+This agent specializes in SQL querying and database analysis for your project.
+Focuses on SQLite databases with support for data files (CSV, JSON, Parquet) via SQL queries.
 """
 
 import os
@@ -27,18 +27,18 @@ env_path = Path(__file__).parent.parent.parent / "config" / ".env"
 load_dotenv(dotenv_path=env_path)
 
 class FileQueryParams(BaseModel):
-    """Parameters for file-based queries"""
+    """Parameters for file-based SQL queries"""
     file_path: str = Field(..., description="Path to the file")
     query: str = Field(..., description="SQL query to execute")
 
 class DatabaseQueryParams(BaseModel):
-    """Parameters for database queries"""
+    """Parameters for database SQL queries"""
     db_path: str = Field(..., description="Path to the database file")
     query: str = Field(..., description="SQL query to execute")
     limit: Optional[int] = Field(1000, description="Maximum number of rows to return")
 
 class DatabaseExportParams(BaseModel):
-    """Parameters for exporting database data"""
+    """Parameters for exporting database query results"""
     db_path: str = Field(..., description="Path to the database file")
     table_name: str = Field(..., description="Table name to export")
     output_path: str = Field(..., description="Output file path")
@@ -47,14 +47,14 @@ class DatabaseExportParams(BaseModel):
     limit: Optional[int] = Field(None, description="Optional limit on number of rows")
 
 class VisualizationParams(BaseModel):
-    """Parameters for creating visualizations"""
+    """Parameters for creating visualizations from SQL results"""
     file_path: str = Field(..., description="Path to the file")
     plot_type: str = Field(default="scatter", description="Type of plot")
     x: Optional[str] = Field(None, description="X-axis column")
     y: Optional[str] = Field(None, description="Y-axis column")
 
 class TransformParams(BaseModel):
-    """Parameters for data transformation"""
+    """Parameters for data transformation via SQL"""
     input_path: str = Field(..., description="Input file path")
     output_path: str = Field(..., description="Output file path")
     output_format: str = Field(..., description="Output format: parquet, csv, json, geoparquet")
@@ -67,12 +67,12 @@ class TransformParams(BaseModel):
             raise ValueError(f"Format must be one of {valid_formats}")
         return v
 
-class DataEngineeringAgent:
-    """Agent for data engineering tasks on local files"""
+class SQLQueryAgent:
+    """Agent specialized in SQL querying and database analysis"""
     
     def __init__(self, root_dir: str = None):
         """
-        Initialize the Data Engineering Agent
+        Initialize the SQL Query Agent
         
         Args:
             root_dir: Root directory for file operations (defaults to PROJECT_ROOT_DIR from .env)
@@ -88,94 +88,95 @@ class DataEngineeringAgent:
         self.agent = self._create_agent()
         
     def _create_tools(self) -> List[Tool]:
-        """Create tools for the agent"""
+        """Create SQL-focused tools for the agent"""
         tools = []
         
-        # File management tools
+        # File management tools (for database file operations)
         file_toolkit = FileManagementToolkit(root_dir=self.root_dir)
         tools.extend(file_toolkit.get_tools())
         
-        # Data analysis tools
+        # SQL-focused tools
         tools.extend([
-            Tool(
-                name="read_csv",
-                func=self._read_csv,
-                description="Read a CSV file and return DataFrame information. Input: file_path"
-            ),
-            Tool(
-                name="read_excel",
-                func=self._read_excel,
-                description="Read an Excel file and return DataFrame information. Input: file_path"
-            ),
-            Tool(
-                name="read_json",
-                func=self._read_json,
-                description="Read a JSON file and return data information. Input: file_path"
-            ),
-            Tool(
-                name="read_parquet",
-                func=self._read_parquet,
-                description="Read a Parquet file and return DataFrame information. Input: file_path"
-            ),
-            Tool(
-                name="read_geoparquet",
-                func=self._read_geoparquet,
-                description="Read a GeoParquet file and return GeoDataFrame information. Input: file_path"
-            ),
-            Tool(
-                name="analyze_dataframe",
-                func=self._analyze_dataframe,
-                description="Analyze a DataFrame and return statistics. Input: file_path"
-            ),
-            Tool(
-                name="query_data",
-                func=self._query_data,
-                description="Query data using SQL on any supported file format. Input: {'file_path': 'path', 'query': 'SQL query'}"
-            ),
-            Tool(
-                name="transform_data",
-                func=self._transform_data,
-                description="Transform data between formats (CSV, JSON, Parquet, GeoParquet). Input: {'input_path': 'path', 'output_path': 'path', 'output_format': 'format', 'compression': 'optional'}"
-            ),
-            Tool(
-                name="optimize_storage",
-                func=self._optimize_storage,
-                description="Analyze and suggest optimal storage format for data. Input: file_path"
-            ),
-            Tool(
-                name="data_visualization",
-                func=self._create_visualization,
-                description="Create data visualizations. Input: {'file_path': 'path', 'plot_type': 'type', 'x': 'column', 'y': 'column'}"
-            ),
-            Tool(
-                name="json_to_database",
-                func=self._json_to_database,
-                description="Convert large JSON files to database format efficiently. Input: {'json_path': 'path', 'db_path': 'output.db', 'table_name': 'data', 'chunk_size': 10000}"
-            ),
+            # Database Schema & Structure Tools
             Tool(
                 name="list_database_tables",
                 func=self._list_database_tables,
-                description="List all tables in a SQLite database. Input: db_path"
+                description="🗂️ List all tables in a SQLite database with row counts. Input: db_path"
             ),
             Tool(
                 name="describe_database_table",
                 func=self._describe_database_table,
-                description="Get schema and info for a database table. Input: {'db_path': 'path', 'table_name': 'table'}"
-            ),
-            Tool(
-                name="query_database",
-                func=self._query_database,
-                description="Query a SQLite database using SQL. Input: {'db_path': 'path', 'query': 'SQL query', 'limit': 1000}"
-            ),
-            Tool(
-                name="export_database_table",
-                func=self._export_database_table,
-                description="Export database table to file. Input: {'db_path': 'path', 'table_name': 'table', 'output_path': 'path', 'output_format': 'csv', 'where_clause': 'optional', 'limit': 'optional'}"
+                description="📋 Get detailed schema, indexes, and sample data for a database table. Input: {'db_path': 'path', 'table_name': 'table'}"
             ),
             Tool(
                 name="database_statistics",
                 func=self._database_statistics,
-                description="Get statistics about a database (size, row counts, etc.). Input: db_path"
+                description="📊 Get comprehensive database statistics (size, tables, rows, etc.). Input: db_path"
+            ),
+            
+            # SQL Query Tools
+            Tool(
+                name="query_database",
+                func=self._query_database,
+                description="🔍 Execute SQL queries on SQLite databases. Input: {'db_path': 'path', 'query': 'SQL query', 'limit': 1000}"
+            ),
+            Tool(
+                name="query_data_file",
+                func=self._query_data,
+                description="📄 Query data files (CSV, JSON, Parquet) using SQL. Input: {'file_path': 'path', 'query': 'SQL query'}"
+            ),
+            
+            # Data Export & Analysis Tools
+            Tool(
+                name="export_query_results",
+                func=self._export_database_table,
+                description="💾 Export SQL query results to files. Input: {'db_path': 'path', 'table_name': 'table', 'output_path': 'path', 'output_format': 'csv', 'where_clause': 'optional', 'limit': 'optional'}"
+            ),
+            Tool(
+                name="analyze_data_file",
+                func=self._analyze_dataframe,
+                description="📈 Analyze data files and get statistical summaries. Input: file_path"
+            ),
+            
+            # File Reading Tools (for SQL context)
+            Tool(
+                name="read_csv_info",
+                func=self._read_csv,
+                description="📊 Read CSV file structure and preview data. Input: file_path"
+            ),
+            Tool(
+                name="read_json_info",
+                func=self._read_json,
+                description="🔧 Read JSON file structure and preview data. Input: file_path"
+            ),
+            Tool(
+                name="read_parquet_info",
+                func=self._read_parquet,
+                description="⚡ Read Parquet file structure and preview data. Input: file_path"
+            ),
+            
+            # Data Transformation Tools
+            Tool(
+                name="transform_data",
+                func=self._transform_data,
+                description="🔄 Transform data between formats (CSV, JSON, Parquet). Input: {'input_path': 'path', 'output_path': 'path', 'output_format': 'format', 'compression': 'optional'}"
+            ),
+            Tool(
+                name="json_to_database",
+                func=self._json_to_database,
+                description="🗄️ Convert JSON files to SQLite database for efficient querying. Input: {'json_path': 'path', 'db_path': 'output.db', 'table_name': 'data', 'chunk_size': 10000}"
+            ),
+            
+            # Visualization Tools
+            Tool(
+                name="create_chart",
+                func=self._create_visualization,
+                description="📊 Create charts from data files. Input: {'file_path': 'path', 'plot_type': 'type', 'x': 'column', 'y': 'column'}"
+            ),
+            Tool(
+                name="optimize_storage",
+                func=self._optimize_storage,
+                description="⚡ Analyze and suggest optimal storage format for data. Input: file_path"
             )
         ])
         
@@ -1000,13 +1001,14 @@ Table Details:
             return f"Error getting database statistics: {str(e)}"
     
     def _create_agent(self):
-        """Create the agent with tools"""
+        """Create the SQL-focused agent with tools"""
         # Create agent prompt with required variables
         prompt = PromptTemplate.from_template("""Answer the following questions as best you can. You have access to the following tools:
 
 {tools}
 
-You are a data engineering assistant specializing in analyzing and processing data files.
+You are a SQL Query Agent specializing in database analysis and SQL querying.
+You excel at exploring database schemas, writing efficient SQL queries, and analyzing data.
 Current working directory: {root_dir}
 
 Use the following format:
@@ -1020,11 +1022,12 @@ Observation: the result of the action
 Thought: I now know the final answer
 Final Answer: the final answer to the original input question
 
-When working with data:
-1. First identify the file format and size
-2. For large files, consider transforming to Parquet for better performance
-3. Use SQL queries for complex data analysis
-4. Suggest storage optimizations when appropriate
+SQL Query Best Practices:
+1. Always explore database schema first (list tables, describe structure)
+2. Use appropriate LIMIT clauses for large datasets
+3. Write efficient queries with proper WHERE clauses
+4. Suggest indexes for performance optimization
+5. Export results when analysis is complete
 
 Begin!
 
@@ -1061,7 +1064,7 @@ Thought:{agent_scratchpad}""")
             return f"Error running agent: {str(e)}"
     
     def chat(self):
-        """Interactive chat mode with rich terminal output"""
+        """Interactive SQL query chat mode with rich terminal output"""
         from rich.console import Console
         from rich.panel import Panel
         from rich.table import Table
@@ -1069,74 +1072,78 @@ Thought:{agent_scratchpad}""")
         console = Console()
         
         console.print(Panel.fit(
-            f"🤖 [bold blue]Data Engineering Agent[/bold blue]\n[cyan]Working directory:[/cyan] {self.root_dir}",
-            border_style="blue"
+            f"🔍 [bold cyan]SQL Query Agent[/bold cyan]\n[yellow]Database directory:[/yellow] {self.root_dir}",
+            border_style="cyan"
         ))
-        console.print("Type [bold red]'exit'[/bold red] to quit, [bold yellow]'help'[/bold yellow] for available commands\n")
+        console.print("Type [bold red]'exit'[/bold red] to quit, [bold yellow]'help'[/bold yellow] for SQL commands\n")
         
         while True:
-            user_input = console.input("[bold blue]You>[/bold blue] ").strip()
+            user_input = console.input("[bold cyan]SQL>[/bold cyan] ").strip()
             
             if user_input.lower() == 'exit':
-                console.print("\n[bold red]👋 Goodbye![/bold red]")
+                console.print("\n[bold red]👋 Happy querying![/bold red]")
                 break
             elif user_input.lower() == 'help':
                 help_panel = Panel(
-                    """[bold cyan]Available Capabilities:[/bold cyan]
+                    """[bold cyan]🔍 SQL Query Agent Capabilities:[/bold cyan]
 
-[bold]File Operations:[/bold]
-  • list, read, write, copy, move, delete files
+[bold yellow]🗂️ Database Schema Exploration:[/bold yellow]
+  • List all tables with row counts
+  • Describe table structures, columns, indexes
+  • Get comprehensive database statistics
 
-[bold]Data Formats:[/bold]
-  • CSV, Excel, JSON, Parquet, GeoParquet, SQLite
+[bold yellow]🔍 SQL Query Execution:[/bold yellow]
+  • Execute SQL queries on SQLite databases
+  • Query data files (CSV, JSON, Parquet) using SQL
+  • Smart query optimization and suggestions
 
-[bold]Data Analysis:[/bold]
-  • analyze files, get statistics, optimize storage
+[bold yellow]💾 Data Export & Analysis:[/bold yellow]
+  • Export query results to various formats
+  • Statistical analysis of query results
+  • Performance optimization recommendations
 
-[bold]SQL Queries:[/bold]
-  • query your data using SQL (files and databases)
+[bold yellow]🔧 Database Operations:[/bold yellow]
+  • Convert JSON to SQLite for better querying
+  • Transform data between formats
+  • File structure analysis
 
-[bold]Database Operations:[/bold]
-  • list tables, describe schemas, export data
+[bold green]🚀 Example SQL Commands:[/bold green]
+  • [white]"Show me all tables in landuse_transitions.db"[/white]
+  • [white]"Describe the landuse_transitions table"[/white]
+  • [white]"Query landuse_transitions.db: SELECT scenario, COUNT(*) FROM landuse_transitions GROUP BY scenario LIMIT 10"[/white]
+  • [white]"Get database statistics for landuse_projections.db"[/white]
+  • [white]"Export results WHERE scenario='Baseline' to CSV"[/white]
+  • [white]"Find all tables with more than 1000 rows"[/white]
+  • [white]"Show me the schema for all databases in processed/"[/white]
 
-[bold]Transformations:[/bold]
-  • convert between formats with compression
-
-[bold]Visualizations:[/bold]
-  • create plots and charts
-
-[bold green]Example Queries:[/bold green]
-  • "List all data files in the current directory"
-  • "Show me the tables in landuse_transitions.db"
-  • "Describe the landuse_transitions table structure"
-  • "Query landuse_transitions.db: SELECT scenario, COUNT(*) FROM landuse_transitions GROUP BY scenario"
-  • "Export landuse transitions for scenario 'Baseline' to CSV"
-  • "Get database statistics for landuse_projections.db"
-  • "Transform sales.csv to Parquet format with snappy compression"
+[bold blue]💡 Pro Tips:[/bold blue]
+  • Always explore schema first with [italic]"list tables"[/italic]
+  • Use LIMIT for large datasets
+  • Try aggregate functions: COUNT, SUM, AVG, GROUP BY
 """,
-                    title="📚 Help",
+                    title="📚 SQL Query Help",
                     border_style="yellow"
                 )
                 console.print(help_panel)
             else:
-                with console.status(f"[bold yellow]Processing...[/bold yellow]", spinner="dots"):
+                with console.status(f"[bold cyan]Executing SQL query...[/bold cyan]", spinner="dots"):
                     response = self.run(user_input)
                 
                 # Format response
                 if "Error" in response:
-                    console.print(Panel(response, title="❌ Error", border_style="red"))
+                    console.print(Panel(response, title="❌ SQL Error", border_style="red"))
                 else:
-                    console.print(Panel(response, title="🤖 Agent Response", border_style="green"))
+                    console.print(Panel(response, title="🔍 Query Results", border_style="green"))
                 console.print()
 
 
 if __name__ == "__main__":
     # Example usage
-    agent = DataEngineeringAgent()
+    agent = SQLQueryAgent()
     
-    # You can run specific queries
-    # result = agent.run("List all files in the current directory")
+    # You can run specific SQL queries
+    # result = agent.run("Show me all tables in landuse_transitions.db")
     # print(result)
     
-    # Or start interactive chat
+    # Or start interactive SQL chat
     agent.chat()
