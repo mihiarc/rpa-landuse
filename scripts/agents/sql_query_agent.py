@@ -9,11 +9,16 @@ import json
 import pandas as pd
 import geopandas as gpd
 import sqlite3
+import duckdb
 from typing import List, Dict, Any, Optional, Union
 from pathlib import Path
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 
 from dotenv import load_dotenv
+
+# Load environment variables from config/.env
+load_dotenv("config/.env")
+load_dotenv()  # Also load from root .env as fallback
 from langchain.agents import create_react_agent, AgentExecutor
 from langchain_openai import ChatOpenAI
 from langchain_community.agent_toolkits import FileManagementToolkit
@@ -60,7 +65,8 @@ class TransformParams(BaseModel):
     output_format: str = Field(..., description="Output format: parquet, csv, json, geoparquet")
     compression: Optional[str] = Field(None, description="Compression type: gzip, snappy, brotli")
     
-    @validator('output_format')
+    @field_validator('output_format')
+    @classmethod
     def validate_format(cls, v):
         valid_formats = ['parquet', 'csv', 'json', 'geoparquet']
         if v not in valid_formats:
@@ -118,7 +124,12 @@ class SQLQueryAgent:
             Tool(
                 name="query_database",
                 func=self._query_database,
-                description="🔍 Execute SQL queries on SQLite databases. Input: {'db_path': 'path', 'query': 'SQL query', 'limit': 1000}"
+                description="🔍 Execute SQL queries on SQLite/DuckDB databases. Input: {'db_path': 'path', 'query': 'SQL query', 'limit': 1000}"
+            ),
+            Tool(
+                name="query_duckdb",
+                func=self._query_duckdb,
+                description="🦆 Execute SQL queries on DuckDB databases (optimized for analytics). Input: {'db_path': 'path', 'query': 'SQL query', 'limit': 1000}"
             ),
             Tool(
                 name="query_data_file",
@@ -872,6 +883,67 @@ Results: {len(df):,} rows
             
         except Exception as e:
             return f"Error executing database query: {str(e)}"
+
+    def _query_duckdb(self, params: Union[Dict[str, str], str]) -> str:
+        """Query a DuckDB database using SQL (optimized for analytics)"""
+        try:
+            # Handle both dict and string inputs
+            if isinstance(params, str):
+                try:
+                    params = json.loads(params)
+                except:
+                    return "Error: Invalid input format. Expected JSON with 'db_path' and 'query' keys"
+            
+            validated_params = DatabaseQueryParams(**params)
+            db_path = validated_params.db_path
+            query = validated_params.query
+            limit = validated_params.limit
+            
+            full_path = Path(self.root_dir) / db_path
+            
+            if not full_path.exists():
+                return f"DuckDB file not found: {db_path}"
+            
+            # Connect to DuckDB database
+            conn = duckdb.connect(str(full_path))
+            
+            # Add LIMIT if not present and it's a SELECT query
+            if query.strip().upper().startswith('SELECT') and 'LIMIT' not in query.upper():
+                query = f"{query.rstrip(';')} LIMIT {limit}"
+            
+            # Execute query and get results as DataFrame for better formatting
+            try:
+                df = conn.execute(query).df()
+                conn.close()
+                
+                if df.empty:
+                    return f"Query executed successfully. No results returned.\nQuery: {query}"
+                
+                # Format results with better DuckDB-style output
+                result_str = f"🦆 DuckDB Query Results ({len(df)} rows):\nQuery: {query}\n\n"
+                
+                # Use pandas formatting for better display
+                if len(df) <= 50:
+                    result_str += df.to_string(index=False, max_cols=10, max_colwidth=30)
+                else:
+                    result_str += df.head(50).to_string(index=False, max_cols=10, max_colwidth=30)
+                    result_str += f"\n\n... and {len(df) - 50} more rows"
+                
+                # Add summary statistics for numeric columns
+                numeric_cols = df.select_dtypes(include=['number']).columns
+                if len(numeric_cols) > 0 and len(df) > 1:
+                    result_str += f"\n\n📊 Summary Statistics:\n"
+                    summary = df[numeric_cols].describe()
+                    result_str += summary.to_string()
+                
+                return result_str
+                
+            except Exception as query_error:
+                conn.close()
+                return f"Error executing DuckDB query: {str(query_error)}"
+            
+        except Exception as e:
+            return f"Error connecting to DuckDB: {str(e)}"
     
     def _export_database_table(self, params: Union[Dict[str, str], str]) -> str:
         """Export database table to file"""

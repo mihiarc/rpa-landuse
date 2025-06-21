@@ -1,10 +1,44 @@
-# Data Engineering Agent API
+# SQL Query Agents API
 
-Complete API reference for the DataEngineeringAgent class and its natural language interface.
+Complete API reference for our specialized SQL agents and their natural language interfaces.
 
 ## Overview
 
-The `DataEngineeringAgent` is the core component that interprets natural language queries and performs data operations on land use databases.
+We provide two specialized agents for different data analysis needs:
+
+### 🌾 **Landuse Natural Language Query Agent**
+Specialized for landuse transition analysis - converts natural language questions into optimized DuckDB SQL queries.
+
+**[📖 Complete Documentation →](landuse-query-agent.md)**
+
+```python
+from scripts.agents.landuse_query_agent import LanduseQueryAgent
+
+# Initialize the specialized landuse agent
+agent = LanduseQueryAgent()
+
+# Ask natural language questions
+result = agent.query("Which scenarios show the most agricultural land loss?")
+```
+
+### 🔍 **General SQL Query Agent**
+Multi-database support for SQLite, DuckDB, CSV, JSON, and Parquet files.
+
+```python
+from scripts.agents.sql_query_agent import SQLQueryAgent
+
+# Initialize the general SQL agent
+agent = SQLQueryAgent(root_dir="./data")
+
+# Run SQL queries on various data sources
+result = agent.run("Show me the tables in landuse_transitions.db")
+```
+
+---
+
+## General SQL Query Agent (Legacy)
+
+The `SQLQueryAgent` is the original component that interprets natural language queries and performs data operations on various databases and files.
 
 ```python
 from scripts.agents.data_engineering_agent import DataEngineeringAgent

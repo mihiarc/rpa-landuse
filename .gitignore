@@ -8,9 +8,11 @@ ENV/
 
 # Data files
 *.db
+*.duckdb
 *.parquet
 data/raw/*.json
 data/processed/*.db
+data/processed/*.duckdb
 
 # Config
 .env
@@ -34,3 +36,7 @@ Thumbs.db
 !data/samples/*.csv
 !data/samples/*.parquet
 site/
+
+# Temporary setup scripts
+set_openai_key.py
+setup_agents.py

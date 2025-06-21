@@ -85,45 +85,41 @@ Get started in just a few steps:
 
 ## 📚 Documentation Structure
 
-<div class="grid cards" markdown>
+### Getting Started
+- **[Installation](getting-started/installation.md)** - Set up the project and dependencies
+- **[Quick Start](getting-started/quickstart.md)** - Run your first queries
+- **[Configuration](getting-started/configuration.md)** - Customize the system
 
--   :material-rocket-launch: **[Getting Started](getting-started/installation.md)**
+### Natural Language Queries
+- **[Overview](queries/overview.md)** - How natural language processing works
+- **[Basic Queries](queries/basic-queries.md)** - Simple query patterns
+- **[Advanced Queries](queries/advanced-queries.md)** - Complex analysis techniques
+- **[Examples](queries/examples.md)** - Real-world query examples
 
-    ---
+### Data & Schemas
+- **[Data Sources](data/sources.md)** - Understanding the RPA projections
+- **[Database Schema](data/schema.md)** - Table structures and relationships
+- **[Land Use Categories](data/categories.md)** - Category definitions
+- **[Processing Pipeline](data/processing.md)** - How data is transformed
 
-    Installation, configuration, and your first queries
+### API Reference
+- **[Agent API](api/agent.md)** - DataEngineeringAgent documentation
+- **[Converters](api/converters.md)** - Data conversion tools
+- **[Tools](api/tools.md)** - Available agent tools
 
--   :material-chat-question: **[Natural Language Queries](queries/overview.md)**
+### Examples & Use Cases
+- **[Use Cases](examples/use-cases.md)** - Real-world applications
+- **[Workflows](examples/workflows.md)** - Step-by-step guides
+- **[Notebooks](examples/notebooks.md)** - Jupyter notebook examples
 
-    ---
+### Development
+- **[Architecture](development/architecture.md)** - System design
+- **[Contributing](development/contributing.md)** - How to contribute
+- **[Testing](development/testing.md)** - Testing guide
 
-    Learn how to ask questions and get insights from your data
-
--   :material-database: **[Data & Schemas](data/sources.md)**
-
-    ---
-
-    Understand the data structure and land use categories
-
--   :material-api: **[API Reference](api/agent.md)**
-
-    ---
-
-    Detailed documentation of agents, tools, and utilities
-
--   :material-lightbulb: **[Examples](examples/use-cases.md)**
-
-    ---
-
-    Real-world use cases and sample workflows
-
--   :material-hammer-wrench: **[Development](development/architecture.md)**
-
-    ---
-
-    Architecture details and contribution guidelines
-
-</div>
+### Help
+- **[FAQ](faq.md)** - Frequently asked questions
+- **[Troubleshooting](troubleshooting.md)** - Common issues and solutions
 
 ## 🤝 Contributing
 
