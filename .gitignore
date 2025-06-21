@@ -40,3 +40,4 @@ site/
 # Temporary setup scripts
 set_openai_key.py
 setup_agents.py
+CLAUDE.md
