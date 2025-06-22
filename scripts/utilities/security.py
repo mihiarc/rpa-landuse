@@ -15,7 +15,7 @@ import time
 from collections import defaultdict
 from datetime import datetime, timedelta
 
-from pydantic import BaseModel, validator, Field
+from pydantic import BaseModel, field_validator, Field
 from rich.console import Console
 
 logger = logging.getLogger(__name__)
@@ -62,17 +62,17 @@ class SQLQueryValidator:
         # Convert to uppercase for keyword checking
         query_upper = cleaned_query.upper()
         
+        # Check for multiple statements (semicolon not at end)
+        if ';' in cleaned_query.rstrip(';'):
+            return False, "Multiple statements not allowed"
+            
         # Check for dangerous keywords
         for keyword in cls.DANGEROUS_KEYWORDS:
             if re.search(r'\b' + keyword + r'\b', query_upper):
                 return False, f"Dangerous keyword '{keyword}' not allowed"
         
-        # Check for multiple statements (semicolon not at end)
-        if ';' in cleaned_query.rstrip(';'):
-            return False, "Multiple statements not allowed"
-        
-        # Basic structure validation
-        if not query_upper.strip().startswith('SELECT'):
+        # Basic structure validation - allow WITH (CTE) or SELECT
+        if not (query_upper.strip().startswith('SELECT') or query_upper.strip().startswith('WITH')):
             return False, "Only SELECT queries are allowed"
         
         # Check for suspicious patterns
@@ -130,12 +130,12 @@ class InputValidator:
         Validate and sanitize file paths
         Prevents directory traversal attacks
         """
+        # Check for directory traversal attempts first
+        if '..' in path:
+            raise ValueError("Directory traversal not allowed")
+            
         # Convert to Path object
         file_path = Path(path).resolve()
-        
-        # Check for directory traversal attempts
-        if '..' in str(file_path):
-            raise ValueError("Directory traversal not allowed")
         
         # Check if path is within allowed directories
         allowed_dirs = [
@@ -244,22 +244,22 @@ class SecureConfig(BaseModel):
     
     openai_api_key: Optional[str] = Field(None, min_length=20)
     anthropic_api_key: Optional[str] = Field(None, min_length=20)
-    landuse_model: str = Field("gpt-4o-mini", regex="^(gpt-4|gpt-3.5|claude)")
+    landuse_model: str = Field("gpt-4o-mini", pattern="^(gpt-4|gpt-3.5|claude)")
     temperature: float = Field(0.1, ge=0.0, le=1.0)
     max_tokens: int = Field(4000, ge=1, le=8000)
     database_path: str = Field("data/processed/landuse_analytics.duckdb")
     max_query_limit: int = Field(1000, ge=1, le=10000)
     enable_logging: bool = Field(True)
-    log_level: str = Field("INFO", regex="^(DEBUG|INFO|WARNING|ERROR|CRITICAL)$")
+    log_level: str = Field("INFO", pattern="^(DEBUG|INFO|WARNING|ERROR|CRITICAL)$")
     
-    @validator('openai_api_key', 'anthropic_api_key')
-    def validate_api_key(cls, v, field):
+    @field_validator('openai_api_key', 'anthropic_api_key')
+    def validate_api_key(cls, v, info):
         """Validate API key format"""
         if v and not v.startswith(('sk-', 'ant_')):
-            logger.warning(f"Unusual {field.name} format detected")
+            logger.warning(f"Unusual {info.field_name} format detected")
         return v
     
-    @validator('database_path')
+    @field_validator('database_path')
     def validate_db_path(cls, v):
         """Validate database path exists"""
         path = Path(v)

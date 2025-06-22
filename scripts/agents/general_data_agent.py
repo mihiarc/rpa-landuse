@@ -1,7 +1,7 @@
 """
-SQL Query Agent for Local Database Analysis
-This agent specializes in SQL querying and database analysis for your project.
-Focuses on SQLite databases with support for data files (CSV, JSON, Parquet) via SQL queries.
+General Data Agent for Multi-Database and File Analysis
+This agent handles general data operations across multiple database types and file formats.
+Supports SQLite, DuckDB, CSV, JSON, Parquet, and more for comprehensive data engineering tasks.
 """
 
 import os
@@ -66,19 +66,18 @@ class TransformParams(BaseModel):
     compression: Optional[str] = Field(None, description="Compression type: gzip, snappy, brotli")
     
     @field_validator('output_format')
-    @classmethod
     def validate_format(cls, v):
         valid_formats = ['parquet', 'csv', 'json', 'geoparquet']
         if v not in valid_formats:
             raise ValueError(f"Format must be one of {valid_formats}")
         return v
 
-class SQLQueryAgent:
-    """Agent specialized in SQL querying and database analysis"""
+class GeneralDataAgent:
+    """Agent specialized in general data operations and multi-database analysis"""
     
     def __init__(self, root_dir: str = None):
         """
-        Initialize the SQL Query Agent
+        Initialize the General Data Agent
         
         Args:
             root_dir: Root directory for file operations (defaults to PROJECT_ROOT_DIR from .env)

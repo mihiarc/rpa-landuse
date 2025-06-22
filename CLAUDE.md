@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is an advanced natural language analysis system for county-level land use transitions using AI agents and modern data stack (DuckDB, LangChain, GPT-4). The project processes USDA RPA land use projection data and enables users to ask questions in plain English about land use changes across different climate scenarios.
+This is an advanced natural language analysis system for county-level land use transitions using AI agents and modern data stack (DuckDB, LangChain, Claude/GPT-4). The project processes USDA RPA land use projection data and enables users to ask questions in plain English about land use changes across different climate scenarios.
 
 ## Key Commands
 
@@ -19,14 +19,17 @@ uv run python setup_agents.py
 
 ### Running the Agents
 ```bash
-# Primary: Landuse Natural Language Query Agent (recommended)
-uv run python scripts/agents/landuse_query_agent.py
+# Primary: Landuse Natural Language Agent (recommended)
+uv run python scripts/agents/landuse_natural_language_agent.py
 
 # Test with sample queries
 uv run python scripts/agents/test_landuse_agent.py
 
-# Alternative: General SQL Query Agent (legacy)
-uv run python scripts/agents/sql_query_agent.py
+# Alternative: General Data Agent (multi-database support)
+uv run python scripts/agents/general_data_agent.py
+
+# Secure version with enhanced security features
+uv run python scripts/agents/secure_landuse_agent.py
 ```
 
 ### Data Processing
@@ -37,6 +40,24 @@ uv run python scripts/converters/convert_to_duckdb.py
 # Legacy SQLite converters
 uv run python scripts/converters/convert_landuse_to_db.py
 uv run python scripts/converters/convert_landuse_with_agriculture.py
+```
+
+### Documentation
+```bash
+# Build documentation
+mkdocs build
+
+# Serve documentation locally (http://localhost:8000)
+mkdocs serve
+```
+
+### Direct Database Access
+```bash
+# Browser-based DuckDB UI
+duckdb data/processed/landuse_analytics.duckdb -ui
+
+# DuckDB command line
+duckdb data/processed/landuse_analytics.duckdb
 ```
 
 ## Architecture
@@ -56,23 +77,38 @@ uv run python scripts/converters/convert_landuse_with_agriculture.py
 
 ### Key Components
 
-**Landuse Query Agent** (`scripts/agents/landuse_query_agent.py`):
+**Landuse Natural Language Agent** (`scripts/agents/landuse_natural_language_agent.py`):
+- Uses Claude 3.5 Sonnet by default (configurable via LANDUSE_MODEL env var)
+- Built with LangChain REACT agent framework
 - Specialized for land use analysis with business context
 - Automatic summary statistics and insights
 - Beautiful Rich terminal UI with markdown support
 - Schema-aware query generation
 
-**SQL Query Agent** (`scripts/agents/sql_query_agent.py`):
-- General-purpose SQL agent for multiple databases
+**General Data Agent** (`scripts/agents/general_data_agent.py`):
+- General-purpose agent for multiple databases and file formats
 - Supports SQLite, DuckDB, CSV, JSON, Parquet
 - File management and data transformation tools
+- Uses GPT-4 by default
+
+**Secure Landuse Agent** (`scripts/agents/secure_landuse_agent.py`):
+- Enhanced version of landuse agent with security features
+- SQL injection prevention and input validation
+- Rate limiting and audit logging
+- Same natural language capabilities with added protection
+
+**Data Converter** (`scripts/converters/convert_to_duckdb.py`):
+- Processes nested JSON to normalized star schema
+- Creates dimension and fact tables
+- Adds indexes and views for performance
+- Handles 20M+ lines efficiently with progress tracking
 
 ### Land Use Categories
-- **Crop**: Agricultural cropland
-- **Pasture**: Livestock grazing land
-- **Forest**: Forested areas
-- **Urban**: Developed/built areas
-- **Range**: Natural grasslands
+- **Crop**: Agricultural cropland (cr)
+- **Pasture**: Livestock grazing land (ps)
+- **Forest**: Forested areas (fr)
+- **Urban**: Developed/built areas (ur)
+- **Rangeland**: Natural grasslands (rg)
 
 ## Environment Configuration
 
@@ -154,3 +190,20 @@ duckdb data/processed/landuse_analytics.duckdb
 # Transition analysis
 "What's converting to urban land in California?"
 ```
+
+## Testing
+
+No formal test framework is configured. Testing is done through:
+- `test_landuse_agent.py`: Tests natural language queries with sample questions
+- `test_agent.py`: Creates sample data and tests general SQL agent
+- Interactive testing via agent scripts
+- Real API calls are used for all tests (no mocking)
+
+## Dependencies
+
+Key packages (managed via `uv`):
+- **Core**: langchain, langchain-anthropic, langchain-community
+- **Data**: pandas, duckdb, pyarrow, ijson
+- **UI**: rich (for terminal output)
+- **Validation**: pydantic v2
+- **Docs**: mkdocs, mkdocs-material

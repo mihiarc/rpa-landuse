@@ -9,7 +9,7 @@ LangChain-based agents for data analysis:
 
 This directory contains specialized AI agents for natural language database querying and analysis.
 
-## 🌾 Landuse Natural Language Query Agent
+## 🌾 Landuse Natural Language Agent
 
 **Specialized for landuse transition analysis** - The most advanced agent for converting natural language questions into optimized DuckDB SQL queries for landuse data.
 
@@ -22,7 +22,7 @@ This directory contains specialized AI agents for natural language database quer
 ### Quick Start
 ```bash
 # Interactive chat mode
-uv run python scripts/agents/landuse_query_agent.py
+uv run python scripts/agents/landuse_natural_language_agent.py
 
 # Test with sample queries
 uv run python scripts/agents/test_landuse_agent.py
@@ -38,9 +38,9 @@ uv run python scripts/agents/test_landuse_agent.py
 
 ---
 
-## 🔍 General SQL Query Agent
+## 🔍 General Data Agent
 
-**Multi-database support** - Original agent that works with SQLite, DuckDB, CSV, JSON, and Parquet files.
+**Multi-database and file format support** - Versatile agent that works with SQLite, DuckDB, CSV, JSON, and Parquet files for general data operations.
 
 ### Features
 - 🗃️ **Multi-Database**: SQLite, DuckDB, CSV, JSON, Parquet support
@@ -51,7 +51,7 @@ uv run python scripts/agents/test_landuse_agent.py
 ### Quick Start
 ```bash
 # Interactive chat mode
-uv run python scripts/agents/sql_query_agent.py
+uv run python scripts/agents/general_data_agent.py
 ```
 
 **[📖 Complete Documentation →](../../docs/api/agent.md)**
@@ -60,13 +60,13 @@ uv run python scripts/agents/sql_query_agent.py
 
 ## Choosing the Right Agent
 
-### Use **Landuse Query Agent** when:
+### Use **Landuse Natural Language Agent** when:
 - ✅ Analyzing landuse transition data specifically
 - ✅ Want natural language to SQL conversion
 - ✅ Need business context and interpretations
 - ✅ Working with the DuckDB landuse database
 
-### Use **General SQL Agent** when:
+### Use **General Data Agent** when:
 - ✅ Working with multiple database types
 - ✅ Need data transformation capabilities
 - ✅ Analyzing various data formats (CSV, JSON, etc.)
@@ -155,7 +155,7 @@ Natural Language Query
 
 3. **Try the landuse agent:**
    ```bash
-   uv run python scripts/agents/landuse_query_agent.py
+   uv run python scripts/agents/landuse_natural_language_agent.py
    ```
 
 4. **Ask natural language questions:**

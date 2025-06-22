@@ -10,7 +10,7 @@ from pathlib import Path
 # Add the agents directory to the path
 sys.path.append(str(Path(__file__).parent))
 
-from landuse_query_agent import LanduseQueryAgent
+from landuse_natural_language_agent import LanduseNaturalLanguageAgent
 from rich.console import Console
 from rich.panel import Panel
 from rich.markdown import Markdown
@@ -27,7 +27,7 @@ def test_landuse_agent():
     
     # Initialize agent
     try:
-        agent = LanduseQueryAgent()
+        agent = LanduseNaturalLanguageAgent()
         console.print("✅ [green]Agent initialized successfully[/green]\n")
     except Exception as e:
         console.print(f"❌ [red]Failed to initialize agent: {str(e)}[/red]")
@@ -66,7 +66,7 @@ def test_landuse_agent():
     console.print(Panel.fit(
         "🎉 [bold green]Testing Complete![/bold green]\n"
         "[yellow]Try running the agent interactively:[/yellow]\n"
-        "[white]uv run python scripts/agents/landuse_query_agent.py[/white]",
+        "[white]uv run python scripts/agents/landuse_natural_language_agent.py[/white]",
         border_style="green"
     ))
 

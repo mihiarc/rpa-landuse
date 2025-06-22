@@ -33,7 +33,7 @@ cp .env.example config/.env
 ### 3. Try the Natural Language Query Agent
 ```bash
 # Interactive landuse analysis with natural language
-uv run python scripts/agents/landuse_query_agent.py
+uv run python scripts/agents/landuse_natural_language_agent.py
 
 # Test with sample queries
 uv run python scripts/agents/test_landuse_agent.py
@@ -53,8 +53,9 @@ duckdb data/processed/landuse_analytics.duckdb -ui
 ```
 langchain-landuse/
 ├── 🤖 scripts/agents/          # AI-powered query agents
-│   ├── landuse_query_agent.py  # Natural language → DuckDB SQL
-│   ├── sql_query_agent.py      # General multi-database agent
+│   ├── landuse_natural_language_agent.py  # Natural language → DuckDB SQL
+│   ├── general_data_agent.py   # General multi-database agent
+│   ├── secure_landuse_agent.py # Security-enhanced landuse agent
 │   └── test_landuse_agent.py   # Sample queries & testing
 ├── 🔄 scripts/converters/      # Data transformation tools
 │   └── convert_to_duckdb.py    # JSON → DuckDB star schema

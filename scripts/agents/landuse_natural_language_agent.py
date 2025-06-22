@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-Landuse Natural Language Query Agent
-Specialized agent for converting natural language queries to DuckDB SQL
-for the landuse transitions database
+Landuse Natural Language Agent
+Specialized agent for converting natural language queries about land use transitions
+into optimized DuckDB SQL queries with business context and insights
 """
 
 import os
@@ -33,8 +33,8 @@ class LanduseQueryParams(BaseModel):
     limit: Optional[int] = Field(50, description="Maximum number of rows to return")
     include_summary: Optional[bool] = Field(True, description="Include summary statistics")
 
-class LanduseQueryAgent:
-    """Natural Language to DuckDB SQL Agent for Landuse Data"""
+class LanduseNaturalLanguageAgent:
+    """Natural Language to DuckDB SQL Agent for Landuse Data Analysis"""
     
     def __init__(self, db_path: str = "data/processed/landuse_analytics.duckdb"):
         self.db_path = Path(db_path)
