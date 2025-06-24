@@ -213,7 +213,7 @@ def cleanup_logs():
 @pytest.fixture
 def mock_rate_limiter():
     """Mock rate limiter that always allows requests"""
-    with patch('scripts.utilities.security.RateLimiter') as mock:
+    with patch('landuse.utilities.security.RateLimiter') as mock:
         limiter = Mock()
         limiter.check_rate_limit.return_value = (True, None)
         mock.return_value = limiter

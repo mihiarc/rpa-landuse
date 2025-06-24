@@ -6,9 +6,7 @@ into optimized DuckDB SQL queries with business context and insights
 """
 
 import os
-import json
-import duckdb
-from typing import List, Dict, Any, Optional, Union
+from typing import List, Dict, Any, Optional
 from pathlib import Path
 from pydantic import BaseModel, Field
 
@@ -17,11 +15,10 @@ from langchain.agents import create_react_agent, AgentExecutor
 from langchain_anthropic import ChatAnthropic
 from langchain_core.tools import Tool
 from langchain.prompts import PromptTemplate
-from rich.console import Console
-from rich.panel import Panel
-from rich.table import Table
-from rich.syntax import Syntax
-from rich.markdown import Markdown
+
+from .base_agent import BaseLanduseAgent
+from .constants import STATE_NAMES, SCHEMA_INFO_TEMPLATE, DEFAULT_ASSUMPTIONS
+from .formatting import clean_sql_query, format_query_results
 
 # Load environment variables from config/.env
 load_dotenv("config/.env")
@@ -33,121 +30,24 @@ class LanduseQueryParams(BaseModel):
     limit: Optional[int] = Field(50, description="Maximum number of rows to return")
     include_summary: Optional[bool] = Field(True, description="Include summary statistics")
 
-class LanduseNaturalLanguageAgent:
+class LanduseNaturalLanguageAgent(BaseLanduseAgent):
     """Natural Language to DuckDB SQL Agent for Landuse Data Analysis"""
     
-    def __init__(self, db_path: str = "data/processed/landuse_analytics.duckdb"):
-        self.db_path = Path(db_path)
-        self.console = Console()
+    def __init__(self, db_path: Optional[str] = None, model_name: Optional[str] = None, 
+                 temperature: float = 0.1, max_tokens: int = 2000):
+        # Use environment variable or default if not provided
+        if db_path is None:
+            db_path = os.getenv('LANDUSE_DB_PATH', 'data/processed/landuse_analytics.duckdb')
         
-        # Initialize LLM
-        self.llm = ChatAnthropic(
-            model="claude-3-5-sonnet-20241022",
-            temperature=0.1,
-            max_tokens=2000
+        # Call parent constructor
+        super().__init__(
+            db_path=db_path,
+            model_name=model_name or "claude-3-5-sonnet-20241022",
+            temperature=temperature,
+            max_tokens=max_tokens
         )
         
-        # Get database schema information
-        self.schema_info = self._get_schema_info()
-        
-        # Create tools
-        self.tools = self._create_tools()
-        
-        # Create agent
-        self.agent = self._create_agent()
-    
-    def _get_schema_info(self) -> str:
-        """Get comprehensive schema information for the agent"""
-        if not self.db_path.exists():
-            return "Database file not found"
-        
-        try:
-            conn = duckdb.connect(str(self.db_path))
-            
-            schema_info = """
-# Landuse Transitions Database Schema
-
-## Overview
-This database contains land use transition data across different climate scenarios, time periods, and geographic locations using a star schema design.
-
-## Tables and Relationships
-
-### Fact Table
-- **fact_landuse_transitions**: Main table with transition data
-  - transition_id (BIGINT): Unique identifier
-  - scenario_id (INTEGER): Links to dim_scenario
-  - time_id (INTEGER): Links to dim_time  
-  - geography_id (INTEGER): Links to dim_geography
-  - from_landuse_id (INTEGER): Source land use type
-  - to_landuse_id (INTEGER): Destination land use type
-  - acres (DECIMAL): Area in acres for this transition
-  - transition_type (VARCHAR): 'same' or 'change'
-
-### Dimension Tables
-- **dim_scenario**: Climate and socioeconomic scenarios
-  - scenario_id (INTEGER): Primary key
-  - scenario_name (VARCHAR): Full scenario name (e.g., "CNRM_CM5_rcp45_ssp1")
-  - climate_model (VARCHAR): Climate model (e.g., "CNRM_CM5")
-  - rcp_scenario (VARCHAR): RCP pathway (e.g., "rcp45", "rcp85")
-  - ssp_scenario (VARCHAR): SSP pathway (e.g., "ssp1", "ssp5")
-
-- **dim_time**: Time periods
-  - time_id (INTEGER): Primary key
-  - year_range (VARCHAR): Range like "2012-2020"
-  - start_year (INTEGER): Starting year
-  - end_year (INTEGER): Ending year
-  - period_length (INTEGER): Duration in years
-
-- **dim_geography**: Geographic locations
-  - geography_id (INTEGER): Primary key
-  - fips_code (VARCHAR): 5-digit FIPS county code
-  - state_code (VARCHAR): 2-digit state code
-
-- **dim_landuse**: Land use types
-  - landuse_id (INTEGER): Primary key
-  - landuse_code (VARCHAR): Short code (cr, ps, rg, fr, ur)
-  - landuse_name (VARCHAR): Full name (Crop, Pasture, Rangeland, Forest, Urban)
-  - landuse_category (VARCHAR): Category (Agriculture, Natural, Developed)
-
-### Pre-built Views
-- **v_agriculture_transitions**: Filtered for agricultural transitions
-- **v_scenario_summary**: Aggregated summary by scenario
-
-## Common Query Patterns
-- Agricultural land loss: FROM Agriculture TO non-Agriculture
-- Urbanization: FROM any TO Urban
-- Reforestation: FROM any TO Forest
-- Climate scenario comparison: GROUP BY scenario_name
-- Geographic analysis: GROUP BY state_code or fips_code
-- Time series: ORDER BY start_year, end_year
-"""
-            
-            # Get actual table counts
-            tables_info = []
-            tables = ['dim_scenario', 'dim_time', 'dim_geography', 'dim_landuse', 'fact_landuse_transitions']
-            
-            for table in tables:
-                try:
-                    count = conn.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0]
-                    tables_info.append(f"- {table}: {count:,} records")
-                except:
-                    pass
-            
-            schema_info += f"\n## Current Data Counts\n" + "\n".join(tables_info)
-            
-            # Get sample scenarios
-            try:
-                scenarios = conn.execute("SELECT scenario_name FROM dim_scenario LIMIT 5").fetchall()
-                scenario_names = [s[0] for s in scenarios]
-                schema_info += f"\n## Sample Scenarios\n" + "\n".join([f"- {s}" for s in scenario_names])
-            except:
-                pass
-            
-            conn.close()
-            return schema_info
-            
-        except Exception as e:
-            return f"Error getting schema info: {str(e)}"
+        # Agent will be created by base class using our prompt
     
     def _create_tools(self) -> List[Tool]:
         """Create specialized tools for landuse queries"""
@@ -179,68 +79,6 @@ This database contains land use transition data across different climate scenari
             )
         ]
     
-    def _execute_landuse_query(self, sql_query: str) -> str:
-        """Execute SQL query on the landuse database"""
-        try:
-            if not self.db_path.exists():
-                return "❌ Database file not found. Please ensure the landuse database has been created."
-            
-            # Clean up SQL query - remove markdown formatting
-            sql_query = sql_query.strip()
-            if sql_query.startswith('```sql'):
-                sql_query = sql_query[6:]  # Remove ```sql
-            if sql_query.startswith('```'):
-                sql_query = sql_query[3:]   # Remove ```
-            if sql_query.endswith('```'):
-                sql_query = sql_query[:-3]  # Remove trailing ```
-            sql_query = sql_query.strip()
-            
-            conn = duckdb.connect(str(self.db_path))
-            
-            # Add LIMIT if not present for safety
-            if sql_query.upper().startswith('SELECT') and 'LIMIT' not in sql_query.upper():
-                sql_query = f"{sql_query.rstrip(';')} LIMIT 100"
-            
-            # Execute query
-            result = conn.execute(sql_query)
-            if result is None:
-                conn.close()
-                return f"❌ Query returned no result object.\nSQL: {sql_query}"
-            
-            df = result.df()
-            conn.close()
-            
-            if df.empty:
-                return f"✅ Query executed successfully but returned no results.\nSQL: {sql_query}"
-            
-            # Format results
-            result = f"🦆 **DuckDB Query Results** ({len(df)} rows)\n"
-            result += f"**SQL:** `{sql_query}`\n\n"
-            
-            # Show data
-            if len(df) <= 20:
-                result += "**Results:**\n"
-                result += df.to_string(index=False, max_colwidth=30)
-            else:
-                result += "**Results (first 20 rows):**\n"
-                result += df.head(20).to_string(index=False, max_colwidth=30)
-                result += f"\n\n... and {len(df) - 20} more rows"
-            
-            # Add summary statistics for numeric columns
-            numeric_cols = df.select_dtypes(include=['number']).columns
-            if len(numeric_cols) > 0 and len(df) > 1:
-                result += f"\n\n📊 **Summary Statistics:**\n"
-                summary = df[numeric_cols].describe()
-                result += summary.to_string()
-            
-            return result
-            
-        except Exception as e:
-            return f"❌ Error executing query: {str(e)}\nSQL: {sql_query}"
-    
-    def _get_schema_help(self, query: str = "") -> str:
-        """Get schema information"""
-        return self.schema_info
     
     def _suggest_query_examples(self, category: str = "general") -> str:
         """Suggest example queries for common patterns"""
@@ -385,9 +223,9 @@ WHERE transition_type = 'change'
 The agent will always clearly state which defaults were applied in each response.
 """
     
-    def _create_agent(self):
-        """Create the natural language to SQL agent"""
-        prompt = PromptTemplate.from_template("""
+    def _get_agent_prompt(self) -> str:
+        """Get the specialized prompt for landuse analysis"""
+        return """
 You are a specialized Landuse Data Analyst AI that converts natural language questions into DuckDB SQL queries for a landuse transitions database.
 
 AVAILABLE TOOLS:
@@ -450,49 +288,16 @@ RESPONSE FORMAT:
 Question: {input}
 Thought: Let me understand what the user is asking about landuse data and convert it to an appropriate SQL query.
 {agent_scratchpad}
-""")
-        
-        # Create the agent
-        agent = create_react_agent(
-            llm=self.llm,
-            tools=self.tools,
-            prompt=prompt
-        )
-        
-        # Create agent executor
-        agent_executor = AgentExecutor(
-            agent=agent,
-            tools=self.tools,
-            verbose=True,
-            handle_parsing_errors=True,
-            max_iterations=5
-        )
-        
-        return agent_executor
+"""
     
-    def query(self, natural_language_query: str) -> str:
-        """Process a natural language query"""
-        try:
-            response = self.agent.invoke({
-                "input": natural_language_query,
-                "schema_info": self.schema_info
-            })
-            return response.get("output", "No response generated")
-        except Exception as e:
-            return f"❌ Error processing query: {str(e)}"
     
-    def chat(self):
-        """Interactive chat mode for landuse queries"""
-        self.console.print(Panel.fit(
-            "🌾 [bold green]Landuse Natural Language Query Agent[/bold green]\n"
-            "[yellow]Ask questions about landuse transitions in natural language![/yellow]\n"
-            f"[dim]Database: {self.db_path}[/dim]",
-            border_style="green"
-        ))
+    def _show_chat_intro(self):
+        """Show landuse-specific intro information"""
+        # Show specialized examples for landuse queries
+        from rich.panel import Panel
         
-        # Show welcome examples
         examples_panel = Panel(
-            """[bold cyan]🚀 Try these example questions:[/bold cyan]
+            """[bold cyan]🚀 Try these landuse-specific questions:[/bold cyan]
 
 [yellow]Quick Analysis (uses smart defaults):[/yellow]
 • "How much agricultural land is being lost?" [dim](averages all scenarios)[/dim]
@@ -515,42 +320,11 @@ Thought: Let me understand what the user is asking about landuse data and conver
 • "What are the top 10 counties for land use change?"
 
 [bold green]💡 Smart Defaults:[/bold green]
-[dim]When you don't specify scenarios/time periods, I'll use averages across all scenarios and the full time range, and clearly state my assumptions![/dim]
-
-[dim]Just ask in natural language - I'll convert it to SQL![/dim]""",
-            title="💡 Example Questions & Smart Defaults",
+[dim]When you don't specify scenarios/time periods, I'll use averages across all scenarios and the full time range, and clearly state my assumptions![/dim]""",
+            title="🌾 Landuse-Specific Examples",
             border_style="blue"
         )
         self.console.print(examples_panel)
-        
-        self.console.print("\nType [bold red]'exit'[/bold red] to quit, [bold yellow]'help'[/bold yellow] for more info, [bold blue]'schema'[/bold blue] for database details\n")
-        
-        while True:
-            try:
-                user_input = self.console.input("[bold green]🌾 Ask>[/bold green] ").strip()
-                
-                if user_input.lower() == 'exit':
-                    self.console.print("\n[bold red]👋 Happy analyzing![/bold red]")
-                    break
-                elif user_input.lower() == 'help':
-                    self.console.print(examples_panel)
-                elif user_input.lower() == 'schema':
-                    schema_md = Markdown(self.schema_info)
-                    self.console.print(Panel(schema_md, title="📊 Database Schema", border_style="cyan"))
-                elif user_input:
-                    with self.console.status(f"[bold green]🤖 Converting to SQL and executing...[/bold green]", spinner="earth"):
-                        response = self.query(user_input)
-                    
-                    # Format response as markdown
-                    response_md = Markdown(response)
-                    self.console.print(Panel(response_md, title="🔍 Analysis Results", border_style="green"))
-                    self.console.print()
-                
-            except KeyboardInterrupt:
-                self.console.print("\n[bold red]👋 Happy analyzing![/bold red]")
-                break
-            except Exception as e:
-                self.console.print(Panel(f"❌ Error: {str(e)}", border_style="red"))
 
 if __name__ == "__main__":
     # Create and run the landuse query agent
