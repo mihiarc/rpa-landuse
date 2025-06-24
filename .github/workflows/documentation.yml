@@ -1,0 +1,303 @@
+name: Documentation
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'docs/**'
+      - 'mkdocs.yml'
+      - 'README.md'
+      - 'CLAUDE.md'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'docs/**'
+      - 'mkdocs.yml'
+      - 'README.md'
+      - 'CLAUDE.md'
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build-docs:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.12"
+        
+    - name: Install uv
+      uses: astral-sh/setup-uv@v4
+      
+    - name: Install dependencies
+      run: uv sync --all-extras --dev
+      
+    - name: Build documentation
+      run: |
+        uv run mkdocs build --strict
+        
+    - name: Check documentation links
+      run: |
+        # Install linkchecker
+        uv add linkchecker
+        
+        # Start a simple HTTP server for link checking
+        cd site
+        python -m http.server 8000 &
+        SERVER_PID=$!
+        sleep 5
+        
+        # Check internal links
+        uv run linkchecker http://localhost:8000 \
+          --check-extern \
+          --ignore-url=".*\.md$" \
+          --ignore-url=".*localhost.*" \
+          --output=text > link-check-results.txt 2>&1 || true
+        
+        # Stop server
+        kill $SERVER_PID
+        
+        # Move results to root
+        mv link-check-results.txt ../
+        cd ..
+        
+    - name: Upload documentation artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: documentation
+        path: |
+          site/
+          link-check-results.txt
+          
+    - name: Upload to GitHub Pages (if main branch)
+      if: github.ref == 'refs/heads/main'
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: site/
+
+  deploy-docs:
+    if: github.ref == 'refs/heads/main'
+    needs: build-docs
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v4
+
+  check-documentation-quality:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.12"
+        
+    - name: Install documentation tools
+      run: |
+        pip install alex proselint textstat
+        
+    - name: Check documentation writing quality
+      run: |
+        # Create quality check script
+        cat > doc_quality_check.py << 'EOF'
+        #!/usr/bin/env python3
+        """Documentation quality checking"""
+        
+        import os
+        import subprocess
+        import sys
+        from pathlib import Path
+        import textstat
+        
+        def check_readability(file_path):
+            """Check readability statistics for a markdown file"""
+            try:
+                with open(file_path, 'r', encoding='utf-8') as f:
+                    content = f.read()
+                
+                # Remove markdown syntax for better readability analysis
+                import re
+                # Remove code blocks
+                content = re.sub(r'```.*?```', '', content, flags=re.DOTALL)
+                # Remove inline code
+                content = re.sub(r'`[^`]+`', '', content)
+                # Remove links
+                content = re.sub(r'\[([^\]]+)\]\([^)]+\)', r'\1', content)
+                # Remove headers
+                content = re.sub(r'^#+\s+', '', content, flags=re.MULTILINE)
+                
+                if len(content.strip()) < 100:  # Skip very short files
+                    return None
+                
+                flesch_score = textstat.flesch_reading_ease(content)
+                grade_level = textstat.flesch_kincaid_grade(content)
+                
+                return {
+                    'file': str(file_path),
+                    'flesch_score': flesch_score,
+                    'grade_level': grade_level,
+                    'word_count': len(content.split())
+                }
+            except Exception as e:
+                print(f"Error analyzing {file_path}: {e}")
+                return None
+        
+        def main():
+            """Check documentation quality"""
+            docs_dir = Path('docs')
+            readme_files = [Path('README.md'), Path('CLAUDE.md')]
+            
+            all_files = []
+            if docs_dir.exists():
+                all_files.extend(docs_dir.glob('**/*.md'))
+            all_files.extend([f for f in readme_files if f.exists()])
+            
+            results = []
+            for file_path in all_files:
+                result = check_readability(file_path)
+                if result:
+                    results.append(result)
+            
+            if results:
+                print("# Documentation Readability Report")
+                print()
+                print("| File | Flesch Score | Grade Level | Word Count | Readability |")
+                print("|------|--------------|-------------|------------|-------------|")
+                
+                for result in sorted(results, key=lambda x: x['flesch_score'], reverse=True):
+                    file_name = result['file'].replace('docs/', '').replace('.md', '')
+                    flesch = result['flesch_score']
+                    grade = result['grade_level']
+                    words = result['word_count']
+                    
+                    # Determine readability level
+                    if flesch >= 90:
+                        level = "Very Easy"
+                    elif flesch >= 80:
+                        level = "Easy"
+                    elif flesch >= 70:
+                        level = "Fairly Easy"
+                    elif flesch >= 60:
+                        level = "Standard"
+                    elif flesch >= 50:
+                        level = "Fairly Difficult"
+                    elif flesch >= 30:
+                        level = "Difficult"
+                    else:
+                        level = "Very Difficult"
+                    
+                    print(f"| {file_name} | {flesch:.1f} | {grade:.1f} | {words} | {level} |")
+                
+                print()
+                print("## Recommendations")
+                print()
+                
+                difficult_docs = [r for r in results if r['flesch_score'] < 50]
+                if difficult_docs:
+                    print("### Improve Readability")
+                    for doc in difficult_docs:
+                        print(f"- **{doc['file']}**: Consider simplifying language (Flesch score: {doc['flesch_score']:.1f})")
+                    print()
+                
+                long_docs = [r for r in results if r['word_count'] > 3000]
+                if long_docs:
+                    print("### Consider Breaking Up Long Documents")
+                    for doc in long_docs:
+                        print(f"- **{doc['file']}**: {doc['word_count']} words - consider splitting into sections")
+                    print()
+                
+                print("### General Guidelines")
+                print("- Target Flesch score: 60-80 (Standard to Easy)")
+                print("- Target grade level: 8-12 (accessible to most readers)")
+                print("- Keep documents under 2000 words for better engagement")
+            else:
+                print("No documentation files found for analysis")
+        
+        if __name__ == "__main__":
+            main()
+        EOF
+        
+        python doc_quality_check.py > documentation-quality-report.md
+        
+    - name: Check for common documentation issues
+      run: |
+        # Check for common issues
+        echo "# Documentation Issues Report" > doc-issues-report.md
+        echo "" >> doc-issues-report.md
+        
+        # Check for broken internal links
+        echo "## Potential Internal Link Issues" >> doc-issues-report.md
+        find docs -name "*.md" -exec grep -l "\]\(" {} \; | while read file; do
+          echo "Checking $file for internal links..."
+          # Look for markdown links that might be broken
+          grep -n "\]\(" "$file" | grep -v "http" | head -5 >> doc-issues-report.md || true
+        done
+        
+        # Check for TODO/FIXME items
+        echo "" >> doc-issues-report.md
+        echo "## TODO/FIXME Items" >> doc-issues-report.md
+        find docs -name "*.md" -exec grep -Hn -i "todo\|fixme\|xxx" {} \; >> doc-issues-report.md || true
+        
+        # Check for inconsistent heading styles
+        echo "" >> doc-issues-report.md
+        echo "## Heading Style Check" >> doc-issues-report.md
+        find docs -name "*.md" -exec sh -c '
+          file="$1"
+          echo "=== $file ==="
+          # Look for potential heading inconsistencies
+          grep -n "^#" "$file" | head -3
+        ' _ {} \; >> doc-issues-report.md || true
+        
+    - name: Upload documentation quality reports
+      uses: actions/upload-artifact@v4
+      with:
+        name: documentation-quality
+        path: |
+          documentation-quality-report.md
+          doc-issues-report.md
+          
+    - name: Comment documentation quality on PR
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          
+          let comment = '## 📚 Documentation Quality Report\n\n';
+          
+          // Add readability report
+          if (fs.existsSync('documentation-quality-report.md')) {
+            const qualityReport = fs.readFileSync('documentation-quality-report.md', 'utf8');
+            comment += qualityReport + '\n\n';
+          }
+          
+          // Add issues report
+          if (fs.existsSync('doc-issues-report.md')) {
+            const issuesReport = fs.readFileSync('doc-issues-report.md', 'utf8');
+            if (issuesReport.length > 100) {  // Only add if there are actual issues
+              comment += '## 🔍 Potential Issues\n\n';
+              comment += issuesReport.substring(0, 2000) + '\n\n';  // Truncate if too long
+            }
+          }
+          
+          comment += '---\n*This report was automatically generated by the documentation workflow.*';
+          
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: comment
+          });
