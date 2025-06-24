@@ -114,8 +114,10 @@ def handle_user_input():
         with st.chat_message("assistant"):
             with st.spinner("🔍 Analyzing your query..."):
                 try:
-                    # Get response from agent
+                    # Get response from agent with timing
+                    query_start = time.time()
                     response = agent.query(prompt)
+                    query_time = time.time() - query_start
                     
                     # Stream the response for better UX
                     response_container = st.empty()
@@ -130,6 +132,10 @@ def handle_user_input():
                     # Final response without cursor
                     response_container.markdown(response)
                     
+                    # Show query time in sidebar
+                    with st.sidebar:
+                        st.caption(f"⏱️ Query took {query_time:.1f}s")
+                    
                     # Add assistant response to chat history
                     st.session_state.messages.append({
                         "role": "assistant", 
@@ -137,8 +143,66 @@ def handle_user_input():
                     })
                     
                 except Exception as e:
-                    error_message = f"❌ Error processing query: {str(e)}"
-                    st.error(error_message)
+                    error_str = str(e)
+                    error_type = type(e).__name__
+                    
+                    # Detailed error diagnosis
+                    if any(indicator in error_str.lower() for indicator in ['rate', '429', 'limit', 'quota']):
+                        # Rate limit error
+                        st.error("🚨 **Rate Limit Detected**")
+                        
+                        if "429" in error_str:
+                            st.info("This is an HTTP 429 (Too Many Requests) error from the API provider.")
+                        
+                        st.warning("""
+                        **Possible causes:**
+                        1. Too many requests in a short time
+                        2. Token limit exceeded for the current minute
+                        3. Daily quota reached
+                        
+                        **Solutions:**
+                        - Wait 60 seconds before trying again
+                        - Reduce query complexity
+                        - Check your API tier/limits
+                        """)
+                        
+                        # Add cooldown timer
+                        with st.empty():
+                            for i in range(10, 0, -1):
+                                st.info(f"⏱️ Suggested cooldown: {i} seconds...")
+                                time.sleep(1)
+                            st.success("✅ You can try again now!")
+                        
+                        error_message = f"❌ Rate limit error: {error_str[:200]}..."
+                        
+                    elif "timeout" in error_str.lower():
+                        # Timeout error
+                        st.error("⏱️ **Query Timeout**")
+                        st.info(f"The query took too long to process (>{os.getenv('LANDUSE_MAX_EXECUTION_TIME', '120')}s)")
+                        st.warning("Try a simpler query or increase LANDUSE_MAX_EXECUTION_TIME")
+                        error_message = f"❌ Timeout error: Query exceeded time limit"
+                        
+                    elif "connection" in error_str.lower() or "network" in error_str.lower():
+                        # Network error
+                        st.error("🌐 **Network Error**")
+                        st.info("Check your internet connection and API endpoint accessibility")
+                        error_message = f"❌ Network error: {error_str[:200]}..."
+                        
+                    else:
+                        # Generic error
+                        st.error(f"❌ **{error_type}**")
+                        st.error(error_str[:500])  # Show first 500 chars
+                        
+                        # Add debug info in expander
+                        with st.expander("🐛 Debug Information"):
+                            st.code(f"""
+Error Type: {error_type}
+Error Message: {error_str}
+Model: {agent.model_name}
+Timestamp: {time.strftime('%Y-%m-%d %H:%M:%S')}
+                            """)
+                        
+                        error_message = f"❌ Error: {error_str[:200]}..."
                     
                     # Add error to chat history
                     st.session_state.messages.append({
@@ -235,6 +299,23 @@ def main():
         show_chat_controls()
         
         st.markdown("---")
+        
+        # Query statistics
+        st.markdown("### 📊 Session Stats")
+        total_queries = len([m for m in st.session_state.messages if m["role"] == "user"])
+        successful_queries = len([m for m in st.session_state.messages if m["role"] == "assistant" and not m["content"].startswith("❌")])
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            st.metric("Total Queries", total_queries)
+        with col2:
+            st.metric("Successful", successful_queries)
+        
+        # Model info
+        st.caption(f"🤖 Model: {agent.model_name}")
+        st.caption(f"⚙️ Max iterations: {os.getenv('LANDUSE_MAX_ITERATIONS', '5')}")
+        
+        st.markdown("---")
         show_quick_queries()
         
         st.markdown("---")
@@ -245,6 +326,11 @@ def main():
         - Mention states, scenarios, or time periods for focused results
         - Ask follow-up questions to drill down into details
         - Use "compare" to analyze differences between scenarios
+        
+        **If you hit rate limits:**
+        - Wait 10-60 seconds between queries
+        - Use simpler, more specific queries
+        - Check Settings page for configuration options
         """)
 
 if __name__ == "__main__":
