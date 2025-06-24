@@ -17,14 +17,27 @@ uv sync
 uv run python setup_agents.py
 ```
 
-### Running the Agents
+### Running the Applications
+
+#### Streamlit Dashboard (Recommended)
 ```bash
-# Primary: Landuse Natural Language Agent (recommended)
+# Modern web dashboard with chat interface and visualizations
+uv run streamlit run streamlit_app.py
+
+# Test dashboard components
+uv run python test_dashboard.py
+```
+
+#### Command Line Agents
+```bash
+# Primary: Landuse Natural Language Agent (command line)
 uv run python -m landuse.agents.landuse_natural_language_agent
+
+# Or use the shortcut
+uv run landuse-agent
 
 # Test with sample queries
 uv run python -m landuse.agents.test_landuse_agent
-
 ```
 
 ### Data Processing
@@ -72,6 +85,14 @@ duckdb data/processed/landuse_analytics.duckdb
 
 ### Key Components
 
+**Streamlit Dashboard** (`streamlit_app.py`):
+- Modern web interface with multipage navigation using st.Page and st.navigation
+- 💬 **Chat Interface**: Natural language queries with streaming responses
+- 📊 **Analytics Dashboard**: Pre-built visualizations with Plotly (agricultural loss, urbanization, climate scenarios)
+- 🔍 **Data Explorer**: Interactive SQL query interface with schema browser
+- ⚙️ **Settings Page**: System status, configuration, and troubleshooting
+- Mobile-responsive design with modern UI patterns
+
 **Landuse Natural Language Agent** (`src/landuse/agents/landuse_natural_language_agent.py`):
 - Uses Claude 3.5 Sonnet by default (configurable via LANDUSE_MODEL env var)
 - Built with LangChain REACT agent framework
@@ -79,7 +100,6 @@ duckdb data/processed/landuse_analytics.duckdb
 - Automatic summary statistics and insights
 - Beautiful Rich terminal UI with markdown support
 - Schema-aware query generation
-
 
 **Data Converter** (`src/landuse/converters/convert_to_duckdb.py`):
 - Processes nested JSON to normalized star schema
@@ -163,6 +183,14 @@ duckdb data/processed/landuse_analytics.duckdb
 
 ## Key Features
 
+### Web Dashboard (Streamlit)
+1. **Modern Web Interface**: Responsive design with multipage navigation
+2. **Interactive Chat**: Real-time natural language queries with streaming responses
+3. **Rich Visualizations**: Plotly charts for agricultural loss, urbanization, climate scenarios
+4. **Data Exploration**: SQL query interface with schema browser and example queries
+5. **System Management**: Configuration, status monitoring, and troubleshooting tools
+
+### Command Line Interface
 1. **Natural Language Understanding**: Converts questions to optimized SQL
 2. **Business Intelligence**: Automatic insights and summary statistics
 3. **Climate Analysis**: Compare RCP/SSP scenarios
