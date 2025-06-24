@@ -12,16 +12,24 @@ Advanced natural language analysis of county-level land use transitions using AI
 
 ## 🚀 Quick Start
 
-### 1. Environment Setup
+### 1. Check Your Setup
+```bash
+# Run the quickstart script to verify everything is ready
+uv run python quickstart.py
+```
+
+This will check your API keys, database, and dependencies, then provide specific instructions if anything is missing.
+
+### 2. Environment Setup (if needed)
 ```bash
 # Install dependencies
 uv sync
 
-# Guided setup (creates .env file and tests everything)
+# Alternative: Guided setup (creates .env file and tests everything)
 uv run python setup_agents.py
 ```
 
-### 2. Configure API Access
+### 3. Configure API Access
 ```bash
 # Copy example environment file to config directory (recommended)
 cp .env.example config/.env
@@ -30,19 +38,19 @@ cp .env.example config/.env
 # OPENAI_API_KEY=your_api_key_here
 ```
 
-### 3. Try the Natural Language Query Agent
+### 4. Try the Natural Language Query Agent
 ```bash
 # Interactive landuse analysis with natural language
-uv run python scripts/agents/landuse_natural_language_agent.py
+uv run python src/landuse/agents/landuse_natural_language_agent.py
 
-# Test with sample queries
-uv run python scripts/agents/test_landuse_agent.py
+# Or use the shortcut:
+uv run landuse-agent
 
 # Alternative: DuckDB UI in browser
 duckdb data/processed/landuse_analytics.duckdb -ui
 ```
 
-### 4. Example Questions to Try
+### 5. Example Questions to Try
 - "Which scenarios show the most agricultural land loss?"
 - "Compare forest loss between RCP45 and RCP85 scenarios"
 - "Which states have the most urban expansion?"
