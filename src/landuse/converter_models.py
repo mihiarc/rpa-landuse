@@ -15,6 +15,7 @@ class ConversionMode(str, Enum):
     STREAMING = "streaming"
     BATCH = "batch"
     PARALLEL = "parallel"
+    BULK_COPY = "bulk_copy"
 
 
 class ConversionConfig(BaseModel):
@@ -33,20 +34,38 @@ class ConversionConfig(BaseModel):
     
     # Processing configuration
     mode: ConversionMode = Field(
-        default=ConversionMode.BATCH,
-        description="Processing mode"
+        default=ConversionMode.BULK_COPY,
+        description="Processing mode (bulk_copy recommended for performance)"
     )
     batch_size: int = Field(
-        default=50000,
+        default=100000,
         gt=0,
-        le=500000,
-        description="Batch size for processing"
+        le=1000000,
+        description="Batch size for processing (larger for bulk loading)"
     )
     parallel_workers: int = Field(
         default=4,
         gt=0,
         le=16,
         description="Number of parallel workers"
+    )
+    
+    # Bulk loading options
+    use_bulk_copy: bool = Field(
+        default=True,
+        description="Use DuckDB COPY command for bulk loading"
+    )
+    parquet_compression: str = Field(
+        default="snappy",
+        description="Parquet compression (snappy, gzip, brotli, lz4, zstd)"
+    )
+    temp_dir: Optional[Path] = Field(
+        default=None,
+        description="Temporary directory for bulk operations"
+    )
+    optimize_after_load: bool = Field(
+        default=True,
+        description="Run ANALYZE on tables after bulk loading"
     )
     
     # DuckDB configuration
