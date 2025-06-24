@@ -30,11 +30,11 @@ uv run python -m landuse.agents.test_landuse_agent
 ### Data Processing
 ```bash
 # Convert JSON to DuckDB star schema (modern approach)
-uv run python -m landuse.converters.convert_to_duckdb
+uv run python scripts/converters/convert_to_duckdb.py
 
 # Legacy SQLite converters
-uv run python -m landuse.converters.convert_landuse_to_db
-uv run python -m landuse.converters.convert_landuse_with_agriculture
+uv run python scripts/converters/convert_landuse_to_db.py
+uv run python scripts/converters/convert_landuse_with_agriculture.py
 ```
 
 ### Documentation

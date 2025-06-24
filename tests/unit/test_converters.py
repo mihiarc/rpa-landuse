@@ -8,7 +8,10 @@ import duckdb
 from pathlib import Path
 from unittest.mock import Mock, patch, mock_open
 
-from landuse.converters.convert_to_duckdb import LanduseDataConverter
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent.parent.parent / "scripts"))
+from converters.convert_to_duckdb import LanduseDataConverter
 
 
 class TestLanduseDataConverter:
