@@ -92,8 +92,9 @@ def display_chat_history():
             
             st.markdown(message["content"])
 
+@st.fragment
 def handle_user_input():
-    """Handle user input and generate response"""
+    """Handle user input and generate response - runs in isolation"""
     # Get agent
     agent, error = get_agent()
     
@@ -210,8 +211,9 @@ Timestamp: {time.strftime('%Y-%m-%d %H:%M:%S')}
                         "content": error_message
                     })
 
+@st.fragment
 def show_chat_controls():
-    """Show chat control buttons"""
+    """Show chat control buttons - runs in isolation"""
     col1, col2, col3, col4 = st.columns(4)
     
     with col1:
@@ -241,8 +243,9 @@ def show_chat_controls():
         message_count = len([m for m in st.session_state.messages if m["role"] == "user"])
         st.metric("Questions Asked", message_count)
 
+@st.fragment
 def show_quick_queries():
-    """Show quick query buttons"""
+    """Show quick query buttons - runs in isolation"""
     st.markdown("### 🚀 Quick Queries")
     
     quick_queries = [

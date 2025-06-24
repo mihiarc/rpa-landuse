@@ -37,11 +37,26 @@ def cache_data(func=None, *, ttl=None, max_entries=None, show_spinner=True, pers
         return decorator(func)
 
 
+def fragment(func=None):
+    """Mock implementation of st.fragment decorator"""
+    def decorator(f):
+        @wraps(f)
+        def wrapper(*args, **kwargs):
+            return f(*args, **kwargs)
+        return wrapper
+    
+    if func is None:
+        return decorator
+    else:
+        return decorator(func)
+
+
 # Create mock streamlit module as a proper module
 mock_st = types.ModuleType('streamlit')
 mock_st.__file__ = __file__
 mock_st.cache_resource = cache_resource
 mock_st.cache_data = cache_data
+mock_st.fragment = fragment
 
 # Add common Streamlit functions
 mock_st.title = Mock()

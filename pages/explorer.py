@@ -359,8 +359,9 @@ def show_schema_browser():
         else:
             st.info("No sample data available")
 
+@st.fragment
 def show_query_interface():
-    """Display custom SQL query interface"""
+    """Display custom SQL query interface - runs in isolation"""
     st.markdown("### 🔧 Custom SQL Query Interface")
     
     # Query examples
