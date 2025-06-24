@@ -17,8 +17,8 @@ from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TimeEl
 import time
 from contextlib import contextmanager
 
-from ..models import ConversionConfig, ConversionStats, ProcessedTransition
-from ..converter_models import ConversionMode
+from ..models import ConversionStats, ProcessedTransition
+from ..converter_models import ConversionConfig, ConversionMode
 from ..utils.retry_decorators import database_retry, file_retry, execute_with_retry
 
 console = Console()
