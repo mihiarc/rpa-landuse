@@ -76,6 +76,11 @@ class LanduseNaturalLanguageAgent(BaseLanduseAgent):
                 name="get_default_assumptions",
                 func=self._get_default_assumptions,
                 description="📋 Get the default assumptions used when user doesn't specify scenarios, time periods, or geographic scope."
+            ),
+            Tool(
+                name="get_state_code",
+                func=self._get_state_code,
+                description="🗺️ Get the numeric state code for a given state name. Use this when users mention states by name."
             )
         ]
     
@@ -180,6 +185,44 @@ ORDER BY t.start_year, total_acres DESC;
 - State-level differences show regional trends
 """
     
+    def _get_state_code(self, state_name: str) -> str:
+        """Get state code for a given state name"""
+        # Import STATE_NAMES from constants
+        from .constants import STATE_NAMES
+        
+        # Create reverse mapping
+        name_to_code = {v.lower(): k for k, v in STATE_NAMES.items()}
+        
+        # Clean the input
+        state_clean = state_name.strip().lower()
+        
+        # Check exact match
+        if state_clean in name_to_code:
+            code = name_to_code[state_clean]
+            return f"🗺️ **State Code Found**\n\n{STATE_NAMES[code]} has state_code = '{code}' in the database.\n\nExample query:\n```sql\nSELECT COUNT(*) FROM dim_geography WHERE state_code = '{code}'\n```"
+        
+        # Check partial matches
+        matches = [(code, name) for code, name in STATE_NAMES.items() if state_clean in name.lower()]
+        if matches:
+            result = "🗺️ **Possible State Matches:**\n\n"
+            for code, name in matches[:5]:  # Show max 5 matches
+                result += f"- {name}: state_code = '{code}'\n"
+            return result
+        
+        # If no match found, show all state codes
+        return """🗺️ **State Code Not Found**
+        
+Common state codes in the database:
+- Alabama: '01'
+- California: '06'  
+- Florida: '12'
+- Illinois: '17'
+- New York: '36'
+- Texas: '48'
+
+Note: Use state_code in WHERE clauses as a string (with quotes).
+"""
+    
     def _get_default_assumptions(self, query: str = "") -> str:
         """Get default assumptions used in analysis"""
         return """
@@ -267,6 +310,15 @@ ALWAYS CLEARLY STATE YOUR ASSUMPTIONS in the response, for example:
 - Time Period: Full range 2012-2100 (all available years)
 - Geographic Scope: All US counties"
 
+IMPORTANT STATE CODES:
+Common states and their numeric codes in the database:
+- Texas: '48'
+- California: '06'  
+- New York: '36'
+- Florida: '12'
+- Illinois: '17'
+(Note: state_code is stored as VARCHAR, use quotes in WHERE clauses)
+
 QUERY PATTERNS FOR COMMON QUESTIONS:
 - "Agricultural land loss" → Agriculture → non-Agriculture transitions (DEFAULT: averaged across scenarios, full time period)
 - "Forest loss" → Forest → non-Forest transitions (DEFAULT: averaged across scenarios, full time period)  
@@ -274,6 +326,7 @@ QUERY PATTERNS FOR COMMON QUESTIONS:
 - "Climate scenarios" → Compare specific RCP/SSP scenarios (USER SPECIFIED)
 - "State analysis" → Group by state_code (DEFAULT: all states unless specified)
 - "Time trends" → Group by time periods (DEFAULT: full range unless specified)
+- "Counties in [state]" → Use dim_geography with appropriate state_code
 
 EXAMPLE RESPONSES WITH DEFAULTS:
 - User: "How much agricultural land is being lost?"

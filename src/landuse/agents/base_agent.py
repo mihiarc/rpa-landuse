@@ -209,7 +209,9 @@ class BaseLanduseAgent(ABC):
             
             # Add LIMIT if not present
             if sql_query.upper().startswith('SELECT') and 'LIMIT' not in sql_query.upper():
-                sql_query = f"{sql_query.rstrip(';')} LIMIT {DB_CONFIG['max_query_limit']}"
+                # Remove trailing semicolon if present
+                query_trimmed = sql_query.rstrip().rstrip(';').rstrip()
+                sql_query = f"{query_trimmed} LIMIT {DB_CONFIG['max_query_limit']}"
             
             # Execute query
             result = conn.execute(sql_query)

@@ -27,12 +27,7 @@ def clean_sql_query(sql_query: str) -> str:
     """
     sql_query = sql_query.strip()
     
-    # Handle multiple/nested quotes
-    while ((sql_query.startswith('"') and sql_query.endswith('"')) or 
-           (sql_query.startswith("'") and sql_query.endswith("'"))):
-        sql_query = sql_query[1:-1].strip()
-    
-    # Remove markdown formatting
+    # Remove markdown formatting first
     if sql_query.startswith('```sql'):
         sql_query = sql_query[6:].strip()
     elif sql_query.startswith('```'):
@@ -40,8 +35,12 @@ def clean_sql_query(sql_query: str) -> str:
     if sql_query.endswith('```'):
         sql_query = sql_query[:-3].strip()
     
-    # Final cleanup - remove any stray quotes
-    sql_query = sql_query.strip('"').strip("'")
+    # Only remove wrapping quotes if they're actually wrapping the entire query
+    # (not SQL string literals within the query)
+    if len(sql_query) >= 2:
+        if ((sql_query.startswith('"') and sql_query.endswith('"') and sql_query.count('"') == 2) or 
+            (sql_query.startswith("'") and sql_query.endswith("'") and sql_query.count("'") == 2)):
+            sql_query = sql_query[1:-1].strip()
     
     return sql_query
 
