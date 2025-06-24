@@ -7,7 +7,10 @@
       "Bash(ls:*)",
       "Bash(uv run:*)",
       "Bash(sqlite3:*)",
-      "Bash(chmod:*)"
+      "Bash(chmod:*)",
+      "Bash(touch:*)",
+      "Bash(cp:*)",
+      "Bash(grep:*)"
     ],
     "deny": []
   }

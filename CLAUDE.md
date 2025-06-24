@@ -20,26 +20,26 @@ uv run python setup_agents.py
 ### Running the Agents
 ```bash
 # Primary: Landuse Natural Language Agent (recommended)
-uv run python scripts/agents/landuse_natural_language_agent.py
+uv run python -m landuse.agents.landuse_natural_language_agent
 
 # Test with sample queries
-uv run python scripts/agents/test_landuse_agent.py
+uv run python -m landuse.agents.test_landuse_agent
 
 # Alternative: General Data Agent (multi-database support)
-uv run python scripts/agents/general_data_agent.py
+uv run python -m landuse.agents.general_data_agent
 
 # Secure version with enhanced security features
-uv run python scripts/agents/secure_landuse_agent.py
+uv run python -m landuse.agents.secure_landuse_agent
 ```
 
 ### Data Processing
 ```bash
 # Convert JSON to DuckDB star schema (modern approach)
-uv run python scripts/converters/convert_to_duckdb.py
+uv run python -m landuse.converters.convert_to_duckdb
 
 # Legacy SQLite converters
-uv run python scripts/converters/convert_landuse_to_db.py
-uv run python scripts/converters/convert_landuse_with_agriculture.py
+uv run python -m landuse.converters.convert_landuse_to_db
+uv run python -m landuse.converters.convert_landuse_with_agriculture
 ```
 
 ### Documentation
@@ -77,7 +77,7 @@ duckdb data/processed/landuse_analytics.duckdb
 
 ### Key Components
 
-**Landuse Natural Language Agent** (`scripts/agents/landuse_natural_language_agent.py`):
+**Landuse Natural Language Agent** (`src/landuse/agents/landuse_natural_language_agent.py`):
 - Uses Claude 3.5 Sonnet by default (configurable via LANDUSE_MODEL env var)
 - Built with LangChain REACT agent framework
 - Specialized for land use analysis with business context
@@ -85,19 +85,19 @@ duckdb data/processed/landuse_analytics.duckdb
 - Beautiful Rich terminal UI with markdown support
 - Schema-aware query generation
 
-**General Data Agent** (`scripts/agents/general_data_agent.py`):
+**General Data Agent** (`src/landuse/agents/general_data_agent.py`):
 - General-purpose agent for multiple databases and file formats
 - Supports SQLite, DuckDB, CSV, JSON, Parquet
 - File management and data transformation tools
 - Uses GPT-4 by default
 
-**Secure Landuse Agent** (`scripts/agents/secure_landuse_agent.py`):
+**Secure Landuse Agent** (`src/landuse/agents/secure_landuse_agent.py`):
 - Enhanced version of landuse agent with security features
 - SQL injection prevention and input validation
 - Rate limiting and audit logging
 - Same natural language capabilities with added protection
 
-**Data Converter** (`scripts/converters/convert_to_duckdb.py`):
+**Data Converter** (`src/landuse/converters/convert_to_duckdb.py`):
 - Processes nested JSON to normalized star schema
 - Creates dimension and fact tables
 - Adds indexes and views for performance
@@ -152,10 +152,10 @@ All agents provide helpful error messages and suggestions:
 ### Interactive Testing
 ```bash
 # Test landuse agent with sample queries
-uv run python scripts/agents/test_landuse_agent.py
+uv run python -m landuse.agents.test_landuse_agent
 
 # Interactive exploration
-uv run python scripts/agents/landuse_query_agent.py
+uv run python -m landuse.agents.landuse_natural_language_agent
 ```
 
 ### DuckDB Direct Access

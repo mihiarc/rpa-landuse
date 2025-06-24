@@ -8,7 +8,7 @@ import time
 from pathlib import Path
 from unittest.mock import Mock, patch, MagicMock
 
-from utilities.security import (
+from landuse.utilities.security import (
     SQLQueryValidator, InputValidator, RateLimiter,
     SecureConfig, SecurityLogger, hash_api_key, 
     generate_session_token, mask_api_key

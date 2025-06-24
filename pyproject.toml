@@ -1,0 +1,96 @@
+[project]
+name = "langchain-landuse"
+version = "0.1.0"
+description = "Advanced natural language analysis system for county-level land use transitions using AI agents"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    # Core dependencies
+    "langchain>=0.3.0",
+    "langchain-anthropic>=0.2.0",
+    "langchain-openai>=0.2.0",
+    "langchain-community>=0.3.0",
+    "langgraph>=0.2.0",
+    "langgraph-checkpoint>=2.0.0",
+    "langgraph-checkpoint-sqlite>=2.0.0",
+    "pandas>=2.2.0",
+    "openpyxl>=3.1.0",
+    "python-dotenv>=1.0.0",
+    "numpy>=1.26.0",
+    "matplotlib>=3.8.0",
+    "seaborn>=0.13.0",
+    "sqlalchemy>=2.0.0",
+    "duckdb>=1.0.0",
+    "pyarrow>=15.0.0",
+    "jupyter>=1.0.0",
+    "ipykernel>=6.29.0",
+    "geopandas>=1.0.0",
+    "fastparquet>=2024.0.0",
+    "rich>=14.0.0",
+    "pydantic>=2.0.0",
+    "ijson>=3.0.0",
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest>=8.0.0",
+    "pytest-cov>=4.1.0",
+    "pytest-asyncio>=0.23.0",
+    "pytest-mock>=3.12.0",
+    "pytest-timeout>=2.2.0",
+    "pytest-xdist>=3.5.0",
+    "coverage>=7.4.0",
+]
+docs = [
+    "mkdocs>=1.5.0",
+    "mkdocs-material>=9.5.0",
+    "mkdocstrings>=0.24.0",
+    "mkdocstrings-python>=1.8.0",
+    "pymdown-extensions>=10.7.0",
+]
+dev = [
+    # Include all test and docs dependencies
+    "langchain-landuse[test,docs]",
+]
+
+[project.scripts]
+landuse-agent = "landuse.agents.landuse_natural_language_agent:main"
+landuse-memory = "landuse.agents.landuse_agent_with_memory:main"
+general-agent = "landuse.agents.general_data_agent:main"
+secure-agent = "landuse.agents.secure_landuse_agent:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/landuse"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "src/landuse",
+    "tests",
+    "*.md",
+    "pyproject.toml",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
+python_classes = "Test*"
+python_functions = "test_*"
+pythonpath = ["src"]
+
+[tool.coverage.run]
+source = ["src/landuse"]
+omit = ["*/tests/*", "*/__pycache__/*"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "if __name__ == .__main__.:",
+    "raise AssertionError",
+    "raise NotImplementedError",
+]

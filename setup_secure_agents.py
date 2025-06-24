@@ -18,8 +18,8 @@ from rich.prompt import Prompt, Confirm
 from rich import print as rprint
 from dotenv import load_dotenv, set_key
 
-# Add scripts to path
-sys.path.append(str(Path(__file__).resolve().parent / "scripts"))
+# Add src to path for imports
+sys.path.append(str(Path(__file__).resolve().parent / "src"))
 
 console = Console()
 
@@ -142,7 +142,11 @@ class SecureSetup:
         try:
             import rich
             rich_ok = True
-            rich_version = rich.__version__
+            try:
+                from importlib.metadata import version
+                rich_version = version('rich')
+            except:
+                rich_version = "Unknown"
         except ImportError:
             rich_ok = False
             rich_version = "Not installed"
@@ -185,16 +189,35 @@ class SecureSetup:
         
         # Check if .env exists
         if self.env_file.exists():
-            if not Confirm.ask(f"\n[yellow]Environment file exists at {self.env_file}. Update it?[/yellow]"):
+            console.print(f"\n[green]✅ Environment file found at {self.env_file}[/green]")
+            load_dotenv(self.env_file)
+            
+            # Check existing keys
+            existing_keys = []
+            if os.getenv("OPENAI_API_KEY"):
+                existing_keys.append("OpenAI")
+            if os.getenv("ANTHROPIC_API_KEY"):
+                existing_keys.append("Anthropic")
+            
+            if existing_keys:
+                console.print(f"[green]✅ API keys already configured: {', '.join(existing_keys)}[/green]")
                 console.print("[dim]Using existing configuration[/dim]")
-                load_dotenv(self.env_file)
                 return True
+            else:
+                console.print("[yellow]⚠️  No API keys found in .env file[/yellow]")
+                if not Confirm.ask("Would you like to add API keys now?"):
+                    console.print("[red]❌ At least one API key is required[/red]")
+                    return False
         
-        # Create new .env from example
+        # Create new .env from example or create empty
         if self.env_example.exists():
             import shutil
             shutil.copy(self.env_example, self.env_file)
             console.print(f"✅ Created {self.env_file} from template")
+        else:
+            # Create empty .env file
+            self.env_file.touch()
+            console.print(f"✅ Created new {self.env_file}")
         
         # Collect API keys
         console.print("\n[bold]API Key Configuration[/bold]")
@@ -318,7 +341,7 @@ class SecureSetup:
                     console.print("✅ Fixed .env file permissions (600)")
         
         # Check for hardcoded secrets
-        py_files = list(Path("scripts").rglob("*.py"))
+        py_files = list(Path("src/landuse").rglob("*.py"))
         hardcoded_found = False
         for py_file in py_files[:5]:  # Check first 5 files as sample
             content = py_file.read_text()
@@ -377,7 +400,7 @@ class SecureSetup:
         
         # Import security module
         try:
-            from scripts.utilities.security import SQLQueryValidator, InputValidator
+            from landuse.utilities.security import SQLQueryValidator, InputValidator
             
             # Test SQL injection prevention
             validator = SQLQueryValidator()
@@ -415,12 +438,22 @@ class SecureSetup:
     
     def _show_summary(self):
         """Show setup summary"""
+        # Check which keys are configured
+        configured_keys = []
+        if os.getenv("OPENAI_API_KEY"):
+            configured_keys.append("OpenAI")
+        if os.getenv("ANTHROPIC_API_KEY"):
+            configured_keys.append("Anthropic")
+        
         console.print(Panel.fit(
             "🎉 [bold green]Setup Complete![/bold green]\n\n"
-            "[yellow]Next steps:[/yellow]\n"
-            "1. Convert data: [white]uv run python scripts/converters/convert_to_duckdb.py[/white]\n"
-            "2. Test secure agent: [white]uv run python scripts/agents/secure_landuse_query_agent.py[/white]\n"
-            "3. Run tests: [white]uv run python scripts/agents/test_landuse_agent.py[/white]\n\n"
+            f"[green]✅ API Keys Configured: {', '.join(configured_keys)}[/green]\n\n"
+            "[yellow]To run the Landuse AI Agent:[/yellow]\n"
+            "[white]uv run python -m landuse.agents.landuse_natural_language_agent[/white]\n\n"
+            "[yellow]Alternative agents:[/yellow]\n"
+            "• General data agent: [white]uv run python -m landuse.agents.general_data_agent[/white]\n"
+            "• Secure agent: [white]uv run python -m landuse.agents.secure_landuse_agent[/white]\n"
+            "• Test queries: [white]uv run python -m landuse.agents.test_landuse_agent[/white]\n\n"
             "[dim]Your API keys are stored securely in config/.env[/dim]",
             border_style="green"
         ))

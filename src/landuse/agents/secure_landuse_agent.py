@@ -6,7 +6,6 @@ input validation, SQL injection prevention, rate limiting, and audit logging
 """
 
 import os
-import sys
 import json
 import duckdb
 import logging
@@ -27,10 +26,7 @@ from rich.table import Table
 from rich.syntax import Syntax
 from rich.markdown import Markdown
 
-# Add parent directory to path for imports
-sys.path.append(str(Path(__file__).parent.parent))
-
-from utilities.security import (
+from landuse.utilities.security import (
     SQLQueryValidator, InputValidator, RateLimiter, 
     SecureConfig, SecurityLogger, mask_api_key
 )
@@ -39,12 +35,15 @@ from utilities.security import (
 load_dotenv("config/.env")
 load_dotenv()
 
-# Setup logging
+# Setup logging - show errors but suppress info messages
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.ERROR,
+    format='%(asctime)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.ERROR)
+# Suppress httpx logs
+logging.getLogger("httpx").setLevel(logging.CRITICAL)
 
 class SecureLanduseQueryParams(BaseModel):
     """Secure parameters for landuse database queries"""
@@ -153,8 +152,8 @@ This database contains land use transition data across different climate scenari
   - scenario_id (INTEGER): Primary key
   - scenario_name (VARCHAR): Full scenario name (e.g., "CNRM_CM5_rcp45_ssp1")
   - climate_model (VARCHAR): Climate model (e.g., "CNRM_CM5")
-  - rcp_scenario (VARCHAR): RCP pathway (e.g., "rcp45", "rcp85")
-  - ssp_scenario (VARCHAR): SSP pathway (e.g., "ssp1", "ssp5")
+  - rcp_scenario (VARCHAR): RCP pathway (e.g., "rcp45", "rcp85") - NOTE: values are "rcp45", "rcp85"
+  - ssp_scenario (VARCHAR): SSP pathway (e.g., "ssp1", "ssp5") - NOTE: values are "ssp1", "ssp2", "ssp3", "ssp5"
 
 - **dim_time**: Time periods
   - time_id (INTEGER): Primary key
@@ -167,6 +166,7 @@ This database contains land use transition data across different climate scenari
   - geography_id (INTEGER): Primary key
   - fips_code (VARCHAR): 5-digit FIPS county code
   - state_code (VARCHAR): 2-digit state code
+  - state_name (VARCHAR): Full state name (if available)
 
 - **dim_landuse**: Land use types
   - landuse_id (INTEGER): Primary key
@@ -210,15 +210,24 @@ This database contains land use transition data across different climate scenari
     def _execute_secure_landuse_query(self, sql_query: str) -> str:
         """Execute SQL query with security validation"""
         try:
-            # Clean up SQL query
+            # Clean up SQL query - handle various quote and markdown issues
             sql_query = sql_query.strip()
+            
+            # Handle multiple/nested quotes
+            while ((sql_query.startswith('"') and sql_query.endswith('"')) or 
+                   (sql_query.startswith("'") and sql_query.endswith("'"))):
+                sql_query = sql_query[1:-1].strip()
+            
+            # Remove markdown formatting
             if sql_query.startswith('```sql'):
-                sql_query = sql_query[6:]
-            if sql_query.startswith('```'):
-                sql_query = sql_query[3:]
+                sql_query = sql_query[6:].strip()
+            elif sql_query.startswith('```'):
+                sql_query = sql_query[3:].strip()
             if sql_query.endswith('```'):
-                sql_query = sql_query[:-3]
-            sql_query = sql_query.strip()
+                sql_query = sql_query[:-3].strip()
+            
+            # Final cleanup - remove any stray quotes
+            sql_query = sql_query.strip('"').strip("'")
             
             # Validate SQL query for security
             is_valid, error = self.sql_validator.validate_query(sql_query)
@@ -258,26 +267,8 @@ This database contains land use transition data across different climate scenari
             if df.empty:
                 return f"✅ Query executed successfully but returned no results.\nSQL: {sql_query}"
             
-            # Format results
-            result = f"🦆 **DuckDB Query Results** ({len(df)} rows)\n"
-            result += f"**SQL:** `{sql_query}`\n\n"
-            
-            # Show data with limit
-            if len(df) <= 20:
-                result += "**Results:**\n"
-                result += df.to_string(index=False, max_colwidth=30)
-            else:
-                result += "**Results (first 20 rows):**\n"
-                result += df.head(20).to_string(index=False, max_colwidth=30)
-                result += f"\n\n... and {len(df) - 20} more rows"
-            
-            # Add summary statistics for numeric columns
-            numeric_cols = df.select_dtypes(include=['number']).columns
-            if len(numeric_cols) > 0 and len(df) > 1:
-                result += f"\n\n📊 **Summary Statistics:**\n"
-                summary = df[numeric_cols].describe()
-                result += summary.to_string()
-            
+            # Format results professionally
+            result = self._format_query_results(df, sql_query)
             return result
             
         except Exception as e:
@@ -288,7 +279,98 @@ This database contains land use transition data across different climate scenari
                 status="error",
                 error=str(e)
             )
-            return f"❌ Error executing query: {str(e)}\nSQL: {sql_query}"
+            # Log the actual SQL that caused the error for debugging
+            logger.error(f"SQL Query that failed: '{sql_query}'")
+            return f"❌ Error executing query: {str(e)}\nSQL attempted: {sql_query}"
+    
+    def _format_query_results(self, df, sql_query: str) -> str:
+        """Format query results in a professional, user-friendly way"""
+        from rich.table import Table
+        from rich.console import Console
+        from io import StringIO
+        import pandas as pd
+        
+        # State code to name mapping
+        state_names = {
+            '01': 'Alabama', '02': 'Alaska', '04': 'Arizona', '05': 'Arkansas',
+            '06': 'California', '08': 'Colorado', '09': 'Connecticut', '10': 'Delaware',
+            '12': 'Florida', '13': 'Georgia', '15': 'Hawaii', '16': 'Idaho',
+            '17': 'Illinois', '18': 'Indiana', '19': 'Iowa', '20': 'Kansas',
+            '21': 'Kentucky', '22': 'Louisiana', '23': 'Maine', '24': 'Maryland',
+            '25': 'Massachusetts', '26': 'Michigan', '27': 'Minnesota', '28': 'Mississippi',
+            '29': 'Missouri', '30': 'Montana', '31': 'Nebraska', '32': 'Nevada',
+            '33': 'New Hampshire', '34': 'New Jersey', '35': 'New Mexico', '36': 'New York',
+            '37': 'North Carolina', '38': 'North Dakota', '39': 'Ohio', '40': 'Oklahoma',
+            '41': 'Oregon', '42': 'Pennsylvania', '44': 'Rhode Island', '45': 'South Carolina',
+            '46': 'South Dakota', '47': 'Tennessee', '48': 'Texas', '49': 'Utah',
+            '50': 'Vermont', '51': 'Virginia', '53': 'Washington', '54': 'West Virginia',
+            '55': 'Wisconsin', '56': 'Wyoming'
+        }
+        
+        # Create a copy of the dataframe to avoid modifying the original
+        df_display = df.copy()
+        
+        # Convert state_code to state names if present
+        if 'state_code' in df_display.columns:
+            df_display['state'] = df_display['state_code'].apply(
+                lambda x: state_names.get(str(x).zfill(2), f"Unknown ({x})")
+            )
+            # Reorder columns to put state name first, drop state_code
+            cols = df_display.columns.tolist()
+            cols.remove('state_code')
+            cols.remove('state')
+            df_display = df_display[['state'] + cols]
+        
+        # Create a string buffer to capture Rich output
+        string_io = StringIO()
+        console = Console(file=string_io, force_terminal=True)
+        
+        # Keep it simple - just start with the data
+        result = ""
+        
+        # Create a Rich table for better formatting
+        table = Table(show_header=True, header_style="bold cyan", title=None)
+        
+        # Add columns
+        for col in df_display.columns:
+            # Capitalize column names nicely
+            col_display = col.replace('_', ' ').title()
+            table.add_column(col_display, style="white", overflow="fold")
+        
+        # Add rows (limit to 50 for readability)
+        display_rows = min(len(df_display), 50)
+        for idx, row in df_display.head(display_rows).iterrows():
+            # Format values nicely
+            formatted_row = []
+            for col in df_display.columns:
+                val = row[col]
+                if isinstance(val, (int, float)):
+                    if pd.isna(val):
+                        formatted_row.append("N/A")
+                    elif col.lower().endswith('acres') or 'acre' in col.lower():
+                        # Round acres to whole numbers
+                        formatted_row.append(f"{int(round(val)):,}")
+                    elif isinstance(val, float):
+                        # For other floats, use 2 decimal places if needed
+                        if val == int(val):
+                            formatted_row.append(f"{int(val):,}")
+                        else:
+                            formatted_row.append(f"{val:,.2f}")
+                    else:
+                        formatted_row.append(f"{val:,}")
+                else:
+                    formatted_row.append(str(val))
+            table.add_row(*formatted_row)
+        
+        # Render the table
+        console.print(table)
+        result += "```\n" + string_io.getvalue() + "```\n"
+        
+        if len(df) > display_rows:
+            result += f"\n*Showing first {display_rows} of {len(df):,} total records*\n"
+        
+        
+        return result
     
     def _get_schema_help(self, query: str = "") -> str:
         """Get schema information"""
@@ -340,12 +422,13 @@ LIMIT 20;
     
     def _create_agent(self):
         """Create the natural language to SQL agent with security focus"""
-        prompt = PromptTemplate.from_template("""
+        # Create prompt template with partial formatting for max_limit
+        prompt_text = f"""
 You are a specialized Landuse Data Analyst AI that converts natural language questions into secure DuckDB SQL queries.
 
 SECURITY REQUIREMENTS:
 1. Only generate SELECT queries - no data modification allowed
-2. Always include appropriate LIMIT clauses (max {max_limit})
+2. Always include appropriate LIMIT clauses (max {self.config.max_query_limit})
 3. Validate all identifiers and parameters
 4. Never include user input directly in SQL strings
 5. Use proper JOIN syntax instead of subqueries where possible
@@ -353,38 +436,76 @@ SECURITY REQUIREMENTS:
 AVAILABLE TOOLS:
 {{tools}}
 
-Use the following format:
+Tool Names: [{{tool_names}}]
 
-Question: the input question you must answer
-Thought: you should always think about what to do
-Action: the action to take, should be one of [{{tool_names}}]
-Action Input: the input to the action
-Observation: the result of the action
-... (this Thought/Action/Action Input/Observation can repeat N times)
-Thought: I now know the final answer
-Final Answer: the final answer to the original input question
+Use this exact format:
+
+Question: the input question
+Thought: brief analysis of what's needed
+Action: execute_secure_landuse_query
+Action Input: SELECT * FROM table WHERE condition
+Observation: the result
+Thought: I have the results
+Final Answer: structured response with insights
+
+CRITICAL: 
+- Action must be the exact tool name (no parentheses)
+- Action Input must be the raw SQL query (no quotes around it)
+- Example Action Input: SELECT state_code, SUM(acres) FROM fact_landuse_transitions GROUP BY state_code
 
 DATABASE SCHEMA:
 {{schema_info}}
 
-INSTRUCTIONS:
-1. Convert natural language to secure SQL queries
-2. Always validate query structure before execution
-3. Use appropriate aggregations and filters
-4. Include meaningful ORDER BY and LIMIT clauses
-5. Focus on read-only analysis
-6. IMPORTANT: When using execute_secure_landuse_query, provide ONLY the SQL query
+KEY RULES:
+- Only SELECT queries allowed
+- Get straight to the SQL query - minimal explanation needed
+- Include state names when querying geography
+- Limit results appropriately
 
 DEFAULT ASSUMPTIONS:
 - Scenarios: Average across all scenarios unless specified
-- Time Periods: Full time range unless specified
+- Time Periods: Full time range unless specified  
 - Geographic Scope: All counties unless specified
 - Transition Type: Focus on 'change' transitions
+
+ALWAYS CLEARLY STATE YOUR ASSUMPTIONS in the response, for example:
+"📊 **Analysis Assumptions:**
+- Scenarios: Averaged across all 20 climate scenarios (mean outcome)
+- Time Period: Full range 2012-2100 (all available years)
+- Geographic Scope: All US counties
+- Transition Type: Only 'change' transitions (excluding same-to-same)"
+
+RESPONSE FORMAT:
+Structure your Final Answer with these sections:
+
+📊 **Analysis Assumptions:**
+- List any defaults applied (scenarios, time periods, geographic scope)
+
+🔍 **Key Findings:**
+1. Primary finding with specific numbers
+2. Secondary patterns or trends
+3. Notable observations
+
+💡 **Interpretation:**
+- What do these results mean in business/policy context?
+- Why are these patterns significant?
+
+📈 **Suggested Follow-up Analyses:**
+1. Related questions to explore
+2. Deeper dives into the data
+3. Additional context that would be valuable
+
+Remember to:
+- Round acre values to whole numbers
+- Use state names not codes
+- Be specific with numbers and comparisons
 
 Question: {{input}}
 Thought: Let me understand what the user is asking and create a secure SQL query.
 {{agent_scratchpad}}
-""".format(max_limit=self.config.max_query_limit))
+"""
+        
+        prompt = PromptTemplate.from_template(prompt_text)
         
         # Create the agent
         agent = create_react_agent(
@@ -397,9 +518,10 @@ Thought: Let me understand what the user is asking and create a secure SQL query
         agent_executor = AgentExecutor(
             agent=agent,
             tools=self.tools,
-            verbose=True,
+            verbose=False,  # Disable verbose to clean up output
             handle_parsing_errors=True,
-            max_iterations=5
+            max_iterations=3,  # Reduced to prevent timeouts
+            return_intermediate_steps=False
         )
         
         return agent_executor
@@ -419,15 +541,14 @@ Thought: Let me understand what the user is asking and create a secure SQL query
                 user_id=user_id
             )
             
-            # Log query attempt
-            logger.info(f"Query from {user_id}: {params.query[:100]}...")
             
-            # Process query
+            # Process query with intermediate steps
             response = self.agent.invoke({
                 "input": params.query,
                 "schema_info": self.schema_info
             })
             
+            # Get the agent's final answer
             return response.get("output", "No response generated")
             
         except Exception as e:
@@ -473,7 +594,7 @@ Thought: Let me understand what the user is asking and create a secure SQL query
         
         while True:
             try:
-                user_input = self.console.input("[bold green]🌾 Ask>[/bold green] ").strip()
+                user_input = self.console.input("[bold green]🌾 Agent>[/bold green] ").strip()
                 
                 if user_input.lower() == 'exit':
                     self.console.print("\n[bold red]👋 Session ended securely![/bold red]")
@@ -484,12 +605,15 @@ Thought: Let me understand what the user is asking and create a secure SQL query
                     schema_md = Markdown(self.schema_info)
                     self.console.print(Panel(schema_md, title="📊 Database Schema", border_style="cyan"))
                 elif user_input:
-                    with self.console.status(f"[bold green]🤖 Processing query securely...[/bold green]", spinner="earth"):
+                    # Show cleaner processing message
+                    self.console.print()
+                    with self.console.status("[bold cyan]🔍 Analyzing your query...[/bold cyan]", spinner="dots"):
                         response = self.query(user_input, user_id="interactive_user")
                     
                     # Format response as markdown
                     response_md = Markdown(response)
-                    self.console.print(Panel(response_md, title="🔍 Analysis Results", border_style="green"))
+                    self.console.print()
+                    self.console.print(Panel(response_md, title="📊 Analysis Results", border_style="green", padding=(1, 2)))
                     self.console.print()
                 
             except KeyboardInterrupt:
@@ -502,7 +626,7 @@ Thought: Let me understand what the user is asking and create a secure SQL query
 if __name__ == "__main__":
     # Create and run the secure landuse query agent
     try:
-        agent = SecureLanduseQueryAgent()
+        agent = SecureLanduseAgent()
         agent.chat()
     except Exception as e:
         console = Console()

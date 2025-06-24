@@ -554,5 +554,5 @@ Thought: Let me understand what the user is asking about landuse data and conver
 
 if __name__ == "__main__":
     # Create and run the landuse query agent
-    agent = LanduseQueryAgent()
+    agent = LanduseNaturalLanguageAgent()
     agent.chat() 

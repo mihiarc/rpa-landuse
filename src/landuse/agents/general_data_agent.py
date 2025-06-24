@@ -7,6 +7,7 @@ Supports SQLite, DuckDB, CSV, JSON, Parquet, and more for comprehensive data eng
 import os
 import json
 import pandas as pd
+import numpy as np
 import geopandas as gpd
 import sqlite3
 import duckdb
@@ -15,10 +16,6 @@ from pathlib import Path
 from pydantic import BaseModel, Field, field_validator
 
 from dotenv import load_dotenv
-
-# Load environment variables from config/.env
-load_dotenv("config/.env")
-load_dotenv()  # Also load from root .env as fallback
 from langchain.agents import create_react_agent, AgentExecutor
 from langchain_openai import ChatOpenAI
 from langchain_community.agent_toolkits import FileManagementToolkit
@@ -28,8 +25,11 @@ from langchain_core.messages import SystemMessage
 from langgraph.checkpoint.memory import MemorySaver
 
 # Load environment variables from config directory
-env_path = Path(__file__).parent.parent.parent / "config" / ".env"
-load_dotenv(dotenv_path=env_path)
+env_path = Path(__file__).parent.parent.parent.parent / "config" / ".env"
+if env_path.exists():
+    load_dotenv(dotenv_path=env_path)
+else:
+    load_dotenv()  # Fallback to root .env
 
 class FileQueryParams(BaseModel):
     """Parameters for file-based SQL queries"""
@@ -355,6 +355,24 @@ class GeneralDataAgent:
                         })
                 
                 analysis["column_analysis"][col] = col_info
+            
+            # Convert numpy types to Python types for JSON serialization
+            def convert_numpy_types(obj):
+                if isinstance(obj, dict):
+                    return {k: convert_numpy_types(v) for k, v in obj.items()}
+                elif isinstance(obj, list):
+                    return [convert_numpy_types(i) for i in obj]
+                elif isinstance(obj, tuple):
+                    return tuple(convert_numpy_types(i) for i in obj)
+                elif isinstance(obj, (np.integer, np.int64)):
+                    return int(obj)
+                elif isinstance(obj, (np.floating, np.float64)):
+                    return float(obj)
+                elif isinstance(obj, np.ndarray):
+                    return obj.tolist()
+                return obj
+            
+            analysis = convert_numpy_types(analysis)
             
             return json.dumps(analysis, indent=2)
             
@@ -1210,7 +1228,7 @@ Thought:{agent_scratchpad}""")
 
 if __name__ == "__main__":
     # Example usage
-    agent = SQLQueryAgent()
+    agent = GeneralDataAgent()
     
     # You can run specific SQL queries
     # result = agent.run("Show me all tables in landuse_transitions.db")
