@@ -133,9 +133,8 @@ def handle_user_input():
                     # Final response without cursor
                     response_container.markdown(response)
                     
-                    # Show query time in sidebar
-                    with st.sidebar:
-                        st.caption(f"⏱️ Query took {query_time:.1f}s")
+                    # Store query time in session state for sidebar display
+                    st.session_state.last_query_time = query_time
                     
                     # Add assistant response to chat history
                     st.session_state.messages.append({
@@ -313,6 +312,10 @@ def main():
             st.metric("Total Queries", total_queries)
         with col2:
             st.metric("Successful", successful_queries)
+        
+        # Query performance
+        if hasattr(st.session_state, 'last_query_time') and st.session_state.last_query_time:
+            st.caption(f"⏱️ Last query: {st.session_state.last_query_time:.1f}s")
         
         # Model info
         st.caption(f"🤖 Model: {agent.model_name}")
