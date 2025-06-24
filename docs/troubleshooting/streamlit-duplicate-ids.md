@@ -99,6 +99,12 @@ preview_limit = st.number_input(
 | number_input | Custom | `custom_preview_rows` | Preview rows for custom |
 | number_input | Custom | `custom_export_limit` | Export limit for custom |
 | number_input | Bulk | `bulk_row_limit` | Row limit for bulk |
+| button | Templates | `template_preview_data` | Preview data button |
+| button | Templates | `template_export_data` | Export data button |
+| button | Custom | `custom_preview_query` | Preview query button |
+| button | Custom | `custom_preview_data` | Preview data button |
+| button | Custom | `custom_export_data` | Export data button |
+| button | Bulk | `bulk_generate_export` | Generate bulk export button |
 
 ## Prevention
 
@@ -152,5 +158,6 @@ This pattern can affect any Streamlit widget that appears multiple times with id
 - `st.checkbox`
 - `st.radio`
 - `st.slider`
+- `st.button`
 
 Always provide unique `key` parameters when using repeated widgets across different sections of your app.

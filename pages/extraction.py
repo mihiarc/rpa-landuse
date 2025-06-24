@@ -387,7 +387,7 @@ def show_predefined_extracts():
         col1, col2 = st.columns(2)
         
         with col1:
-            if st.button("👁️ Preview Data", use_container_width=True):
+            if st.button("👁️ Preview Data", use_container_width=True, key="template_preview_data"):
                 with st.spinner("Loading preview..."):
                     query = build_extraction_query(template['type'], template['filters'])
                     df, error, total_rows = execute_extraction_query(query, limit=preview_rows)
@@ -399,7 +399,7 @@ def show_predefined_extracts():
                         st.dataframe(df, use_container_width=True, hide_index=True)
         
         with col2:
-            if st.button("📥 Export Data", type="primary", use_container_width=True):
+            if st.button("📥 Export Data", type="primary", use_container_width=True, key="template_export_data"):
                 with st.spinner(f"Preparing {export_format} export..."):
                     query = build_extraction_query(template['type'], template['filters'])
                     df, error, total_rows = execute_extraction_query(query, limit=export_limit)
@@ -603,12 +603,12 @@ def show_custom_extraction():
     col1, col2, col3 = st.columns(3)
     
     with col1:
-        if st.button("🔍 Preview Query", use_container_width=True):
+        if st.button("🔍 Preview Query", use_container_width=True, key="custom_preview_query"):
             query = build_extraction_query(extract_type, selected_filters)
             st.code(query, language='sql')
     
     with col2:
-        if st.button("👁️ Preview Data", use_container_width=True):
+        if st.button("👁️ Preview Data", use_container_width=True, key="custom_preview_data"):
             with st.spinner("Loading preview..."):
                 query = build_extraction_query(extract_type, selected_filters)
                 df, error, total_rows = execute_extraction_query(query, limit=preview_limit)
@@ -620,7 +620,7 @@ def show_custom_extraction():
                     st.dataframe(df, use_container_width=True, hide_index=True)
     
     with col3:
-        if st.button("📥 Export Data", type="primary", use_container_width=True):
+        if st.button("📥 Export Data", type="primary", use_container_width=True, key="custom_export_data"):
             with st.spinner(f"Preparing {export_format} export..."):
                 query = build_extraction_query(extract_type, selected_filters)
                 df, error, total_rows = execute_extraction_query(query, limit=export_limit)
@@ -758,7 +758,7 @@ def show_bulk_export():
             )
         
         # Export button
-        if st.button("📦 Generate Bulk Export", type="primary", use_container_width=True):
+        if st.button("📦 Generate Bulk Export", type="primary", use_container_width=True, key="bulk_generate_export"):
             with st.spinner(f"Preparing bulk export..."):
                 try:
                     if export_format == "CSV (ZIP)":
