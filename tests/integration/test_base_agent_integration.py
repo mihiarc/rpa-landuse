@@ -68,8 +68,11 @@ class TestBaseAgentIntegration:
     """Integration tests for base agent"""
     
     @pytest.fixture
-    def agent(self):
+    def agent(self, monkeypatch):
         """Create a test agent instance"""
+        # Override the test database path to use the real database
+        monkeypatch.setenv("LANDUSE_DB_PATH", "data/processed/landuse_analytics.duckdb")
+        
         # Only create if database exists
         if not os.path.exists("data/processed/landuse_analytics.duckdb"):
             pytest.skip("Database not found")
@@ -169,8 +172,11 @@ class TestBaseAgentIntegration:
 class TestAgentCustomization:
     """Test agent customization features"""
     
-    def test_custom_tools(self):
+    def test_custom_tools(self, monkeypatch):
         """Test adding custom tools"""
+        # Override the test database path
+        monkeypatch.setenv("LANDUSE_DB_PATH", "data/processed/landuse_analytics.duckdb")
+        
         class CustomToolAgent(SimpleTestAgent):
             def _get_additional_tools(self):
                 from langchain_core.tools import Tool
@@ -194,8 +200,11 @@ class TestAgentCustomization:
         assert "custom_analysis" in tool_names
         assert len(agent.tools) >= 4  # Base 3 + custom 1
     
-    def test_query_validation(self):
+    def test_query_validation(self, monkeypatch):
         """Test query validation hook"""
+        # Override the test database path
+        monkeypatch.setenv("LANDUSE_DB_PATH", "data/processed/landuse_analytics.duckdb")
+        
         class ValidatingAgent(SimpleTestAgent):
             def _validate_query(self, sql_query: str):
                 if "DROP" in sql_query.upper():
@@ -213,8 +222,11 @@ class TestAgentCustomization:
         
         assert "DROP statements are not allowed" in result
     
-    def test_pre_post_hooks(self):
+    def test_pre_post_hooks(self, monkeypatch):
         """Test pre and post query hooks"""
+        # Override the test database path
+        monkeypatch.setenv("LANDUSE_DB_PATH", "data/processed/landuse_analytics.duckdb")
+        
         class HookedAgent(SimpleTestAgent):
             def __init__(self, *args, **kwargs):
                 super().__init__(*args, **kwargs)
