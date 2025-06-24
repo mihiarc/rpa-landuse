@@ -1,0 +1,156 @@
+#!/usr/bin/env python3
+"""
+Custom DuckDB Connection for Streamlit
+Implements st.connection pattern for efficient database access
+"""
+
+from streamlit.connections import BaseConnection
+from streamlit.runtime.caching import cache_data
+import duckdb
+import pandas as pd
+from typing import Optional, Dict, Any
+import os
+from pathlib import Path
+
+
+class DuckDBConnection(BaseConnection[duckdb.DuckDBPyConnection]):
+    """
+    A Streamlit connection implementation for DuckDB databases.
+    
+    This connection supports:
+    - Local DuckDB files
+    - In-memory databases
+    - Automatic caching of query results
+    - Thread-safe operations
+    """
+    
+    def _connect(self, **kwargs) -> duckdb.DuckDBPyConnection:
+        """
+        Connect to DuckDB database.
+        
+        Parameters from kwargs or secrets:
+        - database: Path to DuckDB file or ':memory:' for in-memory database
+        - read_only: Whether to open in read-only mode (default: True)
+        """
+        # Get database path from kwargs or secrets
+        if 'database' in kwargs:
+            db = kwargs.pop('database')
+        elif hasattr(self._secrets, 'database'):
+            db = self._secrets['database']
+        else:
+            # Default to environment variable or standard path
+            db = os.getenv('LANDUSE_DB_PATH', 'data/processed/landuse_analytics.duckdb')
+        
+        # Get read_only setting
+        read_only = kwargs.pop('read_only', True)
+        
+        # Validate database file exists (if not in-memory)
+        if db != ':memory:' and not Path(db).exists():
+            raise FileNotFoundError(f"Database file not found: {db}")
+        
+        # Connect to DuckDB
+        return duckdb.connect(database=db, read_only=read_only, **kwargs)
+    
+    def cursor(self) -> duckdb.DuckDBPyConnection:
+        """Return a cursor (DuckDB connections are their own cursors)"""
+        return self._instance
+    
+    def query(self, query: str, ttl: Optional[int] = 3600, **kwargs) -> pd.DataFrame:
+        """
+        Execute a query and return results as a DataFrame.
+        
+        Args:
+            query: SQL query to execute
+            ttl: Time-to-live for cached results in seconds (default: 3600)
+            **kwargs: Additional parameters to pass to the query
+            
+        Returns:
+            pd.DataFrame: Query results
+        """
+        @cache_data(ttl=ttl)
+        def _query(query: str, **kwargs) -> pd.DataFrame:
+            cursor = self.cursor()
+            if kwargs:
+                # Execute with parameters
+                result = cursor.execute(query, kwargs)
+            else:
+                # Execute without parameters
+                result = cursor.execute(query)
+            return result.df()
+        
+        return _query(query, **kwargs)
+    
+    def execute(self, query: str, **kwargs) -> None:
+        """
+        Execute a query without returning results.
+        Useful for DDL statements or updates.
+        
+        Args:
+            query: SQL query to execute
+            **kwargs: Additional parameters to pass to the query
+        """
+        cursor = self.cursor()
+        if kwargs:
+            cursor.execute(query, kwargs)
+        else:
+            cursor.execute(query)
+    
+    def get_table_info(self, table_name: str, ttl: int = 3600) -> pd.DataFrame:
+        """
+        Get information about a table's columns.
+        
+        Args:
+            table_name: Name of the table
+            ttl: Cache time-to-live in seconds
+            
+        Returns:
+            pd.DataFrame: Table schema information
+        """
+        query = f"DESCRIBE {table_name}"
+        return self.query(query, ttl=ttl)
+    
+    def list_tables(self, ttl: int = 3600) -> pd.DataFrame:
+        """
+        List all tables in the database.
+        
+        Args:
+            ttl: Cache time-to-live in seconds
+            
+        Returns:
+            pd.DataFrame: List of tables
+        """
+        query = """
+        SELECT table_name 
+        FROM information_schema.tables 
+        WHERE table_schema = 'main' 
+        ORDER BY table_name
+        """
+        return self.query(query, ttl=ttl)
+    
+    def get_row_count(self, table_name: str, ttl: int = 300) -> int:
+        """
+        Get the row count for a table.
+        
+        Args:
+            table_name: Name of the table
+            ttl: Cache time-to-live in seconds (default: 300)
+            
+        Returns:
+            int: Number of rows in the table
+        """
+        query = f"SELECT COUNT(*) as count FROM {table_name}"
+        result = self.query(query, ttl=ttl)
+        return result['count'].iloc[0]
+    
+    def health_check(self) -> bool:
+        """
+        Check if the connection is healthy.
+        
+        Returns:
+            bool: True if connection is healthy
+        """
+        try:
+            self.query("SELECT 1", ttl=0)
+            return True
+        except Exception:
+            return False

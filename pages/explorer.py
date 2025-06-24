@@ -17,14 +17,19 @@ project_root = Path(__file__).parent.parent
 src_path = project_root / "src"
 sys.path.insert(0, str(src_path))
 
+# Import connection
+from landuse.connections import DuckDBConnection
+
+@st.cache_resource
 def get_database_connection():
-    """Get database connection - not cached as DuckDB connections cannot be pickled"""
+    """Get cached database connection using st.connection"""
     try:
-        db_path = os.getenv('LANDUSE_DB_PATH', 'data/processed/landuse_analytics.duckdb')
-        if not Path(db_path).exists():
-            return None, f"Database not found at {db_path}"
-        
-        conn = duckdb.connect(str(db_path), read_only=True)
+        conn = st.connection(
+            name="landuse_db_explorer",
+            type=DuckDBConnection,
+            database=os.getenv('LANDUSE_DB_PATH', 'data/processed/landuse_analytics.duckdb'),
+            read_only=True
+        )
         return conn, None
     except Exception as e:
         return None, f"Database connection error: {e}"
@@ -38,23 +43,22 @@ def get_table_schema():
     
     try:
         # Get all tables
-        tables_query = "SELECT table_name FROM information_schema.tables WHERE table_schema = 'main' ORDER BY table_name"
-        tables = conn.execute(tables_query).fetchall()
+        tables_df = conn.list_tables(ttl=3600)
         
         schema_info = {}
         
-        for table_name, in tables:
+        for _, row in tables_df.iterrows():
+            table_name = row['table_name']
+            
             # Get column information
-            columns_query = f"DESCRIBE {table_name}"
-            columns = conn.execute(columns_query).df()
+            columns = conn.get_table_info(table_name, ttl=3600)
             
             # Get row count
-            count_query = f"SELECT COUNT(*) as row_count FROM {table_name}"
-            row_count = conn.execute(count_query).fetchone()[0]
+            row_count = conn.get_row_count(table_name, ttl=300)
             
             # Get sample data
             sample_query = f"SELECT * FROM {table_name} LIMIT 5"
-            sample_data = conn.execute(sample_query).df()
+            sample_data = conn.query(sample_query, ttl=3600)
             
             schema_info[table_name] = {
                 'columns': columns,
@@ -62,10 +66,8 @@ def get_table_schema():
                 'sample_data': sample_data
             }
         
-        conn.close()
         return schema_info, None
     except Exception as e:
-        conn.close()
         return None, f"Error getting schema: {e}"
 
 @st.cache_data
@@ -299,12 +301,10 @@ def execute_custom_query(query):
         if query_upper.startswith('SELECT') and 'LIMIT' not in query_upper:
             query = f"{query.rstrip(';')} LIMIT 1000"
         
-        result = conn.execute(query)
-        df = result.df()
-        conn.close()
+        # Use short TTL for custom queries to see fresh results
+        df = conn.query(query, ttl=60)
         return df, None
     except Exception as e:
-        conn.close()
         return None, f"Query error: {e}"
 
 def show_schema_browser():

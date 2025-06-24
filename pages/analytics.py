@@ -20,8 +20,9 @@ project_root = Path(__file__).parent.parent
 src_path = project_root / "src"
 sys.path.insert(0, str(src_path))
 
-# Import state mappings
+# Import state mappings and connection
 from landuse.agents.constants import STATE_NAMES
+from landuse.connections import DuckDBConnection
 
 # State code to abbreviation mapping for choropleth
 STATE_ABBREV = {
@@ -36,14 +37,16 @@ STATE_ABBREV = {
     '55': 'WI', '56': 'WY', '11': 'DC'
 }
 
+@st.cache_resource
 def get_database_connection():
-    """Get database connection - not cached as DuckDB connections cannot be pickled"""
+    """Get cached database connection using st.connection"""
     try:
-        db_path = os.getenv('LANDUSE_DB_PATH', 'data/processed/landuse_analytics.duckdb')
-        if not Path(db_path).exists():
-            return None, f"Database not found at {db_path}"
-        
-        conn = duckdb.connect(str(db_path), read_only=True)
+        conn = st.connection(
+            name="landuse_db_analytics",
+            type=DuckDBConnection,
+            database=os.getenv('LANDUSE_DB_PATH', 'data/processed/landuse_analytics.duckdb'),
+            read_only=True
+        )
         return conn, None
     except Exception as e:
         return None, f"Database connection error: {e}"
@@ -58,16 +61,22 @@ def load_summary_data():
     try:
         # Basic dataset stats
         stats = {}
-        stats['total_counties'] = conn.execute("SELECT COUNT(DISTINCT fips_code) FROM dim_geography").fetchone()[0]
-        stats['total_scenarios'] = conn.execute("SELECT COUNT(*) FROM dim_scenario").fetchone()[0]
-        stats['total_transitions'] = conn.execute("SELECT COUNT(*) FROM fact_landuse_transitions WHERE transition_type = 'change'").fetchone()[0]
-        stats['time_periods'] = conn.execute("SELECT COUNT(*) FROM dim_time").fetchone()[0]
         
-        conn.close()
+        # Use query method with appropriate TTL
+        counties_df = conn.query("SELECT COUNT(DISTINCT fips_code) as count FROM dim_geography", ttl=3600)
+        stats['total_counties'] = counties_df['count'].iloc[0]
+        
+        scenarios_df = conn.query("SELECT COUNT(*) as count FROM dim_scenario", ttl=3600)
+        stats['total_scenarios'] = scenarios_df['count'].iloc[0]
+        
+        transitions_df = conn.query("SELECT COUNT(*) as count FROM fact_landuse_transitions WHERE transition_type = 'change'", ttl=300)
+        stats['total_transitions'] = transitions_df['count'].iloc[0]
+        
+        time_df = conn.query("SELECT COUNT(*) as count FROM dim_time", ttl=3600)
+        stats['time_periods'] = time_df['count'].iloc[0]
+        
         return stats, None
     except Exception as e:
-        if conn:
-            conn.close()
         return None, f"Error loading summary data: {e}"
 
 @st.cache_data
@@ -96,11 +105,9 @@ def load_agricultural_loss_data():
         LIMIT 20
         """
         
-        df = conn.execute(query).df()
-        conn.close()
+        df = conn.query(query, ttl=300)
         return df, None
     except Exception as e:
-        conn.close()
         return None, f"Error loading agricultural data: {e}"
 
 @st.cache_data
@@ -127,11 +134,9 @@ def load_urbanization_data():
         LIMIT 50
         """
         
-        df = conn.execute(query).df()
-        conn.close()
+        df = conn.query(query, ttl=300)
         return df, None
     except Exception as e:
-        conn.close()
         return None, f"Error loading urbanization data: {e}"
 
 @st.cache_data
@@ -210,19 +215,16 @@ def load_forest_analysis_data():
         ORDER BY net_change DESC
         """
         
-        df_loss = conn.execute(forest_loss_query).df()
-        df_gain = conn.execute(forest_gain_query).df()
-        df_states = conn.execute(state_forest_query).df()
+        df_loss = conn.query(forest_loss_query, ttl=300)
+        df_gain = conn.query(forest_gain_query, ttl=300)
+        df_states = conn.query(state_forest_query, ttl=300)
         
         # Add state names and abbreviations
         df_states['state_abbr'] = df_states['state_code'].map(STATE_ABBREV)
         df_states['state_name'] = df_states['state_code'].map(STATE_NAMES)
         
-        conn.close()
         return df_loss, df_gain, df_states, None
     except Exception as e:
-        if conn:
-            conn.close()
         return None, None, None, f"Error loading forest data: {e}"
 
 @st.cache_data
@@ -249,11 +251,9 @@ def load_climate_comparison_data():
         LIMIT 100
         """
         
-        df = conn.execute(query).df()
-        conn.close()
+        df = conn.query(query, ttl=300)
         return df, None
     except Exception as e:
-        conn.close()
         return None, f"Error loading climate comparison data: {e}"
 
 @st.cache_data
@@ -282,11 +282,9 @@ def load_time_series_data():
         ORDER BY t.start_year, total_acres DESC
         """
         
-        df = conn.execute(query).df()
-        conn.close()
+        df = conn.query(query, ttl=300)
         return df, None
     except Exception as e:
-        conn.close()
         return None, f"Error loading time series data: {e}"
 
 def create_agricultural_loss_chart(df):
@@ -635,17 +633,14 @@ def load_state_transitions():
         FROM state_totals st
         """
         
-        df = conn.execute(query).df()
+        df = conn.query(query, ttl=300)
         
         # Add state abbreviations and names
         df['state_abbr'] = df['state_code'].map(STATE_ABBREV)
         df['state_name'] = df['state_code'].map(STATE_NAMES)
         
-        conn.close()
         return df, None
     except Exception as e:
-        if conn:
-            conn.close()
         return None, f"Error loading state transitions: {e}"
 
 @st.cache_data
@@ -685,12 +680,9 @@ def load_sankey_data(from_landuse=None, to_landuse=None, scenario_filter=None):
         LIMIT 20
         """
         
-        df = conn.execute(query).df()
-        conn.close()
+        df = conn.query(query, ttl=300)
         return df, None
     except Exception as e:
-        if conn:
-            conn.close()
         return None, f"Error loading Sankey data: {e}"
 
 def create_choropleth_map(df):
@@ -846,12 +838,9 @@ def load_animated_timeline_data():
         ORDER BY t.start_year, total_acres DESC
         """
         
-        df = conn.execute(query).df()
-        conn.close()
+        df = conn.query(query, ttl=300)
         return df, None
     except Exception as e:
-        if conn:
-            conn.close()
         return None, f"Error loading timeline data: {e}"
 
 @st.cache_data
@@ -872,12 +861,9 @@ def load_scenario_comparison_data():
         ORDER BY s.scenario_name
         """
         
-        df = conn.execute(query).df()
-        conn.close()
+        df = conn.query(query, ttl=300)
         return df, None
     except Exception as e:
-        if conn:
-            conn.close()
         return None, f"Error loading scenarios: {e}"
 
 def create_animated_timeline(df):
@@ -963,8 +949,7 @@ def create_scenario_spider_chart(selected_scenarios):
         ORDER BY scenario_name, to_landuse
         """
         
-        df = conn.execute(query).df()
-        conn.close()
+        df = conn.query(query, ttl=300)
         
         if df.empty:
             return None, "No data for selected scenarios"
@@ -1008,8 +993,6 @@ def create_scenario_spider_chart(selected_scenarios):
         return fig, None
         
     except Exception as e:
-        if conn:
-            conn.close()
         return None, f"Error creating comparison: {e}"
 
 def show_enhanced_visualizations():

@@ -20,17 +20,20 @@ project_root = Path(__file__).parent.parent
 src_path = project_root / "src"
 sys.path.insert(0, str(src_path))
 
-# Import state mappings
+# Import state mappings and connection
 from landuse.agents.constants import STATE_NAMES
+from landuse.connections import DuckDBConnection
 
+@st.cache_resource
 def get_database_connection():
-    """Get database connection - not cached as DuckDB connections cannot be pickled"""
+    """Get cached database connection using st.connection"""
     try:
-        db_path = os.getenv('LANDUSE_DB_PATH', 'data/processed/landuse_analytics.duckdb')
-        if not Path(db_path).exists():
-            return None, f"Database not found at {db_path}"
-        
-        conn = duckdb.connect(str(db_path), read_only=True)
+        conn = st.connection(
+            name="landuse_db",
+            type=DuckDBConnection,
+            database=os.getenv('LANDUSE_DB_PATH', 'data/processed/landuse_analytics.duckdb'),
+            read_only=True
+        )
         return conn, None
     except Exception as e:
         return None, f"Database connection error: {e}"
@@ -51,7 +54,7 @@ def get_filter_options():
         FROM dim_scenario
         ORDER BY scenario_name
         """
-        filters['scenarios'] = conn.execute(scenarios_query).df()
+        filters['scenarios'] = conn.query(scenarios_query)
         
         # Get time periods
         time_query = """
@@ -59,7 +62,7 @@ def get_filter_options():
         FROM dim_time
         ORDER BY start_year
         """
-        filters['time_periods'] = conn.execute(time_query).df()
+        filters['time_periods'] = conn.query(time_query)
         
         # Get states
         states_query = """
@@ -68,7 +71,7 @@ def get_filter_options():
         WHERE state_name IS NOT NULL
         ORDER BY state_name
         """
-        filters['states'] = conn.execute(states_query).df()
+        filters['states'] = conn.query(states_query)
         
         # Get land use types
         landuse_query = """
@@ -76,13 +79,10 @@ def get_filter_options():
         FROM dim_landuse
         ORDER BY landuse_name
         """
-        filters['landuse_types'] = conn.execute(landuse_query).df()
+        filters['landuse_types'] = conn.query(landuse_query)
         
-        conn.close()
         return filters, None
     except Exception as e:
-        if conn:
-            conn.close()
         return None, f"Error loading filters: {e}"
 
 def build_extraction_query(extract_type, filters):
@@ -252,21 +252,18 @@ def execute_extraction_query(query, limit=None):
     
     try:
         # Get count first
-        count_query = f"SELECT COUNT(*) FROM ({query}) as subquery"
-        total_rows = conn.execute(count_query).fetchone()[0]
+        count_query = f"SELECT COUNT(*) as count FROM ({query}) as subquery"
+        count_result = conn.query(count_query, ttl=60)  # Short TTL for counts
+        total_rows = count_result['count'].iloc[0]
         
         # Execute main query with limit if specified
         if limit:
             query += f" LIMIT {limit}"
         
-        result = conn.execute(query)
-        df = result.df()
-        conn.close()
+        df = conn.query(query, ttl=300)  # 5 minute cache for data
         
         return df, None, total_rows
     except Exception as e:
-        if conn:
-            conn.close()
         return None, f"Query error: {e}", 0
 
 def convert_to_format(df, format_type):
