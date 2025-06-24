@@ -54,8 +54,6 @@ duckdb data/processed/landuse_analytics.duckdb -ui
 langchain-landuse/
 ├── 🤖 scripts/agents/          # AI-powered query agents
 │   ├── landuse_natural_language_agent.py  # Natural language → DuckDB SQL
-│   ├── general_data_agent.py   # General multi-database agent
-│   ├── secure_landuse_agent.py # Security-enhanced landuse agent
 │   └── test_landuse_agent.py   # Sample queries & testing
 ├── 🔄 scripts/converters/      # Data transformation tools
 │   └── convert_to_duckdb.py    # JSON → DuckDB star schema

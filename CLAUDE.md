@@ -25,11 +25,6 @@ uv run python -m landuse.agents.landuse_natural_language_agent
 # Test with sample queries
 uv run python -m landuse.agents.test_landuse_agent
 
-# Alternative: General Data Agent (multi-database support)
-uv run python -m landuse.agents.general_data_agent
-
-# Secure version with enhanced security features
-uv run python -m landuse.agents.secure_landuse_agent
 ```
 
 ### Data Processing
@@ -85,17 +80,6 @@ duckdb data/processed/landuse_analytics.duckdb
 - Beautiful Rich terminal UI with markdown support
 - Schema-aware query generation
 
-**General Data Agent** (`src/landuse/agents/general_data_agent.py`):
-- General-purpose agent for multiple databases and file formats
-- Supports SQLite, DuckDB, CSV, JSON, Parquet
-- File management and data transformation tools
-- Uses GPT-4 by default
-
-**Secure Landuse Agent** (`src/landuse/agents/secure_landuse_agent.py`):
-- Enhanced version of landuse agent with security features
-- SQL injection prevention and input validation
-- Rate limiting and audit logging
-- Same natural language capabilities with added protection
 
 **Data Converter** (`src/landuse/converters/convert_to_duckdb.py`):
 - Processes nested JSON to normalized star schema

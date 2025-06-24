@@ -51,7 +51,6 @@ uv run python scripts/agents/test_landuse_agent.py
 ### Quick Start
 ```bash
 # Interactive chat mode
-uv run python scripts/agents/general_data_agent.py
 ```
 
 **[📖 Complete Documentation →](../../docs/api/agent.md)**

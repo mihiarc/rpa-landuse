@@ -55,8 +55,6 @@ dev = [
 
 [project.scripts]
 landuse-agent = "landuse.agents.landuse_natural_language_agent:main"
-general-agent = "landuse.agents.general_data_agent:main"
-secure-agent = "landuse.agents.secure_landuse_agent:main"
 
 [build-system]
 requires = ["hatchling"]
