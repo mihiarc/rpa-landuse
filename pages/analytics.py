@@ -222,11 +222,9 @@ def create_agricultural_loss_chart(df):
         height=500,
         yaxis={'categoryorder': 'total ascending'},
         xaxis_title="Acres Lost (millions)",
+        xaxis_tickformat='.1s',  # Format x-axis to show millions
         font=dict(size=12)
     )
-    
-    # Format x-axis to show millions
-    fig.update_xaxis(tickformat='.1s')
     
     return fig
 
@@ -256,10 +254,9 @@ def create_urbanization_chart(df):
         height=500,
         yaxis={'categoryorder': 'total ascending'},
         xaxis_title="Acres Urbanized (millions)",
+        xaxis_tickformat='.1s',  # Format x-axis to show millions
         font=dict(size=12)
     )
-    
-    fig.update_xaxis(tickformat='.1s')
     
     return fig
 
@@ -313,11 +310,10 @@ def create_time_series_chart(df):
         height=500,
         xaxis_title="Year",
         yaxis_title="Acres (millions)",
+        yaxis_tickformat='.1s',  # Format y-axis to show millions
         font=dict(size=12),
         legend=dict(orientation="v", yanchor="top", y=1, xanchor="left", x=1.02)
     )
-    
-    fig.update_yaxis(tickformat='.1s')
     
     return fig
 
