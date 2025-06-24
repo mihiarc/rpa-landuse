@@ -51,6 +51,8 @@ nav:
     - Data Sources: data/sources.md
     - Database Schema: data/schema.md
     - Land Use Categories: data/categories.md
+    - Variable Descriptions: data/variable-descriptions.md
+    - RPA Model Diagram: data/rpa-model-diagram.md
     - Data Processing: data/processing.md
   - API Reference:
     - Data Engineering Agent: api/agent.md
