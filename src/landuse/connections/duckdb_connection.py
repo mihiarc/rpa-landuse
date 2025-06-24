@@ -4,8 +4,24 @@ Custom DuckDB Connection for Streamlit
 Implements st.connection pattern for efficient database access
 """
 
-from streamlit.connections import BaseConnection
-from streamlit.runtime.caching import cache_data
+try:
+    from streamlit.connections import BaseConnection
+    from streamlit.runtime.caching import cache_data
+    HAS_STREAMLIT = True
+except ImportError:
+    # For testing environments where streamlit might not be fully available
+    from typing import Generic, TypeVar
+    T = TypeVar('T')
+    class BaseConnection(Generic[T]):
+        def __init__(self, connection_name: str, **kwargs):
+            self.connection_name = connection_name
+            self._secrets = None
+            self._instance = None
+    def cache_data(ttl=None):
+        def decorator(func):
+            return func
+        return decorator
+    HAS_STREAMLIT = False
 import duckdb
 import pandas as pd
 from typing import Optional, Dict, Any
@@ -35,8 +51,19 @@ class DuckDBConnection(BaseConnection[duckdb.DuckDBPyConnection]):
         # Get database path from kwargs or secrets
         if 'database' in kwargs:
             db = kwargs.pop('database')
-        elif hasattr(self._secrets, 'database'):
-            db = self._secrets['database']
+        elif hasattr(self, '_secrets') and self._secrets:
+            if hasattr(self._secrets, 'database'):
+                db = self._secrets.database
+            elif hasattr(self._secrets, '__getitem__'):
+                try:
+                    db = self._secrets['database']
+                except (KeyError, TypeError):
+                    db = None
+            else:
+                db = None
+            
+            if not db:
+                db = os.getenv('LANDUSE_DB_PATH', 'data/processed/landuse_analytics.duckdb')
         else:
             # Default to environment variable or standard path
             db = os.getenv('LANDUSE_DB_PATH', 'data/processed/landuse_analytics.duckdb')
@@ -71,8 +98,10 @@ class DuckDBConnection(BaseConnection[duckdb.DuckDBPyConnection]):
         def _query(query: str, **kwargs) -> pd.DataFrame:
             cursor = self.cursor()
             if kwargs:
-                # Execute with parameters
-                result = cursor.execute(query, kwargs)
+                # DuckDB uses positional parameters ($1, $2, etc.)
+                # Convert kwargs to list in the order they appear
+                params = list(kwargs.values())
+                result = cursor.execute(query, params)
             else:
                 # Execute without parameters
                 result = cursor.execute(query)
@@ -91,7 +120,10 @@ class DuckDBConnection(BaseConnection[duckdb.DuckDBPyConnection]):
         """
         cursor = self.cursor()
         if kwargs:
-            cursor.execute(query, kwargs)
+            # DuckDB uses positional parameters ($1, $2, etc.)
+            # Convert kwargs to list in the order they appear
+            params = list(kwargs.values())
+            cursor.execute(query, params)
         else:
             cursor.execute(query)
     
