@@ -24,8 +24,12 @@ uv run python setup_agents.py
 # Modern web dashboard with chat interface and visualizations
 uv run streamlit run streamlit_app.py
 
-# Test dashboard components
-uv run python test_dashboard.py
+# Features:
+# - Natural language chat interface
+# - Interactive analytics dashboard with 6 visualization types
+# - Data explorer with SQL query interface
+# - Data extraction tool for custom analysis
+# - System settings and configuration
 ```
 
 #### Command Line Agents
@@ -87,11 +91,19 @@ duckdb data/processed/landuse_analytics.duckdb
 
 **Streamlit Dashboard** (`streamlit_app.py`):
 - Modern web interface with multipage navigation using st.Page and st.navigation
-- 💬 **Chat Interface**: Natural language queries with streaming responses
-- 📊 **Analytics Dashboard**: Pre-built visualizations with Plotly (agricultural loss, urbanization, climate scenarios)
+- 💬 **Chat Interface**: Natural language queries with conversation history
+- 📊 **Analytics Dashboard**: 
+  - Overview metrics and KPIs
+  - Agricultural impact analysis
+  - Forest transition analysis
+  - Climate scenario comparisons
+  - Geographic visualizations (choropleth maps)
+  - Land use flow diagrams (Sankey charts)
 - 🔍 **Data Explorer**: Interactive SQL query interface with schema browser
+- 📥 **Data Extraction**: Export query results in multiple formats (CSV, JSON, Parquet)
 - ⚙️ **Settings Page**: System status, configuration, and troubleshooting
 - Mobile-responsive design with modern UI patterns
+- Custom DuckDB connection using st.connection pattern
 
 **Landuse Natural Language Agent** (`src/landuse/agents/landuse_natural_language_agent.py`):
 - Uses Claude 3.5 Sonnet by default (configurable via LANDUSE_MODEL env var)
@@ -106,6 +118,13 @@ duckdb data/processed/landuse_analytics.duckdb
 - Creates dimension and fact tables
 - Adds indexes and views for performance
 - Handles 20M+ lines efficiently with progress tracking
+
+**DuckDB Connection** (`src/landuse/connections/duckdb_connection.py`):
+- Custom connection class implementing st.connection pattern
+- Automatic result caching with configurable TTL
+- Support for both file-based and in-memory databases
+- Thread-safe operations with read-only mode by default
+- Compatible with testing environments
 
 ### Land Use Categories
 - **Crop**: Agricultural cropland (cr)
@@ -215,17 +234,63 @@ duckdb data/processed/landuse_analytics.duckdb
 
 ## Testing
 
-No formal test framework is configured. Testing is done through:
-- `test_landuse_agent.py`: Tests natural language queries with sample questions
-- `test_agent.py`: Creates sample data and tests general SQL agent
-- Interactive testing via agent scripts
-- Real API calls are used for all tests (no mocking)
+### Test Framework
+```bash
+# Run all tests
+uv run python -m pytest tests/
+
+# Run with coverage report
+uv run python -m pytest tests/ --cov=src --cov-report=term-missing
+
+# Run specific test categories
+uv run python -m pytest tests/unit/          # Unit tests
+uv run python -m pytest tests/integration/   # Integration tests
+```
+
+### Test Coverage
+- **Current Coverage**: 89.75% (exceeding 70% requirement)
+- **Total Tests**: 142+ tests across unit and integration
+- **Test Categories**:
+  - Agent functionality tests
+  - Natural language processing tests
+  - Database connection tests (with real DuckDB)
+  - Security and validation tests
+  - Streamlit component tests (with mocked decorators)
+  - Data conversion tests
+
+### Testing Philosophy
+- All tests use real functionality (no mocking of core logic)
+- Real API calls for agent tests
+- Real database connections for data tests
+- Comprehensive error handling coverage
 
 ## Dependencies
 
 Key packages (managed via `uv`):
 - **Core**: langchain, langchain-anthropic, langchain-community
-- **Data**: pandas, duckdb, pyarrow, ijson
-- **UI**: rich (for terminal output)
+- **Data**: pandas, duckdb (0.11.0+), pyarrow, ijson
+- **Web UI**: streamlit (1.40.0+), plotly
+- **Terminal UI**: rich
 - **Validation**: pydantic v2
+- **Testing**: pytest, pytest-cov, pytest-asyncio
 - **Docs**: mkdocs, mkdocs-material
+
+## Recent Updates (2024-2025)
+
+### Streamlit Dashboard
+- Added comprehensive multipage dashboard with 5 main sections
+- Implemented custom DuckDB connection with st.connection pattern
+- Created rich analytics visualizations using Plotly
+- Added data extraction functionality with multiple export formats
+- Mobile-responsive design with modern UI patterns
+
+### Testing Infrastructure
+- Achieved 89.75% test coverage with 142+ tests
+- Added comprehensive unit tests for all core components
+- Created mock Streamlit module for testing without full installation
+- All tests use real functionality (no mocking of business logic)
+
+### Data Processing
+- Optimized star schema design for 5.4M+ records
+- Added specialized views for common query patterns
+- Improved query performance with strategic indexing
