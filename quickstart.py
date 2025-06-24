@@ -169,14 +169,31 @@ def main():
         ))
     else:
         # Everything is ready!
-        console.print(Panel.fit(
-            "[bold green]✅ Ready to go![/bold green]\n\n"
-            "Start the agent with:\n"
-            "[bold cyan]uv run python src/landuse/agents/landuse_natural_language_agent.py[/bold cyan]\n\n"
-            "Or use the shortcut:\n"
-            "[bold cyan]uv run landuse-agent[/bold cyan]",
-            border_style="green"
-        ))
+        # Check if shortcut command is available
+        try:
+            import subprocess
+            result = subprocess.run(["uv", "run", "which", "landuse-agent"], 
+                                  capture_output=True, text=True)
+            has_shortcut = result.returncode == 0
+        except:
+            has_shortcut = False
+        
+        if has_shortcut:
+            start_text = (
+                "[bold green]✅ Ready to go![/bold green]\n\n"
+                "Start the agent with:\n"
+                "[bold cyan]uv run landuse-agent[/bold cyan]\n\n"
+                "Or use the full path:\n"
+                "[bold cyan]uv run python src/landuse/agents/landuse_natural_language_agent.py[/bold cyan]"
+            )
+        else:
+            start_text = (
+                "[bold green]✅ Ready to go![/bold green]\n\n"
+                "Start the agent with:\n"
+                "[bold cyan]uv run python src/landuse/agents/landuse_natural_language_agent.py[/bold cyan]"
+            )
+        
+        console.print(Panel.fit(start_text, border_style="green"))
         
         # Show example queries
         console.print("\n[bold]Example queries to try:[/bold]")

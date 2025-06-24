@@ -326,7 +326,19 @@ Thought: Let me understand what the user is asking about landuse data and conver
         )
         self.console.print(examples_panel)
 
+
+def main():
+    """Main entry point for the landuse agent"""
+    try:
+        agent = LanduseNaturalLanguageAgent()
+        agent.chat()
+    except KeyboardInterrupt:
+        print("\n👋 Happy analyzing!")
+    except Exception as e:
+        print(f"\n❌ Error: {e}")
+        import sys
+        sys.exit(1)
+
+
 if __name__ == "__main__":
-    # Create and run the landuse query agent
-    agent = LanduseNaturalLanguageAgent()
-    agent.chat() 
+    main() 
