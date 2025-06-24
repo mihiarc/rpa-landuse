@@ -7,7 +7,7 @@ import pytest
 from landuse.agents.constants import (
     STATE_NAMES, SCHEMA_INFO_TEMPLATE, DEFAULT_ASSUMPTIONS,
     QUERY_EXAMPLES, CHAT_EXAMPLES, RESPONSE_SECTIONS,
-    DB_CONFIG, MODEL_CONFIG
+    DB_CONFIG, MODEL_CONFIG, RATE_LIMIT_CONFIG
 )
 
 
@@ -129,6 +129,19 @@ def test_model_config():
     # Check values
     assert MODEL_CONFIG["default_temperature"] == 0.1
     assert MODEL_CONFIG["default_max_tokens"] == 4000
-    assert MODEL_CONFIG["max_iterations"] == 3
+    assert MODEL_CONFIG["max_iterations"] == 5  # Updated default
+    assert MODEL_CONFIG["max_execution_time"] == 120  # New field
     assert "gpt" in MODEL_CONFIG["default_openai_model"]
     assert "claude" in MODEL_CONFIG["default_anthropic_model"]
+
+
+def test_rate_limit_config():
+    """Test rate limit configuration structure and defaults"""
+    # Check structure
+    assert isinstance(RATE_LIMIT_CONFIG, dict)
+    assert "max_calls" in RATE_LIMIT_CONFIG
+    assert "time_window" in RATE_LIMIT_CONFIG
+    
+    # Check values
+    assert RATE_LIMIT_CONFIG["max_calls"] == 60
+    assert RATE_LIMIT_CONFIG["time_window"] == 60

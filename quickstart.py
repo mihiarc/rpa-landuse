@@ -152,6 +152,37 @@ def main():
     console.print(status_table)
     console.print()
     
+    # Show configured limits if everything is set up
+    if all_good:
+        limits_table = Table(title="Configured Limits", show_header=True)
+        limits_table.add_column("Setting", style="cyan")
+        limits_table.add_column("Value", style="yellow")
+        limits_table.add_column("Environment Variable", style="dim")
+        
+        limits_table.add_row(
+            "Max Iterations",
+            str(os.getenv("LANDUSE_MAX_ITERATIONS", "5")),
+            "LANDUSE_MAX_ITERATIONS"
+        )
+        limits_table.add_row(
+            "Max Execution Time",
+            f"{os.getenv('LANDUSE_MAX_EXECUTION_TIME', '120')} seconds",
+            "LANDUSE_MAX_EXECUTION_TIME"
+        )
+        limits_table.add_row(
+            "Max Query Rows",
+            str(os.getenv("LANDUSE_MAX_QUERY_ROWS", "1000")),
+            "LANDUSE_MAX_QUERY_ROWS"
+        )
+        limits_table.add_row(
+            "Rate Limit",
+            f"{os.getenv('LANDUSE_RATE_LIMIT_CALLS', '60')} calls per {os.getenv('LANDUSE_RATE_LIMIT_WINDOW', '60')}s",
+            "LANDUSE_RATE_LIMIT_CALLS/WINDOW"
+        )
+        
+        console.print(limits_table)
+        console.print()
+    
     # Provide instructions based on status
     if not all_good:
         console.print(Panel.fit(

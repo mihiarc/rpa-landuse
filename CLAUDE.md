@@ -106,6 +106,16 @@ ANTHROPIC_API_KEY=your_anthropic_key  # For Claude models
 LANDUSE_MODEL=gpt-4o-mini            # or claude-3-haiku-20240307
 TEMPERATURE=0.1
 MAX_TOKENS=4000
+
+# Query Execution Limits (optional, defaults shown)
+LANDUSE_MAX_ITERATIONS=5        # Max tool calls before stopping
+LANDUSE_MAX_EXECUTION_TIME=120  # Max seconds for query execution
+LANDUSE_MAX_QUERY_ROWS=1000     # Max rows returned by queries
+LANDUSE_DEFAULT_DISPLAY_LIMIT=50 # Default rows to display
+
+# Rate Limiting (optional, defaults shown)
+LANDUSE_RATE_LIMIT_CALLS=60     # Max calls per time window
+LANDUSE_RATE_LIMIT_WINDOW=60    # Time window in seconds
 ```
 
 ## Development Patterns

@@ -273,6 +273,7 @@ class BaseLanduseAgent(ABC):
             verbose=self.verbose,
             handle_parsing_errors=True,
             max_iterations=MODEL_CONFIG['max_iterations'],
+            max_execution_time=MODEL_CONFIG['max_execution_time'],
             return_intermediate_steps=False
         )
         
@@ -286,19 +287,41 @@ class BaseLanduseAgent(ABC):
             if pre_result:
                 return pre_result
             
+            # Log query start
+            self.logger.info(f"Processing query: {natural_language_query[:100]}...")
+            
             # Process query
             response = self.agent.invoke({
                 "input": natural_language_query,
                 "schema_info": self.schema_info
             })
             
+            # Check if we hit iteration limit
+            if response.get("iterations", 0) >= MODEL_CONFIG['max_iterations']:
+                self.logger.warning(f"Query hit iteration limit ({MODEL_CONFIG['max_iterations']})")
+            
             # Post-query hook
             output = response.get("output", "No response generated")
             return self._post_query_hook(output)
             
+        except TimeoutError:
+            self.logger.error(f"Query timed out after {MODEL_CONFIG['max_execution_time']} seconds")
+            return (f"⏱️ Query timed out after {MODEL_CONFIG['max_execution_time']} seconds. "
+                   f"Try a simpler query or increase LANDUSE_MAX_EXECUTION_TIME.")
         except Exception as e:
-            self.logger.error(f"Error processing query: {e}")
-            return f"❌ Error processing query: {str(e)}"
+            # Check for specific error messages
+            error_msg = str(e)
+            if "Agent stopped due to iteration limit" in error_msg:
+                self.logger.warning(f"Agent hit iteration limit: {error_msg}")
+                return (f"🔄 Query required too many steps (>{MODEL_CONFIG['max_iterations']}). "
+                       f"Try a simpler query or increase LANDUSE_MAX_ITERATIONS.")
+            elif "Agent stopped due to time limit" in error_msg:
+                self.logger.warning(f"Agent hit time limit: {error_msg}")
+                return (f"⏱️ Query took too long (>{MODEL_CONFIG['max_execution_time']}s). "
+                       f"Try a simpler query or increase LANDUSE_MAX_EXECUTION_TIME.")
+            else:
+                self.logger.error(f"Error processing query: {e}")
+                return f"❌ Error processing query: {error_msg}"
     
     def _pre_query_hook(self, query: str) -> Optional[str]:
         """Hook called before query processing"""

@@ -4,6 +4,8 @@ Shared constants for landuse agents
 Contains common schema information, mappings, and query examples
 """
 
+import os
+
 # State code to name mapping
 STATE_NAMES = {
     '01': 'Alabama', '02': 'Alaska', '04': 'Arizona', '05': 'Arkansas',
@@ -163,8 +165,8 @@ RESPONSE_SECTIONS = {
 # Database configuration defaults
 DB_CONFIG = {
     "default_path": "data/processed/landuse_analytics.duckdb",
-    "max_query_limit": 1000,
-    "default_display_limit": 50,
+    "max_query_limit": int(os.getenv("LANDUSE_MAX_QUERY_ROWS", "1000")),
+    "default_display_limit": int(os.getenv("LANDUSE_DEFAULT_DISPLAY_LIMIT", "50")),
     "read_only": True
 }
 
@@ -172,7 +174,14 @@ DB_CONFIG = {
 MODEL_CONFIG = {
     "default_temperature": 0.1,
     "default_max_tokens": 4000,
-    "max_iterations": 3,
+    "max_iterations": int(os.getenv("LANDUSE_MAX_ITERATIONS", "5")),  # Increased from 3 to 5
+    "max_execution_time": int(os.getenv("LANDUSE_MAX_EXECUTION_TIME", "120")),  # 2 minutes default
     "default_openai_model": "gpt-4o-mini",
     "default_anthropic_model": "claude-3-5-sonnet-20241022"
+}
+
+# Rate limiting configuration
+RATE_LIMIT_CONFIG = {
+    "max_calls": int(os.getenv("LANDUSE_RATE_LIMIT_CALLS", "60")),
+    "time_window": int(os.getenv("LANDUSE_RATE_LIMIT_WINDOW", "60"))  # seconds
 }
