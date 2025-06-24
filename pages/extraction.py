@@ -340,7 +340,8 @@ def show_predefined_extracts():
     selected_template = st.selectbox(
         "Select a predefined extract:",
         list(extract_templates.keys()),
-        help="Choose a predefined data extract template"
+        help="Choose a predefined data extract template",
+        key="template_selector"
     )
     
     if selected_template:
@@ -354,7 +355,8 @@ def show_predefined_extracts():
             export_format = st.selectbox(
                 "Export format:",
                 ["CSV", "Excel", "JSON", "Parquet"],
-                help="Choose the file format for your export"
+                help="Choose the file format for your export",
+                key="template_export_format"
             )
         
         with col2:
@@ -365,7 +367,8 @@ def show_predefined_extracts():
                 max_value=1000,
                 value=100,
                 step=10,
-                help="Number of rows to preview"
+                help="Number of rows to preview",
+                key="template_preview_rows"
             )
         
         with col3:
@@ -376,7 +379,8 @@ def show_predefined_extracts():
                 max_value=1000000,
                 value=100000,
                 step=1000,
-                help="Maximum rows to export"
+                help="Maximum rows to export",
+                key="template_export_limit"
             )
         
         # Action buttons
@@ -457,7 +461,8 @@ def show_custom_extraction():
             ("Time Series", "time_series")
         ],
         format_func=lambda x: x[0],
-        help="Choose the type of data extraction"
+        help="Choose the type of data extraction",
+        key="custom_extract_type"
     )[1]
     
     # Filter interface
@@ -515,7 +520,8 @@ def show_custom_extraction():
             transition_type = st.selectbox(
                 "Transition Type:",
                 ["All", "change", "same"],
-                help="Select transition type"
+                help="Select transition type",
+                key="custom_transition_type"
             )
             if transition_type != "All":
                 selected_filters['transition_type'] = transition_type
@@ -568,7 +574,8 @@ def show_custom_extraction():
         export_format = st.selectbox(
             "Export format:",
             ["CSV", "Excel", "JSON", "Parquet"],
-            help="Choose the file format for your export"
+            help="Choose the file format for your export",
+            key="custom_export_format"
         )
     
     with col2:
@@ -577,7 +584,8 @@ def show_custom_extraction():
             min_value=10,
             max_value=1000,
             value=100,
-            step=10
+            step=10,
+            key="custom_preview_rows"
         )
     
     with col3:
@@ -586,6 +594,7 @@ def show_custom_extraction():
             min_value=1000,
             max_value=5000000,
             value=500000,
+            key="custom_export_limit",
             step=10000,
             help="Maximum rows to export"
         )
@@ -718,7 +727,8 @@ def show_bulk_export():
     selected_bulk = st.selectbox(
         "Select bulk export option:",
         list(bulk_options.keys()),
-        help="Choose a bulk export package"
+        help="Choose a bulk export package",
+        key="bulk_extract_type"
     )
     
     if selected_bulk:
@@ -732,7 +742,8 @@ def show_bulk_export():
             export_format = st.selectbox(
                 "Export format:",
                 ["CSV (ZIP)", "Excel", "Parquet (ZIP)"],
-                help="Choose the format for bulk export"
+                help="Choose the format for bulk export",
+                key="bulk_export_format"
             )
         
         with col2:
@@ -742,7 +753,8 @@ def show_bulk_export():
                 max_value=10000000,
                 value=1000000,
                 step=100000,
-                help="Maximum rows per dataset"
+                help="Maximum rows per dataset",
+                key="bulk_row_limit"
             )
         
         # Export button
