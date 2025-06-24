@@ -135,6 +135,97 @@ def load_urbanization_data():
         return None, f"Error loading urbanization data: {e}"
 
 @st.cache_data
+def load_forest_analysis_data():
+    """Load comprehensive forest transition data"""
+    conn, error = get_database_connection()
+    if error:
+        return None, None, None, error
+    
+    try:
+        # Query 1: Forest loss by destination
+        forest_loss_query = """
+        SELECT 
+            tl.landuse_name as to_landuse,
+            s.rcp_scenario,
+            SUM(f.acres) as total_acres,
+            AVG(f.acres) as avg_acres_per_county,
+            COUNT(DISTINCT g.state_code) as states_affected
+        FROM fact_landuse_transitions f
+        JOIN dim_scenario s ON f.scenario_id = s.scenario_id
+        JOIN dim_landuse fl ON f.from_landuse_id = fl.landuse_id
+        JOIN dim_landuse tl ON f.to_landuse_id = tl.landuse_id
+        JOIN dim_geography g ON f.geography_id = g.geography_id
+        WHERE fl.landuse_name = 'Forest' 
+          AND tl.landuse_name != 'Forest'
+          AND f.transition_type = 'change'
+        GROUP BY tl.landuse_name, s.rcp_scenario
+        ORDER BY total_acres DESC
+        """
+        
+        # Query 2: Forest gain by source
+        forest_gain_query = """
+        SELECT 
+            fl.landuse_name as from_landuse,
+            s.rcp_scenario,
+            SUM(f.acres) as total_acres,
+            AVG(f.acres) as avg_acres_per_county,
+            COUNT(DISTINCT g.state_code) as states_affected
+        FROM fact_landuse_transitions f
+        JOIN dim_scenario s ON f.scenario_id = s.scenario_id
+        JOIN dim_landuse fl ON f.from_landuse_id = fl.landuse_id
+        JOIN dim_landuse tl ON f.to_landuse_id = tl.landuse_id
+        JOIN dim_geography g ON f.geography_id = g.geography_id
+        WHERE tl.landuse_name = 'Forest' 
+          AND fl.landuse_name != 'Forest'
+          AND f.transition_type = 'change'
+        GROUP BY fl.landuse_name, s.rcp_scenario
+        ORDER BY total_acres DESC
+        """
+        
+        # Query 3: State-level forest changes
+        state_forest_query = """
+        WITH forest_changes AS (
+            SELECT 
+                g.state_code,
+                CASE 
+                    WHEN fl.landuse_name = 'Forest' AND tl.landuse_name != 'Forest' THEN 'loss'
+                    WHEN fl.landuse_name != 'Forest' AND tl.landuse_name = 'Forest' THEN 'gain'
+                END as change_type,
+                SUM(f.acres) as total_acres
+            FROM fact_landuse_transitions f
+            JOIN dim_geography g ON f.geography_id = g.geography_id
+            JOIN dim_landuse fl ON f.from_landuse_id = fl.landuse_id
+            JOIN dim_landuse tl ON f.to_landuse_id = tl.landuse_id
+            WHERE f.transition_type = 'change'
+              AND (fl.landuse_name = 'Forest' OR tl.landuse_name = 'Forest')
+            GROUP BY g.state_code, change_type
+        )
+        SELECT 
+            state_code,
+            SUM(CASE WHEN change_type = 'loss' THEN total_acres ELSE 0 END) as forest_loss,
+            SUM(CASE WHEN change_type = 'gain' THEN total_acres ELSE 0 END) as forest_gain,
+            SUM(CASE WHEN change_type = 'gain' THEN total_acres ELSE -total_acres END) as net_change
+        FROM forest_changes
+        GROUP BY state_code
+        ORDER BY net_change DESC
+        """
+        
+        df_loss = conn.execute(forest_loss_query).df()
+        df_gain = conn.execute(forest_gain_query).df()
+        df_states = conn.execute(state_forest_query).df()
+        
+        # Add state names and abbreviations
+        df_states['state_abbr'] = df_states['state_code'].map(STATE_ABBREV)
+        df_states['state_name'] = df_states['state_code'].map(STATE_NAMES)
+        
+        conn.close()
+        return df_loss, df_gain, df_states, None
+    except Exception as e:
+        if conn:
+            conn.close()
+        return None, None, None, f"Error loading forest data: {e}"
+
+@st.cache_data
 def load_climate_comparison_data():
     """Load data for climate scenario comparison"""
     conn, error = get_database_connection()
@@ -256,6 +347,189 @@ def create_urbanization_chart(df):
         xaxis_title="Acres Urbanized (millions)",
         xaxis_tickformat='.1s',  # Format x-axis to show millions
         font=dict(size=12)
+    )
+    
+    return fig
+
+def create_forest_flow_chart(df_loss, df_gain):
+    """Create a combined flow chart showing forest gains and losses"""
+    if df_loss is None or df_gain is None:
+        return None
+    
+    # Prepare data for waterfall chart
+    fig = go.Figure()
+    
+    # Group by land use type for cleaner visualization
+    loss_by_type = df_loss.groupby('to_landuse')['total_acres'].sum().sort_values(ascending=False)
+    gain_by_type = df_gain.groupby('from_landuse')['total_acres'].sum().sort_values(ascending=False)
+    
+    # Create waterfall chart
+    x_labels = []
+    y_values = []
+    colors = []
+    
+    # Add losses (negative values)
+    for landuse, acres in loss_by_type.items():
+        x_labels.append(f"To {landuse}")
+        y_values.append(-acres)
+        colors.append('rgba(255, 0, 0, 0.6)')  # Red for losses
+    
+    # Add gains (positive values)
+    for landuse, acres in gain_by_type.items():
+        x_labels.append(f"From {landuse}")
+        y_values.append(acres)
+        colors.append('rgba(0, 128, 0, 0.6)')  # Green for gains
+    
+    # Create bar chart
+    fig.add_trace(go.Bar(
+        x=x_labels,
+        y=y_values,
+        marker_color=colors,
+        text=[f"{abs(v/1e6):.1f}M" for v in y_values],
+        textposition='outside',
+        hovertemplate='%{x}<br>%{y:,.0f} acres<extra></extra>'
+    ))
+    
+    # Calculate net change
+    total_loss = sum(v for v in y_values if v < 0)
+    total_gain = sum(v for v in y_values if v > 0)
+    net_change = total_gain + total_loss
+    
+    # Update layout
+    fig.update_layout(
+        title={
+            'text': f"Forest Transitions: Net Change = {net_change/1e6:+.1f}M acres",
+            'x': 0.5,
+            'xanchor': 'center'
+        },
+        xaxis_title="Transition Type",
+        yaxis_title="Acres",
+        yaxis_tickformat='.2s',
+        height=500,
+        showlegend=False,
+        yaxis_zeroline=True,
+        yaxis_zerolinewidth=2,
+        yaxis_zerolinecolor='black'
+    )
+    
+    return fig
+
+def create_forest_state_map(df_states):
+    """Create choropleth map showing net forest change by state"""
+    if df_states is None or df_states.empty:
+        return None
+    
+    # Create choropleth with diverging color scale
+    fig = px.choropleth(
+        df_states,
+        locations='state_abbr',
+        locationmode='USA-states',
+        color='net_change',
+        color_continuous_scale='RdYlGn',  # Red-Yellow-Green for loss-neutral-gain
+        color_continuous_midpoint=0,
+        hover_name='state_name',
+        hover_data={
+            'state_abbr': False,
+            'forest_loss': ':,.0f',
+            'forest_gain': ':,.0f',
+            'net_change': ':,.0f',
+            'state_name': False
+        },
+        labels={
+            'net_change': 'Net Forest Change (acres)',
+            'forest_loss': 'Forest Loss',
+            'forest_gain': 'Forest Gain'
+        },
+        title='Net Forest Change by State (All Scenarios Combined)'
+    )
+    
+    # Update layout
+    fig.update_layout(
+        geo=dict(
+            scope='usa',
+            projection_type='albers usa',
+            showlakes=True,
+            lakecolor='rgba(255, 255, 255, 0.3)'
+        ),
+        height=600,
+        margin={"r":0,"t":40,"l":0,"b":0},
+        coloraxis_colorbar=dict(
+            title="Net Change<br>(acres)",
+            thicknessmode="pixels",
+            thickness=15,
+            lenmode="pixels",
+            len=300,
+            yanchor="middle",
+            y=0.5
+        )
+    )
+    
+    return fig
+
+def create_forest_scenario_comparison(df_loss, df_gain):
+    """Create comparison of forest changes across climate scenarios"""
+    if df_loss is None or df_gain is None:
+        return None
+    
+    # Aggregate by scenario
+    loss_by_scenario = df_loss.groupby('rcp_scenario')['total_acres'].sum()
+    gain_by_scenario = df_gain.groupby('rcp_scenario')['total_acres'].sum()
+    
+    # Create grouped bar chart
+    fig = go.Figure()
+    
+    scenarios = ['rcp45', 'rcp85']
+    
+    fig.add_trace(go.Bar(
+        name='Forest Loss',
+        x=scenarios,
+        y=[-loss_by_scenario.get(s, 0) for s in scenarios],
+        marker_color='rgba(255, 99, 71, 0.7)',
+        text=[f"{abs(loss_by_scenario.get(s, 0)/1e6):.1f}M" for s in scenarios],
+        textposition='outside'
+    ))
+    
+    fig.add_trace(go.Bar(
+        name='Forest Gain',
+        x=scenarios,
+        y=[gain_by_scenario.get(s, 0) for s in scenarios],
+        marker_color='rgba(34, 139, 34, 0.7)',
+        text=[f"{gain_by_scenario.get(s, 0)/1e6:.1f}M" for s in scenarios],
+        textposition='outside'
+    ))
+    
+    # Calculate net change line
+    net_changes = [gain_by_scenario.get(s, 0) - loss_by_scenario.get(s, 0) for s in scenarios]
+    
+    fig.add_trace(go.Scatter(
+        name='Net Change',
+        x=scenarios,
+        y=net_changes,
+        mode='lines+markers+text',
+        line=dict(color='black', width=3),
+        marker=dict(size=10),
+        text=[f"{v/1e6:+.1f}M" for v in net_changes],
+        textposition='top center',
+        yaxis='y2'
+    ))
+    
+    # Update layout with dual y-axes
+    fig.update_layout(
+        title='Forest Changes by Climate Scenario',
+        xaxis_title='Climate Scenario',
+        yaxis_title='Forest Loss/Gain (acres)',
+        yaxis2=dict(
+            title='Net Change (acres)',
+            overlaying='y',
+            side='right',
+            showgrid=False
+        ),
+        yaxis_tickformat='.2s',
+        yaxis2_tickformat='.2s',
+        height=500,
+        hovermode='x unified',
+        barmode='relative',
+        legend=dict(x=0.02, y=0.98, xanchor='left', yanchor='top')
     )
     
     return fig
@@ -976,9 +1250,10 @@ def main():
     st.markdown("---")
     
     # Create tabs for different analysis areas
-    tab1, tab2, tab3, tab4, tab5 = st.tabs([
+    tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
         "🌾 Agricultural Analysis", 
         "🏙️ Urbanization Trends", 
+        "🌲 Forest Analysis",
         "🌡️ Climate Scenarios", 
         "📈 Time Series",
         "🎨 Enhanced Visualizations"
@@ -1069,6 +1344,187 @@ def main():
             st.info("📊 No urbanization data available")
     
     with tab3:
+        st.markdown("### 🌲 Forest Analysis")
+        st.markdown("**Comprehensive analysis of forest gains, losses, and transitions**")
+        
+        # Load forest data
+        df_loss, df_gain, df_states, forest_error = load_forest_analysis_data()
+        
+        if forest_error:
+            st.error(f"❌ {forest_error}")
+        else:
+            # Create sub-tabs for forest analysis
+            forest_tab1, forest_tab2, forest_tab3 = st.tabs([
+                "📊 Overview",
+                "🗺️ Geographic Distribution", 
+                "🌡️ Climate Impact"
+            ])
+            
+            with forest_tab1:
+                st.markdown("#### Forest Transition Overview")
+                
+                if df_loss is not None and df_gain is not None:
+                    # Show flow chart
+                    fig = create_forest_flow_chart(df_loss, df_gain)
+                    if fig:
+                        st.plotly_chart(fig, use_container_width=True)
+                    
+                    # Key metrics
+                    col1, col2, col3 = st.columns(3)
+                    
+                    with col1:
+                        total_loss = df_loss['total_acres'].sum()
+                        st.metric(
+                            "🔻 Total Forest Loss",
+                            f"{total_loss/1e6:.1f}M acres",
+                            help="Total forest converted to other land uses"
+                        )
+                    
+                    with col2:
+                        total_gain = df_gain['total_acres'].sum()
+                        st.metric(
+                            "🔺 Total Forest Gain",
+                            f"{total_gain/1e6:.1f}M acres",
+                            help="Total land converted to forest"
+                        )
+                    
+                    with col3:
+                        net_change = total_gain - total_loss
+                        st.metric(
+                            "📊 Net Change",
+                            f"{net_change/1e6:+.1f}M acres",
+                            delta=f"{(net_change/total_loss)*100:+.1f}%",
+                            help="Net forest change across all scenarios"
+                        )
+                    
+                    # Detailed breakdowns
+                    col1, col2 = st.columns(2)
+                    
+                    with col1:
+                        st.markdown("##### 🔻 Where Forests Are Lost To")
+                        loss_summary = df_loss.groupby('to_landuse')['total_acres'].sum().sort_values(ascending=False)
+                        loss_df = pd.DataFrame({
+                            'Land Use': loss_summary.index,
+                            'Acres Lost': loss_summary.apply(lambda x: f"{x/1e6:.2f}M"),
+                            'Percentage': loss_summary.apply(lambda x: f"{(x/loss_summary.sum())*100:.1f}%")
+                        })
+                        st.dataframe(loss_df, use_container_width=True, hide_index=True)
+                    
+                    with col2:
+                        st.markdown("##### 🔺 Where Forest Gains Come From")
+                        gain_summary = df_gain.groupby('from_landuse')['total_acres'].sum().sort_values(ascending=False)
+                        gain_df = pd.DataFrame({
+                            'Land Use': gain_summary.index,
+                            'Acres Gained': gain_summary.apply(lambda x: f"{x/1e6:.2f}M"),
+                            'Percentage': gain_summary.apply(lambda x: f"{(x/gain_summary.sum())*100:.1f}%")
+                        })
+                        st.dataframe(gain_df, use_container_width=True, hide_index=True)
+                else:
+                    st.info("No forest transition data available")
+            
+            with forest_tab2:
+                st.markdown("#### Geographic Distribution of Forest Changes")
+                
+                if df_states is not None and not df_states.empty:
+                    # Show map
+                    fig = create_forest_state_map(df_states)
+                    if fig:
+                        st.plotly_chart(fig, use_container_width=True)
+                    
+                    # State rankings
+                    col1, col2 = st.columns(2)
+                    
+                    with col1:
+                        st.markdown("##### 🌲 Top States - Net Forest Gain")
+                        top_gain_states = df_states.nlargest(10, 'net_change')[['state_name', 'net_change', 'forest_gain']]
+                        top_gain_states['net_change'] = top_gain_states['net_change'].apply(lambda x: f"{x/1e6:+.2f}M")
+                        top_gain_states['forest_gain'] = top_gain_states['forest_gain'].apply(lambda x: f"{x/1e6:.2f}M")
+                        st.dataframe(
+                            top_gain_states.rename(columns={
+                                'state_name': 'State',
+                                'net_change': 'Net Change',
+                                'forest_gain': 'Total Gain'
+                            }),
+                            use_container_width=True,
+                            hide_index=True
+                        )
+                    
+                    with col2:
+                        st.markdown("##### 🔥 Top States - Net Forest Loss")
+                        top_loss_states = df_states.nsmallest(10, 'net_change')[['state_name', 'net_change', 'forest_loss']]
+                        top_loss_states['net_change'] = top_loss_states['net_change'].apply(lambda x: f"{x/1e6:+.2f}M")
+                        top_loss_states['forest_loss'] = top_loss_states['forest_loss'].apply(lambda x: f"{x/1e6:.2f}M")
+                        st.dataframe(
+                            top_loss_states.rename(columns={
+                                'state_name': 'State',
+                                'net_change': 'Net Change',
+                                'forest_loss': 'Total Loss'
+                            }),
+                            use_container_width=True,
+                            hide_index=True
+                        )
+                    
+                    # Summary insights
+                    st.markdown("##### 🔍 Geographic Insights")
+                    gaining_states = len(df_states[df_states['net_change'] > 0])
+                    losing_states = len(df_states[df_states['net_change'] < 0])
+                    
+                    st.info(f"""
+                    **Key Findings:**
+                    - {gaining_states} states show net forest gain
+                    - {losing_states} states show net forest loss
+                    - Regional patterns suggest climate and development pressures vary significantly by location
+                    """)
+                else:
+                    st.info("No geographic data available")
+            
+            with forest_tab3:
+                st.markdown("#### Climate Scenario Impact on Forests")
+                
+                if df_loss is not None and df_gain is not None:
+                    # Show scenario comparison
+                    fig = create_forest_scenario_comparison(df_loss, df_gain)
+                    if fig:
+                        st.plotly_chart(fig, use_container_width=True)
+                    
+                    # Scenario details
+                    st.markdown("##### 📊 Scenario Breakdown")
+                    
+                    # Create summary by scenario
+                    scenario_summary = []
+                    for scenario in ['rcp45', 'rcp85']:
+                        loss_acres = df_loss[df_loss['rcp_scenario'] == scenario]['total_acres'].sum()
+                        gain_acres = df_gain[df_gain['rcp_scenario'] == scenario]['total_acres'].sum()
+                        net = gain_acres - loss_acres
+                        
+                        scenario_summary.append({
+                            'Scenario': scenario.upper(),
+                            'Forest Loss': f"{loss_acres/1e6:.2f}M acres",
+                            'Forest Gain': f"{gain_acres/1e6:.2f}M acres",
+                            'Net Change': f"{net/1e6:+.2f}M acres",
+                            'Net %': f"{(net/loss_acres)*100:+.1f}%"
+                        })
+                    
+                    summary_df = pd.DataFrame(scenario_summary)
+                    st.dataframe(summary_df, use_container_width=True, hide_index=True)
+                    
+                    # Climate insights
+                    st.markdown("##### 🌡️ Climate Impact Analysis")
+                    
+                    rcp45_net = summary_df[summary_df['Scenario'] == 'RCP45']['Net Change'].iloc[0]
+                    rcp85_net = summary_df[summary_df['Scenario'] == 'RCP85']['Net Change'].iloc[0]
+                    
+                    st.info(f"""
+                    **Climate Scenario Insights:**
+                    - RCP4.5 (moderate emissions): {rcp45_net} net forest change
+                    - RCP8.5 (high emissions): {rcp85_net} net forest change
+                    - Higher emission scenarios typically show different forest transition patterns
+                    - Climate impacts interact with socioeconomic factors (SSP scenarios) to drive land use change
+                    """)
+                else:
+                    st.info("No climate scenario data available")
+    
+    with tab4:
         st.markdown("### Climate Scenario Comparison")
         st.markdown("**Differences in land use patterns between climate pathways**")
         
@@ -1115,7 +1571,7 @@ def main():
         else:
             st.info("📊 No climate comparison data available")
     
-    with tab4:
+    with tab5:
         st.markdown("### Time Series Analysis")
         st.markdown("**How land use transitions change over time periods**")
         
@@ -1162,7 +1618,7 @@ def main():
         else:
             st.info("📊 No time series data available")
     
-    with tab5:
+    with tab6:
         show_enhanced_visualizations()
     
     # Footer
