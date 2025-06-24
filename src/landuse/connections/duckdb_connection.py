@@ -24,9 +24,32 @@ except ImportError:
     HAS_STREAMLIT = False
 import duckdb
 import pandas as pd
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List
 import os
 from pathlib import Path
+from pydantic import BaseModel, Field
+
+from ..models import QueryResult, SQLQuery
+
+
+class ConnectionConfig(BaseModel):
+    """Configuration for DuckDB connection"""
+    database: str = Field(
+        default="data/processed/landuse_analytics.duckdb",
+        description="Path to DuckDB file or ':memory:'"
+    )
+    read_only: bool = Field(
+        default=True,
+        description="Open in read-only mode"
+    )
+    memory_limit: Optional[str] = Field(
+        default=None,
+        description="Memory limit for DuckDB"
+    )
+    threads: Optional[int] = Field(
+        default=None,
+        description="Number of threads for DuckDB"
+    )
 
 
 class DuckDBConnection(BaseConnection[duckdb.DuckDBPyConnection]):
@@ -108,6 +131,50 @@ class DuckDBConnection(BaseConnection[duckdb.DuckDBPyConnection]):
             return result.df()
         
         return _query(query, **kwargs)
+    
+    def query_with_result(self, query: str, ttl: Optional[int] = 3600) -> QueryResult:
+        """
+        Execute a query and return a QueryResult object with metadata.
+        
+        Args:
+            query: SQL query to execute
+            ttl: Time-to-live for cached results in seconds
+            
+        Returns:
+            QueryResult: Query results with metadata
+        """
+        import time
+        
+        try:
+            # Validate SQL query
+            sql_obj = SQLQuery(sql=query)
+            
+            # Execute query with timing
+            start_time = time.time()
+            df = self.query(sql_obj.sql, ttl=ttl)
+            execution_time = time.time() - start_time
+            
+            # Create QueryResult
+            return QueryResult(
+                success=True,
+                data=df,
+                execution_time=execution_time,
+                query=sql_obj.sql
+            )
+        except ValueError as e:
+            # SQL validation error
+            return QueryResult(
+                success=False,
+                error=f"SQL validation error: {str(e)}",
+                query=query
+            )
+        except Exception as e:
+            # Other errors
+            return QueryResult(
+                success=False,
+                error=str(e),
+                query=query
+            )
     
     def execute(self, query: str, **kwargs) -> None:
         """

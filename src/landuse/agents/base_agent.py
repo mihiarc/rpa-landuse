@@ -21,6 +21,12 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.markdown import Markdown
 
+from ..models import (
+    AgentConfig, QueryInput, SQLQuery, QueryResult,
+    ExecuteQueryInput, SchemaInfoInput, QueryExamplesInput,
+    StateCodeInput, ToolInput
+)
+
 from .constants import (
     SCHEMA_INFO_TEMPLATE, DB_CONFIG, MODEL_CONFIG,
     QUERY_EXAMPLES, DEFAULT_ASSUMPTIONS, RESPONSE_SECTIONS
@@ -44,24 +50,40 @@ class BaseLanduseAgent(ABC):
         model_name: Optional[str] = None,
         temperature: Optional[float] = None,
         max_tokens: Optional[int] = None,
-        verbose: bool = False
+        verbose: bool = False,
+        config: Optional[AgentConfig] = None
     ):
-        """Initialize the base agent"""
+        """Initialize the base agent with Pydantic configuration"""
         self.console = Console()
         self.verbose = verbose
         
         # Setup logging
         self._setup_logging()
         
-        # Database configuration
-        self.db_path = Path(db_path or os.getenv('LANDUSE_DB_PATH', DB_CONFIG['default_path']))
-        if not self.db_path.exists():
-            raise FileNotFoundError(f"Database not found: {self.db_path}")
+        # Use provided config or create from parameters
+        if config:
+            self.config = config
+        else:
+            # Build config from individual parameters or environment
+            config_dict = {
+                'db_path': Path(db_path or os.getenv('LANDUSE_DB_PATH', DB_CONFIG['default_path'])),
+                'model_name': model_name or os.getenv('LANDUSE_MODEL', MODEL_CONFIG['default_openai_model']),
+                'temperature': temperature or float(os.getenv('TEMPERATURE', str(MODEL_CONFIG['default_temperature']))),
+                'max_tokens': max_tokens or int(os.getenv('MAX_TOKENS', str(MODEL_CONFIG['default_max_tokens']))),
+                'max_iterations': int(os.getenv('LANDUSE_MAX_ITERATIONS', '5')),
+                'max_execution_time': int(os.getenv('LANDUSE_MAX_EXECUTION_TIME', '120')),
+                'max_query_rows': int(os.getenv('LANDUSE_MAX_QUERY_ROWS', '1000')),
+                'default_display_limit': int(os.getenv('LANDUSE_DEFAULT_DISPLAY_LIMIT', '50')),
+                'rate_limit_calls': int(os.getenv('LANDUSE_RATE_LIMIT_CALLS', '60')),
+                'rate_limit_window': int(os.getenv('LANDUSE_RATE_LIMIT_WINDOW', '60'))
+            }
+            self.config = AgentConfig(**config_dict)
         
-        # Model configuration
-        self.model_name = model_name or os.getenv('LANDUSE_MODEL', MODEL_CONFIG['default_openai_model'])
-        self.temperature = temperature or float(os.getenv('TEMPERATURE', str(MODEL_CONFIG['default_temperature'])))
-        self.max_tokens = max_tokens or int(os.getenv('MAX_TOKENS', str(MODEL_CONFIG['default_max_tokens'])))
+        # Extract commonly used values
+        self.db_path = self.config.db_path
+        self.model_name = self.config.model_name
+        self.temperature = self.config.temperature
+        self.max_tokens = self.config.max_tokens
         
         # Initialize LLM
         self._init_llm()
@@ -194,10 +216,14 @@ class BaseLanduseAgent(ABC):
         return None
     
     def _execute_landuse_query(self, sql_query: str) -> str:
-        """Execute SQL query on the landuse database"""
+        """Execute SQL query on the landuse database with validation"""
         try:
-            # Clean the SQL query
-            sql_query = clean_sql_query(sql_query)
+            # Validate input using Pydantic
+            input_data = ExecuteQueryInput(sql_query=sql_query)
+            
+            # Clean and validate SQL
+            query_obj = SQLQuery(sql=clean_sql_query(input_data.sql_query))
+            sql_query = query_obj.sql
             
             # Validate query if needed (hook for subclasses)
             validation_result = self._validate_query(sql_query)
@@ -211,26 +237,52 @@ class BaseLanduseAgent(ABC):
             if sql_query.upper().startswith('SELECT') and 'LIMIT' not in sql_query.upper():
                 # Remove trailing semicolon if present
                 query_trimmed = sql_query.rstrip().rstrip(';').rstrip()
-                sql_query = f"{query_trimmed} LIMIT {DB_CONFIG['max_query_limit']}"
+                sql_query = f"{query_trimmed} LIMIT {self.config.max_query_rows}"
             
             # Execute query
+            import time
+            start_time = time.time()
             result = conn.execute(sql_query)
+            execution_time = time.time() - start_time
+            
             if result is None:
                 conn.close()
-                return f"❌ Query returned no result object.\nSQL: {sql_query}"
+                query_result = QueryResult(
+                    success=False,
+                    error="Query returned no result object",
+                    query=sql_query
+                )
+                return f"❌ {query_result.error}\nSQL: {sql_query}"
             
             df = result.df()
             conn.close()
             
+            # Create QueryResult object
+            query_result = QueryResult(
+                success=True,
+                data=df,
+                execution_time=execution_time,
+                query=sql_query
+            )
+            
             # Format results
             return format_query_results(
                 df, sql_query,
-                max_display_rows=DB_CONFIG['default_display_limit']
+                max_display_rows=self.config.default_display_limit
             )
             
+        except ValueError as e:
+            # Pydantic validation error
+            self.logger.error(f"Validation error: {e}")
+            return f"❌ Invalid query: {str(e)}"
         except Exception as e:
             self.logger.error(f"Error executing query: {e}")
-            return f"❌ Error executing query: {str(e)}\nSQL: {sql_query}"
+            query_result = QueryResult(
+                success=False,
+                error=str(e),
+                query=sql_query if 'sql_query' in locals() else 'Unknown'
+            )
+            return f"❌ Error executing query: {query_result.error}\nSQL: {query_result.query}"
     
     def _validate_query(self, sql_query: str) -> Optional[str]:
         """Hook for subclasses to validate queries before execution"""
@@ -241,15 +293,23 @@ class BaseLanduseAgent(ABC):
         return self.schema_info
     
     def _suggest_query_examples(self, category: str = "general") -> str:
-        """Suggest example queries for common patterns"""
-        if category.lower() in QUERY_EXAMPLES:
-            return f"💡 **Example Query - {category.title()}:**\n```sql\n{QUERY_EXAMPLES[category.lower()]}\n```"
-        
-        result = "💡 **Common Query Examples:**\n\n"
-        for name, sql in QUERY_EXAMPLES.items():
-            result += f"**{name.replace('_', ' ').title()}:**\n```sql\n{sql}\n```\n\n"
-        
-        return result
+        """Suggest example queries for common patterns with validation"""
+        try:
+            # Validate input
+            input_data = QueryExamplesInput(category=category if category else "general")
+            category = input_data.category.lower()
+            
+            if category in QUERY_EXAMPLES:
+                return f"💡 **Example Query - {category.title()}:**\n```sql\n{QUERY_EXAMPLES[category]}\n```"
+            
+            result = "💡 **Common Query Examples:**\n\n"
+            for name, sql in QUERY_EXAMPLES.items():
+                result += f"**{name.replace('_', ' ').title()}:**\n```sql\n{sql}\n```\n\n"
+            
+            return result
+        except Exception as e:
+            self.logger.error(f"Error getting examples: {e}")
+            return f"❌ Error getting examples: {str(e)}"
     
     @abstractmethod
     def _get_agent_prompt(self) -> str:
@@ -282,25 +342,28 @@ class BaseLanduseAgent(ABC):
         return agent_executor
     
     def query(self, natural_language_query: str) -> str:
-        """Process a natural language query"""
+        """Process a natural language query with validation"""
         try:
+            # Validate input
+            query_input = QueryInput(query=natural_language_query)
+            
             # Pre-query hook
-            pre_result = self._pre_query_hook(natural_language_query)
+            pre_result = self._pre_query_hook(query_input.query)
             if pre_result:
                 return pre_result
             
             # Log query start
-            self.logger.info(f"Processing query: {natural_language_query[:100]}...")
+            self.logger.info(f"Processing query: {query_input.query[:100]}...")
             
             # Process query
             response = self.agent.invoke({
-                "input": natural_language_query,
+                "input": query_input.query,
                 "schema_info": self.schema_info
             })
             
             # Check if we hit iteration limit
-            if response.get("iterations", 0) >= MODEL_CONFIG['max_iterations']:
-                self.logger.warning(f"Query hit iteration limit ({MODEL_CONFIG['max_iterations']})")
+            if response.get("iterations", 0) >= self.config.max_iterations:
+                self.logger.warning(f"Query hit iteration limit ({self.config.max_iterations})")
             
             # Post-query hook
             output = response.get("output", "No response generated")

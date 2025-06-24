@@ -19,6 +19,10 @@ from langchain.prompts import PromptTemplate
 from .base_agent import BaseLanduseAgent
 from .constants import STATE_NAMES, SCHEMA_INFO_TEMPLATE, DEFAULT_ASSUMPTIONS
 from .formatting import clean_sql_query, format_query_results
+from ..models import (
+    AgentConfig, StateCodeInput, QueryExamplesInput,
+    AnalysisRequest, AnalysisResult
+)
 
 # Load environment variables from config/.env
 load_dotenv("config/.env")
@@ -186,31 +190,35 @@ ORDER BY t.start_year, total_acres DESC;
 """
     
     def _get_state_code(self, state_name: str) -> str:
-        """Get state code for a given state name"""
-        # Import STATE_NAMES from constants
-        from .constants import STATE_NAMES
-        
-        # Create reverse mapping
-        name_to_code = {v.lower(): k for k, v in STATE_NAMES.items()}
-        
-        # Clean the input
-        state_clean = state_name.strip().lower()
-        
-        # Check exact match
-        if state_clean in name_to_code:
-            code = name_to_code[state_clean]
-            return f"🗺️ **State Code Found**\n\n{STATE_NAMES[code]} has state_code = '{code}' in the database.\n\nExample query:\n```sql\nSELECT COUNT(*) FROM dim_geography WHERE state_code = '{code}'\n```"
-        
-        # Check partial matches
-        matches = [(code, name) for code, name in STATE_NAMES.items() if state_clean in name.lower()]
-        if matches:
-            result = "🗺️ **Possible State Matches:**\n\n"
-            for code, name in matches[:5]:  # Show max 5 matches
-                result += f"- {name}: state_code = '{code}'\n"
-            return result
-        
-        # If no match found, show all state codes
-        return """🗺️ **State Code Not Found**
+        """Get state code for a given state name with validation"""
+        try:
+            # Validate input
+            input_data = StateCodeInput(state_name=state_name)
+            
+            # Import STATE_NAMES from constants
+            from .constants import STATE_NAMES
+            
+            # Create reverse mapping
+            name_to_code = {v.lower(): k for k, v in STATE_NAMES.items()}
+            
+            # Clean the input
+            state_clean = input_data.state_name.strip().lower()
+            
+            # Check exact match
+            if state_clean in name_to_code:
+                code = name_to_code[state_clean]
+                return f"🗺️ **State Code Found**\n\n{STATE_NAMES[code]} has state_code = '{code}' in the database.\n\nExample query:\n```sql\nSELECT COUNT(*) FROM dim_geography WHERE state_code = '{code}'\n```"
+            
+            # Check partial matches
+            matches = [(code, name) for code, name in STATE_NAMES.items() if state_clean in name.lower()]
+            if matches:
+                result = "🗺️ **Possible State Matches:**\n\n"
+                for code, name in matches[:5]:  # Show max 5 matches
+                    result += f"- {name}: state_code = '{code}'\n"
+                return result
+            
+            # If no match found, show all state codes
+            return """🗺️ **State Code Not Found**
         
 Common state codes in the database:
 - Alabama: '01'
@@ -222,6 +230,9 @@ Common state codes in the database:
 
 Note: Use state_code in WHERE clauses as a string (with quotes).
 """
+        except Exception as e:
+            self.logger.error(f"Error getting state code: {e}")
+            return f"❌ Error getting state code: {str(e)}"
     
     def _get_default_assumptions(self, query: str = "") -> str:
         """Get default assumptions used in analysis"""
