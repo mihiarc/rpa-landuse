@@ -311,6 +311,13 @@ def create_pages():
         icon=":material/search:"
     )
     
+    # Data extraction page
+    extraction_page = st.Page(
+        "pages/extraction.py",
+        title="Data Extraction",
+        icon=":material/download:"
+    )
+    
     # Settings page
     settings_page = st.Page(
         "pages/settings.py",
@@ -320,7 +327,7 @@ def create_pages():
     
     return {
         "Main": [home_page],
-        "Analysis": [chat_page, analytics_page, explorer_page], 
+        "Analysis": [chat_page, analytics_page, explorer_page, extraction_page], 
         "Configuration": [settings_page]
     }
 
