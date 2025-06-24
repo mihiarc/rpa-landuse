@@ -34,11 +34,17 @@ uv run streamlit run streamlit_app.py
 
 #### Command Line Agents
 ```bash
-# Primary: Landuse Natural Language Agent (command line)
+# Primary: LangGraph-based Modern Agent (Recommended)
+uv run python -m landuse.agents.langgraph_agent
+
+# Traditional LangChain Agent (Legacy)
 uv run python -m landuse.agents.landuse_natural_language_agent
 
 # Or use the shortcut
 uv run landuse-agent
+
+# Compare agent performance and capabilities
+uv run python scripts/compare_agents.py
 
 # Test with sample queries
 uv run python -m landuse.agents.test_landuse_agent
@@ -105,12 +111,21 @@ duckdb data/processed/landuse_analytics.duckdb
 - Mobile-responsive design with modern UI patterns
 - Custom DuckDB connection using st.connection pattern
 
-**Landuse Natural Language Agent** (`src/landuse/agents/landuse_natural_language_agent.py`):
+**LangGraph Natural Language Agent** (`src/landuse/agents/langgraph_agent.py`) - **RECOMMENDED**:
+- Modern graph-based agent architecture using LangGraph
+- Enhanced state management with conversation memory
+- Built-in checkpointing for conversation continuity
+- Streaming support for real-time responses
+- Advanced error handling and recovery
+- Tool composition and orchestration
 - Uses Claude 3.5 Sonnet by default (configurable via LANDUSE_MODEL env var)
-- Built with LangChain REACT agent framework
 - Specialized for land use analysis with business context
-- Automatic summary statistics and insights
 - Beautiful Rich terminal UI with markdown support
+
+**Traditional LangChain Agent** (`src/landuse/agents/landuse_natural_language_agent.py`) - **LEGACY**:
+- Built with LangChain REACT agent framework
+- Linear execution with basic tool calling
+- Limited state management
 - Schema-aware query generation
 
 **Data Converter** (`src/landuse/converters/convert_to_duckdb.py`):
@@ -267,10 +282,12 @@ uv run python -m pytest tests/integration/   # Integration tests
 ## Dependencies
 
 Key packages (managed via `uv`):
-- **Core**: langchain, langchain-anthropic, langchain-community
+- **Core**: langchain, langchain-anthropic, langchain-community, langgraph
+- **Modern Agent Framework**: langgraph (for state-based agents)
 - **Data**: pandas, duckdb (0.11.0+), pyarrow, ijson
-- **Web UI**: streamlit (1.40.0+), plotly
+- **Web UI**: streamlit (1.40.0+), plotly  
 - **Terminal UI**: rich
+- **Retry Logic**: tenacity
 - **Validation**: pydantic v2
 - **Testing**: pytest, pytest-cov, pytest-asyncio
 - **Docs**: mkdocs, mkdocs-material
@@ -294,3 +311,20 @@ Key packages (managed via `uv`):
 - Optimized star schema design for 5.4M+ records
 - Added specialized views for common query patterns
 - Improved query performance with strategic indexing
+
+### Modern Agent Architecture (LangGraph Migration)
+- **LangGraph Implementation**: New state-based agent using LangGraph for enhanced workflow control
+- **Conversation Memory**: Built-in checkpointing for conversation continuity across sessions
+- **Streaming Support**: Real-time response streaming for better user experience
+- **Enhanced State Management**: TypedDict-based state with rich context tracking
+- **Tool Orchestration**: Improved tool composition and execution flow
+- **Error Recovery**: Advanced error handling with graceful fallbacks
+- **Performance Improvements**: Graph-based execution with optimized iteration patterns
+- **Production Ready**: Memory management, thread safety, and scalability features
+
+### Modern Infrastructure Enhancements
+- **Pydantic v2 Models**: Type-safe data structures with validation for all components
+- **DuckDB COPY Optimization**: 5-10x performance improvement using bulk loading with Parquet
+- **Retry Logic with Tenacity**: Robust error handling with exponential backoff strategies
+- **CI/CD Pipeline**: Comprehensive GitHub Actions for testing, security, and releases
+- **Streamlit Fragments**: Performance optimization with @st.fragment decorators
