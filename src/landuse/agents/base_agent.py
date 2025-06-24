@@ -26,6 +26,7 @@ from ..models import (
     ExecuteQueryInput, SchemaInfoInput, QueryExamplesInput,
     StateCodeInput, ToolInput
 )
+from ..utils.retry_decorators import database_retry, api_retry
 
 from .constants import (
     SCHEMA_INFO_TEMPLATE, DB_CONFIG, MODEL_CONFIG,
@@ -215,8 +216,10 @@ class BaseLanduseAgent(ABC):
         """Hook for subclasses to add additional tools"""
         return None
     
+    @database_retry(max_attempts=3, min_wait=1.0, max_wait=10.0, 
+                   exceptions=(ConnectionError, TimeoutError, OSError))
     def _execute_landuse_query(self, sql_query: str) -> str:
-        """Execute SQL query on the landuse database with validation"""
+        """Execute SQL query on the landuse database with validation and retry logic"""
         try:
             # Validate input using Pydantic
             input_data = ExecuteQueryInput(sql_query=sql_query)

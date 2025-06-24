@@ -19,6 +19,7 @@ from contextlib import contextmanager
 
 from ..models import ConversionConfig, ConversionStats, ProcessedTransition
 from ..converter_models import ConversionMode
+from ..utils.retry_decorators import database_retry, file_retry, execute_with_retry
 
 console = Console()
 
@@ -54,13 +55,26 @@ class DuckDBBulkLoader:
     
     @contextmanager
     def connection(self):
-        """Context manager for DuckDB connections"""
+        """Context manager for DuckDB connections with retry logic"""
         try:
-            self.conn = duckdb.connect(str(self.db_path))
+            # Use retry logic for database connections
+            self.conn = execute_with_retry(
+                duckdb.connect,
+                operation_name=f"DuckDB connection to {self.db_path}",
+                max_attempts=3,
+                wait_strategy="exponential",
+                min_wait=1.0,
+                max_wait=10.0,
+                exceptions=(ConnectionError, OSError, RuntimeError),
+                database=str(self.db_path)
+            )
             yield self.conn
         finally:
             if self.conn:
-                self.conn.close()
+                try:
+                    self.conn.close()
+                except Exception as e:
+                    console.print(f"⚠️ Warning: Error closing connection: {e}")
                 self.conn = None
     
     def bulk_load_dataframe(
@@ -101,25 +115,45 @@ class DuckDBBulkLoader:
         temp_file = Path(self.temp_dir) / f"{table_name}_{int(time.time())}.parquet"
         
         try:
-            # Write DataFrame to Parquet with optimizations
-            df.to_parquet(
-                temp_file, 
-                index=False, 
+            # Write DataFrame to Parquet with retry logic for file operations
+            execute_with_retry(
+                df.to_parquet,
+                operation_name=f"Writing Parquet file {temp_file}",
+                max_attempts=3,
+                wait_strategy="fixed",
+                min_wait=2.0,
+                exceptions=(OSError, PermissionError, IOError),
+                path=temp_file,
+                index=False,
                 compression=self.compression,
                 engine='pyarrow'
             )
             
             with self.connection() as conn:
-                # Execute the COPY command
+                # Execute the COPY command with retry logic
                 copy_sql = f"""
                     COPY {table_name} {column_spec}
                     FROM '{temp_file}' (FORMAT PARQUET)
                 """
                 
-                conn.execute(copy_sql)
+                execute_with_retry(
+                    conn.execute,
+                    operation_name=f"COPY command for {table_name}",
+                    max_attempts=3,
+                    wait_strategy="exponential",
+                    min_wait=1.0,
+                    max_wait=30.0,
+                    exceptions=(ConnectionError, RuntimeError, OSError),
+                    query=copy_sql
+                )
                 
-                # Get actual row count from table
-                count_result = conn.execute(f"SELECT COUNT(*) FROM {table_name}").fetchone()
+                # Get actual row count from table with retry
+                count_result = execute_with_retry(
+                    lambda: conn.execute(f"SELECT COUNT(*) FROM {table_name}").fetchone(),
+                    operation_name=f"Count verification for {table_name}",
+                    max_attempts=2,
+                    exceptions=(ConnectionError, RuntimeError)
+                )
                 actual_count = count_result[0] if count_result else 0
                 
             processing_time = time.time() - start_time

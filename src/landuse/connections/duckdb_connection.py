@@ -30,6 +30,7 @@ from pathlib import Path
 from pydantic import BaseModel, Field
 
 from ..models import QueryResult, SQLQuery
+from ..utils.retry_decorators import database_retry, network_retry
 
 
 class ConnectionConfig(BaseModel):
@@ -63,9 +64,10 @@ class DuckDBConnection(BaseConnection[duckdb.DuckDBPyConnection]):
     - Thread-safe operations
     """
     
+    @database_retry(max_attempts=3, min_wait=1.0, max_wait=10.0)
     def _connect(self, **kwargs) -> duckdb.DuckDBPyConnection:
         """
-        Connect to DuckDB database.
+        Connect to DuckDB database with retry logic.
         
         Parameters from kwargs or secrets:
         - database: Path to DuckDB file or ':memory:' for in-memory database
@@ -98,8 +100,12 @@ class DuckDBConnection(BaseConnection[duckdb.DuckDBPyConnection]):
         if db != ':memory:' and not Path(db).exists():
             raise FileNotFoundError(f"Database file not found: {db}")
         
-        # Connect to DuckDB
-        return duckdb.connect(database=db, read_only=read_only, **kwargs)
+        # Connect to DuckDB with potential retries for connection issues
+        try:
+            return duckdb.connect(database=db, read_only=read_only, **kwargs)
+        except Exception as e:
+            # Add context to connection errors
+            raise ConnectionError(f"Failed to connect to DuckDB at {db}: {e}") from e
     
     def cursor(self) -> duckdb.DuckDBPyConnection:
         """Return a cursor (DuckDB connections are their own cursors)"""
