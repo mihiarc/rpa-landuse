@@ -70,7 +70,7 @@ class TestLanduseNaturalLanguageAgent:
                 
                 assert agent.db_path == mock_db_path
                 assert agent.llm is not None
-                assert len(agent.tools) == 5
+                assert len(agent.tools) == 6  # Updated: now includes get_state_code tool
                 assert agent.agent is not None
     
     def test_agent_initialization_missing_db(self):
@@ -305,6 +305,11 @@ class TestLanduseNaturalLanguageAgent:
         assert "get_default_assumptions" in tools_by_name
         result = tools_by_name["get_default_assumptions"].func("")
         assert "Default" in result
+        
+        # Test get_state_code tool
+        assert "get_state_code" in tools_by_name
+        result = tools_by_name["get_state_code"].func("Texas")
+        assert "48" in result or "State code" in result
     
     def test_create_agent_prompt(self, agent):
         """Test agent prompt creation"""
@@ -312,7 +317,7 @@ class TestLanduseNaturalLanguageAgent:
         # We can verify the agent and tools are configured correctly
         assert agent.agent is not None
         assert isinstance(agent.agent, AgentExecutor)
-        assert len(agent.tools) == 5
+        assert len(agent.tools) == 6  # Updated: now includes get_state_code tool
         
         # Verify tool names
         tool_names = [tool.name for tool in agent.tools]
@@ -321,6 +326,7 @@ class TestLanduseNaturalLanguageAgent:
         assert "suggest_query_examples" in tool_names
         assert "explain_query_results" in tool_names
         assert "get_default_assumptions" in tool_names
+        assert "get_state_code" in tool_names  # New tool
 
 
 class TestLanduseAgentIntegration:
