@@ -24,7 +24,7 @@ sys.path.insert(0, str(src_path))
 from landuse.agents.constants import STATE_NAMES
 
 def get_database_connection():
-    """Get database connection"""
+    """Get database connection - not cached as DuckDB connections cannot be pickled"""
     try:
         db_path = os.getenv('LANDUSE_DB_PATH', 'data/processed/landuse_analytics.duckdb')
         if not Path(db_path).exists():

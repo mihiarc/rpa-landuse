@@ -17,9 +17,8 @@ project_root = Path(__file__).parent.parent
 src_path = project_root / "src"
 sys.path.insert(0, str(src_path))
 
-@st.cache_data
 def get_database_connection():
-    """Get database connection with caching"""
+    """Get database connection - not cached as DuckDB connections cannot be pickled"""
     try:
         db_path = os.getenv('LANDUSE_DB_PATH', 'data/processed/landuse_analytics.duckdb')
         if not Path(db_path).exists():
