@@ -107,7 +107,7 @@ jobs:
         
     - name: Install documentation tools
       run: |
-        pip install alex proselint textstat
+        pip install textstat
         
     - name: Check documentation writing quality
       run: |
