@@ -55,6 +55,7 @@ nav:
   - Data & Schemas:
     - Data Sources: data/sources.md
     - Database Schema: data/schema.md
+    - DuckDB Schema: data/duckdb-schema.md
     - Land Use Categories: data/categories.md
     - Variable Descriptions: data/variable-descriptions.md
     - RPA Model Diagram: data/rpa-model-diagram.md
@@ -62,6 +63,7 @@ nav:
   - API Reference:
     - LangGraph Agent: api/langgraph-agent.md
     - Traditional Agent: api/agent.md
+    - Landuse Query Agent: api/landuse-query-agent.md
     - Converters: api/converters.md
     - Tools & Utilities: api/tools.md
   - Examples:
@@ -75,6 +77,8 @@ nav:
     - CI/CD Pipeline: development/ci-cd-pipeline.md
     - Retry Logic: development/retry-logic.md
     - Branding Strategy: development/BRANDING_STRATEGY.md
+    - Modern DuckDB Tools: development/modern-duckdb-tools.md
+    - Pydantic Models: development/pydantic-models.md
   - Performance:
     - DuckDB Optimization: performance/duckdb-copy-optimization.md
     - Streamlit Fragments: performance/streamlit-fragments.md
@@ -82,8 +86,18 @@ nav:
     - FAQ: faq.md
     - Troubleshooting: troubleshooting.md
     - GitHub Pages Setup: GITHUB_PAGES_SETUP.md
+    - Streamlit Duplicate IDs: troubleshooting/streamlit-duplicate-ids.md
+    - Streamlit Fragments Guide: troubleshooting/streamlit-fragments.md
+  - Project Info:
+    - Security Policy: SECURITY.md
+    - Testing Guide: TESTING.md
+    - Local Configuration: CLAUDE.local.md
 
 strict: false
+
+# Exclude files from the build
+exclude_docs: |
+  README.md
 
 plugins:
   - search
