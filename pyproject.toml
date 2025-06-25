@@ -1,7 +1,7 @@
 [project]
-name = "langchain-landuse"
+name = "rpa-landuse-analytics"
 version = "0.1.0"
-description = "Advanced natural language analysis system for county-level land use transitions using AI agents"
+description = "AI-powered analytics tool for USDA Forest Service RPA Assessment land use data"
 readme = "README.md"
 requires-python = ">=3.9"
 dependencies = [
@@ -52,11 +52,11 @@ docs = [
 ]
 dev = [
     # Include all test and docs dependencies
-    "langchain-landuse[test,docs]",
+    "rpa-landuse-analytics[test,docs]",
 ]
 
 [project.scripts]
-landuse-agent = "landuse.agents.landuse_natural_language_agent:main"
+rpa-analytics = "landuse.agents.landuse_natural_language_agent:main"
 
 [build-system]
 requires = ["hatchling"]

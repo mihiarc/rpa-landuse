@@ -118,7 +118,7 @@ SELECT
     SUM(f.acres) as total_acres_urbanized,
     COUNT(DISTINCT s.scenario_id) as scenarios_included
 FROM fact_landuse_transitions f
-JOIN dim_geography g ON f.geography_id = g.geography_id
+JOIN dim_geography_enhanced g ON f.geography_id = g.geography_id
 JOIN dim_scenario s ON f.scenario_id = s.scenario_id
 JOIN dim_landuse fl ON f.from_landuse_id = fl.landuse_id
 JOIN dim_landuse tl ON f.to_landuse_id = tl.landuse_id
@@ -207,7 +207,7 @@ ORDER BY t.start_year, total_acres DESC;
             # Check exact match
             if state_clean in name_to_code:
                 code = name_to_code[state_clean]
-                return f"🗺️ **State Code Found**\n\n{STATE_NAMES[code]} has state_code = '{code}' in the database.\n\nExample query:\n```sql\nSELECT COUNT(*) FROM dim_geography WHERE state_code = '{code}'\n```"
+                return f"🗺️ **State Code Found**\n\n{STATE_NAMES[code]} has state_code = '{code}' in the database.\n\nExample query:\n```sql\nSELECT COUNT(*) FROM dim_geography_enhanced WHERE state_code = '{code}'\n```"
             
             # Check partial matches
             matches = [(code, name) for code, name in STATE_NAMES.items() if state_clean in name.lower()]
@@ -299,6 +299,20 @@ Final Answer: the final answer to the original input question
 DATABASE SCHEMA:
 {schema_info}
 
+LAND USE METHODOLOGY CONTEXT:
+The data represents county-level land use projections from 2020-2070 based on:
+- An econometric model calibrated on observed transitions from 2001-2012
+- 20 integrated climate-socioeconomic scenarios (5 climate models × 4 RPA scenarios)
+- Private land only (public lands assumed static)
+- Development is irreversible (once urban, always urban)
+- Policy-neutral projections based on historical relationships
+
+Key patterns to remember:
+- Most new developed land comes from forest (~46%) and agriculture
+- Agricultural transitions (crop ↔ pasture) are common rotations
+- The South Region faces the highest development pressure
+- Higher economic growth (SSP5) drives more land conversion than climate impacts
+
 INSTRUCTIONS:
 1. When users ask questions about landuse data, convert them to appropriate SQL queries
 2. Always use the star schema joins to get meaningful results
@@ -337,7 +351,7 @@ QUERY PATTERNS FOR COMMON QUESTIONS:
 - "Climate scenarios" → Compare specific RCP/SSP scenarios (USER SPECIFIED)
 - "State analysis" → Group by state_code (DEFAULT: all states unless specified)
 - "Time trends" → Group by time periods (DEFAULT: full range unless specified)
-- "Counties in [state]" → Use dim_geography with appropriate state_code
+- "Counties in [state]" → Use dim_geography_enhanced with appropriate state_code
 
 EXAMPLE RESPONSES WITH DEFAULTS:
 - User: "How much agricultural land is being lost?"

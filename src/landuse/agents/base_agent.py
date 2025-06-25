@@ -157,7 +157,7 @@ class BaseLanduseAgent(ABC):
             
             # Add actual table counts
             tables_info = []
-            tables = ['dim_scenario', 'dim_time', 'dim_geography', 'dim_landuse', 'fact_landuse_transitions']
+            tables = ['dim_scenario', 'dim_time', 'dim_geography_enhanced', 'dim_landuse', 'fact_landuse_transitions']
             
             for table in tables:
                 try:
@@ -417,7 +417,7 @@ class BaseLanduseAgent(ABC):
         
         while True:
             try:
-                user_input = self.console.input("[bold green]🌾 Agent>[/bold green] ").strip()
+                user_input = self.console.input("[bold green]🌲 RPA Analytics>[/bold green] ").strip()
                 
                 if user_input.lower() == 'exit':
                     self.console.print("\n[bold red]👋 Happy analyzing![/bold red]")

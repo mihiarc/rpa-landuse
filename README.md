@@ -1,6 +1,6 @@
-# 🌾 LangChain Landuse Analysis Project
+# 🌲 RPA Land Use Analytics
 
-Advanced natural language analysis of county-level land use transitions using AI agents and modern data stack (DuckDB, LangChain, GPT-4).
+AI-powered analytics tool for USDA Forest Service RPA Assessment land use data. Built with a modern data stack (DuckDB, LangChain, Claude/GPT-4) to analyze county-level land use projections from the 2020 Resources Planning Act Assessment.
 
 ## ✨ Features
 
@@ -40,11 +40,11 @@ cp .env.example config/.env
 
 ### 4. Try the Natural Language Query Agent
 ```bash
-# Interactive landuse analysis with natural language
+# Interactive RPA data analysis with natural language
 uv run python src/landuse/agents/landuse_natural_language_agent.py
 
 # Or use the shortcut:
-uv run landuse-agent
+uv run rpa-analytics
 
 # Alternative: DuckDB UI in browser
 duckdb data/processed/landuse_analytics.duckdb -ui
@@ -146,9 +146,18 @@ The results inform resource managers and policymakers as they develop strategies
 
 ## 🔬 Dataset Overview
 
-The data represents gross land-use changes projected at the county level, based on an empirical econometric model of observed land-use transitions from 2001-2012 using National Resources Inventory (NRI) data. Land use change is a major driver of resource change, and these projections were made for each county in the conterminous United States from 2020 to 2070.
+The data contains county-level land use projections from 2020-2070 based on an econometric model calibrated using observed transitions from 2001-2012 (National Resources Inventory data). These projections help understand how climate change and socioeconomic factors may reshape America's landscape.
 
-The projections cover five major land use classes (forest, developed, crop, pasture, and rangeland) and are explicitly linked to projected climate change and socioeconomic change through the 20 RPA scenario-climate futures. All land use change was assumed to occur on privately owned land, with land development treated as an irreversible change. The projections are policy-neutral, based on historical land use relationships driven by future climate change and socioeconomic growth assumptions.
+### Key Methodology Points
+- **Model Type**: Econometric model based on historical land use transitions
+- **Spatial Detail**: 3,075 counties in the conterminous United States  
+- **Time Periods**: Six projection periods from 2012 to 2100
+- **Scenarios**: 20 combinations of climate models and socioeconomic pathways
+- **Land Classes**: Forest, Crop, Pasture, Rangeland, and Urban
+- **Key Assumption**: Development is irreversible (urban land doesn't revert)
+- **Scope**: Private land only (public lands assumed unchanged)
+
+For detailed methodology, see [LAND_USE_METHODOLOGY.md](docs/LAND_USE_METHODOLOGY.md)
 
 ### Land-use Change Model
 
@@ -276,17 +285,23 @@ This project combines modern AI/ML technologies with high-performance analytics 
 - **Error handling**: Helpful error messages and query suggestions
 - **Configurable limits**: Prevents runaway queries with time and iteration limits
 
-## 📚 Data Source
+## 📚 Data Source & Attribution
 
-This dataset was developed by Mihiar, Lewis & Coulston for the USDA Forest Service for the Resources Planning Act (RPA) 2020 Assessment. 
+This project analyzes data from the **USDA Forest Service 2020 Resources Planning Act (RPA) Assessment**.
 
-**Citation**: Mihiar, A.J.; Lewis, D.J.; Coulston, J.W. 2023. Land use projections for the 2020 RPA Assessment. Fort Collins, CO: Forest Service Research Data Archive. https://doi.org/10.2737/RDS-2023-0026
+### RPA Assessment
+**Official Website**: https://www.fs.usda.gov/research/rpa
+
+**Full Report Citation**: U.S. Department of Agriculture, Forest Service. 2023. Future of America's Forest and Rangelands: Forest Service 2020 Resources Planning Act Assessment. Gen. Tech. Rep. WO-102. Washington, DC. https://doi.org/10.2737/WO-GTR-102
+
+### Land Use Projections Dataset
+**Dataset Citation**: Mihiar, A.J.; Lewis, D.J.; Coulston, J.W. 2023. Land use projections for the 2020 RPA Assessment. Fort Collins, CO: Forest Service Research Data Archive. https://doi.org/10.2737/RDS-2023-0026
 
 **Usage**: Download the data from the link above and unzip the .json data file to `data/raw/county_landuse_projections_RPA.json`
 
 ## 🚀 Getting Started
 
-Ready to explore land use data with natural language? Run our quickstart script to verify your setup:
+Ready to explore RPA Assessment data with natural language? Run our quickstart script to verify your setup:
 
 ```bash
 uv run python quickstart.py
@@ -294,8 +309,10 @@ uv run python quickstart.py
 
 This will check your environment and guide you through any needed setup steps. Then start asking questions like:
 
-- "Which scenarios show the most agricultural land loss?"
-- "Compare forest loss between RCP45 and RCP85 scenarios"
-- "Which states have the most urban expansion?"
+- "What are the land use projections for my state?"
+- "Compare forest loss between RCP4.5 and RCP8.5 scenarios"
+- "Which regions face the most urban expansion by 2070?"
 
-Happy analyzing! 🌾
+---
+
+**RPA Land Use Analytics** - Transforming America's land use data into actionable insights 🌲

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Landuse Natural Language Agent - Streamlit Dashboard
-Modern web interface for exploring land use transition data with natural language queries
+RPA Land Use Analytics - Streamlit Dashboard
+AI-powered analytics tool for USDA Forest Service RPA Assessment land use data
 """
 
 import streamlit as st
@@ -15,24 +15,25 @@ sys.path.insert(0, str(src_path))
 
 # Configure page settings - must be first Streamlit command
 st.set_page_config(
-    page_title="🌾 Landuse Analytics Dashboard",
-    page_icon="🌾",
+    page_title="RPA Land Use Analytics",
+    page_icon="🌲",
     layout="wide",
     initial_sidebar_state="expanded",
     menu_items={
-        'Get Help': 'https://github.com/your-repo/langchain-landuse',
-        'Report a bug': 'https://github.com/your-repo/langchain-landuse/issues',
+        'Get Help': 'https://github.com/your-repo/rpa-landuse-analytics',
+        'Report a bug': 'https://github.com/your-repo/rpa-landuse-analytics/issues',
         'About': """
-        # Landuse Analytics Dashboard
+        # RPA Land Use Analytics
         
-        Advanced natural language analysis of county-level land use transitions using AI agents.
+        AI-powered analytics tool for USDA Forest Service RPA Assessment data.
         
         **Features:**
         - 🤖 Natural language querying with AI agents
         - 📊 Interactive data visualizations
         - 🦆 DuckDB-powered analytics
-        - 🌍 Climate scenario analysis
+        - 🌍 Climate scenario analysis (RCP45/85, SSP1-5)
         
+        Data source: USDA Forest Service 2020 RPA Assessment
         Built with LangChain, DuckDB, and Streamlit.
         """
     }
@@ -138,11 +139,11 @@ def show_welcome_page():
     
     col1, col2 = st.columns([3, 1])
     with col1:
-        st.title("🌾 Landuse Analytics Dashboard")
+        st.title("🌲 RPA Land Use Analytics")
         st.markdown("""
-        **Advanced natural language analysis of county-level land use transitions using AI agents**
+        **AI-powered analytics tool for USDA Forest Service RPA Assessment data**
         
-        Explore 20+ million data points covering US land use changes from 2012-2100 across multiple climate scenarios.
+        Explore county-level land use projections from 2012-2070 across 20 climate scenarios from the 2020 Resources Planning Act Assessment.
         """)
     
     with col2:
@@ -343,6 +344,16 @@ def main():
     
     # Run the selected page
     pg.run()
+    
+    # Add footer with attribution
+    st.markdown("---")
+    st.markdown("""
+    <div style='text-align: center; color: #666666; padding: 20px;'>
+        <p><strong>RPA Land Use Analytics</strong></p>
+        <p>Data source: <a href='https://www.fs.usda.gov/research/rpa' target='_blank'>USDA Forest Service 2020 RPA Assessment</a></p>
+        <p style='font-size: 0.9em;'>Transforming America's land use data into actionable insights</p>
+    </div>
+    """, unsafe_allow_html=True)
 
 if __name__ == "__main__":
     main()

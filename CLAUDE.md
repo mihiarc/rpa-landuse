@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is an advanced natural language analysis system for county-level land use transitions using AI agents and modern data stack (DuckDB, LangChain, Claude/GPT-4). The project processes USDA RPA land use projection data and enables users to ask questions in plain English about land use changes across different climate scenarios.
+RPA Land Use Analytics is an AI-powered analytics tool for USDA Forest Service RPA Assessment data. Built with a modern data stack (DuckDB, LangChain, Claude/GPT-4), it processes county-level land use projections and enables users to ask questions in plain English about land use changes across different climate scenarios from the 2020 RPA Assessment.
 
 ## Key Commands
 
@@ -34,11 +34,11 @@ uv run streamlit run streamlit_app.py
 
 #### Command Line Agents
 ```bash
-# Primary: Landuse Natural Language Agent (command line)
+# Primary: RPA Analytics Natural Language Agent (command line)
 uv run python -m landuse.agents.landuse_natural_language_agent
 
 # Or use the shortcut
-uv run landuse-agent
+uv run rpa-analytics
 
 # Test with sample queries
 uv run python -m landuse.agents.test_landuse_agent
@@ -132,6 +132,17 @@ duckdb data/processed/landuse_analytics.duckdb
 - **Forest**: Forested areas (fr)
 - **Urban**: Developed/built areas (ur)
 - **Rangeland**: Natural grasslands (rg)
+
+### Land Use Projection Methodology
+The projections are based on an econometric model with these characteristics:
+- **Historical Calibration**: Based on observed transitions 2001-2012 from NRI data
+- **Spatial Resolution**: County-level projections for 3,075 counties
+- **Land Ownership**: Private land only (public lands assumed static)
+- **Key Assumption**: Development is irreversible - once urban, always urban
+- **Model Type**: Policy-neutral projections based on historical relationships
+- **Primary Pattern**: ~46% of new developed land comes from forest
+
+For detailed methodology, see `docs/LAND_USE_METHODOLOGY.md`
 
 ## Environment Configuration
 

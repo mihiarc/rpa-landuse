@@ -63,7 +63,7 @@ def load_summary_data():
         stats = {}
         
         # Use query method with appropriate TTL
-        counties_df = conn.query("SELECT COUNT(DISTINCT fips_code) as count FROM dim_geography", ttl=3600)
+        counties_df = conn.query("SELECT COUNT(DISTINCT fips_code) as count FROM dim_geography_enhanced", ttl=3600)
         stats['total_counties'] = counties_df['count'].iloc[0]
         
         scenarios_df = conn.query("SELECT COUNT(*) as count FROM dim_scenario", ttl=3600)
@@ -124,7 +124,7 @@ def load_urbanization_data():
             fl.landuse_name as from_landuse,
             SUM(f.acres) as total_acres_urbanized
         FROM fact_landuse_transitions f
-        JOIN dim_geography g ON f.geography_id = g.geography_id
+        JOIN dim_geography_enhanced g ON f.geography_id = g.geography_id
         JOIN dim_landuse fl ON f.from_landuse_id = fl.landuse_id
         JOIN dim_landuse tl ON f.to_landuse_id = tl.landuse_id
         WHERE tl.landuse_name = 'Urban'
@@ -159,7 +159,7 @@ def load_forest_analysis_data():
         JOIN dim_scenario s ON f.scenario_id = s.scenario_id
         JOIN dim_landuse fl ON f.from_landuse_id = fl.landuse_id
         JOIN dim_landuse tl ON f.to_landuse_id = tl.landuse_id
-        JOIN dim_geography g ON f.geography_id = g.geography_id
+        JOIN dim_geography_enhanced g ON f.geography_id = g.geography_id
         WHERE fl.landuse_name = 'Forest' 
           AND tl.landuse_name != 'Forest'
           AND f.transition_type = 'change'
@@ -179,7 +179,7 @@ def load_forest_analysis_data():
         JOIN dim_scenario s ON f.scenario_id = s.scenario_id
         JOIN dim_landuse fl ON f.from_landuse_id = fl.landuse_id
         JOIN dim_landuse tl ON f.to_landuse_id = tl.landuse_id
-        JOIN dim_geography g ON f.geography_id = g.geography_id
+        JOIN dim_geography_enhanced g ON f.geography_id = g.geography_id
         WHERE tl.landuse_name = 'Forest' 
           AND fl.landuse_name != 'Forest'
           AND f.transition_type = 'change'
@@ -198,7 +198,7 @@ def load_forest_analysis_data():
                 END as change_type,
                 SUM(f.acres) as total_acres
             FROM fact_landuse_transitions f
-            JOIN dim_geography g ON f.geography_id = g.geography_id
+            JOIN dim_geography_enhanced g ON f.geography_id = g.geography_id
             JOIN dim_landuse fl ON f.from_landuse_id = fl.landuse_id
             JOIN dim_landuse tl ON f.to_landuse_id = tl.landuse_id
             WHERE f.transition_type = 'change'
@@ -606,7 +606,7 @@ def load_state_transitions():
                 SUM(f.acres) as total_acres,
                 AVG(f.acres) as avg_acres_per_scenario
             FROM fact_landuse_transitions f
-            JOIN dim_geography g ON f.geography_id = g.geography_id
+            JOIN dim_geography_enhanced g ON f.geography_id = g.geography_id
             JOIN dim_landuse fl ON f.from_landuse_id = fl.landuse_id
             JOIN dim_landuse tl ON f.to_landuse_id = tl.landuse_id
             WHERE f.transition_type = 'change'
@@ -827,7 +827,7 @@ def load_animated_timeline_data():
         FROM fact_landuse_transitions f
         JOIN dim_time t ON f.time_id = t.time_id
         JOIN dim_scenario s ON f.scenario_id = s.scenario_id
-        JOIN dim_geography g ON f.geography_id = g.geography_id
+        JOIN dim_geography_enhanced g ON f.geography_id = g.geography_id
         JOIN dim_landuse fl ON f.from_landuse_id = fl.landuse_id
         JOIN dim_landuse tl ON f.to_landuse_id = tl.landuse_id
         WHERE f.transition_type = 'change'
@@ -1224,8 +1224,8 @@ def show_summary_metrics():
 
 def main():
     """Main analytics dashboard"""
-    st.title("📊 Analytics Dashboard")
-    st.markdown("**Pre-built visualizations and insights for land use transition analysis**")
+    st.title("📊 RPA Land Use Analytics Dashboard")
+    st.markdown("**Visualizations and insights from the USDA Forest Service 2020 RPA Assessment**")
     
     # Show summary metrics
     show_summary_metrics()
@@ -1509,7 +1509,31 @@ def main():
     
     with tab4:
         st.markdown("### Climate Scenario Comparison")
-        st.markdown("**Differences in land use patterns between climate pathways**")
+        st.markdown("**Differences in land use patterns between RPA climate pathways**")
+        
+        # Add RPA scenario context
+        with st.expander("📚 Understanding RPA Scenarios", expanded=False):
+            st.markdown("""
+            The 2020 RPA Assessment uses **four integrated scenarios** combining climate and socioeconomic pathways:
+            
+            #### Climate Pathways (RCPs)
+            - **RCP 4.5**: Lower emissions (~2.5°C warming by 2100) - assumes climate policies
+            - **RCP 8.5**: High emissions (~4.5°C warming by 2100) - limited climate action
+            
+            #### Socioeconomic Pathways (SSPs)
+            - **SSP1 - Sustainability**: Green growth, international cooperation
+            - **SSP2 - Middle of the Road**: Historical trends continue
+            - **SSP3 - Regional Rivalry**: Nationalism, resource competition
+            - **SSP5 - Fossil-fueled Development**: Rapid growth, high consumption
+            
+            #### The Four RPA Scenarios
+            | Code | Name | Climate | Society | U.S. Growth |
+            |------|------|---------|---------|-------------|
+            | **LM** | Lower-Moderate | RCP4.5-SSP1 | Sustainable | GDP: 3.0x, Pop: 1.5x |
+            | **HL** | High-Low | RCP8.5-SSP3 | Regional rivalry | GDP: 1.9x, Pop: 1.0x |
+            | **HM** | High-Moderate | RCP8.5-SSP2 | Middle road | GDP: 2.8x, Pop: 1.4x |
+            | **HH** | High-High | RCP8.5-SSP5 | Fossil-fueled | GDP: 4.7x, Pop: 1.9x |
+            """)
         
         climate_data, climate_error = load_climate_comparison_data()
         if climate_error:
@@ -1540,7 +1564,7 @@ def main():
                 st.plotly_chart(fig_bar, use_container_width=True)
             
             with col2:
-                st.markdown("#### 🔍 Climate Insights")
+                st.markdown("#### 🔍 RPA Climate Insights")
                 if len(rcp_comparison) >= 2:
                     rcp85_total = rcp_comparison.get('rcp85', 0)
                     rcp45_total = rcp_comparison.get('rcp45', 0)
@@ -1548,8 +1572,9 @@ def main():
                     
                     st.markdown(f"""
                     - **RCP8.5 Impact:** {difference:+.1f}% more land use change vs RCP4.5
-                    - **Higher Emissions:** Lead to more dramatic land use transitions
-                    - **Policy Relevance:** Shows importance of climate mitigation
+                    - **Scenario LM (RCP4.5):** Only sustainable development scenario
+                    - **Scenarios HL/HM/HH (RCP8.5):** All high-warming futures
+                    - **Policy Relevance:** Sustainable path (LM) shows least disruption
                     """)
         else:
             st.info("📊 No climate comparison data available")

@@ -185,9 +185,20 @@ def create_welcome_panel(db_path: str, model_name: str, api_key_masked: str) -> 
     Returns:
         Rich Panel object
     """
+    # Read ASCII logo if available
+    logo_content = ""
+    try:
+        from pathlib import Path
+        logo_path = Path(__file__).parent.parent.parent.parent / "assets" / "branding" / "ascii_logo_simple.txt"
+        if logo_path.exists():
+            logo_content = logo_path.read_text() + "\n\n"
+    except:
+        pass
+    
     content = (
-        "🌾 [bold green]Landuse Natural Language Query Agent[/bold green]\n"
-        "[yellow]Ask questions about landuse transitions in natural language![/yellow]\n"
+        f"{logo_content}"
+        "🌲 [bold green]RPA Land Use Analytics[/bold green]\n"
+        "[yellow]AI-powered analysis of USDA Forest Service RPA Assessment data[/yellow]\n\n"
         f"[dim]Database: {db_path}[/dim]\n"
         f"[dim]Model: {model_name} | API Key: {api_key_masked}[/dim]"
     )
@@ -201,14 +212,15 @@ def create_examples_panel() -> Panel:
     Returns:
         Rich Panel with example queries
     """
-    content = """[bold cyan]🚀 Example questions:[/bold cyan]
+    content = """[bold cyan]🚀 Example questions about the 2020 RPA Assessment:[/bold cyan]
 
-• "How much agricultural land is being lost?"
-• "Which states have the most urban expansion?"
-• "Compare forest loss between RCP45 and RCP85 scenarios"
-• "Show me crop to pasture transitions by state"
+• "How much agricultural land is projected to be lost by 2070?"
+• "Which states have the most urban expansion under RCP8.5?"
+• "Compare forest loss between RCP4.5 and RCP8.5 scenarios"
+• "Show me crop to urban transitions in the South region"
+• "What are the land use projections for California?"
 
-[dim]Type 'exit' to quit, 'help' for more info[/dim]"""
+[dim]Commands: 'exit' to quit | 'help' for examples | 'schema' for database info[/dim]"""
     
     return Panel(
         content,
