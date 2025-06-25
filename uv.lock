@@ -2445,117 +2445,6 @@ wheels = [
 ]
 
 [[package]]
-name = "langchain-landuse"
-version = "0.1.0"
-source = { editable = "." }
-dependencies = [
-    { name = "duckdb" },
-    { name = "fastparquet" },
-    { name = "geopandas", version = "1.0.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
-    { name = "geopandas", version = "1.1.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
-    { name = "ijson" },
-    { name = "ipykernel" },
-    { name = "jupyter" },
-    { name = "langchain" },
-    { name = "langchain-anthropic" },
-    { name = "langchain-community" },
-    { name = "langchain-openai" },
-    { name = "langgraph" },
-    { name = "langgraph-checkpoint" },
-    { name = "langgraph-checkpoint-sqlite" },
-    { name = "matplotlib", version = "3.9.4", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
-    { name = "matplotlib", version = "3.10.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
-    { name = "numpy", version = "2.0.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
-    { name = "numpy", version = "2.2.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.10.*'" },
-    { name = "numpy", version = "2.3.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
-    { name = "openpyxl" },
-    { name = "pandas" },
-    { name = "plotly" },
-    { name = "pyarrow" },
-    { name = "pydantic" },
-    { name = "python-dotenv" },
-    { name = "rich" },
-    { name = "seaborn" },
-    { name = "sqlalchemy" },
-    { name = "streamlit" },
-]
-
-[package.optional-dependencies]
-dev = [
-    { name = "coverage" },
-    { name = "mkdocs" },
-    { name = "mkdocs-material" },
-    { name = "mkdocstrings" },
-    { name = "mkdocstrings-python" },
-    { name = "pymdown-extensions" },
-    { name = "pytest" },
-    { name = "pytest-asyncio" },
-    { name = "pytest-cov" },
-    { name = "pytest-mock" },
-    { name = "pytest-timeout" },
-    { name = "pytest-xdist" },
-]
-docs = [
-    { name = "mkdocs" },
-    { name = "mkdocs-material" },
-    { name = "mkdocstrings" },
-    { name = "mkdocstrings-python" },
-    { name = "pymdown-extensions" },
-]
-test = [
-    { name = "coverage" },
-    { name = "pytest" },
-    { name = "pytest-asyncio" },
-    { name = "pytest-cov" },
-    { name = "pytest-mock" },
-    { name = "pytest-timeout" },
-    { name = "pytest-xdist" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "coverage", marker = "extra == 'test'", specifier = ">=7.4.0" },
-    { name = "duckdb", specifier = ">=1.0.0" },
-    { name = "fastparquet", specifier = ">=2024.0.0" },
-    { name = "geopandas", specifier = ">=1.0.0" },
-    { name = "ijson", specifier = ">=3.0.0" },
-    { name = "ipykernel", specifier = ">=6.29.0" },
-    { name = "jupyter", specifier = ">=1.0.0" },
-    { name = "langchain", specifier = ">=0.3.0" },
-    { name = "langchain-anthropic", specifier = ">=0.2.0" },
-    { name = "langchain-community", specifier = ">=0.3.0" },
-    { name = "langchain-landuse", extras = ["test", "docs"], marker = "extra == 'dev'" },
-    { name = "langchain-openai", specifier = ">=0.2.0" },
-    { name = "langgraph", specifier = ">=0.2.0" },
-    { name = "langgraph-checkpoint", specifier = ">=2.0.0" },
-    { name = "langgraph-checkpoint-sqlite", specifier = ">=2.0.0" },
-    { name = "matplotlib", specifier = ">=3.8.0" },
-    { name = "mkdocs", marker = "extra == 'docs'", specifier = ">=1.5.0" },
-    { name = "mkdocs-material", marker = "extra == 'docs'", specifier = ">=9.5.0" },
-    { name = "mkdocstrings", marker = "extra == 'docs'", specifier = ">=0.24.0" },
-    { name = "mkdocstrings-python", marker = "extra == 'docs'", specifier = ">=1.8.0" },
-    { name = "numpy", specifier = ">=1.26.0" },
-    { name = "openpyxl", specifier = ">=3.1.0" },
-    { name = "pandas", specifier = ">=2.2.0" },
-    { name = "plotly", specifier = ">=5.17.0" },
-    { name = "pyarrow", specifier = ">=15.0.0" },
-    { name = "pydantic", specifier = ">=2.0.0" },
-    { name = "pymdown-extensions", marker = "extra == 'docs'", specifier = ">=10.7.0" },
-    { name = "pytest", marker = "extra == 'test'", specifier = ">=8.0.0" },
-    { name = "pytest-asyncio", marker = "extra == 'test'", specifier = ">=0.23.0" },
-    { name = "pytest-cov", marker = "extra == 'test'", specifier = ">=4.1.0" },
-    { name = "pytest-mock", marker = "extra == 'test'", specifier = ">=3.12.0" },
-    { name = "pytest-timeout", marker = "extra == 'test'", specifier = ">=2.2.0" },
-    { name = "pytest-xdist", marker = "extra == 'test'", specifier = ">=3.5.0" },
-    { name = "python-dotenv", specifier = ">=1.0.0" },
-    { name = "rich", specifier = ">=14.0.0" },
-    { name = "seaborn", specifier = ">=0.13.0" },
-    { name = "sqlalchemy", specifier = ">=2.0.0" },
-    { name = "streamlit", specifier = ">=1.32.0" },
-]
-provides-extras = ["test", "docs", "dev"]
-
-[[package]]
 name = "langchain-openai"
 version = "0.3.24"
 source = { registry = "https://pypi.org/simple" }
@@ -4896,6 +4785,117 @@ sdist = { url = "https://files.pythonhosted.org/packages/a1/53/830aa4c3066a8ab0a
 wheels = [
     { url = "https://files.pythonhosted.org/packages/0d/9b/63f4c7ebc259242c89b3acafdb37b41d1185c07ff0011164674e9076b491/rich-14.0.0-py3-none-any.whl", hash = "sha256:1c9491e1951aac09caffd42f448ee3d04e58923ffe14993f6e83068dc395d7e0", size = 243229 },
 ]
+
+[[package]]
+name = "rpa-landuse-analytics"
+version = "0.1.0"
+source = { editable = "." }
+dependencies = [
+    { name = "duckdb" },
+    { name = "fastparquet" },
+    { name = "geopandas", version = "1.0.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
+    { name = "geopandas", version = "1.1.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
+    { name = "ijson" },
+    { name = "ipykernel" },
+    { name = "jupyter" },
+    { name = "langchain" },
+    { name = "langchain-anthropic" },
+    { name = "langchain-community" },
+    { name = "langchain-openai" },
+    { name = "langgraph" },
+    { name = "langgraph-checkpoint" },
+    { name = "langgraph-checkpoint-sqlite" },
+    { name = "matplotlib", version = "3.9.4", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
+    { name = "matplotlib", version = "3.10.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
+    { name = "numpy", version = "2.0.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
+    { name = "numpy", version = "2.2.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.10.*'" },
+    { name = "numpy", version = "2.3.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
+    { name = "openpyxl" },
+    { name = "pandas" },
+    { name = "plotly" },
+    { name = "pyarrow" },
+    { name = "pydantic" },
+    { name = "python-dotenv" },
+    { name = "rich" },
+    { name = "seaborn" },
+    { name = "sqlalchemy" },
+    { name = "streamlit" },
+]
+
+[package.optional-dependencies]
+dev = [
+    { name = "coverage" },
+    { name = "mkdocs" },
+    { name = "mkdocs-material" },
+    { name = "mkdocstrings" },
+    { name = "mkdocstrings-python" },
+    { name = "pymdown-extensions" },
+    { name = "pytest" },
+    { name = "pytest-asyncio" },
+    { name = "pytest-cov" },
+    { name = "pytest-mock" },
+    { name = "pytest-timeout" },
+    { name = "pytest-xdist" },
+]
+docs = [
+    { name = "mkdocs" },
+    { name = "mkdocs-material" },
+    { name = "mkdocstrings" },
+    { name = "mkdocstrings-python" },
+    { name = "pymdown-extensions" },
+]
+test = [
+    { name = "coverage" },
+    { name = "pytest" },
+    { name = "pytest-asyncio" },
+    { name = "pytest-cov" },
+    { name = "pytest-mock" },
+    { name = "pytest-timeout" },
+    { name = "pytest-xdist" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "coverage", marker = "extra == 'test'", specifier = ">=7.4.0" },
+    { name = "duckdb", specifier = ">=1.0.0" },
+    { name = "fastparquet", specifier = ">=2024.0.0" },
+    { name = "geopandas", specifier = ">=1.0.0" },
+    { name = "ijson", specifier = ">=3.0.0" },
+    { name = "ipykernel", specifier = ">=6.29.0" },
+    { name = "jupyter", specifier = ">=1.0.0" },
+    { name = "langchain", specifier = ">=0.3.0" },
+    { name = "langchain-anthropic", specifier = ">=0.2.0" },
+    { name = "langchain-community", specifier = ">=0.3.0" },
+    { name = "langchain-openai", specifier = ">=0.2.0" },
+    { name = "langgraph", specifier = ">=0.2.0" },
+    { name = "langgraph-checkpoint", specifier = ">=2.0.0" },
+    { name = "langgraph-checkpoint-sqlite", specifier = ">=2.0.0" },
+    { name = "matplotlib", specifier = ">=3.8.0" },
+    { name = "mkdocs", marker = "extra == 'docs'", specifier = ">=1.5.0" },
+    { name = "mkdocs-material", marker = "extra == 'docs'", specifier = ">=9.5.0" },
+    { name = "mkdocstrings", marker = "extra == 'docs'", specifier = ">=0.24.0" },
+    { name = "mkdocstrings-python", marker = "extra == 'docs'", specifier = ">=1.8.0" },
+    { name = "numpy", specifier = ">=1.26.0" },
+    { name = "openpyxl", specifier = ">=3.1.0" },
+    { name = "pandas", specifier = ">=2.2.0" },
+    { name = "plotly", specifier = ">=5.17.0" },
+    { name = "pyarrow", specifier = ">=15.0.0" },
+    { name = "pydantic", specifier = ">=2.0.0" },
+    { name = "pymdown-extensions", marker = "extra == 'docs'", specifier = ">=10.7.0" },
+    { name = "pytest", marker = "extra == 'test'", specifier = ">=8.0.0" },
+    { name = "pytest-asyncio", marker = "extra == 'test'", specifier = ">=0.23.0" },
+    { name = "pytest-cov", marker = "extra == 'test'", specifier = ">=4.1.0" },
+    { name = "pytest-mock", marker = "extra == 'test'", specifier = ">=3.12.0" },
+    { name = "pytest-timeout", marker = "extra == 'test'", specifier = ">=2.2.0" },
+    { name = "pytest-xdist", marker = "extra == 'test'", specifier = ">=3.5.0" },
+    { name = "python-dotenv", specifier = ">=1.0.0" },
+    { name = "rich", specifier = ">=14.0.0" },
+    { name = "rpa-landuse-analytics", extras = ["test", "docs"], marker = "extra == 'dev'" },
+    { name = "seaborn", specifier = ">=0.13.0" },
+    { name = "sqlalchemy", specifier = ">=2.0.0" },
+    { name = "streamlit", specifier = ">=1.32.0" },
+]
+provides-extras = ["test", "docs", "dev"]
 
 [[package]]
 name = "rpds-py"

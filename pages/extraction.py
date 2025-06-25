@@ -67,7 +67,7 @@ def get_filter_options():
         # Get states
         states_query = """
         SELECT DISTINCT state_code, state_name
-        FROM dim_geography
+        FROM dim_geography_enhanced
         WHERE state_name IS NOT NULL
         ORDER BY state_name
         """
@@ -717,7 +717,7 @@ def show_bulk_export():
             "queries": {
                 "dim_scenario": "SELECT * FROM dim_scenario",
                 "dim_time": "SELECT * FROM dim_time",
-                "dim_geography": "SELECT * FROM dim_geography",
+                "dim_geography_enhanced": "SELECT * FROM dim_geography_enhanced",
                 "dim_landuse": "SELECT * FROM dim_landuse"
             }
         }

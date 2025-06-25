@@ -81,7 +81,7 @@ SELECT 'dim_scenario' as table_name, COUNT(*) as row_count FROM dim_scenario
 UNION ALL
 SELECT 'dim_time', COUNT(*) FROM dim_time
 UNION ALL
-SELECT 'dim_geography', COUNT(*) FROM dim_geography
+SELECT 'dim_geography_enhanced', COUNT(*) FROM dim_geography_enhanced
 UNION ALL
 SELECT 'dim_landuse', COUNT(*) FROM dim_landuse
 UNION ALL
@@ -107,7 +107,7 @@ SELECT
     state_code,
     state_name,
     region
-FROM dim_geography
+FROM dim_geography_enhanced
 WHERE state_name IS NOT NULL
 ORDER BY state_name, county_name
 LIMIT 20;
