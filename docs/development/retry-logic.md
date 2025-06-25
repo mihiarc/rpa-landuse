@@ -676,7 +676,7 @@ def debug_operation():
 
 ## Related Documentation
 
-- [Database Connections](./database-connections.md)
-- [Error Handling](./error-handling.md)
-- [Performance Optimization](../performance/optimization-guide.md)
-- [Testing Guidelines](./testing-guidelines.md)
+- [Architecture Overview](./architecture.md)
+- [Contributing Guide](./contributing.md)
+- [Testing Guide](./testing.md)
+- [CI/CD Pipeline](./ci-cd-pipeline.md)

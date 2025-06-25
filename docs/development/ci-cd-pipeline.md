@@ -508,8 +508,7 @@ uv run pip-licenses
 
 ## Related Documentation
 
-- [Development Guidelines](./development-guidelines.md)
-- [Testing Strategy](./testing-strategy.md)
-- [Security Guidelines](./security-guidelines.md)
-- [Performance Optimization](../performance/optimization-guide.md)
-- [Deployment Guide](./deployment-guide.md)
+- [Architecture Overview](./architecture.md)
+- [Contributing Guide](./contributing.md)
+- [Testing Guide](./testing.md)
+- [Branding Strategy](./BRANDING_STRATEGY.md)
