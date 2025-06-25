@@ -4,13 +4,14 @@ Data Explorer for Landuse Database
 Advanced tools for exploring database schema, running custom queries, and browsing data
 """
 
-import streamlit as st
-import pandas as pd
-import duckdb
+import json
+import os
 import sys
 from pathlib import Path
-import os
-import json
+
+import duckdb
+import pandas as pd
+import streamlit as st
 
 # Add src to path
 project_root = Path(__file__).parent.parent
@@ -19,6 +20,7 @@ sys.path.insert(0, str(src_path))
 
 # Import connection
 from landuse.connections import DuckDBConnection
+
 
 @st.cache_resource
 def get_database_connection():
@@ -40,32 +42,32 @@ def get_table_schema():
     conn, error = get_database_connection()
     if error:
         return None, error
-    
+
     try:
         # Get all tables
         tables_df = conn.list_tables(ttl=3600)
-        
+
         schema_info = {}
-        
+
         for _, row in tables_df.iterrows():
             table_name = row['table_name']
-            
+
             # Get column information
             columns = conn.get_table_info(table_name, ttl=3600)
-            
+
             # Get row count
             row_count = conn.get_row_count(table_name, ttl=300)
-            
+
             # Get sample data
             sample_query = f"SELECT * FROM {table_name} LIMIT 5"
             sample_data = conn.query(sample_query, ttl=3600)
-            
+
             schema_info[table_name] = {
                 'columns': columns,
                 'row_count': row_count,
                 'sample_data': sample_data
             }
-        
+
         return schema_info, None
     except Exception as e:
         return None, f"Error getting schema: {e}"
@@ -89,7 +91,7 @@ SELECT 'fact_landuse_transitions', COUNT(*) FROM fact_landuse_transitions;
 """,
             "Browse scenarios": """
 -- View all climate scenarios
-SELECT 
+SELECT
     scenario_id,
     scenario_name,
     climate_model,
@@ -100,7 +102,7 @@ ORDER BY scenario_name;
 """,
             "Browse geography": """
 -- View geography with state information
-SELECT 
+SELECT
     geography_id,
     fips_code,
     county_name,
@@ -116,7 +118,7 @@ LIMIT 20;
         "Agricultural Analysis": {
             "Agricultural land loss": """
 -- Agricultural land being converted to other uses
-SELECT 
+SELECT
     s.scenario_name,
     g.state_code,
     fl.landuse_name as from_landuse,
@@ -127,7 +129,7 @@ JOIN dim_scenario s ON f.scenario_id = s.scenario_id
 JOIN dim_geography g ON f.geography_id = g.geography_id
 JOIN dim_landuse fl ON f.from_landuse_id = fl.landuse_id
 JOIN dim_landuse tl ON f.to_landuse_id = tl.landuse_id
-WHERE fl.landuse_category = 'Agriculture' 
+WHERE fl.landuse_category = 'Agriculture'
   AND tl.landuse_category != 'Agriculture'
   AND f.transition_type = 'change'
 GROUP BY s.scenario_name, g.state_code, fl.landuse_name, tl.landuse_name
@@ -136,7 +138,7 @@ LIMIT 50;
 """,
             "Crop vs Pasture transitions": """
 -- Transitions between crop and pasture land
-SELECT 
+SELECT
     t.year_range,
     g.state_code,
     fl.landuse_name as from_landuse,
@@ -160,7 +162,7 @@ LIMIT 30;
         "Climate Analysis": {
             "RCP scenario comparison": """
 -- Compare land use changes between RCP scenarios
-SELECT 
+SELECT
     s.rcp_scenario,
     fl.landuse_name as from_landuse,
     tl.landuse_name as to_landuse,
@@ -178,7 +180,7 @@ LIMIT 40;
 """,
             "SSP pathway impacts": """
 -- Compare socioeconomic pathways (SSP)
-SELECT 
+SELECT
     s.ssp_scenario,
     fl.landuse_name as from_landuse,
     tl.landuse_name as to_landuse,
@@ -198,7 +200,7 @@ LIMIT 40;
         "Geographic Analysis": {
             "State-level summaries": """
 -- Land use changes by state
-SELECT 
+SELECT
     g.state_code,
     g.state_name,
     fl.landuse_name as from_landuse,
@@ -218,7 +220,7 @@ LIMIT 50;
 """,
             "County hotspots": """
 -- Counties with most land use change
-SELECT 
+SELECT
     g.fips_code,
     g.county_name,
     g.state_code,
@@ -238,7 +240,7 @@ LIMIT 30;
         "Time Series": {
             "Trends over time": """
 -- How transitions change over time periods
-SELECT 
+SELECT
     t.year_range,
     t.start_year,
     t.end_year,
@@ -258,8 +260,8 @@ ORDER BY t.start_year, total_acres DESC;
             "Acceleration analysis": """
 -- Compare early vs late periods
 WITH period_comparison AS (
-  SELECT 
-    CASE 
+  SELECT
+    CASE
       WHEN t.start_year <= 2040 THEN 'Early (2012-2040)'
       ELSE 'Late (2041-2100)'
     END as period_group,
@@ -274,12 +276,12 @@ WITH period_comparison AS (
     AND fl.landuse_name != tl.landuse_name
   GROUP BY period_group, fl.landuse_name, tl.landuse_name
 )
-SELECT 
+SELECT
   from_landuse,
   to_landuse,
   SUM(CASE WHEN period_group = 'Early (2012-2040)' THEN total_acres ELSE 0 END) as early_period_acres,
   SUM(CASE WHEN period_group = 'Late (2041-2100)' THEN total_acres ELSE 0 END) as late_period_acres,
-  (SUM(CASE WHEN period_group = 'Late (2041-2100)' THEN total_acres ELSE 0 END) - 
+  (SUM(CASE WHEN period_group = 'Late (2041-2100)' THEN total_acres ELSE 0 END) -
    SUM(CASE WHEN period_group = 'Early (2012-2040)' THEN total_acres ELSE 0 END)) as acceleration
 FROM period_comparison
 GROUP BY from_landuse, to_landuse
@@ -294,13 +296,13 @@ def execute_custom_query(query):
     conn, error = get_database_connection()
     if error:
         return None, error
-    
+
     try:
         # Add LIMIT if not present for safety
         query_upper = query.upper().strip()
         if query_upper.startswith('SELECT') and 'LIMIT' not in query_upper:
             query = f"{query.rstrip(';')} LIMIT 1000"
-        
+
         # Use short TTL for custom queries to see fresh results
         df = conn.query(query, ttl=60)
         return df, None
@@ -310,16 +312,16 @@ def execute_custom_query(query):
 def show_schema_browser():
     """Display interactive schema browser"""
     st.markdown("### 📊 Database Schema Browser")
-    
+
     schema_info, error = get_table_schema()
     if error:
         st.error(f"❌ {error}")
         return
-    
+
     if not schema_info:
         st.warning("No schema information available")
         return
-    
+
     # Table selector
     table_names = list(schema_info.keys())
     selected_table = st.selectbox(
@@ -327,10 +329,10 @@ def show_schema_browser():
         table_names,
         help="Choose a table to view its structure and sample data"
     )
-    
+
     if selected_table and selected_table in schema_info:
         table_data = schema_info[selected_table]
-        
+
         # Table summary
         col1, col2, col3 = st.columns(3)
         with col1:
@@ -339,7 +341,7 @@ def show_schema_browser():
             st.metric("Columns", len(table_data['columns']))
         with col3:
             st.metric("Table Type", "Fact" if "fact_" in selected_table else "Dimension")
-        
+
         # Column information
         st.markdown("#### 📋 Column Details")
         st.dataframe(
@@ -347,7 +349,7 @@ def show_schema_browser():
             use_container_width=True,
             hide_index=True
         )
-        
+
         # Sample data
         st.markdown("#### 🔍 Sample Data")
         if not table_data['sample_data'].empty:
@@ -363,22 +365,22 @@ def show_schema_browser():
 def show_query_interface():
     """Display custom SQL query interface - runs in isolation"""
     st.markdown("### 🔧 Custom SQL Query Interface")
-    
+
     # Query examples
     examples = get_query_examples()
-    
+
     col1, col2 = st.columns([2, 1])
-    
+
     with col1:
         st.markdown("#### ✏️ SQL Editor")
-        
+
         # Example query selector
         example_category = st.selectbox(
             "Load example query:",
             ["Custom"] + list(examples.keys()),
             help="Select an example to start with, or choose Custom for your own query"
         )
-        
+
         if example_category != "Custom":
             example_queries = examples[example_category]
             example_name = st.selectbox(
@@ -388,7 +390,7 @@ def show_query_interface():
             default_query = example_queries[example_name]
         else:
             default_query = "-- Enter your SQL query here\nSELECT * FROM dim_landuse LIMIT 10;"
-        
+
         # SQL editor
         query = st.text_area(
             "SQL Query:",
@@ -396,7 +398,7 @@ def show_query_interface():
             height=300,
             help="Enter your SQL query. LIMIT clauses will be added automatically for safety."
         )
-        
+
         # Query controls
         col_exec, col_clear = st.columns([1, 1])
         with col_exec:
@@ -404,7 +406,7 @@ def show_query_interface():
         with col_clear:
             if st.button("🗑️ Clear", use_container_width=True):
                 st.rerun()
-    
+
     with col2:
         st.markdown("#### 💡 Query Tips")
         st.info("""
@@ -413,13 +415,13 @@ def show_query_interface():
         - Use JOINs to connect related tables
         - Add LIMIT for large result sets
         - Use meaningful column aliases
-        
+
         **Performance Tips:**
         - Filter early with WHERE clauses
         - Use scenario_id, time_id for filtering
         - Aggregate before joining when possible
         """)
-        
+
         st.markdown("#### 🏗️ Schema Relationships")
         st.markdown("""
         **Star Schema:**
@@ -428,7 +430,7 @@ def show_query_interface():
         - `dim_time` (time periods)
         - `dim_geography` (locations)
         - `dim_landuse` (land use types)
-        
+
         **Join Pattern:**
         ```sql
         FROM fact_landuse_transitions f
@@ -437,17 +439,17 @@ def show_query_interface():
         -- etc.
         ```
         """)
-    
+
     # Execute query
     if execute_button and query.strip():
         with st.spinner("🔍 Executing query..."):
             result_df, error = execute_custom_query(query)
-        
+
         if error:
             st.error(f"❌ {error}")
         elif result_df is not None:
             st.markdown("#### 📊 Query Results")
-            
+
             # Results summary
             col1, col2, col3 = st.columns(3)
             with col1:
@@ -459,10 +461,10 @@ def show_query_interface():
                     st.warning("⚠️ Results limited to 1000 rows")
                 else:
                     st.success("✅ Complete results")
-            
+
             # Display results
             st.dataframe(result_df, use_container_width=True, hide_index=True)
-            
+
             # Download option
             if not result_df.empty:
                 csv = result_df.to_csv(index=False)
@@ -476,7 +478,7 @@ def show_query_interface():
 def show_data_dictionary():
     """Display data dictionary and documentation"""
     st.markdown("### 📚 Data Dictionary")
-    
+
     # Land use categories
     st.markdown("#### 🌱 Land Use Categories")
     landuse_data = {
@@ -485,14 +487,14 @@ def show_data_dictionary():
         "Category": ["Agriculture", "Agriculture", "Natural", "Natural", "Developed"],
         "Description": [
             "Agricultural cropland for farming",
-            "Livestock grazing and pasture land", 
+            "Livestock grazing and pasture land",
             "Natural grasslands and rangeland",
             "Forested areas and woodlands",
             "Developed urban and suburban areas"
         ]
     }
     st.dataframe(pd.DataFrame(landuse_data), use_container_width=True, hide_index=True)
-    
+
     # Climate scenarios
     st.markdown("#### 🌡️ Climate Scenarios")
     scenario_data = {
@@ -503,19 +505,19 @@ def show_data_dictionary():
             "Higher emissions pathway (severe climate change)",
             "Sustainability pathway (strong international cooperation)",
             "Middle of the road (moderate challenges)",
-            "Regional rivalry (significant challenges)", 
+            "Regional rivalry (significant challenges)",
             "Fossil-fueled development (high economic growth)"
         ]
     }
     st.dataframe(pd.DataFrame(scenario_data), use_container_width=True, hide_index=True)
-    
+
     # Time periods
     st.markdown("#### 📅 Time Periods")
     st.info("""
     The dataset covers projections from 2012 to 2100 in 10-year intervals:
     - **2012-2020**: Calibration period (historical baseline)
     - **2020-2030**: Near-term projections
-    - **2030-2040**: Mid-term projections  
+    - **2030-2040**: Mid-term projections
     - **2040-2050**: Long-term projections
     - **2050-2060**: Extended projections
     - **2060-2070**: Future projections
@@ -525,23 +527,23 @@ def main():
     """Main data explorer interface"""
     st.title("🔍 Data Explorer")
     st.markdown("**Advanced tools for exploring the landuse database**")
-    
+
     # Create tabs
     tab1, tab2, tab3 = st.tabs([
-        "📊 Schema Browser", 
-        "🔧 SQL Interface", 
+        "📊 Schema Browser",
+        "🔧 SQL Interface",
         "📚 Data Dictionary"
     ])
-    
+
     with tab1:
         show_schema_browser()
-    
+
     with tab2:
         show_query_interface()
-    
+
     with tab3:
         show_data_dictionary()
-    
+
     # Footer
     st.markdown("---")
     st.markdown("""

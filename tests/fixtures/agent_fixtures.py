@@ -2,11 +2,12 @@
 Shared fixtures for agent testing
 """
 
-import pytest
-from unittest.mock import Mock, MagicMock, patch
 from pathlib import Path
-import pandas as pd
+from unittest.mock import MagicMock, Mock, patch
+
 import duckdb
+import pandas as pd
+import pytest
 
 
 @pytest.fixture
@@ -16,10 +17,10 @@ def mock_anthropic_llm():
     mock.model = "claude-3-5-sonnet-20241022"
     mock.temperature = 0.1
     mock.max_tokens = 2000
-    
+
     # Default response for invoke
     mock.invoke.return_value = Mock(content="SELECT COUNT(*) FROM dim_scenario")
-    
+
     return mock
 
 
@@ -30,10 +31,10 @@ def mock_openai_llm():
     mock.model = "gpt-4-turbo-preview"
     mock.temperature = 0.1
     mock.max_tokens = 4000
-    
+
     # Default response for invoke
     mock.invoke.return_value = Mock(content="SELECT * FROM table LIMIT 10")
-    
+
     return mock
 
 
@@ -67,18 +68,18 @@ def expected_sql_queries():
     """Expected SQL queries for natural language inputs"""
     return {
         "agricultural": """
-            SELECT 
+            SELECT
                 AVG(f.acres) as avg_acres_lost_per_scenario,
                 SUM(f.acres) as total_acres_lost
             FROM fact_landuse_transitions f
             JOIN dim_landuse fl ON f.from_landuse_id = fl.landuse_id
             JOIN dim_landuse tl ON f.to_landuse_id = tl.landuse_id
-            WHERE fl.landuse_category = 'Agriculture' 
+            WHERE fl.landuse_category = 'Agriculture'
               AND tl.landuse_category != 'Agriculture'
               AND f.transition_type = 'change'
         """,
         "forest": """
-            SELECT 
+            SELECT
                 t.start_year,
                 t.end_year,
                 SUM(f.acres) as forest_loss
@@ -128,13 +129,13 @@ def mock_file_operations():
             "amount": [100, 200, 150]
         })
     }
-    
+
     def mock_read(file_path, *args, **kwargs):
         path = str(file_path)
         if path in mock_files:
             return mock_files[path]
         raise FileNotFoundError(f"Mock file not found: {path}")
-    
+
     return mock_read, mock_files
 
 
@@ -144,10 +145,10 @@ def mock_duckdb_operations():
     class MockDuckDBConnection:
         def __init__(self):
             self.executed_queries = []
-            
+
         def execute(self, query):
             self.executed_queries.append(query)
-            
+
             # Return mock results based on query
             if "COUNT(*)" in query:
                 return MockResult([(5,)])
@@ -158,28 +159,28 @@ def mock_duckdb_operations():
                 ])
             else:
                 return MockResult([])
-                
+
         def close(self):
             pass
-            
+
         def df(self):
             return pd.DataFrame({"col1": [1, 2], "col2": [3, 4]})
-    
+
     class MockResult:
         def __init__(self, data):
             self.data = data
-            
+
         def fetchone(self):
             return self.data[0] if self.data else None
-            
+
         def fetchall(self):
             return self.data
-            
+
         def df(self):
             if not self.data:
                 return pd.DataFrame()
             return pd.DataFrame(self.data)
-    
+
     return MockDuckDBConnection
 
 
@@ -241,17 +242,17 @@ Columns: id, name, value
 def mock_langchain_tools():
     """Mock LangChain tools for agents"""
     tools = []
-    
+
     # Mock execute query tool
     execute_tool = Mock()
     execute_tool.name = "execute_query"
     execute_tool.func = Mock(return_value="Query executed successfully")
     tools.append(execute_tool)
-    
+
     # Mock schema info tool
     schema_tool = Mock()
     schema_tool.name = "get_schema_info"
     schema_tool.func = Mock(return_value="Database schema information")
     tools.append(schema_tool)
-    
+
     return tools

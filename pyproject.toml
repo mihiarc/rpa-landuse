@@ -104,9 +104,11 @@ exclude_lines = [
 [tool.ruff]
 target-version = "py39"
 line-length = 120
+
+[tool.ruff.lint]
 select = [
     "E",  # pycodestyle errors
-    "W",  # pycodestyle warnings
+    "W",  # pycodestyle warnings  
     "F",  # pyflakes
     "I",  # isort
     "B",  # flake8-bugbear
@@ -114,13 +116,17 @@ select = [
     "UP", # pyupgrade
 ]
 ignore = [
-    "E501", # line too long, handled by black
+    "E501", # line too long
     "B008", # do not perform function calls in argument defaults
     "C901", # too complex
+    "E722", # bare except (allow for now)
+    "F401", # unused imports (allow for now)
+    "F841", # unused variable (allow for now)
 ]
 
-[tool.ruff.per-file-ignores]
+[tool.ruff.lint.per-file-ignores]
 "__init__.py" = ["F401"]
+"tests/*" = ["F401", "F841"]
 
 [tool.mypy]
 python_version = "3.9"

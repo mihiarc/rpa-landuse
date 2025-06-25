@@ -4,10 +4,11 @@ Test runner script for the Langchain Landuse project
 Provides convenient commands for running different test suites
 """
 
-import sys
-import subprocess
-from pathlib import Path
 import argparse
+import subprocess
+import sys
+from pathlib import Path
+
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
@@ -19,7 +20,7 @@ def run_command(cmd: list, description: str) -> int:
     """Run a command and return exit code"""
     console.print(f"\n[bold blue]Running:[/bold blue] {description}")
     console.print(f"[dim]Command: {' '.join(cmd)}[/dim]\n")
-    
+
     result = subprocess.run(cmd, capture_output=False)
     return result.returncode
 
@@ -93,7 +94,7 @@ def run_parallel_tests():
 def list_available_markers():
     """List all available test markers"""
     console.print("\n[bold]Available test markers:[/bold]")
-    
+
     markers = [
         ("unit", "Unit tests (fast, isolated)"),
         ("integration", "Integration tests (may require database)"),
@@ -102,14 +103,14 @@ def list_available_markers():
         ("requires_api", "Tests that require API keys"),
         ("requires_db", "Tests that require database")
     ]
-    
+
     table = Table(title="Test Markers")
     table.add_column("Marker", style="cyan")
     table.add_column("Description", style="yellow")
-    
+
     for marker, desc in markers:
         table.add_row(f"@pytest.mark.{marker}", desc)
-    
+
     console.print(table)
     console.print("\n[dim]Use: pytest -m <marker> to run specific marker tests[/dim]")
 
@@ -117,7 +118,7 @@ def list_available_markers():
 def main():
     parser = argparse.ArgumentParser(description="Run tests for Langchain Landuse project")
     parser.add_argument("command", nargs="?", default="all",
-                       choices=["all", "unit", "integration", "security", "coverage", 
+                       choices=["all", "unit", "integration", "security", "coverage",
                                "failed", "parallel", "markers"],
                        help="Type of tests to run")
     parser.add_argument("-t", "--test", help="Run specific test file or test function")
@@ -126,15 +127,15 @@ def main():
     parser.add_argument("-x", "--exitfirst", action="store_true", help="Exit on first failure")
     parser.add_argument("-v", "--verbose", action="store_true", help="Verbose output")
     parser.add_argument("--pdb", action="store_true", help="Drop into debugger on failures")
-    
+
     args = parser.parse_args()
-    
+
     console.print(Panel.fit(
         "[bold green]Langchain Landuse Test Runner[/bold green]\n"
         "[yellow]Running tests with pytest[/yellow]",
         border_style="green"
     ))
-    
+
     # Custom test command
     if args.test:
         exit_code = run_specific_test(args.test)
@@ -163,7 +164,7 @@ def main():
         elif args.command == "markers":
             list_available_markers()
             exit_code = 0
-    
+
     # Summary
     if exit_code == 0:
         console.print(Panel.fit(
@@ -175,7 +176,7 @@ def main():
             f"[bold red]❌ Tests failed with exit code: {exit_code}[/bold red]",
             border_style="red"
         ))
-    
+
     return exit_code
 
 

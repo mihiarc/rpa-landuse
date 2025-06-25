@@ -7,10 +7,11 @@ Checks environment setup and provides instructions for getting started
 import os
 import sys
 from pathlib import Path
+
+from rich import print as rprint
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
-from rich import print as rprint
 
 console = Console()
 
@@ -19,25 +20,25 @@ def check_api_keys():
     """Check if required API keys are configured"""
     # Check multiple possible locations for API keys
     api_key_sources = []
-    
+
     # 1. Check config/.env (recommended)
     config_env = Path("config/.env")
     if config_env.exists():
         from dotenv import load_dotenv
         load_dotenv(config_env)
         api_key_sources.append("config/.env")
-    
+
     # 2. Check root .env
     root_env = Path(".env")
     if root_env.exists():
         from dotenv import load_dotenv
         load_dotenv(root_env, override=True)
         api_key_sources.append(".env")
-    
+
     # 3. Check environment variables
     openai_key = os.getenv("OPENAI_API_KEY")
     anthropic_key = os.getenv("ANTHROPIC_API_KEY")
-    
+
     return {
         "openai": openai_key,
         "anthropic": anthropic_key,
@@ -54,8 +55,8 @@ def check_database():
 def check_dependencies():
     """Check if required dependencies are installed"""
     try:
-        import langchain
         import duckdb
+        import langchain
         import pandas
         import rich
         return True
@@ -66,15 +67,15 @@ def check_dependencies():
 def main():
     """Run the quick start checks and provide instructions"""
     console.print("\n[bold cyan]🚀 Landuse Natural Language Agent - Quick Start[/bold cyan]\n")
-    
+
     # Create status table
     status_table = Table(title="Environment Check", show_header=True)
     status_table.add_column("Component", style="cyan")
     status_table.add_column("Status", style="green")
     status_table.add_column("Details")
-    
+
     all_good = True
-    
+
     # 1. Check dependencies
     deps_ok = check_dependencies()
     if deps_ok:
@@ -90,10 +91,10 @@ def main():
             "Run: [yellow]uv sync[/yellow]"
         )
         all_good = False
-    
+
     # 2. Check API keys
     api_keys = check_api_keys()
-    
+
     # OpenAI API Key
     if api_keys["openai"]:
         key_preview = api_keys["openai"][:8] + "..." + api_keys["openai"][-4:]
@@ -109,7 +110,7 @@ def main():
             "Required for GPT-4 models"
         )
         all_good = False
-    
+
     # Anthropic API Key (optional)
     if api_keys["anthropic"]:
         key_preview = api_keys["anthropic"][:8] + "..." + api_keys["anthropic"][-4:]
@@ -124,7 +125,7 @@ def main():
             "⚠️  Optional",
             "Add for Claude model support"
         )
-    
+
     # API Key Sources
     if api_keys["sources"]:
         status_table.add_row(
@@ -132,7 +133,7 @@ def main():
             "📁 Found",
             ", ".join(api_keys["sources"])
         )
-    
+
     # 3. Check database
     db_exists, db_path = check_database()
     if db_exists:
@@ -148,17 +149,17 @@ def main():
             "Run: [yellow]uv run python scripts/converters/convert_to_duckdb.py[/yellow]"
         )
         all_good = False
-    
+
     console.print(status_table)
     console.print()
-    
+
     # Show configured limits if everything is set up
     if all_good:
         limits_table = Table(title="Configured Limits", show_header=True)
         limits_table.add_column("Setting", style="cyan")
         limits_table.add_column("Value", style="yellow")
         limits_table.add_column("Environment Variable", style="dim")
-        
+
         limits_table.add_row(
             "Max Iterations",
             str(os.getenv("LANDUSE_MAX_ITERATIONS", "5")),
@@ -179,10 +180,10 @@ def main():
             f"{os.getenv('LANDUSE_RATE_LIMIT_CALLS', '60')} calls per {os.getenv('LANDUSE_RATE_LIMIT_WINDOW', '60')}s",
             "LANDUSE_RATE_LIMIT_CALLS/WINDOW"
         )
-        
+
         console.print(limits_table)
         console.print()
-    
+
     # Provide instructions based on status
     if not all_good:
         console.print(Panel.fit(
@@ -203,12 +204,12 @@ def main():
         # Check if shortcut command is available
         try:
             import subprocess
-            result = subprocess.run(["uv", "run", "which", "landuse-agent"], 
+            result = subprocess.run(["uv", "run", "which", "landuse-agent"],
                                   capture_output=True, text=True)
             has_shortcut = result.returncode == 0
         except:
             has_shortcut = False
-        
+
         if has_shortcut:
             start_text = (
                 "[bold green]✅ Ready to go![/bold green]\n\n"
@@ -223,9 +224,9 @@ def main():
                 "Start the agent with:\n"
                 "[bold cyan]uv run python src/landuse/agents/landuse_natural_language_agent.py[/bold cyan]"
             )
-        
+
         console.print(Panel.fit(start_text, border_style="green"))
-        
+
         # Show example queries
         console.print("\n[bold]Example queries to try:[/bold]")
         examples = [
@@ -236,9 +237,9 @@ def main():
         ]
         for example in examples:
             console.print(f"  • [yellow]{example}[/yellow]")
-        
+
         console.print("\n[dim]Type 'exit' to quit, 'help' for more info, 'schema' for database details[/dim]\n")
-    
+
     # Show additional resources
     if all_good:
         console.print(Panel(

@@ -7,12 +7,13 @@ import subprocess
 import sys
 from pathlib import Path
 
+
 def main():
     """Serve documentation using MkDocs"""
     print("🌲 Starting RPA Land Use Analytics Documentation Server...")
     print("📚 Documentation will be available at: http://localhost:8000")
     print("🛑 Press Ctrl+C to stop the server\n")
-    
+
     try:
         # Run mkdocs serve
         subprocess.run(["mkdocs", "serve"], check=True)

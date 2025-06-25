@@ -5,6 +5,7 @@ Organize project files into a cleaner structure
 
 import shutil
 from pathlib import Path
+
 from rich.console import Console
 from rich.panel import Panel
 from rich.tree import Tree
@@ -13,9 +14,9 @@ console = Console()
 
 def organize_files():
     """Organize project files into directories"""
-    
+
     console.print(Panel.fit("📁 [bold blue]Organizing Project Files[/bold blue]", border_style="blue"))
-    
+
     # Define the new directory structure
     directories = [
         "scripts/converters",
@@ -27,12 +28,12 @@ def organize_files():
         "docs",
         "config"
     ]
-    
+
     # Create directories
     for dir_path in directories:
         Path(dir_path).mkdir(parents=True, exist_ok=True)
         console.print(f"[green]✓[/green] Created {dir_path}")
-    
+
     # Define file moves
     file_moves = {
         # Converter scripts
@@ -42,46 +43,46 @@ def organize_files():
         "convert_landuse_with_agriculture.py": "scripts/converters/convert_landuse_with_agriculture.py",
         "add_change_views.py": "scripts/converters/add_change_views.py",
         "data/convert_json_to_parquet.py": "scripts/converters/convert_json_to_parquet.py",
-        
+
         # Agent scripts
         "data_engineering_agent.py": "scripts/agents/data_engineering_agent.py",
         "test_agent.py": "scripts/agents/test_agent.py",
-        
+
         # Raw data
         "data/county_landuse_projections_RPA.json": "data/raw/county_landuse_projections_RPA.json",
-        
+
         # Processed data
         "data/landuse_projections.db": "data/processed/landuse_projections.db",
         "data/landuse_transitions.db": "data/processed/landuse_transitions.db",
         "data/landuse_transitions_with_ag.db": "data/processed/landuse_transitions_with_ag.db",
         "data/county_landuse_projections_RPA.db": "data/processed/county_landuse_projections_RPA.db",
-        
+
         # Sample data
         "data/inventory.json": "data/samples/inventory.json",
         "data/sample_data.csv": "data/samples/sample_data.csv",
         "data/sensor_data.parquet": "data/samples/sensor_data.parquet",
-        
+
         # Config files
         ".env": "config/.env",
         "requirements.txt": "config/requirements.txt",
-        
+
         # Documentation
         "CLAUDE.local.md": "docs/CLAUDE.local.md"
     }
-    
+
     # Move files
     console.print("\n[bold cyan]Moving files...[/bold cyan]")
     for src, dst in file_moves.items():
         src_path = Path(src)
         dst_path = Path(dst)
-        
+
         if src_path.exists():
             dst_path.parent.mkdir(parents=True, exist_ok=True)
             shutil.move(str(src_path), str(dst_path))
             console.print(f"[green]✓[/green] Moved {src} → {dst}")
         else:
             console.print(f"[yellow]![/yellow] Skipped {src} (not found)")
-    
+
     # Create README files
     readme_content = {
         "scripts/converters/README.md": """# Converter Scripts
@@ -152,12 +153,12 @@ Analyzes county-level land use transitions using LangChain agents and SQLite.
 - Change-only views (excluding same-to-same transitions)
 """
     }
-    
+
     console.print("\n[bold cyan]Creating README files...[/bold cyan]")
     for readme_path, content in readme_content.items():
         Path(readme_path).write_text(content)
         console.print(f"[green]✓[/green] Created {readme_path}")
-    
+
     # Create .gitignore
     gitignore_content = """# Python
 __pycache__/
@@ -190,58 +191,58 @@ Thumbs.db
 # Keep sample data
 !data/samples/*
 """
-    
+
     Path(".gitignore").write_text(gitignore_content)
-    console.print(f"[green]✓[/green] Created .gitignore")
-    
+    console.print("[green]✓[/green] Created .gitignore")
+
     # Display new structure
     console.print("\n[bold blue]New Project Structure:[/bold blue]")
-    
+
     tree = Tree("📁 langchain-landuse/")
-    
+
     # Scripts
     scripts = tree.add("📂 scripts/")
     converters = scripts.add("📂 converters/")
     converters.add("📄 convert_landuse_with_agriculture.py")
     converters.add("📄 add_change_views.py")
     converters.add("📄 README.md")
-    
+
     agents = scripts.add("📂 agents/")
     agents.add("📄 data_engineering_agent.py")
     agents.add("📄 test_agent.py")
     agents.add("📄 README.md")
-    
+
     # Data
     data = tree.add("📂 data/")
     raw = data.add("📂 raw/")
     raw.add("📄 county_landuse_projections_RPA.json")
-    
+
     processed = data.add("📂 processed/")
     processed.add("🗄️ landuse_transitions_with_ag.db [PRIMARY]")
     processed.add("🗄️ landuse_transitions.db")
     processed.add("🗄️ landuse_projections.db")
-    
+
     samples = data.add("📂 samples/")
     samples.add("📄 inventory.json")
     samples.add("📄 sample_data.csv")
     samples.add("📄 sensor_data.parquet")
-    
+
     # Config
     config = tree.add("📂 config/")
     config.add("📄 .env")
     config.add("📄 requirements.txt")
-    
+
     # Docs
     docs = tree.add("📂 docs/")
     docs.add("📄 CLAUDE.local.md")
-    
+
     # Root files
     tree.add("📄 README.md")
     tree.add("📄 .gitignore")
     tree.add("📄 organize_project.py")
-    
+
     console.print(tree)
-    
+
     # Summary
     summary = Panel(
         """[bold green]✅ Project organized successfully![/bold green]
@@ -259,7 +260,7 @@ Thumbs.db
         title="📋 Organization Complete",
         border_style="green"
     )
-    
+
     console.print("\n", summary)
 
 if __name__ == "__main__":

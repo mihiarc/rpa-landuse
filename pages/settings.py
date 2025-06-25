@@ -4,11 +4,12 @@ Settings and Help Page for Landuse Dashboard
 Configuration, system status, and help information
 """
 
-import streamlit as st
 import os
+import subprocess
 import sys
 from pathlib import Path
-import subprocess
+
+import streamlit as st
 
 # Add src to path
 project_root = Path(__file__).parent.parent
@@ -23,24 +24,24 @@ def check_system_status():
         "dependencies": {"status": False, "message": "", "details": {}},
         "agent": {"status": False, "message": ""}
     }
-    
+
     # Check database
     db_path = Path(os.getenv('LANDUSE_DB_PATH', 'data/processed/landuse_analytics.duckdb'))
     if db_path.exists():
         status["database"]["status"] = True
         status["database"]["message"] = "Database found and accessible"
         status["database"]["path"] = str(db_path)
-        
+
         # Check database size
         size_mb = db_path.stat().st_size / (1024 * 1024)
         status["database"]["size"] = f"{size_mb:.1f} MB"
     else:
         status["database"]["message"] = f"Database not found at {db_path}"
-    
+
     # Check API keys
     openai_key = os.getenv("OPENAI_API_KEY")
     anthropic_key = os.getenv("ANTHROPIC_API_KEY")
-    
+
     if openai_key:
         status["api_keys"]["details"]["openai"] = {
             "configured": True,
@@ -48,7 +49,7 @@ def check_system_status():
         }
     else:
         status["api_keys"]["details"]["openai"] = {"configured": False}
-    
+
     if anthropic_key:
         status["api_keys"]["details"]["anthropic"] = {
             "configured": True,
@@ -56,21 +57,21 @@ def check_system_status():
         }
     else:
         status["api_keys"]["details"]["anthropic"] = {"configured": False}
-    
+
     if openai_key or anthropic_key:
         status["api_keys"]["status"] = True
         status["api_keys"]["message"] = "At least one API key configured"
     else:
         status["api_keys"]["message"] = "No API keys found"
-    
+
     # Check dependencies
     try:
-        import langchain
         import duckdb
+        import langchain
         import pandas
         import plotly
         import rich
-        
+
         status["dependencies"]["status"] = True
         status["dependencies"]["message"] = "All required packages installed"
         status["dependencies"]["details"] = {
@@ -81,7 +82,7 @@ def check_system_status():
         }
     except ImportError as e:
         status["dependencies"]["message"] = f"Missing packages: {e}"
-    
+
     # Check agent initialization
     if status["database"]["status"] and status["api_keys"]["status"]:
         try:
@@ -93,31 +94,31 @@ def check_system_status():
             status["agent"]["message"] = f"Agent initialization error: {e}"
     else:
         status["agent"]["message"] = "Database or API keys not configured"
-    
+
     return status
 
 def show_system_status():
     """Display system status dashboard"""
     st.markdown("### 🔧 System Status")
-    
+
     status = check_system_status()
-    
+
     # Overall status
     all_good = all([
         status["database"]["status"],
-        status["api_keys"]["status"], 
+        status["api_keys"]["status"],
         status["dependencies"]["status"],
         status["agent"]["status"]
     ])
-    
+
     if all_good:
         st.success("✅ **System Ready** - All components are properly configured!")
     else:
         st.warning("⚠️ **Configuration Needed** - Some components require setup.")
-    
+
     # Detailed status
     col1, col2 = st.columns(2)
-    
+
     with col1:
         # Database status
         st.markdown("#### 🗄️ Database")
@@ -138,7 +139,7 @@ def show_system_status():
                    ```
                 3. Or set `LANDUSE_DB_PATH` environment variable to your database location
                 """)
-        
+
         # Dependencies status
         st.markdown("#### 📦 Dependencies")
         if status["dependencies"]["status"]:
@@ -155,13 +156,13 @@ def show_system_status():
                 uv sync
                 ```
                 """)
-    
+
     with col2:
         # API Keys status
         st.markdown("#### 🔑 API Keys")
         if status["api_keys"]["status"]:
             st.success(f"✅ {status['api_keys']['message']}")
-            
+
             for provider, details in status["api_keys"]["details"].items():
                 if details["configured"]:
                     st.info(f"🔐 **{provider.title()}:** {details['preview']}")
@@ -180,12 +181,12 @@ def show_system_status():
                    ```
                 3. Restart the application
                 """)
-        
+
         # Agent status
         st.markdown("#### 🤖 AI Agent")
         if status["agent"]["status"]:
             st.success(f"✅ {status['agent']['message']}")
-            
+
             # Show model configuration
             model_name = os.getenv('LANDUSE_MODEL', 'gpt-4o-mini')
             st.info(f"🧠 **Model:** {model_name}")
@@ -195,10 +196,10 @@ def show_system_status():
 def show_configuration():
     """Display configuration options"""
     st.markdown("### ⚙️ Configuration")
-    
+
     # Environment variables
     st.markdown("#### 🌍 Environment Variables")
-    
+
     env_vars = {
         "LANDUSE_DB_PATH": {
             "current": os.getenv('LANDUSE_DB_PATH', 'data/processed/landuse_analytics.duckdb'),
@@ -225,7 +226,7 @@ def show_configuration():
             "description": "Maximum query execution time (seconds)"
         }
     }
-    
+
     for var_name, var_info in env_vars.items():
         col1, col2 = st.columns([1, 2])
         with col1:
@@ -233,7 +234,7 @@ def show_configuration():
         with col2:
             st.text(f"Current: {var_info['current']}")
             st.caption(var_info['description'])
-    
+
     # Configuration file example
     st.markdown("#### 📝 Configuration File Example")
     with st.expander("Example config/.env file"):
@@ -264,42 +265,42 @@ LANDUSE_RATE_LIMIT_WINDOW=60
 def show_help_documentation():
     """Display help and documentation"""
     st.markdown("### 📚 Help & Documentation")
-    
+
     # Quick start
     st.markdown("#### 🚀 Quick Start Guide")
     with st.expander("Getting Started", expanded=True):
         st.markdown("""
-        **1. Check System Status** 
+        **1. Check System Status**
         - Ensure database and API keys are configured above
-        
+
         **2. Try the Chat Interface**
         - Navigate to the "Natural Language Chat" page
         - Ask questions like: "How much agricultural land is being lost?"
-        
+
         **3. Explore Analytics**
         - Visit the "Analytics Dashboard" for pre-built visualizations
         - View trends across different climate scenarios
-        
+
         **4. Advanced Analysis**
         - Use the "Data Explorer" for custom SQL queries
         - Browse database schema and run example queries
         """)
-    
+
     # Feature overview
     st.markdown("#### ✨ Feature Overview")
-    
+
     features = {
         "💬 Natural Language Chat": "Ask questions in plain English about land use data",
         "📊 Analytics Dashboard": "Pre-built visualizations and insights",
         "🔍 Data Explorer": "Custom SQL queries and database browsing",
         "⚙️ Settings & Help": "Configuration and troubleshooting"
     }
-    
+
     for feature, description in features.items():
         st.markdown(f"**{feature}**")
         st.caption(description)
         st.markdown("")
-    
+
     # Example queries
     st.markdown("#### 💡 Example Queries")
     with st.expander("Natural Language Examples"):
@@ -308,47 +309,47 @@ def show_help_documentation():
         - "How much agricultural land is being lost?"
         - "Which scenarios show the most crop land conversion?"
         - "Show me crop to pasture transitions by state"
-        
+
         **Climate Analysis:**
         - "Compare forest loss between RCP45 and RCP85 scenarios"
         - "What are the differences between climate pathways?"
-        
+
         **Geographic Analysis:**
         - "Which states have the most urban expansion?"
         - "Show me land use changes in California"
         - "What counties have the most development?"
-        
+
         **Time Series:**
         - "How do land use patterns change over time?"
         - "Show trends from 2020 to 2100"
         """)
-    
+
     # Data information
     st.markdown("#### 📊 About the Data")
     with st.expander("Dataset Information"):
         st.markdown("""
         **Source:** USDA Forest Service RPA 2020 Assessment
-        
+
         **Coverage:**
         - 3,075+ US counties (conterminous United States)
         - 20 climate scenarios (RCP4.5/8.5 × SSP1/2/3/5 × 5 climate models)
         - 6 time periods (2012-2100)
         - 5 land use categories (Crop, Pasture, Rangeland, Forest, Urban)
-        
+
         **Data Size:**
         - 5.4M+ land use transition records
         - 1.2GB DuckDB database
         - Star schema optimized for analytics
-        
+
         **Citation:**
-        Mihiar, A.J.; Lewis, D.J.; Coulston, J.W. 2023. Land use projections for the 2020 RPA Assessment. 
+        Mihiar, A.J.; Lewis, D.J.; Coulston, J.W. 2023. Land use projections for the 2020 RPA Assessment.
         Fort Collins, CO: Forest Service Research Data Archive. https://doi.org/10.2737/RDS-2023-0026
         """)
 
 def show_troubleshooting():
     """Display troubleshooting guide"""
     st.markdown("### 🔧 Troubleshooting")
-    
+
     # Common issues
     issues = {
         "Database not found": {
@@ -384,7 +385,7 @@ def show_troubleshooting():
             ]
         }
     }
-    
+
     for issue, details in issues.items():
         with st.expander(f"❓ {issue}"):
             st.markdown(f"**Symptoms:** {details['symptoms']}")
@@ -396,27 +397,27 @@ def main():
     """Main settings interface"""
     st.title("⚙️ Settings & Help")
     st.markdown("**Configuration, system status, and help information**")
-    
+
     # Create tabs
     tab1, tab2, tab3, tab4 = st.tabs([
         "🔧 System Status",
-        "⚙️ Configuration", 
+        "⚙️ Configuration",
         "📚 Help & Docs",
         "🔧 Troubleshooting"
     ])
-    
+
     with tab1:
         show_system_status()
-    
+
     with tab2:
         show_configuration()
-    
+
     with tab3:
         show_help_documentation()
-    
+
     with tab4:
         show_troubleshooting()
-    
+
     # Footer
     st.markdown("---")
     st.markdown("""

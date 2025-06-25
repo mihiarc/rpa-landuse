@@ -4,12 +4,13 @@ Pydantic models for landuse data structures
 Provides comprehensive data validation and type safety
 """
 
-from typing import Optional, List, Dict, Any, Literal
 from datetime import datetime
-from pathlib import Path
-from pydantic import BaseModel, Field, ConfigDict, field_validator, model_validator
-import pandas as pd
 from enum import Enum
+from pathlib import Path
+from typing import Any, Dict, List, Literal, Optional
+
+import pandas as pd
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 
 # Enums for controlled vocabularies
@@ -20,7 +21,7 @@ class LandUseType(str, Enum):
     RANGELAND = "rg"
     FOREST = "fr"
     URBAN = "ur"
-    
+
     @classmethod
     def from_name(cls, name: str) -> "LandUseType":
         """Get enum from display name"""
@@ -65,13 +66,13 @@ class TransitionType(str, Enum):
 class AgentConfig(BaseModel):
     """Configuration for landuse agents"""
     model_config = ConfigDict(extra="forbid")
-    
+
     # Database configuration
     db_path: Path = Field(
         default=Path("data/processed/landuse_analytics.duckdb"),
         description="Path to DuckDB database"
     )
-    
+
     # Model configuration
     model_name: str = Field(
         default="claude-3-5-sonnet-20241022",
@@ -88,7 +89,7 @@ class AgentConfig(BaseModel):
         gt=0,
         description="Maximum tokens in response"
     )
-    
+
     # Query execution limits
     max_iterations: int = Field(
         default=5,
@@ -114,7 +115,7 @@ class AgentConfig(BaseModel):
         le=500,
         description="Default number of rows to display"
     )
-    
+
     # Rate limiting
     rate_limit_calls: int = Field(
         default=60,
@@ -126,7 +127,7 @@ class AgentConfig(BaseModel):
         gt=0,
         description="Rate limit time window in seconds"
     )
-    
+
     @field_validator('db_path')
     @classmethod
     def validate_db_path(cls, v: Path) -> Path:
@@ -139,7 +140,7 @@ class AgentConfig(BaseModel):
 class QueryInput(BaseModel):
     """Input for natural language queries"""
     model_config = ConfigDict(extra="forbid")
-    
+
     query: str = Field(
         ...,
         min_length=1,
@@ -150,7 +151,7 @@ class QueryInput(BaseModel):
         default=True,
         description="Include default assumptions in response"
     )
-    
+
     @field_validator('query')
     @classmethod
     def clean_query(cls, v: str) -> str:
@@ -161,7 +162,7 @@ class QueryInput(BaseModel):
 class SQLQuery(BaseModel):
     """Validated SQL query"""
     model_config = ConfigDict(extra="forbid")
-    
+
     sql: str = Field(
         ...,
         min_length=1,
@@ -171,7 +172,7 @@ class SQLQuery(BaseModel):
         None,
         description="Human-readable description of query"
     )
-    
+
     @field_validator('sql')
     @classmethod
     def validate_sql(cls, v: str) -> str:
@@ -187,7 +188,7 @@ class SQLQuery(BaseModel):
 class QueryResult(BaseModel):
     """Result from query execution"""
     model_config = ConfigDict(arbitrary_types_allowed=True)
-    
+
     success: bool
     data: Optional[pd.DataFrame] = Field(None, exclude=True)  # Exclude from serialization
     error: Optional[str] = None
@@ -195,7 +196,7 @@ class QueryResult(BaseModel):
     column_count: int = 0
     execution_time: float = 0.0
     query: Optional[str] = None
-    
+
     @model_validator(mode='after')
     def set_counts(self) -> 'QueryResult':
         """Set row and column counts from dataframe"""
@@ -203,8 +204,8 @@ class QueryResult(BaseModel):
             self.row_count = len(self.data)
             self.column_count = len(self.data.columns)
         return self
-    
-    def to_dict(self) -> Dict[str, Any]:
+
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary with data as list of dicts"""
         result = self.model_dump(exclude={'data'})
         if self.data is not None:
@@ -215,7 +216,7 @@ class QueryResult(BaseModel):
 class DimensionTable(BaseModel):
     """Base model for dimension tables"""
     model_config = ConfigDict(extra="forbid")
-    
+
 
 class ScenarioDimension(DimensionTable):
     """Scenario dimension data"""
@@ -224,7 +225,7 @@ class ScenarioDimension(DimensionTable):
     climate_model: str
     rcp_scenario: RCPScenario
     ssp_scenario: SSPScenario
-    
+
 
 class TimeDimension(DimensionTable):
     """Time dimension data"""
@@ -243,7 +244,7 @@ class GeographyDimension(DimensionTable):
     state_code: str
     state_name: Optional[str] = None
     region: Optional[str] = None
-    
+
     @field_validator('fips_code')
     @classmethod
     def validate_fips(cls, v: str) -> str:
@@ -264,7 +265,7 @@ class LandUseDimension(DimensionTable):
 class LandUseTransition(BaseModel):
     """Fact table record for land use transitions"""
     model_config = ConfigDict(extra="forbid")
-    
+
     transition_id: int
     scenario_id: int
     time_id: int
@@ -273,7 +274,7 @@ class LandUseTransition(BaseModel):
     to_landuse_id: int
     acres: float = Field(ge=0)
     transition_type: TransitionType
-    
+
     @model_validator(mode='after')
     def validate_transition(self) -> 'LandUseTransition':
         """Validate transition logic"""
@@ -288,18 +289,18 @@ class LandUseTransition(BaseModel):
 class AnalysisRequest(BaseModel):
     """Request for data analysis"""
     model_config = ConfigDict(extra="forbid")
-    
+
     analysis_type: Literal[
         "agricultural_loss",
-        "urban_expansion", 
+        "urban_expansion",
         "forest_change",
         "climate_comparison",
         "geographic_summary"
     ]
-    scenarios: Optional[List[str]] = None
-    states: Optional[List[str]] = None
-    time_periods: Optional[List[str]] = None
-    group_by: Optional[List[str]] = Field(
+    scenarios: Optional[list[str]] = None
+    states: Optional[list[str]] = None
+    time_periods: Optional[list[str]] = None
+    group_by: Optional[list[str]] = Field(
         default=None,
         description="Fields to group results by"
     )
@@ -309,14 +310,14 @@ class AnalysisRequest(BaseModel):
 class AnalysisResult(BaseModel):
     """Result from analysis request"""
     model_config = ConfigDict(arbitrary_types_allowed=True)
-    
+
     request: AnalysisRequest
     data: pd.DataFrame = Field(exclude=True)
-    summary_stats: Dict[str, float]
-    insights: List[str]
-    visualization_data: Optional[Dict[str, Any]] = None
-    
-    def to_dict(self) -> Dict[str, Any]:
+    summary_stats: dict[str, float]
+    insights: list[str]
+    visualization_data: Optional[dict[str, Any]] = None
+
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for serialization"""
         result = self.model_dump(exclude={'data'})
         result['data'] = self.data.to_dict(orient='records')
@@ -367,7 +368,7 @@ class ChatMessage(BaseModel):
     content: str
     timestamp: datetime = Field(default_factory=datetime.now)
     thinking: Optional[str] = None
-    metadata: Optional[Dict[str, Any]] = None
+    metadata: Optional[dict[str, Any]] = None
 
 
 class SystemStatus(BaseModel):

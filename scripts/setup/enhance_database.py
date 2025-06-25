@@ -3,8 +3,9 @@
 Enhance the landuse database with additional useful information
 """
 
-import duckdb
 from pathlib import Path
+
+import duckdb
 from rich.console import Console
 from rich.panel import Panel
 
@@ -12,7 +13,7 @@ console = Console()
 
 def add_state_names_to_geography(db_path: str):
     """Add state names to the dim_geography table"""
-    
+
     state_names = {
         '01': 'Alabama', '02': 'Alaska', '04': 'Arizona', '05': 'Arkansas',
         '06': 'California', '08': 'Colorado', '09': 'Connecticut', '10': 'Delaware',
@@ -28,42 +29,42 @@ def add_state_names_to_geography(db_path: str):
         '50': 'Vermont', '51': 'Virginia', '53': 'Washington', '54': 'West Virginia',
         '55': 'Wisconsin', '56': 'Wyoming', '72': 'Puerto Rico', '78': 'Virgin Islands'
     }
-    
+
     console.print(Panel.fit(
         "🔧 [bold blue]Enhancing Database[/bold blue]\n"
         "[yellow]Adding state names to geography dimension[/yellow]",
         border_style="blue"
     ))
-    
+
     try:
         conn = duckdb.connect(db_path)
-        
+
         # Check if state_name column already exists
         columns = conn.execute("""
-            SELECT column_name 
-            FROM information_schema.columns 
-            WHERE table_name = 'dim_geography_enhanced' 
+            SELECT column_name
+            FROM information_schema.columns
+            WHERE table_name = 'dim_geography_enhanced'
             AND column_name = 'state_name'
         """).fetchall()
-        
+
         if not columns:
             console.print("Adding state_name column to dim_geography_enhanced...")
-            
+
             # Add the column
             conn.execute("ALTER TABLE dim_geography_enhanced ADD COLUMN state_name VARCHAR(50)")
-            
+
             # Update with state names
             for code, name in state_names.items():
                 conn.execute("""
-                    UPDATE dim_geography_enhanced 
-                    SET state_name = ? 
+                    UPDATE dim_geography_enhanced
+                    SET state_name = ?
                     WHERE state_code = ?
                 """, (name, code))
-            
+
             # Create a view that includes state names
             conn.execute("""
                 CREATE OR REPLACE VIEW v_geography_enhanced AS
-                SELECT 
+                SELECT
                     geography_id,
                     fips_code,
                     state_code,
@@ -72,9 +73,9 @@ def add_state_names_to_geography(db_path: str):
                     region
                 FROM dim_geography_enhanced
             """)
-            
+
             console.print("✅ State names added successfully!")
-            
+
             # Show sample
             sample = conn.execute("""
                 SELECT state_code, state_name, COUNT(*) as counties
@@ -84,33 +85,33 @@ def add_state_names_to_geography(db_path: str):
                 ORDER BY state_name
                 LIMIT 5
             """).fetchdf()
-            
+
             console.print("\nSample results:")
             console.print(sample)
-            
+
         else:
             console.print("✓ State names already exist in dim_geography_enhanced")
-        
+
         conn.close()
-        
+
     except Exception as e:
         console.print(f"[red]Error: {e}[/red]")
         return False
-    
+
     return True
 
 def create_enhanced_views(db_path: str):
     """Create views that include human-readable names"""
-    
+
     console.print("\nCreating enhanced views...")
-    
+
     try:
         conn = duckdb.connect(db_path)
-        
+
         # Create a comprehensive transitions view with names
         conn.execute("""
             CREATE OR REPLACE VIEW v_transitions_with_names AS
-            SELECT 
+            SELECT
                 f.transition_id,
                 s.scenario_name,
                 s.rcp_scenario,
@@ -134,20 +135,20 @@ def create_enhanced_views(db_path: str):
             JOIN dim_landuse fl ON f.from_landuse_id = fl.landuse_id
             JOIN dim_landuse tl ON f.to_landuse_id = tl.landuse_id
         """)
-        
+
         console.print("✅ Enhanced views created successfully!")
-        
+
         conn.close()
-        
+
     except Exception as e:
         console.print(f"[red]Error creating views: {e}[/red]")
         return False
-    
+
     return True
 
 if __name__ == "__main__":
     db_path = "data/processed/landuse_analytics.duckdb"
-    
+
     if Path(db_path).exists():
         add_state_names_to_geography(db_path)
         create_enhanced_views(db_path)

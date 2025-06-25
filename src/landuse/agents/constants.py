@@ -42,7 +42,7 @@ This database contains USDA Forest Service 2020 RPA Assessment land use projecti
 - **fact_landuse_transitions**: Main table with transition data
   - transition_id (BIGINT): Unique identifier
   - scenario_id (INTEGER): Links to dim_scenario
-  - time_id (INTEGER): Links to dim_time  
+  - time_id (INTEGER): Links to dim_time
   - geography_id (INTEGER): Links to dim_geography_enhanced
   - from_landuse_id (INTEGER): Source land use type
   - to_landuse_id (INTEGER): Destination land use type
@@ -91,21 +91,21 @@ DEFAULT_ASSUMPTIONS = {
 QUERY_EXAMPLES = {
     "agricultural_loss": """
 -- Agricultural land loss (averaged across scenarios, full time period)
-SELECT 
+SELECT
     AVG(f.acres) as avg_acres_lost_per_scenario,
     COUNT(DISTINCT s.scenario_id) as scenarios_included
 FROM fact_landuse_transitions f
 JOIN dim_scenario s ON f.scenario_id = s.scenario_id
 JOIN dim_landuse fl ON f.from_landuse_id = fl.landuse_id
 JOIN dim_landuse tl ON f.to_landuse_id = tl.landuse_id
-WHERE fl.landuse_category = 'Agriculture' 
+WHERE fl.landuse_category = 'Agriculture'
   AND tl.landuse_category != 'Agriculture'
   AND f.transition_type = 'change'
 LIMIT 100;
 """,
     "urbanization": """
 -- Urbanization patterns (averaged across scenarios)
-SELECT 
+SELECT
     g.state_code,
     fl.landuse_name as from_landuse,
     AVG(f.acres) as avg_acres_urbanized
@@ -121,7 +121,7 @@ LIMIT 20;
 """,
     "climate_comparison": """
 -- Compare RCP scenarios
-SELECT 
+SELECT
     s.rcp_scenario,
     fl.landuse_name as from_landuse,
     tl.landuse_name as to_landuse,
@@ -136,7 +136,7 @@ ORDER BY total_acres DESC;
 """,
     "time_series": """
 -- Time series of land use changes
-SELECT 
+SELECT
     t.start_year,
     t.end_year,
     fl.landuse_name as from_landuse,
@@ -152,7 +152,7 @@ ORDER BY t.start_year, total_acres DESC;
 """
 }
 
-# Interactive chat examples  
+# Interactive chat examples
 CHAT_EXAMPLES = [
     "How much agricultural land is projected to be lost by 2070?",
     "Which states have the most urban expansion under high growth scenarios?",
@@ -204,7 +204,7 @@ RPA_SCENARIOS = {
         "theme": "Taking the Green Road"
     },
     "HL": {
-        "name": "High-Low", 
+        "name": "High-Low",
         "rcp": "rcp85",
         "ssp": "ssp3",
         "description": "High warming (~4.5°C), low U.S. growth, regional rivalry",
@@ -212,7 +212,7 @@ RPA_SCENARIOS = {
     },
     "HM": {
         "name": "High-Moderate",
-        "rcp": "rcp85", 
+        "rcp": "rcp85",
         "ssp": "ssp2",
         "description": "High warming (~4.5°C), moderate U.S. growth, middle of the road",
         "theme": "Middle of the Road"
@@ -220,7 +220,7 @@ RPA_SCENARIOS = {
     "HH": {
         "name": "High-High",
         "rcp": "rcp85",
-        "ssp": "ssp5", 
+        "ssp": "ssp5",
         "description": "High warming (~4.5°C), high U.S. growth, fossil-fueled development",
         "theme": "Taking the Highway"
     }

@@ -4,9 +4,9 @@ Mock Streamlit module for testing
 Provides mock implementations of Streamlit decorators and functions
 """
 
-from unittest.mock import Mock
-from functools import wraps
 import types
+from functools import wraps
+from unittest.mock import Mock
 
 
 def cache_resource(func=None, *, ttl=None, max_entries=None, show_spinner=True, validate=None):
@@ -16,7 +16,7 @@ def cache_resource(func=None, *, ttl=None, max_entries=None, show_spinner=True, 
         def wrapper(*args, **kwargs):
             return f(*args, **kwargs)
         return wrapper
-    
+
     if func is None:
         return decorator
     else:
@@ -30,7 +30,7 @@ def cache_data(func=None, *, ttl=None, max_entries=None, show_spinner=True, pers
         def wrapper(*args, **kwargs):
             return f(*args, **kwargs)
         return wrapper
-    
+
     if func is None:
         return decorator
     else:
@@ -44,7 +44,7 @@ def fragment(func=None):
         def wrapper(*args, **kwargs):
             return f(*args, **kwargs)
         return wrapper
-    
+
     if func is None:
         return decorator
     else:
@@ -120,19 +120,19 @@ mock_st.connection = Mock()
 class SessionState:
     def __init__(self):
         self._state = {}
-    
+
     def __getattr__(self, name):
         return self._state.get(name, None)
-    
+
     def __setattr__(self, name, value):
         if name == '_state':
             super().__setattr__(name, value)
         else:
             self._state[name] = value
-    
+
     def __contains__(self, key):
         return key in self._state
-    
+
     def get(self, key, default=None):
         return self._state.get(key, default)
 
@@ -147,10 +147,10 @@ mock_st.experimental_singleton = Mock()
 class MockContainer:
     def __enter__(self):
         return self
-    
+
     def __exit__(self, *args):
         pass
-    
+
     def __getattr__(self, name):
         return Mock()
 
