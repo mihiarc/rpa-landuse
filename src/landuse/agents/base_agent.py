@@ -203,14 +203,16 @@ class BaseLanduseAgent(ABC):
 
             # Add actual table counts
             tables_info = []
+            # Safe: These table names are hardcoded, not from user input
             tables = ['dim_scenario', 'dim_time', 'dim_geography_enhanced', 'dim_landuse', 'fact_landuse_transitions']
 
             for table in tables:
                 try:
-                    count = conn.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0]
+                    # Safe: table names from hardcoded list above
+                    count = conn.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0]  # nosec B608
                     tables_info.append(f"- {table}: {count:,} records")
                 except Exception:
-                    pass
+                    pass  # nosec B110
 
             if tables_info:
                 schema_info += "\n## Current Data Counts\n" + "\n".join(tables_info)
@@ -222,7 +224,7 @@ class BaseLanduseAgent(ABC):
                 if scenario_names:
                     schema_info += "\n\n## Sample Scenarios\n" + "\n".join([f"- {s}" for s in scenario_names])
             except Exception:
-                pass
+                pass  # nosec B110 - Optional info, safe to skip on error
 
             conn.close()
             return schema_info

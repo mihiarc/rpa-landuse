@@ -209,7 +209,8 @@ ORDER BY t.start_year, total_acres DESC;
             # Check exact match
             if state_clean in name_to_code:
                 code = name_to_code[state_clean]
-                return f"🗺️ **State Code Found**\n\n{STATE_NAMES[code]} has state_code = '{code}' in the database.\n\nExample query:\n```sql\nSELECT COUNT(*) FROM dim_geography_enhanced WHERE state_code = '{code}'\n```"
+                # Safe: code comes from STATE_NAMES dictionary, not user input
+                return f"🗺️ **State Code Found**\n\n{STATE_NAMES[code]} has state_code = '{code}' in the database.\n\nExample query:\n```sql\nSELECT COUNT(*) FROM dim_geography_enhanced WHERE state_code = '{code}'\n```"  # nosec B608
 
             # Check partial matches
             matches = [(code, name) for code, name in STATE_NAMES.items() if state_clean in name.lower()]

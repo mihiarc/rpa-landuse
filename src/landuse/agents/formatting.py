@@ -193,8 +193,8 @@ def create_welcome_panel(db_path: str, model_name: str, api_key_masked: str) -> 
         logo_path = Path(__file__).parent.parent.parent.parent / "assets" / "branding" / "ascii_logo_simple.txt"
         if logo_path.exists():
             logo_content = logo_path.read_text() + "\n\n"
-    except:
-        pass
+    except Exception:
+        pass  # nosec B110 - Optional logo, safe to skip
 
     content = (
         f"{logo_content}"

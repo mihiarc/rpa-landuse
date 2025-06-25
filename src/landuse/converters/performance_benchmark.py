@@ -42,7 +42,11 @@ class PerformanceBenchmark:
     """
 
     def __init__(self, test_db_path: Optional[str] = None):
-        self.test_db_path = test_db_path or tempfile.mktemp(suffix=".duckdb")
+        if test_db_path:
+            self.test_db_path = test_db_path
+        else:
+            fd, self.test_db_path = tempfile.mkstemp(suffix=".duckdb")
+            os.close(fd)  # Close the file descriptor as DuckDB will manage the file
         self.results: list[BenchmarkResult] = []
 
     def create_test_data(self, num_records: int = 100000) -> pd.DataFrame:
