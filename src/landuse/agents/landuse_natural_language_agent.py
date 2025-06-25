@@ -7,7 +7,7 @@ into optimized DuckDB SQL queries with business context and insights
 
 import os
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 from dotenv import load_dotenv
 from langchain.agents import AgentExecutor, create_react_agent
@@ -16,8 +16,8 @@ from langchain_anthropic import ChatAnthropic
 from langchain_core.tools import Tool
 from pydantic import BaseModel, Field
 
-from ..models import AgentConfig, AnalysisRequest, AnalysisResult, QueryExamplesInput, StateCodeInput
 from ..config import LanduseConfig
+from ..models import AgentConfig, AnalysisRequest, AnalysisResult, QueryExamplesInput, StateCodeInput
 from .base_agent import BaseLanduseAgent
 from .constants import DEFAULT_ASSUMPTIONS, SCHEMA_INFO_TEMPLATE, STATE_NAMES
 from .formatting import clean_sql_query, format_query_results

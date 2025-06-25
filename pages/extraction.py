@@ -12,19 +12,20 @@ import zipfile
 from datetime import datetime
 from pathlib import Path
 
-import duckdb
-import pandas as pd
-import streamlit as st
-
 # Add src to path
 project_root = Path(__file__).parent.parent
 src_path = project_root / "src"
 sys.path.insert(0, str(src_path))
 
+# Import third-party libraries after sys.path modification
+import duckdb  # noqa: E402
+import pandas as pd  # noqa: E402
+import streamlit as st  # noqa: E402
+
 # Import state mappings and connection
-from landuse.agents.constants import STATE_NAMES
-from landuse.config import LanduseConfig
-from landuse.connections import DuckDBConnection
+from landuse.agents.constants import STATE_NAMES  # noqa: E402
+from landuse.config import LanduseConfig  # noqa: E402
+from landuse.connections import DuckDBConnection  # noqa: E402
 
 
 @st.cache_resource

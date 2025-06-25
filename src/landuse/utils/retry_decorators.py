@@ -5,7 +5,7 @@ Retry decorators and utilities using tenacity for robust error handling
 
 import functools
 import time
-from typing import Any, Callable, List, Optional, Type, Union
+from typing import Any, Callable, Optional, Union
 
 from rich.console import Console
 

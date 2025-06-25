@@ -8,7 +8,7 @@ import logging
 import os
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Optional, Union
 
 import duckdb
 from dotenv import load_dotenv
@@ -21,6 +21,7 @@ from rich.console import Console
 from rich.markdown import Markdown
 from rich.panel import Panel
 
+from ..config import LanduseConfig
 from ..models import (
     AgentConfig,
     ExecuteQueryInput,
@@ -32,7 +33,6 @@ from ..models import (
     StateCodeInput,
     ToolInput,
 )
-from ..config import LanduseConfig
 from ..utils.retry_decorators import api_retry, database_retry
 from .constants import (
     DB_CONFIG,
@@ -109,9 +109,9 @@ class BaseLanduseAgent(ABC):
                 overrides['max_tokens'] = max_tokens
             if verbose:
                 overrides['verbose'] = verbose
-            
+
             self.unified_config = LanduseConfig.for_agent_type('basic', **overrides)
-            
+
             # Convert to AgentConfig for backward compatibility
             self.config = AgentConfig(
                 db_path=Path(self.unified_config.db_path),
@@ -493,4 +493,5 @@ class BaseLanduseAgent(ABC):
 
     def _show_chat_intro(self):
         """Hook for subclasses to show additional intro information"""
-        pass
+        # This is intentionally empty - subclasses can override
+        return

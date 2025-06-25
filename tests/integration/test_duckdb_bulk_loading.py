@@ -12,8 +12,8 @@ import duckdb
 import pandas as pd
 import pytest
 
-from landuse.converters.bulk_loader import DuckDBBulkLoader
 from landuse.converter_models import ConversionStats
+from landuse.converters.bulk_loader import DuckDBBulkLoader
 
 
 class TestDuckDBBulkLoading:
@@ -178,7 +178,7 @@ class TestDuckDBBulkLoading:
         invalid_data = pd.DataFrame({'col1': [1, 2, 3], 'col2': ['a', 'b', 'c']})
 
         with DuckDBBulkLoader(test_db_path) as loader:
-            with pytest.raises(Exception):  # Should raise error for non-existent table
+            with pytest.raises(duckdb.CatalogException):  # Should raise error for non-existent table
                 loader.bulk_load_dataframe(invalid_data, "non_existent_table")
 
     def test_context_manager(self, test_db_path):

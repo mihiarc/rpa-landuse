@@ -12,9 +12,10 @@ project_root = Path(__file__).parent.parent
 src_path = project_root / "src"
 sys.path.insert(0, str(src_path))
 
-from dotenv import load_dotenv
+# Import third-party libraries after sys.path modification
+from dotenv import load_dotenv  # noqa: E402
 
-from landuse.agents.langgraph_map_agent import LandGraphConfig, LangGraphMapAgent
+from landuse.agents.langgraph_map_agent import LandGraphConfig, LangGraphMapAgent  # noqa: E402
 
 # Load environment
 load_dotenv("config/.env")

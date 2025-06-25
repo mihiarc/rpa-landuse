@@ -8,23 +8,24 @@ import os
 import sys
 from pathlib import Path
 
-import duckdb
-import numpy as np
-import pandas as pd
-import plotly.express as px
-import plotly.graph_objects as go
-import streamlit as st
-from plotly.subplots import make_subplots
-
 # Add src to path
 project_root = Path(__file__).parent.parent
 src_path = project_root / "src"
 sys.path.insert(0, str(src_path))
 
+# Import third-party libraries after sys.path modification
+import duckdb  # noqa: E402
+import numpy as np  # noqa: E402
+import pandas as pd  # noqa: E402
+import plotly.express as px  # noqa: E402
+import plotly.graph_objects as go  # noqa: E402
+import streamlit as st  # noqa: E402
+from plotly.subplots import make_subplots  # noqa: E402
+
 # Import state mappings and connection
-from landuse.agents.constants import STATE_NAMES
-from landuse.config import LanduseConfig
-from landuse.connections import DuckDBConnection
+from landuse.agents.constants import STATE_NAMES  # noqa: E402
+from landuse.config import LanduseConfig  # noqa: E402
+from landuse.connections import DuckDBConnection  # noqa: E402
 
 # State code to abbreviation mapping for choropleth
 STATE_ABBREV = {

@@ -7,12 +7,13 @@ AI-powered analytics tool for USDA Forest Service RPA Assessment land use data
 import sys
 from pathlib import Path
 
-import streamlit as st
-
 # Add src to path so we can import our landuse modules
 project_root = Path(__file__).parent
 src_path = project_root / "src"
 sys.path.insert(0, str(src_path))
+
+# Import third-party libraries after sys.path modification
+import streamlit as st  # noqa: E402
 
 # Configure page settings - must be first Streamlit command
 st.set_page_config(
@@ -41,7 +42,7 @@ st.set_page_config(
 )
 
 # Load environment variables
-from dotenv import load_dotenv
+from dotenv import load_dotenv  # noqa: E402
 
 load_dotenv("config/.env")
 load_dotenv()

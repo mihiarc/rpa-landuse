@@ -20,7 +20,11 @@
       "Bash(git commit:*)",
       "Bash(git reset:*)",
       "Bash(uv sync:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(python:*)",
+      "Bash(for file in tests/unit/streamlit/test_*.py)",
+      "Bash(do sed -i '' 's/import streamlit as st$/import streamlit as st  # noqa: E402/' \"$file\")",
+      "Bash(done)"
     ],
     "deny": []
   }

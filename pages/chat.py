@@ -9,12 +9,14 @@ import sys
 import time
 from pathlib import Path
 
-import streamlit as st
-
 # Add src to path
 project_root = Path(__file__).parent.parent
 src_path = project_root / "src"
 sys.path.insert(0, str(src_path))
+
+# Import third-party libraries after sys.path modification
+import streamlit as st  # noqa: E402
+
 
 def initialize_agent():
     """Initialize the landuse agent with caching"""
@@ -126,7 +128,7 @@ def handle_user_input():
                     words = response.split()
                     displayed_words = []
 
-                    for i, word in enumerate(words):
+                    for _, word in enumerate(words):
                         displayed_words.append(word)
                         response_container.markdown(" ".join(displayed_words) + "▊")
                         time.sleep(0.02)  # Small delay for streaming effect

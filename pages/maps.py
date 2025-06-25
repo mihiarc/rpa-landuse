@@ -6,22 +6,22 @@ Interactive interface for generating and exploring land use maps
 
 import json
 import os
-
-# Import map generation functionality
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Literal, Optional
+from typing import Any, Literal, Optional
 
-import duckdb
-import pandas as pd
-import streamlit as st
-
+# Import map generation functionality
 project_root = Path(__file__).parent.parent
 src_path = project_root / "src"
 sys.path.insert(0, str(src_path))
 
-from landuse.tools.map_generation_tool import MapGenerationTool, MapRequest
+# Import third-party libraries after sys.path modification
+import duckdb  # noqa: E402
+import pandas as pd  # noqa: E402
+import streamlit as st  # noqa: E402
+
+from landuse.tools.map_generation_tool import MapGenerationTool, MapRequest  # noqa: E402
 
 # Page configuration
 st.set_page_config(

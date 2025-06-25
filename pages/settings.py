@@ -9,12 +9,14 @@ import subprocess
 import sys
 from pathlib import Path
 
-import streamlit as st
-
 # Add src to path
 project_root = Path(__file__).parent.parent
 src_path = project_root / "src"
 sys.path.insert(0, str(src_path))
+
+# Import third-party libraries after sys.path modification
+import streamlit as st  # noqa: E402
+
 
 def check_system_status():
     """Check overall system status"""

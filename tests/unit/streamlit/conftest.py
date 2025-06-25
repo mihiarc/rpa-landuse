@@ -5,10 +5,12 @@ Pytest configuration for Streamlit tests
 import sys
 from pathlib import Path
 
-import pytest
-
 # Add project root to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
+
+# Import third-party libraries after sys.path modification
+import pytest  # noqa: E402
+
 
 @pytest.fixture(scope="session", autouse=True)
 def mock_streamlit_module():

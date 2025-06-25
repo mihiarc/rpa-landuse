@@ -24,7 +24,7 @@ except ImportError:
     HAS_STREAMLIT = False
 import os
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 import duckdb
 import pandas as pd

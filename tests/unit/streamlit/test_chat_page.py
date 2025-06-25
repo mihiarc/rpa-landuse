@@ -14,7 +14,7 @@ import pytest
 from tests.unit.streamlit.mock_streamlit import mock_st
 
 sys.modules['streamlit'] = mock_st
-import streamlit as st
+import streamlit as st  # noqa: E402
 
 
 class TestChatPage:
@@ -94,7 +94,7 @@ class TestChatPage:
             {"role": "user", "content": "Hello"},
             {"role": "assistant", "content": "Hi there!"}
         ]
-        
+
         mock_chat_message = Mock()
         mock_st.chat_message.return_value.__enter__ = Mock(return_value=mock_chat_message)
         mock_st.chat_message.return_value.__exit__ = Mock(return_value=None)
@@ -102,7 +102,7 @@ class TestChatPage:
         from pages.chat import display_chat_history
 
         display_chat_history()
-        
+
         # Verify chat messages were called for each message
         assert mock_st.chat_message.call_count == 2
 
@@ -124,8 +124,8 @@ class TestChatPage:
 
         # Check that sources were formatted
         calls = mock_chat_message.markdown.call_args_list
-        assert any("Here is the answer" in str(call) for call in calls)
-        assert any("Sources" in str(call) for call in calls)
+        assert any("Here is the answer" in str(c) for c in calls)
+        assert any("Sources" in str(c) for c in calls)
 
     @patch('pages.chat.st')
     def test_format_response_with_dataframe(self, mock_st):
@@ -265,7 +265,7 @@ class TestChatPage:
         mock_st.chat_input.assert_called()
 
     @patch('pages.chat.st')
-    def test_display_chat_history(self, mock_st, mock_session_state):
+    def test_display_chat_history_with_messages(self, mock_st, mock_session_state):
         """Test chat history display"""
         # Add some messages to history
         mock_session_state.messages = [
@@ -290,6 +290,6 @@ class TestChatPage:
         assert mock_st.chat_message.call_count >= 4
 
         # Verify roles were set correctly
-        roles = [call[0][0] for call in mock_st.chat_message.call_args_list]
+        roles = [c[0][0] for c in mock_st.chat_message.call_args_list]
         assert "user" in roles
         assert "assistant" in roles

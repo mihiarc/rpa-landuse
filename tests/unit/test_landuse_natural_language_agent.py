@@ -11,7 +11,7 @@ import pytest
 from langchain.agents import AgentExecutor
 
 from landuse.agents.landuse_natural_language_agent import LanduseNaturalLanguageAgent, LanduseQueryParams
-from tests.fixtures.agent_fixtures import *
+from tests.fixtures.agent_fixtures import mock_landuse_agent  # noqa: F401
 
 
 class TestLanduseQueryParams:

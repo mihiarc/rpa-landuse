@@ -13,7 +13,7 @@ import pytest
 from tests.unit.streamlit.mock_streamlit import mock_st
 
 sys.modules['streamlit'] = mock_st
-import streamlit as st
+import streamlit as st  # noqa: E402
 
 
 class TestExplorerPage:

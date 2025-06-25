@@ -9,7 +9,7 @@ import tempfile
 import time
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Optional, Union
 
 import duckdb
 import pandas as pd
@@ -18,8 +18,7 @@ import pyarrow.parquet as pq
 from rich.console import Console
 from rich.progress import BarColumn, Progress, SpinnerColumn, TextColumn, TimeElapsedColumn
 
-from ..converter_models import ConversionMode
-from ..converter_models import ConversionConfig, ConversionStats, ProcessedTransition
+from ..converter_models import ConversionConfig, ConversionMode, ConversionStats, ProcessedTransition
 from ..utils.retry_decorators import database_retry, execute_with_retry, file_retry
 
 console = Console()

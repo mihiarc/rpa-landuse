@@ -10,7 +10,7 @@ import sys
 import tempfile
 import time
 from pathlib import Path
-from typing import Any, Dict, List, Tuple, Union
+from typing import Any, Union
 
 import duckdb
 import pandas as pd
@@ -759,7 +759,7 @@ def main():
         console.print(Panel.fit(
             f"✅ [bold green]Conversion Complete![/bold green]\n"
             f"⏱️ Duration: {duration:.2f} seconds\n"
-            f"📁 Output: {output_file}",
+            f"📁 Output: {args.output}",
             border_style="green"
         ))
 

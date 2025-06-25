@@ -297,7 +297,7 @@ class TestDuckDBConnection:
         connection._instance = connection._connect(database=temp_db_path, read_only=True)
 
         # Try to create a table in read-only mode
-        with pytest.raises(Exception):
+        with pytest.raises(duckdb.CatalogException):
             connection._instance.execute("CREATE TABLE should_fail (id INTEGER)")
 
         connection._instance.close()

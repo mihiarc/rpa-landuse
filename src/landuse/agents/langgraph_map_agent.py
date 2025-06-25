@@ -10,7 +10,7 @@ import operator
 import os
 from collections.abc import Sequence
 from pathlib import Path
-from typing import Annotated, Any, Dict, List, Optional, TypedDict
+from typing import Annotated, Any, Optional, TypedDict
 
 import duckdb
 import pandas as pd

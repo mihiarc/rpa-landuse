@@ -7,7 +7,7 @@ Provides clean dataclass-based configuration for all agent types
 import os
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 
 @dataclass
