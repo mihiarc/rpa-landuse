@@ -1,6 +1,6 @@
 # Quick Start Guide
 
-Get up and running with natural language queries in 5 minutes!
+Get up and running with RPA Land Use Analytics in 5 minutes!
 
 ## Prerequisites
 
@@ -12,38 +12,42 @@ Make sure you've completed the [installation](installation.md) steps:
 
 ## Your First Query
 
-### 1. Start the Agent
+### 1. Start the RPA Analytics Agent
 
 ```bash
-uv run python scripts/agents/test_agent.py
+# Interactive command-line interface
+uv run rpa-analytics
+
+# Or launch the web dashboard
+uv run streamlit run streamlit_app.py
 ```
 
-### 2. List Available Data
+### 2. Explore RPA Scenarios
 
-Start by exploring what data is available:
-
-```
-You> List all files in the data directory
-```
-
-The agent will show you available CSV, JSON, Parquet, and database files.
-
-### 3. Explore a Database
-
-If you have the land use database, explore its structure:
+Start by understanding the available RPA scenarios:
 
 ```
-You> Show me the tables in processed/landuse_transitions_with_ag.db
+You> What RPA scenarios are available in the database?
+```
+
+The agent will show you the 20 integrated climate-socioeconomic scenarios.
+
+### 3. Explore the RPA Database
+
+Explore the star schema structure:
+
+```
+You> Describe the database schema
 ```
 
 Response:
 ```
-Database: processed/landuse_transitions_with_ag.db
-Tables:
-  • landuse_transitions: 1,234,567 rows
-  • landuse_transitions_ag: 987,654 rows
-  • landuse_changes_only: 543,210 rows
-  • landuse_changes_only_ag: 432,109 rows
+RPA Land Use Analytics Database:
+  • fact_landuse_transitions: 5.4M land use changes
+  • dim_scenario: 20 RPA climate-socioeconomic scenarios
+  • dim_geography_enhanced: 3,075 US counties
+  • dim_landuse: 5 land use categories
+  • dim_time: 6 time periods (2012-2100)
 ```
 
 ### 4. Understand the Schema
@@ -56,38 +60,38 @@ The agent will show columns, data types, and sample data.
 
 ## Natural Language Query Examples
 
-### Basic Queries
+### Basic RPA Queries
 
-**Count records by scenario:**
+**Compare RPA scenarios:**
 ```
-You> How many transitions are there for each scenario?
-```
-
-**Find specific transitions:**
-```
-You> Show me forest to urban transitions in the Baseline scenario
+You> How does agricultural land loss differ between the LM and HH scenarios?
 ```
 
-**Aggregate data:**
+**Analyze climate models:**
 ```
-You> What's the total agricultural land area in 2050?
-```
-
-### Advanced Queries
-
-**Top counties by change:**
-```
-You> Which 10 counties had the most forest loss between 2020 and 2050?
+You> Show me forest loss under the "hot" climate model
 ```
 
-**Scenario comparison:**
+**Project future land use:**
 ```
-You> Compare total urban area between Baseline and High Crop Demand scenarios in 2050
+You> What's the projected urban area in 2070 under high growth scenarios?
 ```
 
-**Trend analysis:**
+### Advanced RPA Queries
+
+**Climate pathway comparison:**
 ```
-You> Show me how cropland area changes over time for FIPS code 06037
+You> Compare forest loss between RCP4.5 and RCP8.5 pathways
+```
+
+**Socioeconomic analysis:**
+```
+You> How does urban expansion differ between SSP1 (sustainability) and SSP5 (fossil-fueled)?
+```
+
+**Regional patterns:**
+```
+You> Show me agricultural transitions in the South region under the "dry" climate model
 ```
 
 ## Working with the Agent
@@ -104,19 +108,21 @@ The agent will:
 Example interaction:
 
 ```
-You> What are the main land use types?
+You> What are the main land use types in the RPA Assessment?
 
-Agent> I'll query the database to show you the distinct land use types.
+Agent> I'll query the RPA database to show you the land use categories.
 
-Query: SELECT DISTINCT from_land_use FROM landuse_transitions ORDER BY from_land_use
+📊 Analysis Assumptions:
+- Using USDA Forest Service 2020 RPA Assessment categories
 
-Results: 6 rows
-- Crop
-- Forest
-- Pasture
-- Range
-- Total
-- Urban
+Query: SELECT landuse_name, landuse_category FROM dim_landuse ORDER BY landuse_id
+
+Results: 5 land use types
+- Crop (Agriculture)
+- Pasture (Agriculture)
+- Rangeland (Natural)
+- Forest (Natural)
+- Urban (Developed)
 ```
 
 ### Query Tips
