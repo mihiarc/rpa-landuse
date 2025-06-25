@@ -61,17 +61,22 @@ Documentation will be available at http://localhost:8000
 
 ### Initial Setup (One-time)
 1. Go to repository Settings → Pages
-2. Source: Deploy from GitHub Actions
-3. Save the settings
+2. Source: Deploy from a branch
+3. Branch: gh-pages / (root)
+4. Save the settings
 
 ### Automatic Deployment
 Documentation automatically deploys when:
-- Changes are pushed to the main branch
+- Documentation files are changed and pushed to main branch
 - The deploy-docs workflow is manually triggered
+- Uses `mkdocs gh-deploy` to build and push to gh-pages branch
 
 ### Manual Deployment
 ```bash
-# Build and deploy manually
+# Using the helper script
+uv run python scripts/deploy_docs.py
+
+# Or using mkdocs directly
 uv run mkdocs gh-deploy --force
 ```
 
