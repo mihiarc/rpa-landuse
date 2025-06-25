@@ -249,7 +249,7 @@ class DuckDBConnection(BaseConnection[duckdb.DuckDBPyConnection]):
             raise ValueError(f"Invalid table name: {table_name}")
         
         # Safe: table_name is validated above
-        query = f"SELECT COUNT(*) as count FROM {table_name}"  # nosec B608
+        query = f"SELECT COUNT(*) as count FROM {table_name}"
         result = self.query(query, ttl=ttl)
         return result['count'].iloc[0]
 

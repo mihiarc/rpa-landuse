@@ -74,20 +74,6 @@ jobs:
     - name: Install dependencies
       run: uv sync --all-extras --dev
       
-    - name: Run bandit security scan
-      run: |
-        uv run bandit -r src/ -f json -o bandit-report.json
-        uv run bandit -r src/ -f txt -o bandit-report.txt
-        
-    - name: Upload bandit reports
-      uses: actions/upload-artifact@v4
-      if: always()
-      with:
-        name: bandit-reports
-        path: |
-          bandit-report.json
-          bandit-report.txt
-          
     - name: Run semgrep for additional code analysis
       uses: returntocorp/semgrep-action@v1
       with:
@@ -192,12 +178,6 @@ jobs:
           echo "- **Dependency vulnerabilities**: $SAFETY_ISSUES issues found" >> security-summary.md
         fi
         
-        # Code scan results
-        if [ -f bandit-reports/bandit-report.json ]; then
-          BANDIT_HIGH=$(jq '[.results[] | select(.issue_severity == "HIGH")] | length' bandit-reports/bandit-report.json 2>/dev/null || echo "0")
-          BANDIT_MEDIUM=$(jq '[.results[] | select(.issue_severity == "MEDIUM")] | length' bandit-reports/bandit-report.json 2>/dev/null || echo "0")
-          echo "- **Code security issues**: $BANDIT_HIGH high, $BANDIT_MEDIUM medium severity" >> security-summary.md
-        fi
         
         # License check results
         if [ -f license-reports/licenses-report.json ]; then

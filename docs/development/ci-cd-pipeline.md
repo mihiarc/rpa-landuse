@@ -28,7 +28,6 @@ The CI/CD pipeline provides automated testing, security scanning, performance mo
 2. **Code Quality Checks**
    - **Linting**: `ruff check` for code style and potential issues
    - **Type Checking**: `mypy` for static type analysis
-   - **Security Scan**: `bandit` for security vulnerabilities
 
 3. **Testing**
    - Unit and integration tests with `pytest`

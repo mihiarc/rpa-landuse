@@ -209,10 +209,10 @@ class BaseLanduseAgent(ABC):
             for table in tables:
                 try:
                     # Safe: table names from hardcoded list above
-                    count = conn.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0]  # nosec B608
+                    count = conn.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0]
                     tables_info.append(f"- {table}: {count:,} records")
                 except Exception:
-                    pass  # nosec B110
+                    pass
 
             if tables_info:
                 schema_info += "\n## Current Data Counts\n" + "\n".join(tables_info)
@@ -224,7 +224,7 @@ class BaseLanduseAgent(ABC):
                 if scenario_names:
                     schema_info += "\n\n## Sample Scenarios\n" + "\n".join([f"- {s}" for s in scenario_names])
             except Exception:
-                pass  # nosec B110 - Optional info, safe to skip on error
+                pass  # Optional info, safe to skip on error
 
             conn.close()
             return schema_info

@@ -150,7 +150,7 @@ class DuckDBBulkLoader:
                 # Get actual row count from table with retry
                 # Safe: table_name comes from DataFrame load operation, not user input
                 count_result = execute_with_retry(
-                    lambda: conn.execute(f"SELECT COUNT(*) FROM {table_name}").fetchone(),  # nosec B608
+                    lambda: conn.execute(f"SELECT COUNT(*) FROM {table_name}").fetchone(),
                     operation_name=f"Count verification for {table_name}",
                     max_attempts=2,
                     exceptions=(ConnectionError, RuntimeError)
@@ -334,7 +334,7 @@ class DuckDBBulkLoader:
 
             # Get table statistics
             # Safe: table_name validated in load operation
-            stats = conn.execute(f"""  # nosec B608
+            stats = conn.execute(f"""
                 SELECT
                     COUNT(*) as row_count,
                     COUNT(DISTINCT COLUMNS(*)) as distinct_values

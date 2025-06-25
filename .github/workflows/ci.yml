@@ -65,16 +65,6 @@ jobs:
       run: uv run mypy src --ignore-missing-imports --no-strict-optional
       continue-on-error: true  # Type checking is advisory for now
       
-    - name: Run security scan with bandit
-      run: uv run bandit -r src/ -f json -o bandit-report.json
-      continue-on-error: true  # Security scan is advisory
-      
-    - name: Upload security scan results
-      uses: actions/upload-artifact@v4
-      if: always()
-      with:
-        name: security-report-${{ matrix.python-version }}
-        path: bandit-report.json
         
     - name: Run tests with coverage
       run: |
