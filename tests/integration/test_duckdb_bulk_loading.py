@@ -23,10 +23,13 @@ class TestDuckDBBulkLoading:
     def test_db_path(self):
         """Create temporary database for testing"""
         with tempfile.NamedTemporaryFile(suffix=".duckdb", delete=False) as f:
-            yield f.name
+            temp_path = f.name
+        # Remove the file so DuckDB can create it fresh
+        os.unlink(temp_path)
+        yield temp_path
         # Cleanup
-        if os.path.exists(f.name):
-            os.unlink(f.name)
+        if os.path.exists(temp_path):
+            os.unlink(temp_path)
 
     @pytest.fixture
     def sample_data(self):
