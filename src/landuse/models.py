@@ -65,7 +65,7 @@ class TransitionType(str, Enum):
 # Data Models
 class AgentConfig(BaseModel):
     """Configuration for landuse agents"""
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="forbid", protected_namespaces=())
 
     # Database configuration
     db_path: Path = Field(
@@ -373,6 +373,8 @@ class ChatMessage(BaseModel):
 
 class SystemStatus(BaseModel):
     """System status information"""
+    model_config = ConfigDict(protected_namespaces=())
+    
     database_connected: bool
     agent_initialized: bool
     model_name: str

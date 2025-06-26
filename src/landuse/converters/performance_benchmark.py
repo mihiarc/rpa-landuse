@@ -17,7 +17,7 @@ from rich.panel import Panel
 from rich.progress import BarColumn, Progress, SpinnerColumn, TextColumn, TimeElapsedColumn
 from rich.table import Table
 
-from ..models import ConversionStats
+from ..converter_models import ConversionStats
 from .bulk_loader import DuckDBBulkLoader
 
 console = Console()
