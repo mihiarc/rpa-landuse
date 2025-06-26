@@ -46,7 +46,8 @@ class PerformanceBenchmark:
             self.test_db_path = test_db_path
         else:
             fd, self.test_db_path = tempfile.mkstemp(suffix=".duckdb")
-            os.close(fd)  # Close the file descriptor as DuckDB will manage the file
+            os.close(fd)  # Close the file descriptor
+            os.unlink(self.test_db_path)  # Remove the file so DuckDB can create it fresh
         self.results: list[BenchmarkResult] = []
 
     def create_test_data(self, num_records: int = 100000) -> pd.DataFrame:
@@ -172,7 +173,7 @@ class PerformanceBenchmark:
                     method_name="Bulk COPY (Parquet)",
                     total_records=stats.processed_records,
                     processing_time=stats.processing_time,
-                    records_per_second=stats.records_per_second,
+                    records_per_second=stats.records_per_second(),
                     memory_peak_mb=peak_memory,
                     file_size_mb=file_size,
                     success=True
