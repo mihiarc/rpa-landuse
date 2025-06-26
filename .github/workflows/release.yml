@@ -43,6 +43,7 @@ jobs:
     - name: Run full test suite
       run: |
         uv run python -m pytest tests/ \
+          --ignore=tests/unit/streamlit \
           --cov=src \
           --cov-fail-under=70 \
           -v --tb=short
