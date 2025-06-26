@@ -201,7 +201,7 @@ class RateLimiter:
         """
         self.max_calls = max_calls
         self.time_window = time_window
-        self.calls = defaultdict(list)
+        self.calls: dict[str, list[float]] = defaultdict(list)
 
     def check_rate_limit(self, identifier: str) -> tuple[bool, Optional[str]]:
         """
@@ -289,7 +289,10 @@ class SecureConfig(BaseModel):
             'log_level': os.getenv('LOG_LEVEL', 'INFO')
         }
 
-        return cls(**config_dict)
+        # Filter out None values to avoid type issues
+        filtered_config = {k: v for k, v in config_dict.items() if v is not None}
+
+        return cls(**filtered_config)
 
 
 class SecurityLogger:

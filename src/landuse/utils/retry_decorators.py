@@ -26,11 +26,12 @@ try:
 except ImportError:
     HAS_TENACITY = False
     # Fallback implementation for environments without tenacity
-    class retry:
+    class retry_fallback:
         def __init__(self, *args, **kwargs):
             pass
         def __call__(self, func):
             return func
+    retry = retry_fallback
 
 console = Console()
 

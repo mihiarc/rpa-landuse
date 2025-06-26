@@ -225,7 +225,7 @@ def create_langgraph_config(**overrides) -> LanduseConfig:
     Maps old field names to new unified configuration.
     """
     # Map old field names to new ones if needed
-    field_mapping = {
+    field_mapping: dict[str, str] = {
         # Old LandGraphConfig fields -> New LanduseConfig fields
         # (currently they're the same, but this allows for future changes)
     }

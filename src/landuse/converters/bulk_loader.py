@@ -102,8 +102,7 @@ class DuckDBBulkLoader:
             return ConversionStats(
                 total_records=0,
                 processed_records=0,
-                processing_time=0.0,
-                records_per_second=0.0
+                processing_time=0.0
             )
 
         # Prepare column specification
@@ -165,8 +164,7 @@ class DuckDBBulkLoader:
             return ConversionStats(
                 total_records=len(df),
                 processed_records=len(df),
-                processing_time=processing_time,
-                records_per_second=records_per_second
+                processing_time=processing_time
             )
 
         except Exception as e:
@@ -263,8 +261,7 @@ class DuckDBBulkLoader:
         return ConversionStats(
             total_records=total_processed,
             processed_records=total_processed,
-            processing_time=total_time,
-            records_per_second=records_per_second
+            processing_time=total_time
         )
 
     def bulk_load_transitions(

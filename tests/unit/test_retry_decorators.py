@@ -66,7 +66,9 @@ class TestRetryDecorators:
             call_count += 1
             raise ConnectionError("Database connection failed")
 
-        with pytest.raises(ConnectionError):
+        # Tenacity wraps exceptions in RetryError
+        from tenacity import RetryError
+        with pytest.raises(RetryError):
             mock_db_operation()
 
         assert call_count == 2
@@ -149,8 +151,11 @@ class TestRetryDecorators:
             call_count += 1
             return None  # Always triggers retry
 
-        result = mock_operation()
-        assert result is None  # Returns last result
+        # Tenacity raises RetryError when all attempts exhausted
+        from tenacity import RetryError
+        with pytest.raises(RetryError):
+            mock_operation()
+
         assert call_count == 2
 
     @pytest.mark.skipif(not HAS_TENACITY, reason="tenacity not available")

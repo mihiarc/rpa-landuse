@@ -356,7 +356,7 @@ class PerformanceBenchmark:
         try:
             import psutil
             process = psutil.Process()
-            return process.memory_info().rss / 1024 / 1024  # Convert to MB
+            return float(process.memory_info().rss / 1024 / 1024)  # Convert to MB
         except ImportError:
             return 0.0
 
