@@ -209,7 +209,7 @@ jobs:
         import duckdb
         conn = duckdb.connect('data/processed/landuse_analytics.duckdb')
         conn.execute('CREATE TABLE test_table (id INTEGER, name VARCHAR)')
-        conn.execute('INSERT INTO test_table VALUES (1, \"test\")')
+        conn.execute(\"INSERT INTO test_table VALUES (1, 'test')\")
         conn.close()
         "
         
