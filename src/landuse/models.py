@@ -374,7 +374,7 @@ class ChatMessage(BaseModel):
 class SystemStatus(BaseModel):
     """System status information"""
     model_config = ConfigDict(protected_namespaces=())
-    
+
     database_connected: bool
     agent_initialized: bool
     model_name: str
