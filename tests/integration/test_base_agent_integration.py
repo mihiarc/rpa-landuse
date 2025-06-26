@@ -97,10 +97,10 @@ class TestBaseAgentIntegration:
         schema = agent._get_schema_help()
 
         # Check for key schema elements
-        assert "Landuse Transitions Database Schema" in schema
+        assert "RPA Land Use Transitions Database Schema" in schema
         assert "dim_scenario" in schema
         assert "dim_time" in schema
-        assert "dim_geography" in schema
+        assert "dim_geography_enhanced" in schema
         assert "dim_landuse" in schema
         assert "fact_landuse_transitions" in schema
 
@@ -133,7 +133,7 @@ class TestBaseAgentIntegration:
             g.state_code,
             COUNT(*) as record_count
         FROM fact_landuse_transitions f
-        JOIN dim_geography g ON f.geography_id = g.geography_id
+        JOIN dim_geography_enhanced g ON f.geography_id = g.geography_id
         GROUP BY g.state_code
         LIMIT 5
         """
@@ -147,7 +147,7 @@ class TestBaseAgentIntegration:
         # Test schema tool
         schema_tool = next(t for t in agent.tools if t.name == "get_schema_info")
         schema_result = schema_tool.func("")
-        assert "Landuse Transitions Database Schema" in schema_result
+        assert "RPA Land Use Transitions Database Schema" in schema_result
 
         # Test examples tool
         examples_tool = next(t for t in agent.tools if t.name == "suggest_query_examples")
@@ -251,7 +251,7 @@ class TestAgentCustomization:
         agent = ValidatingAgent()
         result = agent._execute_landuse_query("DROP TABLE test")
 
-        assert "DROP statements are not allowed" in result
+        assert "Only SELECT and WITH queries are allowed" in result
 
     def test_pre_post_hooks(self, monkeypatch):
         """Test pre and post query hooks"""

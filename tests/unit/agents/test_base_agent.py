@@ -83,7 +83,7 @@ class TestBaseLanduseAgent:
 
     def test_initialization_missing_db(self, mock_env):
         """Test initialization with missing database"""
-        with pytest.raises(FileNotFoundError, match="Database not found"):
+        with pytest.raises(FileNotFoundError, match="Database file not found"):
             TestableAgent(db_path="nonexistent.db")
 
     def test_initialization_missing_api_key(self, mock_db_path, monkeypatch):
