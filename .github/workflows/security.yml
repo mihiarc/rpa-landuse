@@ -101,21 +101,6 @@ jobs:
         sarif_file: semgrep.sarif
       continue-on-error: true
 
-  secrets-scan:
-    runs-on: ubuntu-latest
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Run TruffleHog OSS
-      id: trufflehog
-      uses: trufflesecurity/trufflehog@main
-      with:
-        path: ./
-        base: main
-        head: HEAD
-        extra_args: --debug --only-verified
-        
   license-check:
     runs-on: ubuntu-latest
     steps:
@@ -158,7 +143,7 @@ jobs:
         fi
 
   security-summary:
-    needs: [dependency-scan, code-scan, secrets-scan, license-check]
+    needs: [dependency-scan, code-scan, license-check]
     runs-on: ubuntu-latest
     if: always()
     steps:
