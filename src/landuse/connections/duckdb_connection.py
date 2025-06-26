@@ -247,7 +247,7 @@ class DuckDBConnection(BaseConnection[duckdb.DuckDBPyConnection]):
         # Validate table name to prevent SQL injection
         if not table_name.replace('_', '').isalnum():
             raise ValueError(f"Invalid table name: {table_name}")
-        
+
         # Safe: table_name is validated above
         query = f"SELECT COUNT(*) as count FROM {table_name}"
         result = self.query(query, ttl=ttl)
