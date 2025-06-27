@@ -19,7 +19,13 @@
       "Bash(uv pip:*)",
       "Bash(git commit:*)",
       "Bash(git stash pop:*)",
-      "Bash(git stash show:*)"
+      "Bash(git stash show:*)",
+      "Bash(mkdir:*)",
+      "Bash(git mv:*)",
+      "Bash(mv:*)",
+      "Bash(git rm:*)",
+      "Bash(rm:*)",
+      "Bash(true)"
     ],
     "deny": []
   }
