@@ -7,8 +7,7 @@ Provides clean dataclass-based configuration for all agent types
 import os
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Optional
-
+from typing import Any
 
 @dataclass
 class LanduseConfig:
@@ -29,7 +28,7 @@ class LanduseConfig:
         default_factory=lambda: os.getenv('LANDUSE_MODEL', 'claude-3-5-sonnet-20241022')
     )
     temperature: float = field(
-        default_factory=lambda: float(os.getenv('TEMPERATURE', '0.1'))
+        default_factory=lambda: float(os.getenv('TEMPERATURE', '0.2'))
     )
     max_tokens: int = field(
         default_factory=lambda: int(os.getenv('MAX_TOKENS', '4000'))
@@ -201,22 +200,18 @@ class LanduseConfig:
 
         return "\n".join(repr_lines)
 
-
 # Convenience functions for common use cases
 def get_basic_config(**overrides) -> LanduseConfig:
     """Get configuration for basic agents"""
     return LanduseConfig.for_agent_type('basic', **overrides)
 
-
 def get_map_config(**overrides) -> LanduseConfig:
     """Get configuration for map-enabled agents"""
     return LanduseConfig.for_agent_type('map', **overrides)
 
-
 def get_streamlit_config(**overrides) -> LanduseConfig:
     """Get configuration for Streamlit applications"""
     return LanduseConfig.for_agent_type('streamlit', **overrides)
-
 
 # Legacy compatibility - these match the old LandGraphConfig field names
 def create_langgraph_config(**overrides) -> LanduseConfig:

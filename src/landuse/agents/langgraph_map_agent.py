@@ -4,7 +4,6 @@ Enhanced LangGraph Landuse Agent with Map Generation Capabilities
 Extends the base agent to create visualizations and maps
 """
 
-import json
 import logging
 import operator
 import os
@@ -13,7 +12,6 @@ from pathlib import Path
 from typing import Annotated, Any, Optional, TypedDict
 
 import duckdb
-import pandas as pd
 from dotenv import load_dotenv
 from langchain_anthropic import ChatAnthropic
 from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, SystemMessage
@@ -25,13 +23,12 @@ from langgraph.prebuilt import ToolNode
 from rich.console import Console
 from rich.markdown import Markdown
 from rich.panel import Panel
-from rich.table import Table
 
 from ..config import LanduseConfig
 from ..models import ExecuteQueryInput, SQLQuery
 from ..tools.map_generation_tool import create_map_generation_tool
 from ..utils.retry_decorators import database_retry
-from .constants import SCHEMA_INFO_TEMPLATE, STATE_NAMES
+from .constants import SCHEMA_INFO_TEMPLATE
 from .formatting import clean_sql_query, format_query_results, format_response
 
 # Load environment variables
@@ -49,14 +46,10 @@ class AgentState(TypedDict):
     iteration_count: int
     max_iterations: int
 
-
-
-
 class MapAgentState(AgentState):
     """Extended state for map-capable agent"""
     generated_maps: list[dict[str, Any]]
     visualization_requested: bool
-
 
 class LangGraphMapAgent:
     """
