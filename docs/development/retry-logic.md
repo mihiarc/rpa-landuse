@@ -227,7 +227,7 @@ class DuckDBBulkLoader:
 
 **Enhanced agent with retry logic:**
 ```python
-class BaseLanduseAgent:
+class LanduseAgent:
     @database_retry(max_attempts=3, min_wait=1.0, max_wait=10.0, 
                    exceptions=(ConnectionError, TimeoutError, OSError))
     def _execute_landuse_query(self, sql_query: str) -> str:

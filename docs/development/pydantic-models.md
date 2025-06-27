@@ -173,7 +173,7 @@ print(f"Speed: {stats.records_per_second():.0f} records/sec")
 ### Agent Usage
 
 ```python
-from landuse.agents import LanduseNaturalLanguageAgent
+from landuse.agents import LanduseAgent
 from landuse import AgentConfig, QueryInput
 
 # Initialize with Pydantic config
@@ -183,7 +183,7 @@ config = AgentConfig(
     max_iterations=10
 )
 
-agent = LanduseNaturalLanguageAgent(config=config)
+agent = LanduseAgent(config=config)
 
 # Query with validation
 query_input = QueryInput(

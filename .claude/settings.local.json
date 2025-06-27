@@ -25,7 +25,15 @@
       "Bash(for file in tests/unit/streamlit/test_*.py)",
       "Bash(do sed -i '' 's/import streamlit as st$/import streamlit as st  # noqa: E402/' \"$file\")",
       "Bash(done)",
-      "Bash(tree:*)"
+      "Bash(tree:*)",
+      "Bash(git stash pop:*)",
+      "Bash(git stash show:*)",
+      "Bash(mkdir:*)",
+      "Bash(git mv:*)",
+      "Bash(mv:*)",
+      "Bash(git rm:*)",
+      "Bash(rm:*)",
+      "Bash(true)"
     ],
     "deny": []
   }

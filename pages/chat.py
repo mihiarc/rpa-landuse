@@ -21,12 +21,12 @@ import streamlit as st  # noqa: E402
 def initialize_agent():
     """Initialize the landuse agent with caching"""
     try:
-        from landuse.agents.landuse_natural_language_agent import LanduseNaturalLanguageAgent
-
+        from landuse.agents import LanduseAgent
+        
         # Show loading message
         with st.spinner("🤖 Initializing AI agent..."):
-            agent = LanduseNaturalLanguageAgent()
-
+            agent = LanduseAgent()
+        
         return agent, None
     except FileNotFoundError as e:
         error_msg = f"Database not found: {e}"

@@ -1,6 +1,9 @@
 # Agents package initialization
 
-from .base_agent import BaseLanduseAgent
+# Import the unified agent
+from .agent import LanduseAgent
+
+# Import constants and utilities for backward compatibility
 from .constants import (
     CHAT_EXAMPLES,
     DB_CONFIG,
@@ -22,10 +25,13 @@ from .formatting import (
     get_summary_statistics,
 )
 
-__all__ = [
-    # Base class
-    'BaseLanduseAgent',
+# Import prompts system
+from .prompts import get_system_prompt, create_custom_prompt, PromptVariations
 
+__all__ = [
+    # Main agent class
+    'LanduseAgent',
+    
     # Constants
     'STATE_NAMES', 'SCHEMA_INFO_TEMPLATE', 'DEFAULT_ASSUMPTIONS',
     'QUERY_EXAMPLES', 'CHAT_EXAMPLES', 'RESPONSE_SECTIONS',
@@ -34,5 +40,8 @@ __all__ = [
     # Formatting utilities
     'clean_sql_query', 'format_query_results', 'format_row_values',
     'get_summary_statistics', 'create_welcome_panel', 'create_examples_panel',
-    'format_error', 'format_response'
+    'format_error', 'format_response',
+    
+    # Prompts
+    'get_system_prompt', 'create_custom_prompt', 'PromptVariations'
 ]
