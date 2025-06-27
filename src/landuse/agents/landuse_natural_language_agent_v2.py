@@ -23,7 +23,7 @@ class NaturalLanguageState(BaseLanduseState):
     default_assumptions_shown: bool = False
 
 
-class LanduseNaturalLanguageAgent(BaseLangGraphAgent):
+class LanduseAgent(BaseLangGraphAgent):
     """
     Specialized LangGraph agent for natural language queries about land use data.
     
@@ -234,7 +234,7 @@ def main():
     """Main entry point for the natural language agent"""
     try:
         config = LanduseConfig.for_agent_type('basic')
-        agent = LanduseNaturalLanguageAgent(config)
+        agent = LanduseAgent(config)
         agent.chat()
     except KeyboardInterrupt:
         print("\n👋 Happy analyzing!")

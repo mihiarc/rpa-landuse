@@ -17,7 +17,7 @@ from rich.columns import Columns
 import sys
 sys.path.append(str(Path(__file__).parent.parent / "src"))
 
-from landuse.agents.landuse_natural_language_agent import LanduseNaturalLanguageAgent
+from landuse.agents import LanduseAgent
 from landuse.agents.langgraph_agent import LangGraphLanduseAgent, LandGraphConfig
 
 console = Console()
@@ -211,7 +211,7 @@ def main():
         
         # Traditional agent
         console.print("   Initializing Traditional LangChain agent...")
-        traditional_agent = LanduseNaturalLanguageAgent()
+        traditional_agent = LanduseAgent()
         
         # LangGraph agent
         console.print("   Initializing LangGraph agent...")

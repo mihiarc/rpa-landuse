@@ -17,7 +17,9 @@
       "Bash(git add:*)",
       "Bash(sed:*)",
       "Bash(uv pip:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(git stash pop:*)",
+      "Bash(git stash show:*)"
     ],
     "deny": []
   }

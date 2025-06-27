@@ -65,8 +65,8 @@ This report outlines the migration from traditional LangChain agents to the mode
 ### Import Changes:
 ```python
 # Old imports
-from landuse.agents.base_agent import BaseLanduseAgent
-from landuse.agents.landuse_natural_language_agent import LanduseNaturalLanguageAgent
+from landuse.agents import LanduseAgent
+from landuse.agents import LanduseAgent
 from landuse.agents.langgraph_map_agent import LangGraphMapAgent
 
 # New imports
@@ -78,14 +78,14 @@ from landuse.agents.langgraph_map_agent_v2 import LangGraphMapAgent
 ### Class Hierarchy Changes:
 ```
 Old:
-BaseLanduseAgent (ABC)
-├── LanduseNaturalLanguageAgent (LangChain REACT)
-└── LangGraphMapAgent (Separate implementation, not inheriting from base)
+LanduseAgent(ABC)
+├── LanduseAgent(LangChain REACT)
+└── LanduseAgent(enable_maps=True, Separate implementation, not inheriting from base)
 
 New:
 BaseLangGraphAgent (ABC)
-├── LanduseNaturalLanguageAgent (LangGraph)
-└── LangGraphMapAgent (extends LanduseNaturalLanguageAgent)
+├── LanduseAgent(LangGraph)
+└── LanduseAgent(enable_maps=True, extends LanduseNaturalLanguageAgent)
 ```
 
 ### Key API Changes:

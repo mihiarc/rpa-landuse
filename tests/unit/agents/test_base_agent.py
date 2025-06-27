@@ -8,7 +8,7 @@ from unittest.mock import Mock, patch, MagicMock
 import pandas as pd
 from pathlib import Path
 
-from landuse.agents.base_agent import BaseLanduseAgent
+from landuse.agents import LanduseAgent
 from langchain_core.tools import Tool
 
 

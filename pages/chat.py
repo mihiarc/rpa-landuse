@@ -18,11 +18,11 @@ sys.path.insert(0, str(src_path))
 def initialize_agent():
     """Initialize the landuse agent with caching"""
     try:
-        from landuse.agents.landuse_natural_language_agent import LanduseNaturalLanguageAgent
+        from landuse.agents import LanduseAgent
         
         # Show loading message
         with st.spinner("🤖 Initializing AI agent..."):
-            agent = LanduseNaturalLanguageAgent()
+            agent = LanduseAgent()
         
         return agent, None
     except FileNotFoundError as e:

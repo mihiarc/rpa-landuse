@@ -74,7 +74,7 @@ def test_agent_import():
     sys.path.insert(0, str(src_path))
     
     try:
-        from landuse.agents.landuse_natural_language_agent import LanduseNaturalLanguageAgent
+        from landuse.agents import LanduseAgent
         print("✅ Landuse agent import successful")
         return True
     except ImportError as e:

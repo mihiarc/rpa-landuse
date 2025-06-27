@@ -42,7 +42,7 @@ load_dotenv("config/.env")
 load_dotenv()
 
 
-class BaseLanduseAgent(ABC):
+class LanduseAgent(ABC):
     """Base class for landuse natural language agents"""
     
     def __init__(

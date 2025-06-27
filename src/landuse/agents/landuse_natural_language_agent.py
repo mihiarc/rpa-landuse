@@ -16,7 +16,7 @@ from langchain_anthropic import ChatAnthropic
 from langchain_core.tools import Tool
 from langchain.prompts import PromptTemplate
 
-from .base_agent import BaseLanduseAgent
+from .agent import LanduseAgent
 from .constants import STATE_NAMES, SCHEMA_INFO_TEMPLATE, DEFAULT_ASSUMPTIONS
 from .formatting import clean_sql_query, format_query_results
 from ..models import (
@@ -34,7 +34,7 @@ class LanduseQueryParams(BaseModel):
     limit: Optional[int] = Field(50, description="Maximum number of rows to return")
     include_summary: Optional[bool] = Field(True, description="Include summary statistics")
 
-class LanduseNaturalLanguageAgent(BaseLanduseAgent):
+class LanduseAgent(BaseLanduseAgent):
     """Natural Language to DuckDB SQL Agent for Landuse Data Analysis"""
     
     def __init__(self, db_path: Optional[str] = None, model_name: Optional[str] = None, 
@@ -394,7 +394,7 @@ Thought: Let me understand what the user is asking about landuse data and conver
 def main():
     """Main entry point for the landuse agent"""
     try:
-        agent = LanduseNaturalLanguageAgent()
+        agent = LanduseAgent()
         agent.chat()
     except KeyboardInterrupt:
         print("\n👋 Happy analyzing!")

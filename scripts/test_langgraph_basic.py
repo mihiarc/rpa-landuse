@@ -21,12 +21,12 @@ def test_agent_creation():
     try:
         # Create natural language agent
         config = LanduseConfig.for_agent_type('basic', enable_memory=False)
-        nl_agent = LanduseNaturalLanguageAgent(config)
+        nl_agent = LanduseAgent(config)
         print("✅ Natural language agent created")
         
         # Create map agent
         config_map = LanduseConfig.for_agent_type('map', enable_memory=False)
-        map_agent = LangGraphMapAgent(config)
+        map_agent = LanduseAgent(enable_maps=True, config)
         print("✅ Map agent created")
         
         # Check key attributes
@@ -56,7 +56,7 @@ def test_simple_query():
     
     try:
         config = LanduseConfig.for_agent_type('basic', enable_memory=False, max_iterations=3)
-        agent = LanduseNaturalLanguageAgent(config)
+        agent = LanduseAgent(config)
         
         # Use a simple query that should work
         response = agent.query("How many land use types are there?")
@@ -82,7 +82,7 @@ def test_graph_compilation():
     
     try:
         config = LanduseConfig.for_agent_type('basic', enable_memory=False)
-        agent = LanduseNaturalLanguageAgent(config)
+        agent = LanduseAgent(config)
         
         # Check graph structure
         assert agent.graph is not None, "Graph not created"

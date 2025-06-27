@@ -36,9 +36,9 @@ def simple_benchmark():
     # Test Traditional Agent (if possible)
     console.print("\n🔵 Testing Traditional Agent...")
     try:
-        from landuse.agents.landuse_natural_language_agent import LanduseNaturalLanguageAgent
+        from landuse.agents import LanduseAgent
         
-        agent = LanduseNaturalLanguageAgent()
+        agent = LanduseAgent()
         console.print("   ✅ Agent initialized")
         
         for i, query in enumerate(queries, 1):

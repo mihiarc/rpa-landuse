@@ -37,10 +37,10 @@ def demo_agent_initialization():
     # Test Traditional Agent
     console.print("\n🔧 Testing Traditional LangChain Agent...")
     try:
-        from landuse.agents.landuse_natural_language_agent import LanduseNaturalLanguageAgent
+        from landuse.agents import LanduseAgent
         
         start_time = time.time()
-        traditional_agent = LanduseNaturalLanguageAgent()
+        traditional_agent = LanduseAgent()
         init_time = time.time() - start_time
         
         results["traditional"] = {

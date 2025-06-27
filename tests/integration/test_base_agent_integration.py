@@ -9,7 +9,7 @@ import os
 from pathlib import Path
 from unittest.mock import patch
 
-from landuse.agents.base_agent import BaseLanduseAgent
+from landuse.agents import LanduseAgent
 from landuse.agents.constants import DEFAULT_ASSUMPTIONS, RESPONSE_SECTIONS
 from tests.conftest import TEST_ENV
 

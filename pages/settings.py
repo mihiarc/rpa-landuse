@@ -85,7 +85,7 @@ def check_system_status():
     # Check agent initialization
     if status["database"]["status"] and status["api_keys"]["status"]:
         try:
-            from landuse.agents.landuse_natural_language_agent import LanduseNaturalLanguageAgent
+            from landuse.agents import LanduseAgent
             # Don't actually initialize to avoid overhead, just check imports
             status["agent"]["status"] = True
             status["agent"]["message"] = "Agent can be initialized"

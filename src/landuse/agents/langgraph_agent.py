@@ -23,7 +23,7 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.markdown import Markdown
 
-from .base_agent import BaseLanduseAgent
+from .agent import LanduseAgent
 from .constants import STATE_NAMES, SCHEMA_INFO_TEMPLATE, DEFAULT_ASSUMPTIONS
 from .formatting import clean_sql_query, format_query_results, format_response
 from ..models import (

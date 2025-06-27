@@ -58,7 +58,7 @@ class TestLanduseNaturalLanguageAgent:
         mock_anthropic.return_value = mock_anthropic_llm
         
         with patch('landuse.agents.landuse_natural_language_agent.Path.exists', return_value=True):
-            agent = LanduseNaturalLanguageAgent(str(mock_db_path))
+            agent = LanduseAgent(str(mock_db_path))
         
         return agent
     
@@ -66,7 +66,7 @@ class TestLanduseNaturalLanguageAgent:
         """Test agent initializes correctly"""
         with patch('landuse.agents.landuse_natural_language_agent.ChatAnthropic') as mock_anthropic:
             with patch('landuse.agents.landuse_natural_language_agent.Path.exists', return_value=True):
-                agent = LanduseNaturalLanguageAgent(str(mock_db_path))
+                agent = LanduseAgent(str(mock_db_path))
                 
                 assert agent.db_path == mock_db_path
                 assert agent.llm is not None
@@ -78,7 +78,7 @@ class TestLanduseNaturalLanguageAgent:
         with patch('landuse.agents.landuse_natural_language_agent.ChatAnthropic'):
             with patch('landuse.agents.landuse_natural_language_agent.Path.exists', return_value=False):
                 with pytest.raises(FileNotFoundError, match="Database not found"):
-                    agent = LanduseNaturalLanguageAgent("nonexistent.db")
+                    agent = LanduseAgent("nonexistent.db")
     
     @patch('landuse.agents.base_agent.duckdb.connect')
     def test_get_schema_info(self, mock_connect, agent):
@@ -345,7 +345,7 @@ class TestLanduseAgentIntegration:
             )
             mock_anthropic.return_value = mock_llm
             
-            agent = LanduseNaturalLanguageAgent(str(test_database))
+            agent = LanduseAgent(str(test_database))
             
             # Execute a query through the tools
             result = agent._execute_landuse_query(
@@ -364,7 +364,7 @@ class TestLanduseAgentIntegration:
             mock_llm = Mock()
             mock_anthropic.return_value = mock_llm
             
-            agent = LanduseNaturalLanguageAgent(str(test_database))
+            agent = LanduseAgent(str(test_database))
             
             for query_type, nl_query in sample_nl_queries.items():
                 # Mock agent response
@@ -386,7 +386,7 @@ class TestLanduseAgentIntegration:
         # Create agent with mocked dependencies
         with patch('landuse.agents.landuse_natural_language_agent.ChatAnthropic') as mock_anthropic:
             with patch('landuse.agents.landuse_natural_language_agent.Path.exists', return_value=True):
-                agent = LanduseNaturalLanguageAgent(str(mock_db_path))
+                agent = LanduseAgent(str(mock_db_path))
         
         with patch('landuse.agents.base_agent.duckdb.connect') as mock_connect:
             # Create large mock dataset

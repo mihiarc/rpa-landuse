@@ -52,13 +52,13 @@ def create_natural_language_agent(
         return NewNaturalLanguageAgent(config)
     else:
         # Import old agent only if needed
-        from .landuse_natural_language_agent import LanduseNaturalLanguageAgent
+        from .agent import LanduseAgent
         warnings.warn(
             "Using legacy LanduseNaturalLanguageAgent. Please migrate to LangGraph version.",
             DeprecationWarning,
             stacklevel=2
         )
-        return LanduseNaturalLanguageAgent(db_path, model_name, temperature, max_tokens, verbose, config)
+        return LanduseAgent(db_path, model_name, temperature, max_tokens, verbose, config)
 
 
 def create_map_agent(
@@ -87,7 +87,7 @@ def create_map_agent(
             DeprecationWarning,
             stacklevel=2
         )
-        return LangGraphMapAgent(config)
+        return LanduseAgent(enable_maps=True, config)
 
 
 # Environment variable to control migration
