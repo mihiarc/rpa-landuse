@@ -34,7 +34,7 @@ class TestLanduseAgent:
         with patch('landuse.config.landuse_config.LanduseConfig.__post_init__', return_value=None):
             config = LanduseConfig(db_path=str(mock_db_path))
             
-        with patch('landuse.agents.base_agent.ChatAnthropic') as mock_anthropic:
+        with patch('landuse.agents.landuse_agent.ChatAnthropic') as mock_anthropic:
             with patch('os.getenv', return_value='test-key'):
                 mock_llm = Mock()
                 mock_anthropic.return_value = mock_llm
@@ -47,7 +47,7 @@ class TestLanduseAgent:
         with patch('landuse.config.landuse_config.LanduseConfig.__post_init__', return_value=None):
             config = LanduseConfig(db_path=str(mock_db_path))
             
-        with patch('landuse.agents.base_agent.ChatAnthropic') as mock_anthropic:
+        with patch('landuse.agents.landuse_agent.ChatAnthropic') as mock_anthropic:
             with patch('os.getenv', return_value='test-key'):
                 agent = LanduseAgent(config=config)
                 
@@ -58,10 +58,9 @@ class TestLanduseAgent:
 
     def test_agent_initialization_missing_db(self):
         """Test agent handles missing database gracefully"""
-        with patch('landuse.agents.base_agent.ChatAnthropic'):
-            # The new AgentConfig validates database exists
-            with pytest.raises(FileNotFoundError) as exc_info:
-                config = LanduseConfig(db_path="nonexistent.db")
+        # The new AgentConfig validates database exists
+        with pytest.raises(FileNotFoundError) as exc_info:
+            config = LanduseConfig(db_path="nonexistent.db")
             
             # Check the error message
             assert "Database file not found" in str(exc_info.value)
@@ -238,7 +237,7 @@ class TestLanduseAgentIntegration:
         """Test complete query workflow with real database"""
         monkeypatch.setenv("LANDUSE_DB_PATH", str(test_database))
         
-        with patch('landuse.agents.base_agent.ChatAnthropic') as mock_anthropic:
+        with patch('landuse.agents.landuse_agent.ChatAnthropic') as mock_anthropic:
             # Mock LLM
             mock_llm = Mock()
             mock_anthropic.return_value = mock_llm
@@ -265,7 +264,7 @@ class TestLanduseAgentIntegration:
         """Test agent with proper LLM response format"""
         monkeypatch.setenv("LANDUSE_DB_PATH", str(test_database))
         
-        with patch('landuse.agents.base_agent.ChatAnthropic') as mock_anthropic:
+        with patch('landuse.agents.landuse_agent.ChatAnthropic') as mock_anthropic:
             mock_llm = Mock()
             mock_anthropic.return_value = mock_llm
             
@@ -291,7 +290,7 @@ class TestLanduseAgentIntegration:
         conn.execute("CREATE TABLE test (id INTEGER)")
         conn.close()
         
-        with patch('landuse.agents.base_agent.ChatAnthropic'):
+        with patch('landuse.agents.landuse_agent.ChatAnthropic'):
             with patch('landuse.config.landuse_config.LanduseConfig.__post_init__', return_value=None):
                 config = LanduseConfig(db_path=str(mock_db_path))
             agent = LanduseAgent(config=config)
