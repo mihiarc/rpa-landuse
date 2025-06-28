@@ -60,9 +60,9 @@ def test_default_assumptions():
     assert "transition_type" in DEFAULT_ASSUMPTIONS
 
     # Check values contain expected content
-    assert "20 climate scenarios" in DEFAULT_ASSUMPTIONS["scenarios"]
-    assert "2012-2100" in DEFAULT_ASSUMPTIONS["time_period"]
-    assert "US counties" in DEFAULT_ASSUMPTIONS["geographic_scope"]
+    assert "20 RPA scenarios" in DEFAULT_ASSUMPTIONS["scenarios"]
+    assert "2012-2070" in DEFAULT_ASSUMPTIONS["time_period"]
+    assert "U.S. counties" in DEFAULT_ASSUMPTIONS["geographic_scope"]
     assert "change" in DEFAULT_ASSUMPTIONS["transition_type"]
 
 

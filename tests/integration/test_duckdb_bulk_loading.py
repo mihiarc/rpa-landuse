@@ -93,7 +93,7 @@ class TestDuckDBBulkLoading:
             assert stats.total_records == len(sample_data)
             assert stats.processed_records == len(sample_data)
             assert stats.processing_time > 0
-            assert stats.records_per_second > 0
+            assert stats.records_per_second() > 0
 
             # Verify data was loaded
             with loader.connection() as conn:
@@ -118,7 +118,7 @@ class TestDuckDBBulkLoading:
             assert stats.total_records == 0
             assert stats.processed_records == 0
             assert stats.processing_time == 0
-            assert stats.records_per_second == 0
+            assert stats.records_per_second() == 0
 
     def test_bulk_load_batches(self, test_table_schema, sample_data):
         """Test bulk loading with batch generator"""
