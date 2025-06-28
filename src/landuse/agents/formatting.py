@@ -13,7 +13,7 @@ from rich.markdown import Markdown
 from rich.panel import Panel
 from rich.table import Table
 
-from .constants import STATE_NAMES
+from landuse.utilities.state_mappings import StateMapper
 
 
 def clean_sql_query(sql_query: str) -> str:
@@ -77,7 +77,7 @@ def format_query_results(
     # Convert state codes to names if present
     if 'state_code' in df_display.columns:
         df_display['state'] = df_display['state_code'].apply(
-            lambda x: STATE_NAMES.get(str(x).zfill(2), f"Unknown ({x})")
+            lambda x: StateMapper.fips_to_name(str(x).zfill(2)) or f"Unknown ({x})"
         )
         # Reorder columns to put state name first, drop state_code
         cols = df_display.columns.tolist()

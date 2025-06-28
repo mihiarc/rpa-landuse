@@ -23,22 +23,9 @@ import streamlit as st  # noqa: E402
 from plotly.subplots import make_subplots  # noqa: E402
 
 # Import state mappings and connection
-from landuse.agents.constants import STATE_NAMES  # noqa: E402
+from landuse.utilities.state_mappings import StateMapper  # noqa: E402
 from landuse.config import LanduseConfig  # noqa: E402
 from landuse.connections import DuckDBConnection  # noqa: E402
-
-# State code to abbreviation mapping for choropleth
-STATE_ABBREV = {
-    '01': 'AL', '02': 'AK', '04': 'AZ', '05': 'AR', '06': 'CA', '08': 'CO',
-    '09': 'CT', '10': 'DE', '12': 'FL', '13': 'GA', '15': 'HI', '16': 'ID',
-    '17': 'IL', '18': 'IN', '19': 'IA', '20': 'KS', '21': 'KY', '22': 'LA',
-    '23': 'ME', '24': 'MD', '25': 'MA', '26': 'MI', '27': 'MN', '28': 'MS',
-    '29': 'MO', '30': 'MT', '31': 'NE', '32': 'NV', '33': 'NH', '34': 'NJ',
-    '35': 'NM', '36': 'NY', '37': 'NC', '38': 'ND', '39': 'OH', '40': 'OK',
-    '41': 'OR', '42': 'PA', '44': 'RI', '45': 'SC', '46': 'SD', '47': 'TN',
-    '48': 'TX', '49': 'UT', '50': 'VT', '51': 'VA', '53': 'WA', '54': 'WV',
-    '55': 'WI', '56': 'WY', '11': 'DC'
-}
 
 @st.cache_resource
 def get_database_connection():
@@ -226,8 +213,8 @@ def load_forest_analysis_data():
         df_states = conn.query(state_forest_query, ttl=300)
 
         # Add state names and abbreviations
-        df_states['state_abbr'] = df_states['state_code'].map(STATE_ABBREV)
-        df_states['state_name'] = df_states['state_code'].map(STATE_NAMES)
+        df_states['state_abbr'] = df_states['state_code'].map(StateMapper.FIPS_TO_ABBREV)
+        df_states['state_name'] = df_states['state_code'].map(StateMapper.FIPS_TO_NAME)
 
         return df_loss, df_gain, df_states, None
     except Exception as e:
@@ -642,8 +629,8 @@ def load_state_transitions():
         df = conn.query(query, ttl=300)
 
         # Add state abbreviations and names
-        df['state_abbr'] = df['state_code'].map(STATE_ABBREV)
-        df['state_name'] = df['state_code'].map(STATE_NAMES)
+        df['state_abbr'] = df['state_code'].map(StateMapper.FIPS_TO_ABBREV)
+        df['state_name'] = df['state_code'].map(StateMapper.FIPS_TO_NAME)
 
         return df, None
     except Exception as e:
