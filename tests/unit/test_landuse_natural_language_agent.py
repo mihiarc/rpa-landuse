@@ -155,8 +155,8 @@ class TestLanduseAgent:
 
     def test_get_system_prompt(self, agent):
         """Test system prompt generation"""
-        # Standard prompt
-        prompt1 = agent._create_system_prompt()
+        # Standard prompt is now accessed via the system_prompt attribute
+        prompt1 = agent.system_prompt
         assert "land use analytics expert" in prompt1
         assert "RPA Assessment database" in prompt1
 

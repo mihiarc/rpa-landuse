@@ -10,6 +10,7 @@ from langgraph.prebuilt import ToolNode
 from rich.panel import Panel
 
 from landuse.agents.base_agent import BaseLanduseAgent
+from landuse.agents.prompts import get_system_prompt
 from landuse.config.landuse_config import LanduseConfig
 from landuse.tools.common_tools import create_analysis_tool, create_execute_query_tool, create_schema_tool
 
@@ -35,34 +36,13 @@ class LanduseAgent(BaseLanduseAgent):
     def __init__(self, config: Optional[LanduseConfig] = None):
         """Initialize the modern landuse agent."""
         super().__init__(config)
-        self.system_prompt = self._create_system_prompt()
-
-    def _create_system_prompt(self) -> str:
-        """Create the system prompt with domain knowledge."""
-        return f"""You are a land use analytics expert with access to the RPA Assessment database.
-
-The database contains projections for land use changes across US counties from 2012-2100 under different climate scenarios.
-
-Key Context:
-- Land use categories: crop, pasture, forest, urban, rangeland
-- Scenarios combine climate (RCP45/85) and socioeconomic (SSP1-5) pathways
-- Development is irreversible - once land becomes urban, it stays urban
-
-Database Schema:
-{self.schema}
-
-When answering questions:
-1. First understand what the user is asking
-2. Generate appropriate SQL queries to get the data
-3. Analyze results in the context of land use science
-4. Provide clear, actionable insights
-
-Always consider:
-- Temporal trends (changes over time)
-- Scenario comparisons (climate impacts)
-- Geographic patterns (state/county variations)
-- Land use transitions (what converts to what)
-"""
+        # Use centralized prompts system with configuration from config
+        self.system_prompt = get_system_prompt(
+            include_maps=self.config.enable_map_generation,
+            analysis_style=self.config.analysis_style,
+            domain_focus=None if self.config.domain_focus == 'none' else self.config.domain_focus,
+            schema_info=self.schema
+        )
 
     def _create_tools(self) -> list[BaseTool]:
         """Create tools for the agent."""

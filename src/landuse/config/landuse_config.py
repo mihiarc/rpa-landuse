@@ -76,6 +76,14 @@ class LanduseConfig:
     enable_map_generation: bool = field(
         default_factory=lambda: os.getenv('LANDUSE_ENABLE_MAPS', 'true').lower() == 'true'
     )
+    
+    # Prompt Configuration
+    analysis_style: str = field(
+        default_factory=lambda: os.getenv('LANDUSE_ANALYSIS_STYLE', 'standard')
+    )
+    domain_focus: str = field(
+        default_factory=lambda: os.getenv('LANDUSE_DOMAIN_FOCUS', 'none')
+    )
 
     # Streamlit Configuration
     streamlit_cache_ttl: int = field(
