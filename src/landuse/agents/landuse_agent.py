@@ -1,12 +1,12 @@
 """Consolidated landuse agent with modern LangGraph architecture."""
 
 import os
-from typing import Any, Optional, TypedDict, Union
+from typing import Any, Optional, TypedDict
 
 import duckdb
 from langchain_anthropic import ChatAnthropic
 from langchain_core.language_models import BaseChatModel
-from langchain_core.messages import AIMessage, BaseMessage, HumanMessage
+from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, ToolMessage
 from langchain_core.tools import BaseTool
 from langchain_openai import ChatOpenAI
 from langgraph.checkpoint.memory import MemorySaver
@@ -24,7 +24,8 @@ from landuse.utils.retry_decorators import database_retry
 
 
 class AgentState(TypedDict):
-    """State definition for the landuse agent following 2025 patterns."""
+    """State definition for the landuse agent
+    ."""
     messages: list[BaseMessage]
     context: dict[str, Any]
     iteration_count: int
@@ -188,26 +189,40 @@ class LanduseAgent:
         workflow.add_edge("analyzer", "agent")
         workflow.add_edge("human_review", "agent")
 
-        # Compile with memory
-        return workflow.compile(checkpointer=self.memory)
+        # Compile without memory to avoid state corruption issues
+        return workflow.compile()
 
     def _agent_node(self, state: AgentState) -> dict[str, Any]:
         """Main agent node that decides next action."""
         messages = state["messages"]
 
-        # Add system prompt if this is the first message
-        if len(messages) == 1:
-            messages = [
-                {"role": "system", "content": self.system_prompt},
-                messages[0]
-            ]
+        # Convert tuple messages to proper LangChain message objects if needed
+        converted_messages = []
+        for msg in messages:
+            if isinstance(msg, tuple):
+                role, content = msg
+                if role == "user":
+                    converted_messages.append(HumanMessage(content=content))
+                elif role == "assistant":
+                    converted_messages.append(AIMessage(content=content))
+                elif role == "system":
+                    converted_messages.append(HumanMessage(content=content))  # System as human for Claude
+                else:
+                    converted_messages.append(HumanMessage(content=content))
+            else:
+                converted_messages.append(msg)
+
+        # Add system prompt as first message if needed
+        if not converted_messages or not any(isinstance(m, HumanMessage) and "landuse" in str(m.content).lower() for m in converted_messages[:1]):
+            system_msg = HumanMessage(content=self.system_prompt)
+            converted_messages = [system_msg] + converted_messages
 
         # Get LLM response
-        response = self.llm.bind_tools(self.tools).invoke(messages)
+        response = self.llm.bind_tools(self.tools).invoke(converted_messages)
 
-        # Update state
+        # Update state with proper message list
         return {
-            "messages": messages + [response],
+            "messages": converted_messages + [response],
             "iteration_count": state.get("iteration_count", 0) + 1
         }
 
@@ -348,24 +363,111 @@ Focus on:
         else:
             return "Check the query syntax and ensure all table/column names match the schema exactly."
 
-    def query(self, question: str) -> str:
-        """Execute a natural language query using the agent."""
+    def simple_query(self, question: str) -> str:
+        """Execute a query using simple direct LLM interaction without LangGraph state management."""
         try:
-            if not self.graph:
-                self.graph = self._build_graph()
-
-            # Use the graph with memory checkpointing
-            result = self.graph.invoke(
-                {"messages": [("user", question)]},
-                config={"configurable": {"thread_id": "landuse-session"}}
-            )
-
-            # Extract and format the final response
-            if "messages" in result:
-                return result["messages"][-1].content
-            return str(result)
+            # Create a fresh conversation with system prompt
+            messages = [
+                HumanMessage(content=self.system_prompt),
+                HumanMessage(content=question)
+            ]
+            
+            # Get initial response
+            response = self.llm.bind_tools(self.tools).invoke(messages)
+            messages.append(response)
+            
+            # Handle tool calls if any
+            max_iterations = 3
+            iteration = 0
+            
+            # Store tool results for creative formatting
+            query_results = []
+            analysis_results = []
+            
+            while hasattr(response, 'tool_calls') and response.tool_calls and iteration < max_iterations:
+                iteration += 1
+                
+                # Execute each tool call and add proper ToolMessage
+                for tool_call in response.tool_calls:
+                    # Find the matching tool
+                    tool_name = tool_call["name"]
+                    tool_args = tool_call["args"]
+                    tool_id = tool_call["id"]  # Important: use the tool call ID
+                    
+                    # Execute the tool
+                    tool_result = None
+                    for tool in self.tools:
+                        if tool.name == tool_name:
+                            try:
+                                if self.config.debug:
+                                    print(f"DEBUG: Executing tool {tool_name} with args: {tool_args}")
+                                tool_result = tool.invoke(tool_args)
+                                if self.config.debug:
+                                    print(f"DEBUG: Tool result length: {len(str(tool_result))}")
+                                
+                                # Store results for formatting
+                                if tool_name == "execute_landuse_query":
+                                    query_results.append(str(tool_result))
+                                elif tool_name == "analyze_landuse_results":
+                                    analysis_results.append(str(tool_result))
+                                    
+                                break
+                            except Exception as e:
+                                error_msg = f"Tool error: {str(e)}"
+                                if self.config.debug:
+                                    print(f"DEBUG: Tool error: {error_msg}")
+                                    import traceback
+                                    traceback.print_exc()
+                                tool_result = error_msg
+                    
+                    if tool_result is None:
+                        tool_result = f"Unknown tool: {tool_name}"
+                    
+                    # Add tool result using proper ToolMessage format
+                    messages.append(ToolMessage(
+                        content=str(tool_result),
+                        tool_call_id=tool_id
+                    ))
+                
+                # Get next response
+                response = self.llm.bind_tools(self.tools).invoke(messages)
+                messages.append(response)
+            
+            # Extract the final text content from the response
+            final_content = ""
+            if hasattr(response, 'content'):
+                content = response.content
+                # Handle different content formats
+                if isinstance(content, list):
+                    # Extract text from list of content blocks
+                    text_parts = []
+                    for item in content:
+                        if isinstance(item, dict) and item.get('type') == 'text':
+                            text_parts.append(item.get('text', ''))
+                        elif isinstance(item, str):
+                            text_parts.append(item)
+                        else:
+                            # Skip non-text items like tool calls
+                            continue
+                    final_content = ' '.join(text_parts)
+                else:
+                    final_content = str(content)
+            elif hasattr(response, 'text'):
+                final_content = str(response.text)
+            else:
+                final_content = str(response)
+            
+            # Return clean final content without any special formatting
+            
+            return final_content
+            
         except Exception as e:
             return f"Error processing query: {str(e)}"
+
+    def query(self, question: str) -> str:
+        """Execute a natural language query using the agent."""
+        # Use the simple approach to avoid LangGraph state issues for now
+        return self.simple_query(question)
 
     def stream_query(self, question: str) -> Any:
         """
@@ -502,3 +604,12 @@ Focus on:
             title="Example Questions",
             border_style="blue"
         ))
+
+    @property
+    def model_name(self) -> str:
+        """Get the model name from configuration."""
+        return self.config.model_name
+
+    def _get_schema_help(self) -> str:
+        """Get user-friendly schema information for display in the UI."""
+        return self.schema

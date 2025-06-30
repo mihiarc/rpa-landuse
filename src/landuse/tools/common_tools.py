@@ -5,7 +5,7 @@ from typing import Any, Optional
 from langchain_core.tools import tool
 from pydantic import BaseModel, Field
 
-from landuse.agents.formatting import clean_sql_query, format_query_results
+from landuse.agents.formatting import clean_sql_query, format_raw_query_results
 from landuse.config.landuse_config import LanduseConfig
 import duckdb
 from landuse.utils.retry_decorators import database_retry
@@ -96,7 +96,7 @@ def _execute_with_retry(db_connection: duckdb.DuckDBPyConnection, query: str) ->
 
 def _format_success_response(result: dict[str, Any], config: LanduseConfig) -> str:
     """Format successful query results."""
-    formatted = format_query_results(result["results"], result["columns"])
+    formatted = format_raw_query_results(result["results"], result["columns"])
 
     # Add row count information if truncated
     if result["row_count"] >= config.max_query_rows:

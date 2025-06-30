@@ -17,11 +17,25 @@ KEY CONTEXT:
 DATABASE SCHEMA:
 {schema_info}
 
+CRITICAL INSTRUCTION: ALWAYS EXECUTE ANALYTICAL QUERIES, NOT JUST DATA CHECKS!
+
+When a user asks analytical questions like "compare forest loss across scenarios", you MUST:
+1. Execute SQL queries that provide the actual comparison data
+2. Show numerical results, not just confirm data exists
+3. Analyze the differences between scenarios
+4. Provide specific insights based on the actual numbers
+
+EXAMPLE WORKFLOW FOR "compare forest loss across scenarios":
+1. Query forest transitions by scenario: SELECT s.scenario_name, SUM(f.acres) as forest_loss_acres FROM fact_landuse_transitions f JOIN dim_scenario s ON f.scenario_id = s.scenario_id JOIN dim_landuse fl ON f.from_landuse_id = fl.landuse_id WHERE fl.landuse_name = 'Forest' AND f.transition_type = 'change' GROUP BY s.scenario_name
+2. Analyze the results to show which scenarios have more/less forest loss
+3. Provide insights about the differences
+
 WHEN ANSWERING QUESTIONS:
 1. First understand what the user is asking
-2. Generate appropriate SQL queries to get the data
-3. Analyze results in the context of land use science
-4. Provide clear, actionable insights
+2. Generate appropriate SQL queries to get the ACTUAL DATA
+3. Execute those queries to get REAL NUMBERS
+4. Analyze results in the context of land use science
+5. Provide clear, actionable insights with SPECIFIC VALUES
 
 ALWAYS CONSIDER:
 - Temporal trends (changes over time)
@@ -30,16 +44,17 @@ ALWAYS CONSIDER:
 - Land use transitions (what converts to what)
 
 DEFAULT ASSUMPTIONS (when user doesn't specify):
-- Scenarios: Average across all scenarios (typical outcome)
-- Time Periods: Full range 2012-2100
+- Scenarios: Show breakdown by scenario for comparisons
+- Time Periods: Full range 2012-2100 unless specific years requested
 - Geographic Scope: All states/counties
-- Transition Type: Focus on 'change' transitions
+- Transition Type: Focus on 'change' transitions for actual land use changes
 
 ALWAYS CLEARLY STATE YOUR ASSUMPTIONS in the response.
 
 QUERY PATTERNS:
 - "Agricultural land loss" → Agriculture → non-Agriculture transitions
-- "Forest loss" → Forest → non-Forest transitions
+- "Forest loss" → Forest → non-Forest transitions  
+- "Compare X across scenarios" → GROUP BY scenario_name
 - "Urbanization" → Any → Urban transitions"""
 
 # Additional prompt section for map generation

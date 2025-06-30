@@ -25,7 +25,7 @@ class LanduseConfig:
 
     # Model Configuration
     model_name: str = field(
-        default_factory=lambda: os.getenv('LANDUSE_MODEL', 'claude-3-5-sonnet-20241022')
+        default_factory=lambda: os.getenv('LANDUSE_MODEL', 'gpt-4o-mini')
     )
     temperature: float = field(
         default_factory=lambda: float(os.getenv('TEMPERATURE', '0.2'))

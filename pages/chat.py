@@ -18,14 +18,21 @@ sys.path.insert(0, str(src_path))
 import streamlit as st  # noqa: E402
 
 
-def initialize_agent():
-    """Initialize the landuse agent with caching"""
+def initialize_agent(model_name: str = None):
+    """Initialize the landuse agent with specified model"""
     try:
         from landuse.agents import LanduseAgent
+        from landuse.config import LanduseConfig
         
         # Show loading message
-        with st.spinner("🤖 Initializing AI agent..."):
-            agent = LanduseAgent()
+        with st.spinner(f"🤖 Initializing AI agent with {model_name or 'default model'}..."):
+            # Create config for Streamlit with specified model
+            config_kwargs = {'debug': True}
+            if model_name:
+                config_kwargs['model_name'] = model_name
+            config = LanduseConfig.for_agent_type('streamlit', **config_kwargs)
+            agent = LanduseAgent(config)
+            print(f"DEBUG: Agent initialized with model {agent.model_name}")
         
         return agent, None
     except FileNotFoundError as e:
@@ -33,12 +40,20 @@ def initialize_agent():
         return None, error_msg
     except Exception as e:
         error_msg = f"Failed to initialize agent: {e}"
+        print(f"DEBUG: Agent initialization error: {e}")
+        import traceback
+        traceback.print_exc()
         return None, error_msg
 
-@st.cache_resource
-def get_agent():
-    """Get cached agent instance"""
-    return initialize_agent()
+@st.cache_resource(ttl=300)  # 5 minute TTL to prevent stale agent
+def get_agent(model_name: str = None):
+    """Get cached agent instance with TTL"""
+    agent, error = initialize_agent(model_name)
+    if error:
+        # Don't cache errors
+        st.cache_resource.clear()
+        print(f"DEBUG: Clearing cache due to error: {error}")
+    return agent, error
 
 def initialize_session_state():
     """Initialize session state for chat"""
@@ -50,6 +65,10 @@ def initialize_session_state():
 
     if "show_welcome" not in st.session_state:
         st.session_state.show_welcome = True
+    
+    if "selected_model" not in st.session_state:
+        # Default to OpenAI
+        st.session_state.selected_model = "gpt-4o-mini"
 
 def show_welcome_message():
     """Show welcome message and example queries"""
@@ -98,8 +117,8 @@ def display_chat_history():
 @st.fragment
 def handle_user_input():
     """Handle user input and generate response - runs in isolation"""
-    # Get agent
-    agent, error = get_agent()
+    # Get agent with selected model
+    agent, error = get_agent(st.session_state.selected_model)
 
     if error:
         st.error(f"❌ {error}")
@@ -123,17 +142,28 @@ def handle_user_input():
                     response = agent.query(prompt)
                     query_time = time.time() - query_start
 
+                    # Debug logging
+                    print(f"DEBUG Chat: Query '{prompt}' returned response of length {len(response) if response else 0}")
+                    print(f"DEBUG Chat: Response type: {type(response)}")
+                    if response:
+                        print(f"DEBUG Chat: Response preview: {response[:100]}...")
+
+                    # Ensure response is a string
+                    if not isinstance(response, str):
+                        if isinstance(response, list):
+                            response = ' '.join(str(item) for item in response)
+                        else:
+                            response = str(response)
+
+                    # Check if response is empty after conversion
+                    if not response or response.isspace():
+                        response = "I apologize, but I couldn't generate a response. Please try rephrasing your question or check the logs for more details."
+                        print(f"DEBUG Chat: Empty response detected for query: {prompt}")
+
                     # Stream the response for better UX
                     response_container = st.empty()
-                    words = response.split()
-                    displayed_words = []
-
-                    for _, word in enumerate(words):
-                        displayed_words.append(word)
-                        response_container.markdown(" ".join(displayed_words) + "▊")
-                        time.sleep(0.02)  # Small delay for streaming effect
-
-                    # Final response without cursor
+                    
+                    # Display the response directly - simple and clean
                     response_container.markdown(response)
 
                     # Store query time in session state for sidebar display
@@ -232,7 +262,7 @@ def show_chat_controls():
     with col3:
         if st.button("📊 View Schema", help="Show database schema"):
             if "agent_initialized" in st.session_state:
-                agent, _ = get_agent()
+                agent, _ = get_agent(st.session_state.selected_model)
                 if agent:
                     schema_info = agent._get_schema_help()
                     st.session_state.messages.append({
@@ -273,8 +303,8 @@ def main():
     # Initialize session state
     initialize_session_state()
 
-    # Check agent status
-    agent, error = get_agent()
+    # Check agent status with selected model
+    agent, error = get_agent(st.session_state.selected_model)
 
     if error:
         st.error(f"❌ {error}")
@@ -300,6 +330,63 @@ def main():
 
     # Show controls in sidebar
     with st.sidebar:
+        st.markdown("### 🤖 Model Selection")
+        
+        # Model options
+        model_options = {
+            "gpt-4o-mini": "OpenAI GPT-4O Mini",
+            "gpt-4o": "OpenAI GPT-4O",
+            "gpt-3.5-turbo": "OpenAI GPT-3.5 Turbo",
+            "claude-3-5-sonnet-20241022": "Claude 3.5 Sonnet",
+            "claude-3-opus-20240229": "Claude 3 Opus",
+            "claude-3-haiku-20240307": "Claude 3 Haiku"
+        }
+        
+        # Check which API keys are available
+        import os
+        has_openai = bool(os.getenv('OPENAI_API_KEY'))
+        has_anthropic = bool(os.getenv('ANTHROPIC_API_KEY'))
+        
+        # Filter available models based on API keys
+        available_models = {}
+        for model_id, model_name in model_options.items():
+            if model_id.startswith("gpt") and has_openai:
+                available_models[model_id] = f"✅ {model_name}"
+            elif model_id.startswith("claude") and has_anthropic:
+                available_models[model_id] = f"✅ {model_name}"
+            else:
+                available_models[model_id] = f"❌ {model_name} (No API Key)"
+        
+        # Model selector
+        selected_model = st.selectbox(
+            "Choose AI Model:",
+            options=list(model_options.keys()),
+            format_func=lambda x: available_models[x],
+            index=list(model_options.keys()).index(st.session_state.selected_model),
+            help="Select the AI model to use for chat. Only models with API keys are available."
+        )
+        
+        # Update model if changed
+        if selected_model != st.session_state.selected_model:
+            st.session_state.selected_model = selected_model
+            st.session_state.messages = []  # Clear chat history when model changes
+            st.session_state.show_welcome = True
+            st.cache_resource.clear()  # Clear agent cache
+            st.rerun()
+        
+        # Show API key status
+        st.caption("**API Key Status:**")
+        if has_openai:
+            st.caption("✅ OpenAI API Key configured")
+        else:
+            st.caption("❌ OpenAI API Key missing")
+        
+        if has_anthropic:
+            st.caption("✅ Anthropic API Key configured")
+        else:
+            st.caption("❌ Anthropic API Key missing")
+        
+        st.markdown("---")
         st.markdown("### 🎛️ Chat Controls")
         show_chat_controls()
 
@@ -321,7 +408,7 @@ def main():
             st.caption(f"⏱️ Last query: {st.session_state.last_query_time:.1f}s")
 
         # Model info
-        st.caption(f"🤖 Model: {agent.model_name}")
+        st.caption(f"🤖 Current Model: {st.session_state.selected_model}")
         st.caption(f"⚙️ Max iterations: {os.getenv('LANDUSE_MAX_ITERATIONS', '5')}")
 
         st.markdown("---")
