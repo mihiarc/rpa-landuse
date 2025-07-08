@@ -1,0 +1,158 @@
+# Streamlit Community Cloud Deployment Guide
+
+This guide explains how to deploy the RPA Land Use Analytics dashboard to Streamlit Community Cloud.
+
+## Prerequisites
+
+1. **GitHub Repository**: Your code must be in a public GitHub repository
+2. **Streamlit Account**: Sign up at [share.streamlit.io](https://share.streamlit.io)
+3. **Git LFS**: Large files (DuckDB) are tracked with Git LFS
+
+## Repository Setup
+
+### Git LFS Configuration
+
+The repository is already configured with Git LFS to handle the large DuckDB file (312MB). The following files are tracked:
+- `*.duckdb` - DuckDB database files
+- `*.parquet` - Parquet data files
+- `data/raw/*.json` - Large JSON source files
+
+### Required Files
+
+Ensure these files are present in your repository:
+- `streamlit_app.py` - Main Streamlit application
+- `requirements.txt` or `pyproject.toml` - Python dependencies
+- `data/processed/landuse_analytics.duckdb` - Database file (via Git LFS)
+- `.streamlit/config.toml` - Streamlit configuration (optional)
+
+## Deployment Steps
+
+### 1. Push to GitHub
+
+```bash
+# Ensure all changes are committed
+git add .
+git commit -m "Prepare for Streamlit deployment"
+
+# Push with Git LFS files
+git push origin main
+```
+
+### 2. Create Streamlit App
+
+1. Go to [share.streamlit.io](https://share.streamlit.io)
+2. Click "New app"
+3. Connect your GitHub account if not already connected
+4. Select your repository: `rpa-landuse`
+5. Select branch: `main`
+6. Main file path: `streamlit_app.py`
+
+### 3. Configure Secrets
+
+Add your API keys in the Streamlit Cloud secrets management:
+
+```toml
+# In Streamlit Cloud Secrets (Advanced Settings)
+OPENAI_API_KEY = "your-openai-api-key"
+ANTHROPIC_API_KEY = "your-anthropic-api-key"  # Optional
+
+# Optional configuration
+LANDUSE_MODEL = "gpt-4o-mini"
+TEMPERATURE = "0.1"
+MAX_TOKENS = "4000"
+```
+
+### 4. Advanced Settings
+
+In the advanced settings, you may need to:
+
+1. **Python version**: Ensure it matches your local version (3.11+)
+2. **Install command**: The default should work with `pyproject.toml`
+3. **Resource limits**: The free tier should be sufficient
+
+## Environment Variables
+
+The app reads from Streamlit secrets automatically. Configure these in the Streamlit Cloud dashboard:
+
+```python
+# Required
+OPENAI_API_KEY = st.secrets["OPENAI_API_KEY"]
+
+# Optional (with defaults)
+ANTHROPIC_API_KEY = st.secrets.get("ANTHROPIC_API_KEY", "")
+LANDUSE_MODEL = st.secrets.get("LANDUSE_MODEL", "gpt-4o-mini")
+```
+
+## Troubleshooting
+
+### Large File Issues
+
+If you encounter issues with the DuckDB file:
+
+1. Ensure Git LFS is properly configured:
+   ```bash
+   git lfs ls-files  # Should show data/processed/landuse_analytics.duckdb
+   ```
+
+2. Verify the file is uploaded:
+   ```bash
+   git lfs push origin main --all
+   ```
+
+### Memory Issues
+
+If the app runs out of memory:
+
+1. The DuckDB file is 312MB, which should fit in the free tier
+2. Consider implementing query result limits
+3. Use DuckDB's efficient query processing
+
+### Connection Issues
+
+The app uses a custom DuckDB connection with caching:
+- Read-only mode by default
+- Automatic result caching
+- Thread-safe operations
+
+## Local Testing
+
+Before deploying, test locally to match the cloud environment:
+
+```bash
+# Install dependencies
+uv sync
+
+# Set environment variables
+export OPENAI_API_KEY="your-key"
+
+# Run the app
+uv run streamlit run streamlit_app.py
+```
+
+## Monitoring
+
+Once deployed:
+1. Check the app logs in Streamlit Cloud dashboard
+2. Monitor usage and performance metrics
+3. Set up error notifications
+
+## Updates
+
+To update the deployed app:
+1. Make changes locally
+2. Commit and push to GitHub
+3. Streamlit Cloud will automatically redeploy
+
+## Security Notes
+
+- Never commit API keys to the repository
+- Use Streamlit secrets for all sensitive data
+- The DuckDB file is read-only in the app
+- User queries are validated before execution
+
+## Support
+
+For issues specific to:
+- **Streamlit deployment**: Check [Streamlit documentation](https://docs.streamlit.io/streamlit-community-cloud)
+- **Git LFS**: See [Git LFS documentation](https://git-lfs.github.com/)
+- **App functionality**: See the main README.md
