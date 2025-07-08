@@ -4,10 +4,12 @@ RPA Land Use Analytics - Streamlit Dashboard
 AI-powered analytics tool for USDA Forest Service RPA Assessment land use data
 """
 
-# Very early debug output
-print("DEBUG: Starting streamlit_app.py")
-print(f"DEBUG: Python executable: {sys.executable}")
-print(f"DEBUG: Python version: {sys.version}")
+# Very early debug output - only in development
+import os
+if os.getenv("STREAMLIT_RUNTIME_ENV") != "cloud":
+    print("DEBUG: Starting streamlit_app.py")
+    print(f"DEBUG: Python executable: {sys.executable}")
+    print(f"DEBUG: Python version: {sys.version}")
 
 import sys
 from pathlib import Path
