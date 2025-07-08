@@ -1,0 +1,12 @@
+# System packages needed for the app
+# These are installed with apt-get on Streamlit Cloud
+
+# For geopandas and geographic operations
+gdal-bin
+libgdal-dev
+
+# For matplotlib (if backend issues)
+libgl1-mesa-glx
+
+# Git LFS support
+git-lfs
