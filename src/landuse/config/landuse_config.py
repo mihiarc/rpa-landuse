@@ -84,6 +84,17 @@ class LanduseConfig:
     domain_focus: str = field(
         default_factory=lambda: os.getenv('LANDUSE_DOMAIN_FOCUS', 'none')
     )
+    
+    # Knowledge Base Configuration
+    enable_knowledge_base: bool = field(
+        default_factory=lambda: os.getenv('LANDUSE_ENABLE_KNOWLEDGE_BASE', 'false').lower() == 'true'
+    )
+    knowledge_base_path: str = field(
+        default_factory=lambda: os.getenv('LANDUSE_KNOWLEDGE_BASE_PATH', 'src/landuse/docs')
+    )
+    chroma_persist_dir: str = field(
+        default_factory=lambda: os.getenv('LANDUSE_CHROMA_PERSIST_DIR', 'data/chroma_db')
+    )
 
     # Streamlit Configuration
     streamlit_cache_ttl: int = field(

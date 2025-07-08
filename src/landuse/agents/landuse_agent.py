@@ -50,6 +50,12 @@ class LanduseAgent:
         self.llm = self._create_llm()
         self.db_connection = self._create_db_connection()
         self.schema = self._get_schema()
+        self.knowledge_base = None
+        
+        # Initialize knowledge base if enabled
+        if self.config.enable_knowledge_base:
+            self._initialize_knowledge_base()
+        
         self.tools = self._create_tools()
         self.graph = None
         self.memory = MemorySaver()  # Memory-first architecture (2025 best practice)
@@ -150,13 +156,41 @@ class LanduseAgent:
 
         return "\n".join(schema_lines)
 
+    def _initialize_knowledge_base(self):
+        """Initialize the knowledge base if enabled."""
+        try:
+            from landuse.knowledge import RPAKnowledgeBase
+            
+            self.console.print("[yellow]Initializing RPA knowledge base...[/yellow]")
+            self.knowledge_base = RPAKnowledgeBase(
+                docs_path=self.config.knowledge_base_path,
+                persist_directory=self.config.chroma_persist_dir
+            )
+            self.knowledge_base.initialize()
+            self.console.print("[green]✓ Knowledge base ready[/green]")
+        except Exception as e:
+            self.console.print(f"[red]Warning: Failed to initialize knowledge base: {str(e)}[/red]")
+            self.console.print("[yellow]Continuing without knowledge base...[/yellow]")
+            self.knowledge_base = None
+
     def _create_tools(self) -> list[BaseTool]:
         """Create tools for the agent."""
-        return [
+        tools = [
             create_execute_query_tool(self.config, self.db_connection, self.schema),
             create_analysis_tool(),
             create_schema_tool(self.schema)
         ]
+        
+        # Add knowledge base retriever if available
+        if self.knowledge_base:
+            try:
+                retriever_tool = self.knowledge_base.create_retriever_tool()
+                tools.append(retriever_tool)
+                self.console.print("[green]✓ Added RPA documentation retriever tool[/green]")
+            except Exception as e:
+                self.console.print(f"[red]Warning: Failed to create retriever tool: {str(e)}[/red]")
+        
+        return tools
 
     def _build_graph(self) -> StateGraph:
         """Build the LangGraph state graph."""
@@ -613,3 +647,13 @@ Focus on:
     def _get_schema_help(self) -> str:
         """Get user-friendly schema information for display in the UI."""
         return self.schema
+    
+    def __enter__(self):
+        """Context manager entry."""
+        return self
+        
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """Context manager exit - clean up resources."""
+        if hasattr(self, 'db_connection') and self.db_connection:
+            self.db_connection.close()
+        # Knowledge base (Chroma) will persist automatically
