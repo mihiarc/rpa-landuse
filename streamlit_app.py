@@ -42,10 +42,25 @@ st.set_page_config(
 )
 
 # Load environment variables
-from dotenv import load_dotenv  # noqa: E402
+import os  # noqa: E402
+from pathlib import Path  # noqa: E402
 
-load_dotenv("config/.env")
-load_dotenv()
+# Try to load from .env if it exists (local development)
+try:
+    from dotenv import load_dotenv  # noqa: E402
+    env_path = Path("config/.env")
+    if env_path.exists():
+        load_dotenv(env_path)
+    else:
+        load_dotenv()
+except ImportError:
+    # dotenv not available in deployment, use st.secrets
+    pass
+
+# Use Streamlit secrets in deployment
+if hasattr(st, 'secrets'):
+    for key, value in st.secrets.items():
+        os.environ[key] = str(value)
 
 # Custom CSS for modern styling
 st.markdown("""

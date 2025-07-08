@@ -35,6 +35,5 @@ showSidebarNavigation = true
 toolbarMode = "auto"
 
 [ui]
-# Hide deploy button and menu
+# Hide deploy button
 hideTopBar = false
-hideSidebarNav = false
