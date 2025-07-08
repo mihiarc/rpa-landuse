@@ -5,7 +5,7 @@ description = "AI-powered analytics tool for USDA Forest Service RPA Assessment 
 readme = "README.md"
 requires-python = ">=3.9"
 dependencies = [
-    # Core dependencies
+    # Core AI/LLM frameworks
     "langchain>=0.3.0",
     "langchain-anthropic>=0.2.0",
     "langchain-openai>=0.2.0",
@@ -13,24 +13,27 @@ dependencies = [
     "langgraph>=0.2.0",
     "langgraph-checkpoint>=2.0.0",
     "langgraph-checkpoint-sqlite>=2.0.0",
+    
+    # Data processing
     "pandas>=2.2.0",
-    "openpyxl>=3.1.0",
-    "python-dotenv>=1.0.0",
     "numpy>=1.26.0",
-    "matplotlib>=3.8.0",
-    "seaborn>=0.13.0",
-    "sqlalchemy>=2.0.0",
     "duckdb>=1.0.0",
     "pyarrow>=15.0.0",
-    "jupyter>=1.0.0",
-    "ipykernel>=6.29.0",
+    "ijson>=3.0.0",
+    "openpyxl>=3.1.0",  # Required for Excel export in extraction.py
+    
+    # Visualization & GIS
+    "matplotlib>=3.8.0",
+    "plotly>=5.17.0",
     "geopandas>=1.0.0",
-    "fastparquet>=2024.0.0",
+    
+    # Web UI
+    "streamlit>=1.46.0",
+    
+    # Utilities
+    "python-dotenv>=1.0.0",
     "rich>=14.0.0",
     "pydantic>=2.0.0",
-    "ijson>=3.0.0",
-    "streamlit>=1.46.0",
-    "plotly>=5.17.0",
 ]
 
 [project.optional-dependencies]
