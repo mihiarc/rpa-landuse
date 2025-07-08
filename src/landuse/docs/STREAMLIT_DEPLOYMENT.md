@@ -12,17 +12,20 @@ This guide explains how to deploy the RPA Land Use Analytics dashboard to Stream
 
 ### Git LFS Configuration
 
-The repository is already configured with Git LFS to handle the large DuckDB file (312MB). The following files are tracked:
-- `*.duckdb` - DuckDB database files
-- `*.parquet` - Parquet data files
-- `data/raw/*.json` - Large JSON source files
+The repository is configured with Git LFS to handle large files:
+- `*.duckdb` - DuckDB database files (312MB)
+- `data/chroma_db/` - Chroma vector database (36MB) containing domain knowledge for the query agent:
+  - `chroma.sqlite3` - SQLite database
+  - `*.bin` files - Vector embeddings
+  - `*.pickle` files - Index metadata
 
 ### Required Files
 
 Ensure these files are present in your repository:
 - `streamlit_app.py` - Main Streamlit application
 - `requirements.txt` or `pyproject.toml` - Python dependencies
-- `data/processed/landuse_analytics.duckdb` - Database file (via Git LFS)
+- `data/processed/landuse_analytics.duckdb` - Analytics database (via Git LFS)
+- `data/chroma_db/` - Vector database for domain knowledge (via Git LFS)
 - `.streamlit/config.toml` - Streamlit configuration (optional)
 
 ## Deployment Steps
@@ -103,9 +106,10 @@ If you encounter issues with the DuckDB file:
 
 If the app runs out of memory:
 
-1. The DuckDB file is 312MB, which should fit in the free tier
+1. The DuckDB file (312MB) and Chroma DB (36MB) should fit in the free tier
 2. Consider implementing query result limits
 3. Use DuckDB's efficient query processing
+4. The Chroma vector database is loaded on-demand for semantic search
 
 ### Connection Issues
 
