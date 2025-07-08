@@ -12,24 +12,24 @@
         <meta name="author" content="RPA Analytics Team">
       
       
-        <link rel="canonical" href="https://mihiarc.github.io/langchain-landuse/agents/CONSTANTS_ARCHITECTURE/">
+        <link rel="canonical" href="https://mihiarc.github.io/langchain-landuse/KNOWLEDGE_BASE_INTEGRATION/">
       
       
       
       
-      <link rel="icon" href="../../assets/images/favicon.png">
+      <link rel="icon" href="../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.15">
     
     
       
-        <title>How Constants.py Connects to the Agent - RPA Land Use Analytics</title>
+        <title>Knowledge Base Integration Guide - RPA Land Use Analytics</title>
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.342714a4.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.342714a4.min.css">
       
         
-        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
+        <link rel="stylesheet" href="../assets/stylesheets/palette.06af60db.min.css">
       
       
 
@@ -48,9 +48,9 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
     
-    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -76,7 +76,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#how-constantspy-connects-to-the-agent" class="md-skip">
+        <a href="#knowledge-base-integration-guide" class="md-skip">
           Skip to content
         </a>
       
@@ -90,7 +90,7 @@
 
 <header class="md-header" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../.." title="RPA Land Use Analytics" class="md-header__button md-logo" aria-label="RPA Land Use Analytics" data-md-component="logo">
+    <a href=".." title="RPA Land Use Analytics" class="md-header__button md-logo" aria-label="RPA Land Use Analytics" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -110,7 +110,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              How Constants.py Connects to the Agent
+              Knowledge Base Integration Guide
             
           </span>
         </div>
@@ -223,7 +223,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../.." class="md-tabs__link">
+      <a href=".." class="md-tabs__link">
         
   
   
@@ -244,7 +244,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../rpa/overview/" class="md-tabs__link">
+        <a href="../rpa/overview/" class="md-tabs__link">
           
   
   
@@ -264,7 +264,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../getting-started/installation/" class="md-tabs__link">
+        <a href="../getting-started/installation/" class="md-tabs__link">
           
   
   
@@ -284,7 +284,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../queries/overview/" class="md-tabs__link">
+        <a href="../queries/overview/" class="md-tabs__link">
           
   
   
@@ -304,7 +304,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../data/sources/" class="md-tabs__link">
+        <a href="../data/sources/" class="md-tabs__link">
           
   
   
@@ -324,7 +324,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../api/langgraph-agent/" class="md-tabs__link">
+        <a href="../api/langgraph-agent/" class="md-tabs__link">
           
   
   
@@ -344,7 +344,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../examples/use-cases/" class="md-tabs__link">
+        <a href="../examples/use-cases/" class="md-tabs__link">
           
   
   
@@ -364,7 +364,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../development/architecture/" class="md-tabs__link">
+        <a href="../development/architecture/" class="md-tabs__link">
           
   
   
@@ -384,7 +384,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../performance/duckdb-copy-optimization/" class="md-tabs__link">
+        <a href="../performance/duckdb-copy-optimization/" class="md-tabs__link">
           
   
   
@@ -404,7 +404,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../faq/" class="md-tabs__link">
+        <a href="../faq/" class="md-tabs__link">
           
   
   
@@ -424,7 +424,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../SECURITY/" class="md-tabs__link">
+        <a href="../SECURITY/" class="md-tabs__link">
           
   
   
@@ -460,7 +460,7 @@
 
 <nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../.." title="RPA Land Use Analytics" class="md-nav__button md-logo" aria-label="RPA Land Use Analytics" data-md-component="logo">
+    <a href=".." title="RPA Land Use Analytics" class="md-nav__button md-logo" aria-label="RPA Land Use Analytics" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -490,7 +490,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../.." class="md-nav__link">
+      <a href=".." class="md-nav__link">
         
   
   
@@ -555,7 +555,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../rpa/overview/" class="md-nav__link">
+      <a href="../rpa/overview/" class="md-nav__link">
         
   
   
@@ -578,7 +578,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../RPA_SCENARIOS/" class="md-nav__link">
+      <a href="../RPA_SCENARIOS/" class="md-nav__link">
         
   
   
@@ -601,7 +601,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../LAND_USE_METHODOLOGY/" class="md-nav__link">
+      <a href="../LAND_USE_METHODOLOGY/" class="md-nav__link">
         
   
   
@@ -624,7 +624,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../rpa/climate-models/" class="md-nav__link">
+      <a href="../rpa/climate-models/" class="md-nav__link">
         
   
   
@@ -697,7 +697,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../getting-started/installation/" class="md-nav__link">
+      <a href="../getting-started/installation/" class="md-nav__link">
         
   
   
@@ -720,7 +720,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../getting-started/quickstart/" class="md-nav__link">
+      <a href="../getting-started/quickstart/" class="md-nav__link">
         
   
   
@@ -743,7 +743,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../getting-started/configuration/" class="md-nav__link">
+      <a href="../getting-started/configuration/" class="md-nav__link">
         
   
   
@@ -816,7 +816,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../queries/overview/" class="md-nav__link">
+      <a href="../queries/overview/" class="md-nav__link">
         
   
   
@@ -839,7 +839,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../queries/basic-queries/" class="md-nav__link">
+      <a href="../queries/basic-queries/" class="md-nav__link">
         
   
   
@@ -862,7 +862,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../queries/advanced-queries/" class="md-nav__link">
+      <a href="../queries/advanced-queries/" class="md-nav__link">
         
   
   
@@ -885,7 +885,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../queries/examples/" class="md-nav__link">
+      <a href="../queries/examples/" class="md-nav__link">
         
   
   
@@ -958,7 +958,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../data/sources/" class="md-nav__link">
+      <a href="../data/sources/" class="md-nav__link">
         
   
   
@@ -981,7 +981,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../data/schema/" class="md-nav__link">
+      <a href="../data/schema/" class="md-nav__link">
         
   
   
@@ -1004,7 +1004,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../data/duckdb-schema/" class="md-nav__link">
+      <a href="../data/duckdb-schema/" class="md-nav__link">
         
   
   
@@ -1027,7 +1027,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../data/categories/" class="md-nav__link">
+      <a href="../data/categories/" class="md-nav__link">
         
   
   
@@ -1050,7 +1050,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../data/variable-descriptions/" class="md-nav__link">
+      <a href="../data/variable-descriptions/" class="md-nav__link">
         
   
   
@@ -1073,7 +1073,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../data/rpa-model-diagram/" class="md-nav__link">
+      <a href="../data/rpa-model-diagram/" class="md-nav__link">
         
   
   
@@ -1096,7 +1096,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../data/processing/" class="md-nav__link">
+      <a href="../data/processing/" class="md-nav__link">
         
   
   
@@ -1169,7 +1169,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../api/langgraph-agent/" class="md-nav__link">
+      <a href="../api/langgraph-agent/" class="md-nav__link">
         
   
   
@@ -1192,7 +1192,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../api/agent/" class="md-nav__link">
+      <a href="../api/agent/" class="md-nav__link">
         
   
   
@@ -1215,7 +1215,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../api/landuse-query-agent/" class="md-nav__link">
+      <a href="../api/landuse-query-agent/" class="md-nav__link">
         
   
   
@@ -1238,7 +1238,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../api/converters/" class="md-nav__link">
+      <a href="../api/converters/" class="md-nav__link">
         
   
   
@@ -1261,7 +1261,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../api/tools/" class="md-nav__link">
+      <a href="../api/tools/" class="md-nav__link">
         
   
   
@@ -1334,7 +1334,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../examples/use-cases/" class="md-nav__link">
+      <a href="../examples/use-cases/" class="md-nav__link">
         
   
   
@@ -1357,7 +1357,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../examples/workflows/" class="md-nav__link">
+      <a href="../examples/workflows/" class="md-nav__link">
         
   
   
@@ -1380,7 +1380,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../examples/notebooks/" class="md-nav__link">
+      <a href="../examples/notebooks/" class="md-nav__link">
         
   
   
@@ -1453,7 +1453,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../development/architecture/" class="md-nav__link">
+      <a href="../development/architecture/" class="md-nav__link">
         
   
   
@@ -1476,7 +1476,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../development/contributing/" class="md-nav__link">
+      <a href="../development/contributing/" class="md-nav__link">
         
   
   
@@ -1499,7 +1499,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../development/testing/" class="md-nav__link">
+      <a href="../development/testing/" class="md-nav__link">
         
   
   
@@ -1522,7 +1522,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../development/ci-cd-pipeline/" class="md-nav__link">
+      <a href="../development/ci-cd-pipeline/" class="md-nav__link">
         
   
   
@@ -1545,7 +1545,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../development/retry-logic/" class="md-nav__link">
+      <a href="../development/retry-logic/" class="md-nav__link">
         
   
   
@@ -1568,7 +1568,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../development/BRANDING_STRATEGY/" class="md-nav__link">
+      <a href="../development/BRANDING_STRATEGY/" class="md-nav__link">
         
   
   
@@ -1591,7 +1591,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../development/modern-duckdb-tools/" class="md-nav__link">
+      <a href="../development/modern-duckdb-tools/" class="md-nav__link">
         
   
   
@@ -1614,7 +1614,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../development/pydantic-models/" class="md-nav__link">
+      <a href="../development/pydantic-models/" class="md-nav__link">
         
   
   
@@ -1687,7 +1687,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../performance/duckdb-copy-optimization/" class="md-nav__link">
+      <a href="../performance/duckdb-copy-optimization/" class="md-nav__link">
         
   
   
@@ -1710,7 +1710,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../performance/streamlit-fragments/" class="md-nav__link">
+      <a href="../performance/streamlit-fragments/" class="md-nav__link">
         
   
   
@@ -1783,7 +1783,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../faq/" class="md-nav__link">
+      <a href="../faq/" class="md-nav__link">
         
   
   
@@ -1806,7 +1806,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../troubleshooting/" class="md-nav__link">
+      <a href="../troubleshooting/" class="md-nav__link">
         
   
   
@@ -1829,7 +1829,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../GITHUB_PAGES_SETUP/" class="md-nav__link">
+      <a href="../GITHUB_PAGES_SETUP/" class="md-nav__link">
         
   
   
@@ -1852,7 +1852,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../troubleshooting/streamlit-duplicate-ids/" class="md-nav__link">
+      <a href="../troubleshooting/streamlit-duplicate-ids/" class="md-nav__link">
         
   
   
@@ -1875,7 +1875,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../troubleshooting/streamlit-fragments/" class="md-nav__link">
+      <a href="../troubleshooting/streamlit-fragments/" class="md-nav__link">
         
   
   
@@ -1948,7 +1948,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../SECURITY/" class="md-nav__link">
+      <a href="../SECURITY/" class="md-nav__link">
         
   
   
@@ -1971,7 +1971,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../TESTING/" class="md-nav__link">
+      <a href="../TESTING/" class="md-nav__link">
         
   
   
@@ -1994,7 +1994,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../CLAUDE.local/" class="md-nav__link">
+      <a href="../CLAUDE.local/" class="md-nav__link">
         
   
   
@@ -2036,143 +2036,140 @@
   
 
 
-<h1 id="how-constantspy-connects-to-the-agent">How Constants.py Connects to the Agent<a class="headerlink" href="#how-constantspy-connects-to-the-agent" title="Permanent link">&para;</a></h1>
+<h1 id="knowledge-base-integration-guide">Knowledge Base Integration Guide<a class="headerlink" href="#knowledge-base-integration-guide" title="Permanent link">&para;</a></h1>
+<p>This guide explains how to use the vector store knowledge base feature to enhance the RPA Land Use Analytics agent with domain knowledge from markdown documentation.</p>
 <h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
-<p>The <code>constants.py</code> file serves as a centralized configuration and knowledge base for the LanduseAgent. It contains all the domain-specific information, templates, and defaults that the agent needs to operate effectively.</p>
-<h2 id="architecture-diagram">Architecture Diagram<a class="headerlink" href="#architecture-diagram" title="Permanent link">&para;</a></h2>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>┌─────────────────────────────────────────────────────────┐
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>│                    constants.py                          │
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>│                                                          │
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>│  ┌─────────────────┐  ┌──────────────────┐             │
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>│  │  STATE_NAMES    │  │ SCHEMA_INFO      │             │
-</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>│  │  - State codes  │  │  TEMPLATE        │             │
-</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>│  │  - State names  │  │ - Table schemas  │             │
-</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>│  └────────┬────────┘  └────────┬─────────┘             │
-</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>│           │                     │                        │
-</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>│  ┌────────▼────────┐  ┌────────▼─────────┐             │
-</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>│  │ DEFAULT_        │  │ QUERY_EXAMPLES   │             │
-</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>│  │ ASSUMPTIONS     │  │ - SQL templates  │             │
-</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>│  │ - Scenarios     │  │ - Common queries │             │
-</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>│  │ - Time periods  │  └────────┬─────────┘             │
-</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>│  └────────┬────────┘           │                        │
-</span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>│           │                     │                        │
-</span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>│  ┌────────▼────────┐  ┌────────▼─────────┐             │
-</span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>│  │ DB_CONFIG       │  │ MODEL_CONFIG     │             │
-</span><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>│  │ - Default path  │  │ - Temperature    │             │
-</span><span id="__span-0-20"><a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a>│  │ - Query limits  │  │ - Max tokens     │             │
-</span><span id="__span-0-21"><a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a>│  └────────┬────────┘  └────────┬─────────┘             │
-</span><span id="__span-0-22"><a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a>└───────────┼────────────────────┼────────────────────────┘
-</span><span id="__span-0-23"><a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a>            │                     │
-</span><span id="__span-0-24"><a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a>            └─────────┬───────────┘
-</span><span id="__span-0-25"><a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a>                      │
-</span><span id="__span-0-26"><a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a>                      ▼
-</span><span id="__span-0-27"><a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a>        ┌─────────────────────────────┐
-</span><span id="__span-0-28"><a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a>        │       agent.py              │
-</span><span id="__span-0-29"><a id="__codelineno-0-29" name="__codelineno-0-29" href="#__codelineno-0-29"></a>        │                             │
-</span><span id="__span-0-30"><a id="__codelineno-0-30" name="__codelineno-0-30" href="#__codelineno-0-30"></a>        │  Uses constants for:        │
-</span><span id="__span-0-31"><a id="__codelineno-0-31" name="__codelineno-0-31" href="#__codelineno-0-31"></a>        │  • Configuration           │
-</span><span id="__span-0-32"><a id="__codelineno-0-32" name="__codelineno-0-32" href="#__codelineno-0-32"></a>        │  • Schema knowledge        │
-</span><span id="__span-0-33"><a id="__codelineno-0-33" name="__codelineno-0-33" href="#__codelineno-0-33"></a>        │  • Query templates         │
-</span><span id="__span-0-34"><a id="__codelineno-0-34" name="__codelineno-0-34" href="#__codelineno-0-34"></a>        │  • State mappings         │
-</span><span id="__span-0-35"><a id="__codelineno-0-35" name="__codelineno-0-35" href="#__codelineno-0-35"></a>        │  • Default behaviors      │
-</span><span id="__span-0-36"><a id="__codelineno-0-36" name="__codelineno-0-36" href="#__codelineno-0-36"></a>        └─────────────────────────────┘
+<p>The knowledge base integration allows the agent to search through RPA Assessment documentation using semantic search, combining structured data queries with contextual information from official documents.</p>
+<h2 id="features">Features<a class="headerlink" href="#features" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>Semantic Search</strong>: Uses OpenAI embeddings to find relevant documentation based on meaning</li>
+<li><strong>Automatic Indexing</strong>: Processes markdown files and creates searchable chunks</li>
+<li><strong>Persistent Storage</strong>: Uses Chroma vector database for efficient retrieval</li>
+<li><strong>Seamless Integration</strong>: Works with the existing LangGraph agent architecture</li>
+<li><strong>No Technical Debt</strong>: Implemented as a configurable feature in the existing agent</li>
+</ul>
+<h2 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link">&para;</a></h2>
+<p>Enable the knowledge base by setting environment variables in your <code>.env</code> file:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># Enable knowledge base feature</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="nv">LANDUSE_ENABLE_KNOWLEDGE_BASE</span><span class="o">=</span><span class="nb">true</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="c1"># Optional: customize paths (defaults shown)</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="nv">LANDUSE_KNOWLEDGE_BASE_PATH</span><span class="o">=</span>src/landuse/docs
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="nv">LANDUSE_CHROMA_PERSIST_DIR</span><span class="o">=</span>data/chroma_db
 </span></code></pre></div>
-<h2 id="how-each-constant-is-used">How Each Constant is Used<a class="headerlink" href="#how-each-constant-is-used" title="Permanent link">&para;</a></h2>
-<h3 id="1-schema_info_template-database-knowledge">1. <strong>SCHEMA_INFO_TEMPLATE</strong> (Database Knowledge)<a class="headerlink" href="#1-schema_info_template-database-knowledge" title="Permanent link">&para;</a></h3>
-<p>The agent uses this to understand the database structure:</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># In agent.py _get_schema_info() method:</span>
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="k">def</span><span class="w"> </span><span class="nf">_get_schema_info</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>    <span class="c1"># Start with template</span>
-</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>    <span class="n">schema_info</span> <span class="o">=</span> <span class="n">SCHEMA_INFO_TEMPLATE</span>
-</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>
-</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>    <span class="c1"># Add actual table counts...</span>
-</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>    <span class="c1"># The template provides the base knowledge about tables and relationships</span>
+<h2 id="usage">Usage<a class="headerlink" href="#usage" title="Permanent link">&para;</a></h2>
+<h3 id="command-line">Command Line<a class="headerlink" href="#command-line" title="Permanent link">&para;</a></h3>
+<p>When the knowledge base is enabled, the agent automatically gains access to a documentation search tool:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># Run the agent with knowledge base enabled</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="nv">LANDUSE_ENABLE_KNOWLEDGE_BASE</span><span class="o">=</span><span class="nb">true</span><span class="w"> </span>uv<span class="w"> </span>run<span class="w"> </span>rpa-analytics
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="c1"># Or set it in your .env file and run normally</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>uv<span class="w"> </span>run<span class="w"> </span>rpa-analytics
 </span></code></pre></div>
-<p><strong>Purpose</strong>: Gives the LLM complete understanding of the database schema so it can generate correct SQL queries.</p>
-<h3 id="2-state_names-geographic-mapping">2. <strong>STATE_NAMES</strong> (Geographic Mapping)<a class="headerlink" href="#2-state_names-geographic-mapping" title="Permanent link">&para;</a></h3>
-<p>Used in the <code>get_state_code</code> tool:</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nd">@tool</span>
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="k">def</span><span class="w"> </span><span class="nf">get_state_code</span><span class="p">(</span><span class="n">state_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>    <span class="c1"># Create reverse mapping</span>
-</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>    <span class="n">name_to_code</span> <span class="o">=</span> <span class="p">{</span><span class="n">v</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span> <span class="n">k</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">STATE_NAMES</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
-</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>
-</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>    <span class="c1"># Convert &quot;Texas&quot; → &quot;48&quot;, &quot;California&quot; → &quot;06&quot;, etc.</span>
+<h3 id="python-api">Python API<a class="headerlink" href="#python-api" title="Permanent link">&para;</a></h3>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">landuse.agents.landuse_agent</span><span class="w"> </span><span class="kn">import</span> <span class="n">LanduseAgent</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">landuse.config.landuse_config</span><span class="w"> </span><span class="kn">import</span> <span class="n">LanduseConfig</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="c1"># Create config with knowledge base enabled</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="n">config</span> <span class="o">=</span> <span class="n">LanduseConfig</span><span class="p">(</span><span class="n">enable_knowledge_base</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="c1"># Initialize agent</span>
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="k">with</span> <span class="n">LanduseAgent</span><span class="p">(</span><span class="n">config</span><span class="p">)</span> <span class="k">as</span> <span class="n">agent</span><span class="p">:</span>
+</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>    <span class="c1"># Query combining documentation and data</span>
+</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>    <span class="n">response</span> <span class="o">=</span> <span class="n">agent</span><span class="o">.</span><span class="n">query</span><span class="p">(</span>
+</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>        <span class="s2">&quot;What does the RPA Assessment say about forest loss? &quot;</span>
+</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>        <span class="s2">&quot;Also show me actual data for forest transitions.&quot;</span>
+</span><span id="__span-2-13"><a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a>    <span class="p">)</span>
+</span><span id="__span-2-14"><a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
 </span></code></pre></div>
-<p><strong>Purpose</strong>: Allows users to use state names naturally ("Texas") instead of codes ("48").</p>
-<h3 id="3-default_assumptions-query-defaults">3. <strong>DEFAULT_ASSUMPTIONS</strong> (Query Defaults)<a class="headerlink" href="#3-default_assumptions-query-defaults" title="Permanent link">&para;</a></h3>
-<p>Used in the system prompt to handle ambiguous queries:</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">_get_system_prompt</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
-</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="s2">    DEFAULT ASSUMPTIONS (when user doesn&#39;t specify):</span>
-</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="s2">    - Scenarios: </span><span class="si">{</span><span class="n">DEFAULT_ASSUMPTIONS</span><span class="p">[</span><span class="s2">&quot;scenarios&quot;</span><span class="p">]</span><span class="si">}</span>
-</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="s2">    - Time Periods: </span><span class="si">{</span><span class="n">DEFAULT_ASSUMPTIONS</span><span class="p">[</span><span class="s2">&quot;time_period&quot;</span><span class="p">]</span><span class="si">}</span>
-</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="s2">    - Geographic Scope: </span><span class="si">{</span><span class="n">DEFAULT_ASSUMPTIONS</span><span class="p">[</span><span class="s2">&quot;geographic_scope&quot;</span><span class="p">]</span><span class="si">}</span>
-</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="s2">    - Transition Type: </span><span class="si">{</span><span class="n">DEFAULT_ASSUMPTIONS</span><span class="p">[</span><span class="s2">&quot;transition_type&quot;</span><span class="p">]</span><span class="si">}</span>
-</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="s2">    &quot;&quot;&quot;</span>
+<h3 id="streamlit-app">Streamlit App<a class="headerlink" href="#streamlit-app" title="Permanent link">&para;</a></h3>
+<p>The knowledge base is automatically available in the Streamlit app when enabled:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="nv">LANDUSE_ENABLE_KNOWLEDGE_BASE</span><span class="o">=</span><span class="nb">true</span><span class="w"> </span>uv<span class="w"> </span>run<span class="w"> </span>streamlit<span class="w"> </span>run<span class="w"> </span>streamlit_app.py
 </span></code></pre></div>
-<p><strong>Purpose</strong>: Provides sensible defaults when users ask vague questions like "How much forest is being lost?"</p>
-<h3 id="4-query_examples-sql-templates">4. <strong>QUERY_EXAMPLES</strong> (SQL Templates)<a class="headerlink" href="#4-query_examples-sql-templates" title="Permanent link">&para;</a></h3>
-<p>Used by the <code>suggest_query_examples</code> tool:</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="nd">@tool</span>
-</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="k">def</span><span class="w"> </span><span class="nf">suggest_query_examples</span><span class="p">(</span><span class="n">category</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;general&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>    <span class="k">if</span> <span class="n">category</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="n">QUERY_EXAMPLES</span><span class="p">:</span>
-</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Example Query - </span><span class="si">{</span><span class="n">category</span><span class="o">.</span><span class="n">title</span><span class="p">()</span><span class="si">}</span><span class="s2">:</span><span class="se">\n</span><span class="si">{</span><span class="n">QUERY_EXAMPLES</span><span class="p">[</span><span class="n">category</span><span class="o">.</span><span class="n">lower</span><span class="p">()]</span><span class="si">}</span><span class="s2">&quot;</span>
-</span></code></pre></div>
-<p><strong>Purpose</strong>: Provides tested SQL patterns for common analysis types.</p>
-<h3 id="5-db_config-database-configuration">5. <strong>DB_CONFIG</strong> (Database Configuration)<a class="headerlink" href="#5-db_config-database-configuration" title="Permanent link">&para;</a></h3>
-<p>Used during initialization:</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="n">config_dict</span> <span class="o">=</span> <span class="p">{</span>
-</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>    <span class="s1">&#39;db_path&#39;</span><span class="p">:</span> <span class="n">Path</span><span class="p">(</span><span class="n">db_path</span> <span class="ow">or</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;LANDUSE_DB_PATH&#39;</span><span class="p">,</span> <span class="n">DB_CONFIG</span><span class="p">[</span><span class="s1">&#39;default_path&#39;</span><span class="p">])),</span>
-</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>    <span class="s1">&#39;max_query_rows&#39;</span><span class="p">:</span> <span class="n">DB_CONFIG</span><span class="p">[</span><span class="s1">&#39;max_query_limit&#39;</span><span class="p">],</span>
-</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>    <span class="s1">&#39;default_display_limit&#39;</span><span class="p">:</span> <span class="n">DB_CONFIG</span><span class="p">[</span><span class="s1">&#39;default_display_limit&#39;</span><span class="p">]</span>
-</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="p">}</span>
-</span></code></pre></div>
-<p><strong>Purpose</strong>: Centralizes database-related settings and limits.</p>
-<h3 id="6-model_config-llm-configuration">6. <strong>MODEL_CONFIG</strong> (LLM Configuration)<a class="headerlink" href="#6-model_config-llm-configuration" title="Permanent link">&para;</a></h3>
-<p>Used for model defaults:</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="s1">&#39;model_name&#39;</span><span class="p">:</span> <span class="n">model_name</span> <span class="ow">or</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;LANDUSE_MODEL&#39;</span><span class="p">,</span> <span class="n">MODEL_CONFIG</span><span class="p">[</span><span class="s1">&#39;default_openai_model&#39;</span><span class="p">]),</span>
-</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="s1">&#39;temperature&#39;</span><span class="p">:</span> <span class="n">temperature</span> <span class="ow">or</span> <span class="nb">float</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;TEMPERATURE&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">MODEL_CONFIG</span><span class="p">[</span><span class="s1">&#39;default_temperature&#39;</span><span class="p">]))),</span>
-</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="s1">&#39;max_tokens&#39;</span><span class="p">:</span> <span class="n">max_tokens</span> <span class="ow">or</span> <span class="nb">int</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;MAX_TOKENS&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">MODEL_CONFIG</span><span class="p">[</span><span class="s1">&#39;default_max_tokens&#39;</span><span class="p">]))),</span>
-</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="s1">&#39;max_iterations&#39;</span><span class="p">:</span> <span class="n">MODEL_CONFIG</span><span class="p">[</span><span class="s1">&#39;max_iterations&#39;</span><span class="p">],</span>
-</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="s1">&#39;max_execution_time&#39;</span><span class="p">:</span> <span class="n">MODEL_CONFIG</span><span class="p">[</span><span class="s1">&#39;max_execution_time&#39;</span><span class="p">]</span>
-</span></code></pre></div>
-<p><strong>Purpose</strong>: Sets safe defaults for LLM behavior and execution limits.</p>
-<h2 id="benefits-of-this-architecture">Benefits of This Architecture<a class="headerlink" href="#benefits-of-this-architecture" title="Permanent link">&para;</a></h2>
+<h2 id="example-queries">Example Queries<a class="headerlink" href="#example-queries" title="Permanent link">&para;</a></h2>
+<p>The knowledge base enables new types of queries that combine documentation context with data analysis:</p>
+<h3 id="documentation-only-queries">Documentation-Only Queries<a class="headerlink" href="#documentation-only-queries" title="Permanent link">&para;</a></h3>
+<ul>
+<li>"What are the key findings from the RPA Assessment about land development threats?"</li>
+<li>"What climate scenarios does the RPA Assessment use?"</li>
+<li>"Explain the wildland-urban interface according to the RPA documentation"</li>
+</ul>
+<h3 id="combined-documentation-and-data-queries">Combined Documentation and Data Queries<a class="headerlink" href="#combined-documentation-and-data-queries" title="Permanent link">&para;</a></h3>
+<ul>
+<li>"What does the RPA Assessment say about drought projections? Show me rangeland data for western states."</li>
+<li>"According to the RPA documentation, which regions face the most forest loss? Show me the actual data."</li>
+<li>"Explain the RPA's methodology for land use projections and show me an example from the database."</li>
+</ul>
+<h2 id="how-it-works">How It Works<a class="headerlink" href="#how-it-works" title="Permanent link">&para;</a></h2>
 <ol>
-<li><strong>Separation of Concerns</strong>: Domain knowledge is separated from agent logic</li>
-<li><strong>Easy Updates</strong>: Change constants without touching agent code</li>
-<li><strong>Reusability</strong>: Multiple agents or tools can share the same constants</li>
-<li><strong>Maintainability</strong>: All configuration in one place</li>
-<li><strong>Type Safety</strong>: Constants provide consistent types and values</li>
+<li><strong>Document Loading</strong>: The <code>RPAKnowledgeBase</code> class loads markdown files from <code>src/landuse/docs/</code></li>
+<li><strong>Text Splitting</strong>: Documents are split into chunks while preserving context</li>
+<li><strong>Embedding Generation</strong>: Each chunk is converted to a vector embedding using OpenAI</li>
+<li><strong>Vector Storage</strong>: Embeddings are stored in Chroma for fast similarity search</li>
+<li><strong>Tool Integration</strong>: A retriever tool is added to the agent's toolset</li>
+<li><strong>Query Processing</strong>: The agent can now search documentation when answering questions</li>
 </ol>
-<h2 id="example-flow">Example Flow<a class="headerlink" href="#example-flow" title="Permanent link">&para;</a></h2>
-<p>When a user asks "Which states have the most forest loss?":</p>
-<ol>
-<li>Agent receives the query</li>
-<li>Uses <strong>SCHEMA_INFO_TEMPLATE</strong> to understand table relationships</li>
-<li>Applies <strong>DEFAULT_ASSUMPTIONS</strong> (all scenarios, full time period)</li>
-<li>May reference <strong>QUERY_EXAMPLES["agricultural_loss"]</strong> as a pattern</li>
-<li>Uses <strong>STATE_NAMES</strong> to convert state codes to names in results</li>
-<li>Respects <strong>DB_CONFIG</strong> limits on query size</li>
-<li>Operates within <strong>MODEL_CONFIG</strong> constraints</li>
-</ol>
-<h2 id="environment-variable-overrides">Environment Variable Overrides<a class="headerlink" href="#environment-variable-overrides" title="Permanent link">&para;</a></h2>
-<p>Many constants can be overridden via environment variables:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="c1"># Override defaults</span>
-</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="nb">export</span><span class="w"> </span><span class="nv">LANDUSE_MAX_QUERY_ROWS</span><span class="o">=</span><span class="m">5000</span>
-</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="nb">export</span><span class="w"> </span><span class="nv">LANDUSE_MAX_ITERATIONS</span><span class="o">=</span><span class="m">10</span>
-</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="nb">export</span><span class="w"> </span><span class="nv">LANDUSE_MODEL</span><span class="o">=</span>gpt-4
-</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>
-</span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="c1"># Constants.py reads these in DB_CONFIG and MODEL_CONFIG</span>
+<h2 id="architecture">Architecture<a class="headerlink" href="#architecture" title="Permanent link">&para;</a></h2>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>LanduseAgent
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>├── Standard Tools
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>│   ├── execute_landuse_query
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>│   ├── analyze_landuse_results
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>│   └── explore_landuse_schema
+</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>└── Knowledge Base Tool (when enabled)
+</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>    └── search_rpa_documentation
+</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>        └── RPAKnowledgeBase
+</span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>            ├── Document Loader
+</span><span id="__span-4-10"><a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a>            ├── Text Splitter
+</span><span id="__span-4-11"><a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a>            ├── Embeddings (OpenAI)
+</span><span id="__span-4-12"><a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a>            └── Vector Store (Chroma)
 </span></code></pre></div>
-<p>This provides flexibility without code changes.</p>
-<h2 id="summary">Summary<a class="headerlink" href="#summary" title="Permanent link">&para;</a></h2>
-<p>The <code>constants.py</code> file acts as the agent's "knowledge base" and configuration center. It provides:
-- Domain knowledge (schema, state mappings)
-- Behavioral defaults (assumptions, limits)
-- Query patterns (examples)
-- System configuration (database, model)</p>
-<p>This clean separation makes the agent more maintainable and allows easy customization of its behavior through a single file.</p>
+<h2 id="performance-considerations">Performance Considerations<a class="headerlink" href="#performance-considerations" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>Initial Setup</strong>: First run will process all documents and create embeddings (one-time cost)</li>
+<li><strong>Subsequent Runs</strong>: Vector store is persisted to disk for fast loading</li>
+<li><strong>Query Performance</strong>: Semantic search typically returns results in &lt;1 second</li>
+<li><strong>Storage</strong>: Vector database requires ~50-100MB depending on document volume</li>
+</ul>
+<h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">&para;</a></h2>
+<h3 id="knowledge-base-not-loading">Knowledge Base Not Loading<a class="headerlink" href="#knowledge-base-not-loading" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Check that <code>OPENAI_API_KEY</code> is set (required for embeddings)</li>
+<li>Verify markdown documents exist in <code>src/landuse/docs/</code></li>
+<li>Ensure write permissions for <code>data/chroma_db/</code> directory</li>
+</ul>
+<h3 id="slow-initial-loading">Slow Initial Loading<a class="headerlink" href="#slow-initial-loading" title="Permanent link">&para;</a></h3>
+<ul>
+<li>First run processes all documents; subsequent runs load from disk</li>
+<li>Use <code>force_rebuild=True</code> to recreate the vector store if needed</li>
+</ul>
+<h3 id="search-not-finding-expected-results">Search Not Finding Expected Results<a class="headerlink" href="#search-not-finding-expected-results" title="Permanent link">&para;</a></h3>
+<ul>
+<li>The knowledge base uses semantic search, not keyword matching</li>
+<li>Try rephrasing queries to be more specific</li>
+<li>Check that relevant content exists in the markdown files</li>
+</ul>
+<h2 id="adding-new-documentation">Adding New Documentation<a class="headerlink" href="#adding-new-documentation" title="Permanent link">&para;</a></h2>
+<p>To add new documentation to the knowledge base:</p>
+<ol>
+<li>Add markdown files to <code>src/landuse/docs/</code></li>
+<li>Delete the existing vector store: <code>rm -rf data/chroma_db/</code></li>
+<li>Run the agent - it will automatically rebuild the index</li>
+</ol>
+<h2 id="dependencies">Dependencies<a class="headerlink" href="#dependencies" title="Permanent link">&para;</a></h2>
+<p>The knowledge base feature requires additional packages:
+- <code>chromadb</code>: Vector database for storing embeddings
+- <code>unstructured</code>: Document parsing and processing
+- <code>markdown</code>: Markdown file support</p>
+<p>These are installed automatically when you run <code>uv sync</code>.</p>
+<h2 id="future-enhancements">Future Enhancements<a class="headerlink" href="#future-enhancements" title="Permanent link">&para;</a></h2>
+<p>Potential improvements for the knowledge base:</p>
+<ol>
+<li><strong>Multiple Document Sources</strong>: Support for PDFs, Word docs, etc.</li>
+<li><strong>Dynamic Updates</strong>: Add new documents without rebuilding</li>
+<li><strong>Query Optimization</strong>: Fine-tune retrieval parameters</li>
+<li><strong>Caching</strong>: Cache frequently accessed documentation chunks</li>
+<li><strong>Multi-Modal Search</strong>: Support for tables, charts, and images</li>
+</ol>
 
 
 
@@ -2259,10 +2256,10 @@
     
     
       
-      <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.path", "navigation.top", "search.suggest", "search.highlight", "content.tabs.link", "content.code.annotation", "content.code.copy", "toc.integrate"], "search": "../../assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tabs", "navigation.sections", "navigation.path", "navigation.top", "search.suggest", "search.highlight", "content.tabs.link", "content.code.annotation", "content.code.copy", "toc.integrate"], "search": "../assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../assets/javascripts/bundle.56ea9cef.min.js"></script>
+      <script src="../assets/javascripts/bundle.56ea9cef.min.js"></script>
       
     
   </body>
