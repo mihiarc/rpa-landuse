@@ -8,11 +8,13 @@ ENV/
 
 # Data files
 *.db
-*.duckdb
 *.parquet
 data/raw/*.json
 data/processed/*.db
-data/processed/*.duckdb
+
+# DuckDB files are tracked with Git LFS
+# *.duckdb
+# data/processed/*.duckdb
 
 # Config
 .env
