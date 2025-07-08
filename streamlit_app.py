@@ -6,13 +6,13 @@ AI-powered analytics tool for USDA Forest Service RPA Assessment land use data
 
 # Very early debug output - only in development
 import os
+import sys
+from pathlib import Path
+
 if os.getenv("STREAMLIT_RUNTIME_ENV") != "cloud":
     print("DEBUG: Starting streamlit_app.py")
     print(f"DEBUG: Python executable: {sys.executable}")
     print(f"DEBUG: Python version: {sys.version}")
-
-import sys
-from pathlib import Path
 
 # Add src to path so we can import our landuse modules
 try:
@@ -62,9 +62,7 @@ st.set_page_config(
     }
 )
 
-# Load environment variables
-import os  # noqa: E402
-from pathlib import Path  # noqa: E402
+# Load environment variables (already imported at top)
 
 # Try to load from .env if it exists (local development)
 try:
@@ -164,9 +162,8 @@ st.markdown("""
 
 def check_environment():
     """Check if the environment is properly configured"""
-    import os
-    from pathlib import Path
-
+    # os and Path already imported at top of file
+    
     checks = {
         "database": False,
         "api_keys": False,
@@ -313,8 +310,6 @@ def show_welcome_page():
     # Quick stats
     if checks["database"]:
         try:
-            import os
-
             import duckdb
 
             db_path = os.getenv('LANDUSE_DB_PATH', 'data/processed/landuse_analytics.duckdb')
@@ -395,35 +390,35 @@ def create_pages():
 
     # Chat interface page
     chat_page = st.Page(
-        "pages/chat.py",
+        "pages_disabled/chat.py",
         title="Natural Language Chat",
         icon=":material/chat:"
     )
 
     # Analytics dashboard page
     analytics_page = st.Page(
-        "pages/analytics.py",
+        "pages_disabled/analytics.py",
         title="Analytics Dashboard",
         icon=":material/analytics:"
     )
 
     # Data explorer page
     explorer_page = st.Page(
-        "pages/explorer.py",
+        "pages_disabled/explorer.py",
         title="Data Explorer",
         icon=":material/search:"
     )
 
     # Data extraction page
     extraction_page = st.Page(
-        "pages/extraction.py",
+        "pages_disabled/extraction.py",
         title="Data Extraction",
         icon=":material/download:"
     )
 
     # Settings page
     settings_page = st.Page(
-        "pages/settings.py",
+        "pages_disabled/settings.py",
         title="Settings & Help",
         icon=":material/settings:"
     )
