@@ -186,7 +186,7 @@ orjson==3.10.18
     #   langsmith
 ormsgpack==1.10.0
     # via langgraph-checkpoint
-packaging==24.2
+packaging==25.0
     # via
     #   altair
     #   geopandas
