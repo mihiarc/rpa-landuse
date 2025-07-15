@@ -41,33 +41,39 @@ result = agent.run("Show me the tables in landuse_transitions.db")
 The `SQLQueryAgent` is the original component that interprets natural language queries and performs data operations on various databases and files.
 
 ```python
-from scripts.agents.data_engineering_agent import DataEngineeringAgent
+from landuse.agents.landuse_agent import LanduseAgent
+from landuse.config.landuse_config import LanduseConfig
 
-# Initialize the agent
-agent = DataEngineeringAgent(root_dir="./data")
+# Initialize with default configuration
+agent = LanduseAgent()
+
+# Initialize with custom configuration
+config = LanduseConfig.from_env(model_name="gpt-4o", enable_map_generation=True)
+agent = LanduseAgent(config=config)
 
 # Run a query
-result = agent.run("Show me the tables in landuse_transitions.db")
+result = agent.run("Show me the tables in the database")
 ```
 
-## Class: DataEngineeringAgent
+## Class: LanduseAgent
 
 ### Constructor
 
 ```python
-DataEngineeringAgent(root_dir: str = None)
+LanduseAgent(config: LanduseConfig = None)
 ```
 
 **Parameters:**
-- `root_dir` (str, optional): Root directory for file operations. Defaults to `PROJECT_ROOT_DIR` from environment or `"./data"`
+- `config` (LanduseConfig, optional): Configuration object. If None, uses default configuration from environment variables.
 
 **Example:**
 ```python
-# Use default directory
-agent = DataEngineeringAgent()
+# Use default configuration
+agent = LanduseAgent()
 
-# Specify custom directory
-agent = DataEngineeringAgent(root_dir="/path/to/data")
+# Use agent-specific configuration
+config = LanduseConfig.for_agent_type('map', verbose=True)
+agent = LanduseAgent(config=config)
 ```
 
 ### Methods
@@ -249,13 +255,14 @@ The agent respects environment variables:
 ```python
 import os
 
-# Set configuration
-os.environ['AGENT_MODEL'] = 'gpt-4-turbo-preview'
+# Set configuration via environment variables
+os.environ['LANDUSE_MODEL'] = 'gpt-4o'
 os.environ['TEMPERATURE'] = '0.1'
 os.environ['MAX_TOKENS'] = '4000'
 
 # Initialize with configuration
-agent = DataEngineeringAgent()
+config = LanduseConfig.from_env()
+agent = LanduseAgent(config=config)
 ```
 
 ## Integration Examples
@@ -280,7 +287,8 @@ for query in queries:
 ```python
 # Data processing pipeline
 def analyze_county(fips_code):
-    agent = DataEngineeringAgent()
+    config = LanduseConfig.for_agent_type('basic')
+    agent = LanduseAgent(config=config)
     
     # Get county profile
     profile = agent.run(f"Show land use for FIPS {fips_code}")
@@ -298,9 +306,12 @@ def analyze_county(fips_code):
 
 ```python
 from flask import Flask, request, jsonify
+from landuse.agents.landuse_agent import LanduseAgent
+from landuse.config.landuse_config import LanduseConfig
 
 app = Flask(__name__)
-agent = DataEngineeringAgent()
+config = LanduseConfig.for_agent_type('basic')
+agent = LanduseAgent(config=config)
 
 @app.route('/query', methods=['POST'])
 def query():
@@ -313,25 +324,29 @@ def query():
 
 ### Custom Tools
 
-Add custom analysis tools:
+Add custom analysis tools by extending the LanduseAgent:
 
 ```python
-class CustomAgent(DataEngineeringAgent):
-    def _create_tools(self):
-        tools = super()._create_tools()
-        
-        # Add custom tool
-        tools.append(Tool(
+from landuse.agents.landuse_agent import LanduseAgent
+from landuse.config.landuse_config import LanduseConfig
+from langchain_core.tools import Tool
+
+class CustomAgent(LanduseAgent):
+    def __init__(self, config: LanduseConfig = None):
+        super().__init__(config)
+        # Add custom tools to the existing toolset
+        self.tools.append(self._create_custom_tool())
+    
+    def _create_custom_tool(self):
+        return Tool(
             name="custom_metric",
             func=self._calculate_custom_metric,
             description="Calculate custom sustainability metric"
-        ))
-        
-        return tools
+        )
     
-    def _calculate_custom_metric(self, params):
+    def _calculate_custom_metric(self, params: str) -> str:
         # Custom implementation
-        pass
+        return "Custom metric calculation results"
 ```
 
 ### Extending Functionality

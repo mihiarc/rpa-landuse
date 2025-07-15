@@ -1,57 +1,123 @@
 # Configuration
 
-Learn how to customize the LangChain Land Use Analysis system to fit your needs.
+Learn how to customize the RPA Land Use Analytics system using the unified `LanduseConfig` system.
+
+## Overview
+
+The system uses a modern dataclass-based configuration system (`LanduseConfig`) that provides type-safe, validated configuration with environment variable support and agent-specific presets.
 
 ## Environment Variables
 
-The system uses environment variables stored in `config/.env` for configuration.
+The system reads configuration from environment variables, typically stored in `config/.env`.
 
 ### Required Settings
 
 ```bash
-# OpenAI API Key (required)
-OPENAI_API_KEY=sk-...your-key-here...
+# API Keys (choose one based on your model preference)
+OPENAI_API_KEY=sk-...your-key-here...        # For GPT models
+ANTHROPIC_API_KEY=sk-ant-...your-key...      # For Claude models
 ```
 
-### Optional Settings
+### Core Configuration Variables
 
 ```bash
-# Project Settings
-PROJECT_ROOT_DIR=./data           # Root directory for data files
-MAX_FILE_SIZE_MB=100             # Maximum file size for processing
+# Database Configuration
+LANDUSE_DB_PATH=data/processed/landuse_analytics.duckdb
 
-# Agent Model Settings
-AGENT_MODEL=gpt-4-turbo-preview  # OpenAI model to use
-TEMPERATURE=0.1                   # Model temperature (0.0-1.0)
+# Model Configuration  
+LANDUSE_MODEL=gpt-4o-mini        # Model name (gpt-4o-mini, claude-3-sonnet-20240229, etc.)
+TEMPERATURE=0.2                  # Model temperature (0.0-2.0)
 MAX_TOKENS=4000                  # Maximum response tokens
 
-# Database Settings
-DEFAULT_QUERY_LIMIT=1000         # Default row limit for queries
-CHUNK_SIZE=10000                 # Batch size for data processing
+# Agent Behavior
+LANDUSE_MAX_ITERATIONS=8         # Maximum agent iterations
+LANDUSE_MAX_EXECUTION_TIME=120   # Maximum execution time (seconds)
+LANDUSE_MAX_QUERY_ROWS=1000      # Maximum query result rows
+LANDUSE_DEFAULT_DISPLAY_LIMIT=50 # Default display limit
+
+# Features
+LANDUSE_ENABLE_MEMORY=true       # Enable conversation memory
+LANDUSE_ENABLE_MAPS=true         # Enable map generation
+LANDUSE_ENABLE_KNOWLEDGE_BASE=false  # Enable knowledge base integration
+
+# Performance
+LANDUSE_RATE_LIMIT_CALLS=60      # API calls per window
+LANDUSE_RATE_LIMIT_WINDOW=60     # Rate limit window (seconds)
+
+# Debugging
+VERBOSE=false                    # Enable verbose output
+DEBUG=false                      # Enable debug mode
 ```
+
+## Using LanduseConfig
+
+### Basic Usage
+
+```python
+from landuse.config.landuse_config import LanduseConfig
+
+# Create default configuration
+config = LanduseConfig()
+
+# Create configuration with overrides
+config = LanduseConfig.from_env(
+    model_name="claude-3-sonnet-20240229",
+    temperature=0.1,
+    enable_map_generation=True
+)
+```
+
+### Agent-Specific Configurations
+
+The system provides pre-configured setups for different agent types:
+
+```python
+from landuse.config.landuse_config import get_basic_config, get_map_config, get_streamlit_config
+
+# Basic agent (minimal features)
+basic_config = get_basic_config()
+
+# Map-enabled agent (includes visualization)
+map_config = get_map_config(verbose=True)
+
+# Streamlit application config
+streamlit_config = get_streamlit_config(enable_memory=False)
+```
+
+### Configuration Validation
+
+The `LanduseConfig` system includes automatic validation:
+
+- **Database path validation**: Ensures the database file exists
+- **API key validation**: Checks for required API keys based on model
+- **Numeric range validation**: Validates temperature, token limits, etc.
+- **Directory creation**: Automatically creates output directories
 
 ## Model Selection
 
 ### Available Models
 
-The agent supports different OpenAI models:
+The system supports both OpenAI and Anthropic models:
 
 ```bash
-# Recommended for best results
-AGENT_MODEL=gpt-4-turbo-preview
+# OpenAI Models (recommended)
+LANDUSE_MODEL=gpt-4o-mini           # Default - fast, cost-effective
+LANDUSE_MODEL=gpt-4o                # Best performance
+LANDUSE_MODEL=gpt-4-turbo           # Good balance
 
-# Alternatives
-AGENT_MODEL=gpt-4               # More expensive, similar quality
-AGENT_MODEL=gpt-3.5-turbo      # Faster, cheaper, less accurate
+# Anthropic Models
+LANDUSE_MODEL=claude-3-sonnet-20240229    # Excellent reasoning
+LANDUSE_MODEL=claude-3-haiku-20240307     # Fast, economical
 ```
 
 ### Model Comparison
 
-| Model | Pros | Cons | Best For |
-|-------|------|------|----------|
-| gpt-4-turbo-preview | Best accuracy, large context | More expensive | Complex queries, production use |
-| gpt-4 | Very accurate | Most expensive, smaller context | High-stakes analysis |
-| gpt-3.5-turbo | Fast, cheap | Less accurate SQL | Simple queries, development |
+| Model | Provider | Pros | Cons | Best For |
+|-------|----------|------|------|----------|
+| gpt-4o-mini | OpenAI | Fast, cheap, good accuracy | Smaller context | Development, simple queries |
+| gpt-4o | OpenAI | Best accuracy, large context | More expensive | Production, complex analysis |
+| claude-3-sonnet | Anthropic | Excellent reasoning | Higher cost | Complex SQL, analysis |
+| claude-3-haiku | Anthropic | Very fast, economical | Less capable | Simple queries, high volume |
 
 ## Temperature Settings
 
@@ -71,99 +137,113 @@ TEMPERATURE=0.7
 !!! tip "Best Practice"
     Use low temperature (0.0-0.2) for data analysis to ensure consistent, accurate SQL generation.
 
-## Memory and Context
+## Advanced Configuration Options
 
-The agent uses LangGraph's MemorySaver for conversation context:
+### Map Generation Settings
 
-```python
-# In data_engineering_agent.py
-self.memory = MemorySaver()
-```
-
-This enables:
-- Follow-up questions
-- Contextual understanding
-- Multi-step analysis
-
-## File Size Limits
-
-Control how large files are handled:
+Configure map output and visualization:
 
 ```bash
-# Maximum file size for full processing
-MAX_FILE_SIZE_MB=100
+# Map generation
+LANDUSE_MAP_OUTPUT_DIR=maps/agent_generated  # Output directory for maps
+LANDUSE_ENABLE_MAPS=true                     # Enable/disable map generation
+```
 
-# For larger files, sampling is used
-# First 1000 rows are read for preview
+### Knowledge Base Integration
+
+Enable knowledge base for enhanced context:
+
+```bash
+# Knowledge base settings
+LANDUSE_ENABLE_KNOWLEDGE_BASE=false          # Enable knowledge base
+LANDUSE_KNOWLEDGE_BASE_PATH=src/landuse/docs # Path to documentation
+LANDUSE_CHROMA_PERSIST_DIR=data/chroma_db    # Vector database location
+```
+
+### Streamlit Configuration
+
+For web interface deployment:
+
+```bash
+# Streamlit-specific settings
+STREAMLIT_CACHE_TTL=300                      # Cache time-to-live (seconds)
 ```
 
 ## Custom Agent Configuration
 
-### Modifying Agent Behavior
-
-Edit `scripts/agents/data_engineering_agent.py`:
+### Creating Custom Configurations
 
 ```python
-class DataEngineeringAgent:
-    def __init__(self, root_dir: str = None):
-        # Customize initialization
-        self.llm = ChatOpenAI(
-            model=os.getenv("AGENT_MODEL", "gpt-4-turbo-preview"),
-            temperature=float(os.getenv("TEMPERATURE", "0.1")),
-            max_tokens=int(os.getenv("MAX_TOKENS", "4000")),
-            # Add custom parameters
-            request_timeout=60,
-            max_retries=3
-        )
+from landuse.config.landuse_config import LanduseConfig
+
+# Create a custom configuration
+custom_config = LanduseConfig.from_env(
+    model_name="gpt-4o",
+    temperature=0.0,
+    max_iterations=10,
+    enable_map_generation=True,
+    verbose=True,
+    max_query_rows=2000
+)
+
+# Use with an agent
+from landuse.agents.landuse_agent import LanduseAgent
+agent = LanduseAgent(config=custom_config)
 ```
 
-### Adding Custom Tools
-
-Extend agent capabilities by adding new tools:
+### Configuration for Different Use Cases
 
 ```python
-def _create_tools(self) -> List[Tool]:
-    tools = []
-    
-    # Add your custom tool
-    tools.append(
-        Tool(
-            name="custom_analysis",
-            func=self._custom_analysis,
-            description="Perform custom analysis on data"
-        )
-    )
-    
-    return tools
+# Development configuration - fast and cheap
+dev_config = LanduseConfig.for_agent_type('basic',
+    model_name="gpt-4o-mini",
+    temperature=0.1,
+    max_iterations=5,
+    verbose=True
+)
 
-def _custom_analysis(self, params: str) -> str:
-    """Your custom analysis logic"""
-    # Implementation here
-    pass
+# Production configuration - accurate and robust
+prod_config = LanduseConfig.for_agent_type('map',
+    model_name="gpt-4o",
+    temperature=0.0,
+    max_iterations=8,
+    enable_map_generation=True,
+    verbose=False
+)
+
+# Analysis configuration - optimized for complex queries
+analysis_config = LanduseConfig.from_env(
+    model_name="claude-3-sonnet-20240229",
+    temperature=0.0,
+    max_query_rows=5000,
+    max_execution_time=300,
+    enable_knowledge_base=True
+)
 ```
 
 ## Database Configuration
 
 ### Query Limits
 
-Prevent accidental large result sets:
+Configure query result limits through `LanduseConfig`:
 
 ```python
-# In DatabaseQueryParams
-class DatabaseQueryParams(BaseModel):
-    limit: Optional[int] = Field(1000, description="Maximum rows")
+config = LanduseConfig.from_env(
+    max_query_rows=2000,           # Maximum rows returned
+    default_display_limit=100      # Default display limit
+)
 ```
 
 ### Connection Settings
 
-For different database locations:
+Configure database path through environment variables:
 
 ```bash
-# Use absolute paths for databases outside data directory
-DATABASE_PATH=/path/to/your/database.db
+# Database location
+LANDUSE_DB_PATH=data/processed/landuse_analytics.duckdb
 
-# Or modify in code
-db_path = os.getenv("DATABASE_PATH", "processed/landuse_transitions.db")
+# Or use absolute paths
+LANDUSE_DB_PATH=/path/to/your/database.duckdb
 ```
 
 ## Visualization Settings
@@ -302,23 +382,32 @@ Create different configurations for different environments:
 
 ```bash
 # config/.env.development
-AGENT_MODEL=gpt-3.5-turbo
+LANDUSE_MODEL=gpt-4o-mini
 TEMPERATURE=0.2
 MAX_TOKENS=2000
+LANDUSE_MAX_ITERATIONS=5
+VERBOSE=true
 
 # config/.env.production  
-AGENT_MODEL=gpt-4-turbo-preview
+LANDUSE_MODEL=gpt-4o
 TEMPERATURE=0.0
 MAX_TOKENS=4000
+LANDUSE_MAX_ITERATIONS=8
+VERBOSE=false
 ```
 
 Load appropriate config:
 
 ```python
 from dotenv import load_dotenv
+from landuse.config.landuse_config import LanduseConfig
 
+# Load environment-specific config
 env = os.getenv("ENVIRONMENT", "development")
 load_dotenv(f"config/.env.{env}")
+
+# Create configuration
+config = LanduseConfig.from_env()
 ```
 
 ## Next Steps

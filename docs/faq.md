@@ -44,14 +44,14 @@ No! The agent converts your natural language questions into SQL automatically. Y
 ### Which OpenAI model should I use?
 
 ```bash
-# Recommended (best accuracy)
-AGENT_MODEL=gpt-4-turbo-preview
+# Recommended (best balance of speed and accuracy)
+LANDUSE_MODEL=gpt-4o-mini
 
-# Budget option (faster, less accurate)
-AGENT_MODEL=gpt-3.5-turbo
+# Best accuracy (more expensive)
+LANDUSE_MODEL=gpt-4o
 
-# High accuracy (more expensive)
-AGENT_MODEL=gpt-4
+# Alternative: Anthropic models
+LANDUSE_MODEL=claude-3-sonnet-20240229
 ```
 
 ### Can I use it offline?

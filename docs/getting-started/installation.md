@@ -62,10 +62,12 @@ Edit the `.env` file with your settings:
 OPENAI_API_KEY=your_openai_api_key_here
 
 # Optional (defaults shown)
-PROJECT_ROOT_DIR=./data
-AGENT_MODEL=gpt-4-turbo-preview
-TEMPERATURE=0.1
+LANDUSE_DB_PATH=data/processed/landuse_analytics.duckdb
+LANDUSE_MODEL=gpt-4o-mini
+TEMPERATURE=0.2
 MAX_TOKENS=4000
+LANDUSE_MAX_ITERATIONS=8
+LANDUSE_ENABLE_MAPS=true
 MAX_FILE_SIZE_MB=100
 ```
 
