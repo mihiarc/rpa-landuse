@@ -55,3 +55,4 @@ __pycache__/
 # Logs
 logs/
 pytest_output.log
+data/*
