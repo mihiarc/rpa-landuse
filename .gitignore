@@ -1,58 +1,153 @@
+# ===============================================
 # Python
+# ===============================================
+# Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
+*.pyc
+
+# Virtual environments
 .venv/
 venv/
 ENV/
+env/
 
-# Data files
-*.db
-*.parquet
-data/raw/*.json
-data/processed/*.db
-
-# DuckDB files are tracked with Git LFS
-# *.duckdb
-# data/processed/*.duckdb
-
-# Config
-.env
-config/.env
-
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-
-# OS
-.DS_Store
-Thumbs.db
-
-# Keep sample data
-!data/samples/*
-
-# Sample data tracking (added by organization script)
-!data/samples/*.json
-!data/samples/*.csv
-!data/samples/*.parquet
-site/
-
+# ===============================================
+# Project-specific
+# ===============================================
 # Temporary setup scripts
 set_openai_key.py
 setup_agents.py
-CLAUDE.md
 
-# Testing artifacts
+# Documentation build
+site/
+
+# ===============================================
+# Data & Database
+# ===============================================
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Data formats
+*.parquet
+*.csv
+*.json
+
+# Project data directories
+data/raw/
+data/processed/
+data/chroma_db/
+data/cb_2018_us_county_500k/
+data/ssp_projections/
+
+# Exception: Keep sample data
+!data/samples/
+!data/samples/*.json
+!data/samples/*.csv
+!data/samples/*.parquet
+
+# Exception: Keep README files
+!data/README.md
+!data/**/README.md
+
+# Note: DuckDB files are tracked with Git LFS
+# *.duckdb
+
+# ===============================================
+# Configuration
+# ===============================================
+.env
+config/.env
+*.env.local
+*.env.development
+*.env.test
+*.env.production
+
+# ===============================================
+# IDE & Editor
+# ===============================================
+# VS Code
+.vscode/
+
+# IntelliJ IDEA
+.idea/
+*.iml
+
+# Vim
+*.swp
+*.swo
+*~
+
+# ===============================================
+# OS Files
+# ===============================================
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Linux
+.directory
+
+# ===============================================
+# Testing & Coverage
+# ===============================================
 .coverage
 coverage.xml
 htmlcov/
 .pytest_cache/
-*.pyc
-__pycache__/
+.tox/
+.nox/
+*.cover
+.hypothesis/
 
-# Logs
+# ===============================================
+# Logs & Debug
+# ===============================================
 logs/
+*.log
 pytest_output.log
-data/*
+
+# ===============================================
+# Generated Files
+# ===============================================
+# Maps and visualizations
+maps/agent_generated/
+maps/test/
+maps/*.png
+!maps/README.md
+
+# Keep county maps
+!maps/counties/
+
+# ===============================================
+# Dependencies & Build
+# ===============================================
+# UV lock file (managed by uv)
+# uv.lock
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
