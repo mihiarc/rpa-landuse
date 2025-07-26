@@ -34,7 +34,8 @@
       "Bash(git rm:*)",
       "Bash(rm:*)",
       "Bash(true)",
-      "Bash(rg:*)"
+      "Bash(rg:*)",
+      "Bash(duckdb:*)"
     ],
     "deny": []
   }

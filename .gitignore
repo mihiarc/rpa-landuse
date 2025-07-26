@@ -66,6 +66,12 @@ config/.env
 *.env.test
 *.env.production
 
+# Streamlit secrets
+.streamlit/secrets.toml
+.streamlit/*.toml
+!.streamlit/config.toml
+!.streamlit/secrets.toml.example
+
 # ===============================================
 # IDE & Editor
 # ===============================================

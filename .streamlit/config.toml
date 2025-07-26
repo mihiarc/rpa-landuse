@@ -1,39 +1,35 @@
-[global]
-# Show debug information
-developmentMode = false
-
-[server]
-# Port configuration
-port = 8501
-headless = false
-
-# Enable CORS for local development
-enableCORS = false
-enableXsrfProtection = false
-
-# File upload settings
-maxUploadSize = 200
-maxMessageSize = 200
-
-[browser]
-# Automatically open browser when starting
-gatherUsageStats = false
+# Streamlit Configuration File
 
 [theme]
-# RPA Land Use Analytics Brand Theme
-primaryColor = "#2E7D32"  # Forest green
-backgroundColor = "#FAFAFA"  # Light background
-secondaryBackgroundColor = "#FFFFFF"
-textColor = "#424242"  # Dark gray text
+# Primary color for interactive elements
+primaryColor = "#667eea"
+
+# Background color for the main content area
+backgroundColor = "#ffffff"
+
+# Background color for sidebar and most interactive widgets
+secondaryBackgroundColor = "#f8f9fa"
+
+# Color used for almost all text
+textColor = "#2c3e50"
+
+# Font family for all text in the app
 font = "sans serif"
 
+[server]
+# Max message size for Streamlit server
+maxMessageSize = 200
+
+# Max upload size (in MB)
+maxUploadSize = 200
+
+[browser]
+# Tab title
+gatherUsageStats = false
+
 [client]
-# Show sidebar navigation
-showSidebarNavigation = true
+# Show error messages in the browser
+showErrorDetails = true
 
-# Toolbar mode
-toolbarMode = "auto"
-
-[ui]
-# Hide deploy button
-hideTopBar = false
+# Tools for developers
+toolbarMode = "minimal"
