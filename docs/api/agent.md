@@ -4,7 +4,7 @@ Complete API reference for the unified RPA Land Use Analytics agent.
 
 ## Overview
 
-The **LanduseAgent** is the primary and only agent for RPA Land Use Analytics. It provides a unified interface for natural language queries about USDA Forest Service RPA Assessment data with both simple and advanced execution modes.
+The **LanduseAgent** is the primary agent for RPA Land Use Analytics. It provides a unified interface for natural language queries about USDA Forest Service RPA Assessment data with both simple and advanced execution modes.
 
 ### 🌾 **Unified Architecture**
 Single agent class that combines:
