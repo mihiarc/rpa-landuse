@@ -22,7 +22,7 @@ conn.execute("""
 """)
 
 conn.execute("""
-    CREATE TABLE dim_geography_enhanced (
+    CREATE TABLE dim_geography (
         geography_id INTEGER PRIMARY KEY,
         fips_code VARCHAR,
         state_code VARCHAR
@@ -53,7 +53,7 @@ conn.execute("""
 # Insert minimal test data
 conn.execute("INSERT INTO dim_scenario VALUES (1, 'test_scenario')")
 conn.execute("INSERT INTO dim_time VALUES (1, '2020-2030')")
-conn.execute("INSERT INTO dim_geography_enhanced VALUES (1, '00001', 'XX')")
+conn.execute("INSERT INTO dim_geography VALUES (1, '00001', 'XX')")
 conn.execute("INSERT INTO dim_landuse VALUES (1, 'cr', 'Crop')")
 conn.execute("INSERT INTO fact_landuse_transitions VALUES (1, 1, 1, 1, 1, 1, 100.0, 'same')")
 

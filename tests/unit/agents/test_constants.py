@@ -41,7 +41,7 @@ def test_schema_info_template():
     assert "fact_landuse_transitions" in SCHEMA_INFO_TEMPLATE
     assert "dim_scenario" in SCHEMA_INFO_TEMPLATE
     assert "dim_time" in SCHEMA_INFO_TEMPLATE
-    assert "dim_geography_enhanced" in SCHEMA_INFO_TEMPLATE
+    assert "dim_geography" in SCHEMA_INFO_TEMPLATE
     assert "dim_landuse" in SCHEMA_INFO_TEMPLATE
 
     # Check for important fields

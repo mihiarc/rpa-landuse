@@ -62,7 +62,7 @@ class TestLanduseDataConverter:
 
         assert "dim_scenario" in table_names
         assert "dim_time" in table_names
-        assert "dim_geography_enhanced" in table_names
+        assert "dim_geography" in table_names
         assert "dim_landuse" in table_names
         assert "fact_landuse_transitions" in table_names
 
