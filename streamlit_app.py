@@ -57,7 +57,7 @@ st.set_page_config(
         - 🌍 Climate scenario analysis (RCP45/85, SSP1-5)
 
         Data source: USDA Forest Service 2020 RPA Assessment
-        Built with LangChain, DuckDB, and Streamlit.
+        Built with LangGraph, DuckDB, and Streamlit.
         """
     }
 )
@@ -213,8 +213,8 @@ st.markdown("""
         padding: 2rem;
         margin: 0.5rem;
         transition: all 0.3s ease;
-        height: 100%;
         box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        height: 100%;
     }
 
     .feature-card:hover {
@@ -240,29 +240,6 @@ st.markdown("""
         line-height: 1.6;
     }
 
-    /* Status indicators */
-    .status-container {
-        background: #f8f9fa;
-        border-radius: 10px;
-        padding: 1.5rem;
-        margin-top: 1rem;
-    }
-    
-    .status-item {
-        display: flex;
-        align-items: center;
-        margin-bottom: 0.75rem;
-        font-size: 0.95rem;
-    }
-    
-    .status-icon {
-        margin-right: 0.5rem;
-        font-size: 1.2rem;
-    }
-    
-    .status-ok { color: #28a745; }
-    .status-warning { color: #ffc107; }
-    .status-error { color: #dc3545; }
 
     /* Navigation improvements */
     .nav-link {
@@ -376,284 +353,149 @@ def show_welcome_page():
     </div>
     """, unsafe_allow_html=True)
     
-    # System Status and Quick Stats in wide layout
-    col1, col2, col3 = st.columns([3, 2, 2])
-    
-    with col1:
-        # Quick Stats if database is available
-        checks, _ = check_environment()
-        if checks["database"]:
+    # Dataset Overview section
+    # Quick Stats if database is available
+    checks, _ = check_environment()
+    if checks["database"]:
+        try:
+            import duckdb
+            db_path = os.getenv('LANDUSE_DB_PATH', 'data/processed/landuse_analytics.duckdb')
+            conn = duckdb.connect(str(db_path), read_only=True)
+            
+            # Get basic stats
+            stats = {}
             try:
-                import duckdb
-                db_path = os.getenv('LANDUSE_DB_PATH', 'data/processed/landuse_analytics.duckdb')
-                conn = duckdb.connect(str(db_path), read_only=True)
+                stats["counties"] = conn.execute("SELECT COUNT(DISTINCT fips_code) FROM dim_geography_enhanced").fetchone()[0]
+                stats["scenarios"] = conn.execute("SELECT COUNT(*) FROM dim_scenario").fetchone()[0]
+                stats["transitions"] = conn.execute("SELECT COUNT(*) FROM fact_landuse_transitions").fetchone()[0]
+                stats["time_periods"] = conn.execute("SELECT COUNT(*) FROM dim_time").fetchone()[0]
                 
-                # Get basic stats
-                stats = {}
-                try:
-                    stats["counties"] = conn.execute("SELECT COUNT(DISTINCT fips_code) FROM dim_geography_enhanced").fetchone()[0]
-                    stats["scenarios"] = conn.execute("SELECT COUNT(*) FROM dim_scenario").fetchone()[0]
-                    stats["transitions"] = conn.execute("SELECT COUNT(*) FROM fact_landuse_transitions").fetchone()[0]
-                    stats["time_periods"] = conn.execute("SELECT COUNT(*) FROM dim_time").fetchone()[0]
+                st.markdown("### 📊 Dataset Overview")
+                
+                # Create a 2x2 grid for metrics
+                metric_col1, metric_col2 = st.columns(2)
+                with metric_col1:
+                    st.markdown(f"""
+                    <div class="metric-card">
+                        <div class="metric-value">{stats['counties']:,}</div>
+                        <div class="metric-label">US Counties</div>
+                    </div>
+                    """, unsafe_allow_html=True)
                     
-                    st.markdown("### 📊 Dataset Overview")
+                    st.markdown(f"""
+                    <div class="metric-card">
+                        <div class="metric-value">{stats['scenarios']}</div>
+                        <div class="metric-label">Climate Scenarios</div>
+                    </div>
+                    """, unsafe_allow_html=True)
+                
+                with metric_col2:
+                    st.markdown(f"""
+                    <div class="metric-card">
+                        <div class="metric-value">{stats['transitions']/1000000:.1f}M</div>
+                        <div class="metric-label">Land Transitions</div>
+                    </div>
+                    """, unsafe_allow_html=True)
                     
-                    # Create a 2x2 grid for metrics
-                    metric_col1, metric_col2 = st.columns(2)
-                    with metric_col1:
-                        st.markdown(f"""
-                        <div class="metric-card">
-                            <div class="metric-value">{stats['counties']:,}</div>
-                            <div class="metric-label">US Counties</div>
-                        </div>
-                        """, unsafe_allow_html=True)
-                        
-                        st.markdown(f"""
-                        <div class="metric-card">
-                            <div class="metric-value">{stats['scenarios']}</div>
-                            <div class="metric-label">Climate Scenarios</div>
-                        </div>
-                        """, unsafe_allow_html=True)
-                    
-                    with metric_col2:
-                        st.markdown(f"""
-                        <div class="metric-card">
-                            <div class="metric-value">{stats['transitions']/1000000:.1f}M</div>
-                            <div class="metric-label">Land Transitions</div>
-                        </div>
-                        """, unsafe_allow_html=True)
-                        
-                        st.markdown(f"""
-                        <div class="metric-card">
-                            <div class="metric-value">{stats['time_periods']}</div>
-                            <div class="metric-label">Time Periods</div>
-                        </div>
-                        """, unsafe_allow_html=True)
-                        
-                except Exception as e:
-                    st.warning(f"Could not load dataset statistics: {e}")
-                finally:
-                    conn.close()
+                    st.markdown(f"""
+                    <div class="metric-card">
+                        <div class="metric-value">{stats['time_periods']}</div>
+                        <div class="metric-label">Time Periods</div>
+                    </div>
+                    """, unsafe_allow_html=True)
                     
             except Exception as e:
-                st.error(f"Database connection error: {e}")
+                st.warning(f"Could not load dataset statistics: {e}")
+            finally:
+                conn.close()
+                
+        except Exception as e:
+            st.error(f"Database connection error: {e}")
     
-    with col2:
-        # System Status
-        checks, debug_info = check_environment()
-        st.markdown("### 🔧 System Status")
-        
-        st.markdown('<div class="status-container">', unsafe_allow_html=True)
-        
-        # Database status
-        status_icon = "✅" if checks["database"] else "❌"
-        st.markdown(f"""
-        <div class="status-item">
-            <span class="status-icon {'status-ok' if checks['database'] else 'status-error'}">{status_icon}</span>
-            <span><b>Database:</b> {'Ready' if checks['database'] else 'Missing'}</span>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        # API Keys status
-        status_icon = "✅" if checks["api_keys"] else "❌"
-        st.markdown(f"""
-        <div class="status-item">
-            <span class="status-icon {'status-ok' if checks['api_keys'] else 'status-error'}">{status_icon}</span>
-            <span><b>API Keys:</b> {'Configured' if checks['api_keys'] else 'Missing'}</span>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        # Dependencies status
-        status_icon = "✅" if checks["dependencies"] else "❌"
-        st.markdown(f"""
-        <div class="status-item">
-            <span class="status-icon {'status-ok' if checks['dependencies'] else 'status-error'}">{status_icon}</span>
-            <span><b>Dependencies:</b> {'Installed' if checks['dependencies'] else 'Missing'}</span>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        # Module status
-        status_icon = "✅" if checks["landuse_module"] else "❌"
-        st.markdown(f"""
-        <div class="status-item">
-            <span class="status-icon {'status-ok' if checks['landuse_module'] else 'status-error'}">{status_icon}</span>
-            <span><b>Landuse Module:</b> {'Loaded' if checks['landuse_module'] else 'Error'}</span>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        st.markdown('</div>', unsafe_allow_html=True)
-        
-        if not all(checks.values()):
-            st.warning("⚠️ Some components need setup. Check Settings.")
-            
-    with col3:
-        # Quick Actions
-        st.markdown("### 🚀 Quick Actions")
-        
-        st.markdown("""
-        <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 10px;">
-        """, unsafe_allow_html=True)
-        
-        # Quick navigation buttons
-        if st.button("💬 Start Chat", key="quick_chat", use_container_width=True):
-            st.switch_page("views/chat.py")
-            
-        if st.button("📊 View Analytics", key="quick_analytics", use_container_width=True):
-            st.switch_page("views/analytics.py")
-            
-        if st.button("🔍 Explore Data", key="quick_explorer", use_container_width=True):
-            st.switch_page("views/explorer.py")
-            
-        if st.button("⚙️ Settings", key="quick_settings", use_container_width=True):
-            st.switch_page("views/settings.py")
-            
-        st.markdown("</div>", unsafe_allow_html=True)
+    # Add system check hint
+    if not all(checks.values()):
+        st.info("💡 Check **Settings** to view system status and resolve any configuration issues.")
 
-    # Feature overview with wide layout
+    # Feature overview in 2x2 grid layout
     st.markdown('<h2 class="section-header"><span class="section-icon">🚀</span>Features</h2>', unsafe_allow_html=True)
     
-    # Use 4 columns for features in wide layout
-    col1, col2, col3, col4 = st.columns([1, 1, 1, 1])
-
+    # First row of features
+    col1, col2 = st.columns(2)
+    
     with col1:
-        st.markdown("""
-        <div class="feature-card">
-            <div class="feature-icon">💬</div>
-            <h3 class="feature-title">Natural Language Queries</h3>
-            <p class="feature-description">Ask questions in plain English about land use changes. Our AI converts your questions to SQL and provides insights.</p>
-            <ul style="margin-top: 1rem; padding-left: 1.5rem;">
-                <li>Agricultural land loss analysis</li>
-                <li>Climate scenario comparisons</li>
-                <li>Urban expansion patterns</li>
-            </ul>
-        </div>
-        """, unsafe_allow_html=True)
+        with st.container():
+            st.markdown("""
+            <div class="feature-card">
+                <div class="feature-icon">💬</div>
+                <h3 class="feature-title">Natural Language Queries</h3>
+                <p class="feature-description">Ask questions in plain English about land use changes. Our AI converts your questions to SQL and provides insights.</p>
+                <ul style="margin-top: 1rem; padding-left: 1.5rem;">
+                    <li>Agricultural land loss analysis</li>
+                    <li>Climate scenario comparisons</li>
+                    <li>Urban expansion patterns</li>
+                </ul>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            if st.button("💬 Open Chat", key="feature_chat", use_container_width=True):
+                st.switch_page("views/chat.py")
 
     with col2:
-        st.markdown("""
-        <div class="feature-card">
-            <div class="feature-icon">📊</div>
-            <h3 class="feature-title">Interactive Analytics</h3>
-            <p class="feature-description">Explore pre-built visualizations with real-time data from the RPA Assessment.</p>
-            <ul style="margin-top: 1rem; padding-left: 1.5rem;">
-                <li>Climate impact dashboards</li>
-                <li>Geographic trend maps</li>
-                <li>Time series analysis</li>
-            </ul>
-        </div>
-        """, unsafe_allow_html=True)
+        with st.container():
+            st.markdown("""
+            <div class="feature-card">
+                <div class="feature-icon">📊</div>
+                <h3 class="feature-title">Interactive Analytics</h3>
+                <p class="feature-description">Explore pre-built visualizations with real-time data from the RPA Assessment.</p>
+                <ul style="margin-top: 1rem; padding-left: 1.5rem;">
+                    <li>Climate impact dashboards</li>
+                    <li>Geographic trend maps</li>
+                    <li>Time series analysis</li>
+                </ul>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            if st.button("📊 Open Analytics", key="feature_analytics", use_container_width=True):
+                st.switch_page("views/analytics.py")
 
+    # Second row of features
+    col3, col4 = st.columns(2)
+    
     with col3:
-        st.markdown("""
-        <div class="feature-card">
-            <div class="feature-icon">🔍</div>
-            <h3 class="feature-title">Data Explorer</h3>
-            <p class="feature-description">Advanced tools for data scientists to directly query and analyze the database.</p>
-            <ul style="margin-top: 1rem; padding-left: 1.5rem;">
-                <li>Schema browser</li>
-                <li>SQL query interface</li>
-                <li>Export capabilities</li>
-            </ul>
-        </div>
-        """, unsafe_allow_html=True)
-        
+        with st.container():
+            st.markdown("""
+            <div class="feature-card">
+                <div class="feature-icon">🔍</div>
+                <h3 class="feature-title">Data Explorer</h3>
+                <p class="feature-description">Advanced tools for data scientists to directly query and analyze the database.</p>
+                <ul style="margin-top: 1rem; padding-left: 1.5rem;">
+                    <li>Schema browser</li>
+                    <li>SQL query interface</li>
+                    <li>Export capabilities</li>
+                </ul>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            if st.button("🔍 Open Explorer", key="feature_explorer", use_container_width=True):
+                st.switch_page("views/explorer.py")
+    
     with col4:
-        st.markdown("""
-        <div class="feature-card">
-            <div class="feature-icon">🗺️</div>
-            <h3 class="feature-title">Enhanced Visualizations</h3>
-            <p class="feature-description">Rich maps, flow diagrams, and advanced analytics for deeper insights.</p>
-            <ul style="margin-top: 1rem; padding-left: 1.5rem;">
-                <li>Choropleth maps</li>
-                <li>Sankey flow diagrams</li>
-                <li>Animated timelines</li>
-            </ul>
-        </div>
-        """, unsafe_allow_html=True)
-
-    # Getting started section with wide layout
-    st.markdown('<h2 class="section-header"><span class="section-icon">🎯</span>Getting Started</h2>', unsafe_allow_html=True)
-
-    # Create a container for better organization
-    with st.container():
-        col1, col2, col3 = st.columns([2, 2, 1])
-
-        with col1:
+        with st.container():
             st.markdown("""
-            ### 📚 Quick Start Guide
+            <div class="feature-card">
+                <div class="feature-icon">🗺️</div>
+                <h3 class="feature-title">Enhanced Visualizations</h3>
+                <p class="feature-description">Rich maps, flow diagrams, and advanced analytics for deeper insights.</p>
+                <ul style="margin-top: 1rem; padding-left: 1.5rem;">
+                    <li>Choropleth maps</li>
+                    <li>Sankey flow diagrams</li>
+                    <li>Animated timelines</li>
+                </ul>
+            </div>
+            """, unsafe_allow_html=True)
             
-            #### Choose Your Path:
-            """)
-            
-            # Create a grid of action cards
-            action_col1, action_col2 = st.columns(2)
-            
-            with action_col1:
-                st.markdown("""
-                <div style="background: #e3f2fd; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
-                    <h4 style="color: #1976d2; margin: 0;">💬 For Analysts</h4>
-                    <p style="margin: 0.5rem 0;">Use natural language to query data</p>
-                </div>
-                """, unsafe_allow_html=True)
-                
-                st.markdown("""
-                <div style="background: #f3e5f5; padding: 1rem; border-radius: 8px;">
-                    <h4 style="color: #7b1fa2; margin: 0;">📊 For Executives</h4>
-                    <p style="margin: 0.5rem 0;">View pre-built dashboards</p>
-                </div>
-                """, unsafe_allow_html=True)
-                
-            with action_col2:
-                st.markdown("""
-                <div style="background: #e8f5e9; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
-                    <h4 style="color: #388e3c; margin: 0;">🔍 For Data Scientists</h4>
-                    <p style="margin: 0.5rem 0;">Direct SQL access & exports</p>
-                </div>
-                """, unsafe_allow_html=True)
-                
-                st.markdown("""
-                <div style="background: #fff3e0; padding: 1rem; border-radius: 8px;">
-                    <h4 style="color: #f57c00; margin: 0;">🗺️ For Researchers</h4>
-                    <p style="margin: 0.5rem 0;">Advanced visualizations</p>
-                </div>
-                """, unsafe_allow_html=True)
-
-        with col2:
-            st.markdown("""
-            ### 💡 Example Questions
-            
-            #### Agricultural Analysis:
-            - "How much agricultural land is being lost?"
-            - "Which scenarios show the most crop loss?"
-            
-            #### Urban Development:
-            - "Which states have the most urban expansion?"
-            - "What's converting to urban land?"
-            
-            #### Climate Scenarios:
-            - "Compare RCP45 vs RCP85 forest loss"
-            - "Show SSP impacts on land use"
-            
-            #### Geographic Patterns:
-            - "Analyze California land transitions"
-            - "Which counties change the most?"
-            """)
-
-        with col3:
-            st.markdown("""
-            ### ℹ️ Smart Defaults
-            """)
-            
-            st.info("""
-            The AI uses intelligent defaults when not specified:
-            
-            📍 **Geography:** All US counties  
-            🌡️ **Scenarios:** All 20 averaged  
-            📅 **Time:** 2012-2100  
-            🔄 **Changes:** Only transitions  
-            
-            Each response clearly states assumptions made.
-            """)
+            if st.button("🗺️ Open Visualizations", key="feature_viz", use_container_width=True):
+                st.switch_page("views/analytics.py")
 
 # Define pages using modern st.Page API
 def create_pages():
