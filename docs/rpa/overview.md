@@ -7,14 +7,18 @@ The USDA Forest Service's 2020 Resources Planning Act (RPA) Assessment provides 
 ## Key Components
 
 ### Land Use Projections
+
 The 2020 RPA Assessment includes detailed county-level projections for:
+
 - **Private land only** - Public lands are assumed to remain static
 - **5 land use categories**: Crop, Pasture, Rangeland, Forest, and Urban
 - **3,075 US counties** - Complete coverage of the conterminous United States
 - **Time periods**: 2012-2020, 2020-2030, 2030-2040, 2040-2050, 2050-2070, 2070-2090, 2090-2100
 
 ### Integrated Scenarios
+
 The assessment uses 20 integrated climate-socioeconomic scenarios:
+
 - **4 scenario combinations** (LM, HL, HM, HH)
 - **5 climate models** representing different precipitation and temperature patterns
 - **2 climate pathways** (RCP4.5 and RCP8.5)
@@ -37,11 +41,13 @@ The assessment uses 20 integrated climate-socioeconomic scenarios:
 ## Data Sources
 
 ### Primary Data
+
 - **National Resources Inventory (NRI)** - Historical land use observations
 - **Climate projections** - From 5 global climate models
 - **Socioeconomic projections** - Population and economic growth scenarios
 
 ### Model Outputs
+
 - **Transition matrices** - Acres changing between land use categories
 - **Scenario variations** - Results for all 20 integrated scenarios
 - **Temporal resolution** - Decadal projections through 2100
@@ -49,6 +55,7 @@ The assessment uses 20 integrated climate-socioeconomic scenarios:
 ## Using RPA Data with This Tool
 
 RPA Land Use Analytics makes this complex dataset accessible through:
+
 - Natural language queries to explore scenarios
 - Pre-built analyses of key trends
 - Interactive visualizations
