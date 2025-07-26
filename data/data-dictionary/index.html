@@ -12,13 +12,13 @@
         <meta name="author" content="RPA Analytics Team">
       
       
-        <link rel="canonical" href="https://mihiarc.github.io/rpa-landuse/data/categories/">
+        <link rel="canonical" href="https://mihiarc.github.io/rpa-landuse/data/data-dictionary/">
       
       
-        <link rel="prev" href="../duckdb-schema/">
+        <link rel="prev" href="../view-definitions/">
       
       
-        <link rel="next" href="../variable-descriptions/">
+        <link rel="next" href="../technical-specifications/">
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
@@ -26,7 +26,7 @@
     
     
       
-        <title>Land Use Categories - RPA Land Use Analytics</title>
+        <title>Data Dictionary - RPA Land Use Analytics</title>
       
     
     
@@ -80,7 +80,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#land-use-categories" class="md-skip">
+        <a href="#data-dictionary" class="md-skip">
           Skip to content
         </a>
       
@@ -114,7 +114,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Land Use Categories
+              Data Dictionary
             
           </span>
         </div>
@@ -1035,10 +1035,32 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../data-dictionary/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Data Dictionary
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -1049,6 +1071,629 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      Overview
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#business-context" class="md-nav__link">
+    <span class="md-ellipsis">
+      Business Context
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#core-business-concepts" class="md-nav__link">
+    <span class="md-ellipsis">
+      Core Business Concepts
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Core Business Concepts">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#land-use-transitions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Land Use Transitions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#climate-scenarios" class="md-nav__link">
+    <span class="md-ellipsis">
+      Climate Scenarios
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#data-elements-by-category" class="md-nav__link">
+    <span class="md-ellipsis">
+      Data Elements by Category
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Data Elements by Category">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#geographic-identifiers" class="md-nav__link">
+    <span class="md-ellipsis">
+      Geographic Identifiers
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Geographic Identifiers">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fips-code" class="md-nav__link">
+    <span class="md-ellipsis">
+      FIPS Code
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#county-name" class="md-nav__link">
+    <span class="md-ellipsis">
+      County Name
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#state-information" class="md-nav__link">
+    <span class="md-ellipsis">
+      State Information
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#region" class="md-nav__link">
+    <span class="md-ellipsis">
+      Region
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#land-use-categories" class="md-nav__link">
+    <span class="md-ellipsis">
+      Land Use Categories
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Land Use Categories">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#land-use-code" class="md-nav__link">
+    <span class="md-ellipsis">
+      Land Use Code
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#land-use-name" class="md-nav__link">
+    <span class="md-ellipsis">
+      Land Use Name
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#land-use-category" class="md-nav__link">
+    <span class="md-ellipsis">
+      Land Use Category
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scenario-definitions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Scenario Definitions
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Scenario Definitions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#climate-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      Climate Model
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rcp-scenario" class="md-nav__link">
+    <span class="md-ellipsis">
+      RCP Scenario
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ssp-scenario" class="md-nav__link">
+    <span class="md-ellipsis">
+      SSP Scenario
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#temporal-elements" class="md-nav__link">
+    <span class="md-ellipsis">
+      Temporal Elements
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Temporal Elements">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#time-period" class="md-nav__link">
+    <span class="md-ellipsis">
+      Time Period
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#start-year-end-year" class="md-nav__link">
+    <span class="md-ellipsis">
+      Start Year / End Year
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#measurement-units" class="md-nav__link">
+    <span class="md-ellipsis">
+      Measurement Units
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Measurement Units">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#acres" class="md-nav__link">
+    <span class="md-ellipsis">
+      Acres
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#population-thousands" class="md-nav__link">
+    <span class="md-ellipsis">
+      Population (Thousands)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#income-per-capita" class="md-nav__link">
+    <span class="md-ellipsis">
+      Income Per Capita
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#transition-characteristics" class="md-nav__link">
+    <span class="md-ellipsis">
+      Transition Characteristics
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Transition Characteristics">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#transition-type" class="md-nav__link">
+    <span class="md-ellipsis">
+      Transition Type
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fromto-land-use" class="md-nav__link">
+    <span class="md-ellipsis">
+      From/To Land Use
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#socioeconomic-indicators" class="md-nav__link">
+    <span class="md-ellipsis">
+      Socioeconomic Indicators
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Socioeconomic Indicators">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#population-projections" class="md-nav__link">
+    <span class="md-ellipsis">
+      Population Projections
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#income-projections" class="md-nav__link">
+    <span class="md-ellipsis">
+      Income Projections
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#data-quality-and-validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Data Quality and Validation
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Data Quality and Validation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#completeness" class="md-nav__link">
+    <span class="md-ellipsis">
+      Completeness
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#accuracy-considerations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Accuracy Considerations
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#business-rules-validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Business Rules Validation
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#usage-guidelines" class="md-nav__link">
+    <span class="md-ellipsis">
+      Usage Guidelines
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Usage Guidelines">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#query-patterns" class="md-nav__link">
+    <span class="md-ellipsis">
+      Query Patterns
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Query Patterns">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#basic-land-use-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      Basic Land Use Analysis
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scenario-comparison" class="md-nav__link">
+    <span class="md-ellipsis">
+      Scenario Comparison
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#geographic-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      Geographic Analysis
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#temporal-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      Temporal Analysis
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#common-business-questions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Common Business Questions
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Common Business Questions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#development-pressure" class="md-nav__link">
+    <span class="md-ellipsis">
+      Development Pressure
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#agricultural-impact" class="md-nav__link">
+    <span class="md-ellipsis">
+      Agricultural Impact
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#climate-sensitivity" class="md-nav__link">
+    <span class="md-ellipsis">
+      Climate Sensitivity
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#regional-planning" class="md-nav__link">
+    <span class="md-ellipsis">
+      Regional Planning
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#integration-considerations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Integration Considerations
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Integration Considerations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#external-data-sources" class="md-nav__link">
+    <span class="md-ellipsis">
+      External Data Sources
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#data-relationships" class="md-nav__link">
+    <span class="md-ellipsis">
+      Data Relationships
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#business-intelligence-applications" class="md-nav__link">
+    <span class="md-ellipsis">
+      Business Intelligence Applications
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#technical-notes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Technical Notes
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Technical Notes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#data-types-and-precision" class="md-nav__link">
+    <span class="md-ellipsis">
+      Data Types and Precision
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#performance-characteristics" class="md-nav__link">
+    <span class="md-ellipsis">
+      Performance Characteristics
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#maintenance-and-updates" class="md-nav__link">
+    <span class="md-ellipsis">
+      Maintenance and Updates
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#glossary" class="md-nav__link">
+    <span class="md-ellipsis">
+      Glossary
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      Next Steps
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1150,32 +1795,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    Land Use Categories
-    
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../categories/" class="md-nav__link">
         
   
   
@@ -1186,341 +1809,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#overview" class="md-nav__link">
-    <span class="md-ellipsis">
-      Overview
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#primary-categories" class="md-nav__link">
-    <span class="md-ellipsis">
-      Primary Categories
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Primary Categories">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#crop-cropland" class="md-nav__link">
-    <span class="md-ellipsis">
-      🌾 Crop (Cropland)
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#pasture" class="md-nav__link">
-    <span class="md-ellipsis">
-      🐄 Pasture
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#forest" class="md-nav__link">
-    <span class="md-ellipsis">
-      🌲 Forest
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#urban" class="md-nav__link">
-    <span class="md-ellipsis">
-      🏢 Urban
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#range-rangeland" class="md-nav__link">
-    <span class="md-ellipsis">
-      🌿 Range (Rangeland)
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#total" class="md-nav__link">
-    <span class="md-ellipsis">
-      📊 Total
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#agricultural-aggregation" class="md-nav__link">
-    <span class="md-ellipsis">
-      Agricultural Aggregation
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Agricultural Aggregation">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#agriculture-combined" class="md-nav__link">
-    <span class="md-ellipsis">
-      🚜 Agriculture (Combined)
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#understanding-transitions" class="md-nav__link">
-    <span class="md-ellipsis">
-      Understanding Transitions
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Understanding Transitions">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#natural-progressions" class="md-nav__link">
-    <span class="md-ellipsis">
-      Natural Progressions
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#economic-drivers" class="md-nav__link">
-    <span class="md-ellipsis">
-      Economic Drivers
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#policy-influences" class="md-nav__link">
-    <span class="md-ellipsis">
-      Policy Influences
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#regional-variations" class="md-nav__link">
-    <span class="md-ellipsis">
-      Regional Variations
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Regional Variations">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#eastern-us" class="md-nav__link">
-    <span class="md-ellipsis">
-      Eastern US
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#western-us" class="md-nav__link">
-    <span class="md-ellipsis">
-      Western US
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#midwest" class="md-nav__link">
-    <span class="md-ellipsis">
-      Midwest
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#coastal-areas" class="md-nav__link">
-    <span class="md-ellipsis">
-      Coastal Areas
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#query-examples-by-category" class="md-nav__link">
-    <span class="md-ellipsis">
-      Query Examples by Category
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Query Examples by Category">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#cropland-analysis" class="md-nav__link">
-    <span class="md-ellipsis">
-      Cropland Analysis
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#forest-conservation" class="md-nav__link">
-    <span class="md-ellipsis">
-      Forest Conservation
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#urban-growth" class="md-nav__link">
-    <span class="md-ellipsis">
-      Urban Growth
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#agricultural-trends" class="md-nav__link">
-    <span class="md-ellipsis">
-      Agricultural Trends
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#rangeland-changes" class="md-nav__link">
-    <span class="md-ellipsis">
-      Rangeland Changes
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#data-quality-considerations" class="md-nav__link">
-    <span class="md-ellipsis">
-      Data Quality Considerations
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Data Quality Considerations">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#classification-accuracy" class="md-nav__link">
-    <span class="md-ellipsis">
-      Classification Accuracy
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#temporal-consistency" class="md-nav__link">
-    <span class="md-ellipsis">
-      Temporal Consistency
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#spatial-resolution" class="md-nav__link">
-    <span class="md-ellipsis">
-      Spatial Resolution
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#best-practices" class="md-nav__link">
-    <span class="md-ellipsis">
-      Best Practices
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#next-steps" class="md-nav__link">
-    <span class="md-ellipsis">
-      Next Steps
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -2496,254 +2784,387 @@
   
 
 
-<h1 id="land-use-categories">Land Use Categories<a class="headerlink" href="#land-use-categories" title="Permanent link">&para;</a></h1>
-<p>Detailed explanation of each land use category in the database and how they relate to real-world land classification systems.</p>
+<h1 id="data-dictionary">Data Dictionary<a class="headerlink" href="#data-dictionary" title="Permanent link">&para;</a></h1>
 <h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
-<p>The land use classification system used in this project is based on standard USDA and land cover categories, simplified into six main types for analysis.</p>
-<pre class="mermaid"><code>graph TD
-    A[Total Land Area] --&gt; B[Crop]
-    A --&gt; C[Pasture]
-    A --&gt; D[Forest]
-    A --&gt; E[Urban]
-    A --&gt; F[Range]
-
-    B --&gt; G[Agriculture]
-    C --&gt; G
-
-    style G fill:#f9f,stroke:#333,stroke-width:2px</code></pre>
-<h2 id="primary-categories">Primary Categories<a class="headerlink" href="#primary-categories" title="Permanent link">&para;</a></h2>
-<h3 id="crop-cropland">🌾 Crop (Cropland)<a class="headerlink" href="#crop-cropland" title="Permanent link">&para;</a></h3>
-<p><strong>Definition:</strong> Land used for the production of adapted crops for harvest.</p>
-<p><strong>Includes:</strong>
-- Annual crops (corn, soybeans, wheat, etc.)
-- Perennial crops (orchards, vineyards)
-- Cultivated lands
-- Crop rotation areas
-- Fallow cropland</p>
-<p><strong>Characteristics:</strong>
-- Actively managed for agricultural production
-- Regular planting and harvesting cycles
-- May include irrigation infrastructure
-- Subject to agricultural policies and subsidies</p>
-<p><strong>Typical Transitions:</strong>
-- <strong>To Urban:</strong> Agricultural land near cities under development pressure
-- <strong>To Pasture:</strong> Crop-livestock integration or economic shifts
-- <strong>To Forest:</strong> Abandoned farmland or conservation programs
-- <strong>From Pasture:</strong> Intensification of agricultural use</p>
-<h3 id="pasture">🐄 Pasture<a class="headerlink" href="#pasture" title="Permanent link">&para;</a></h3>
-<p><strong>Definition:</strong> Land used primarily for grazing of livestock.</p>
-<p><strong>Includes:</strong>
-- Improved pastures with planted grasses
-- Grazing lands in rotation with crops
-- Permanent pastures
-- Hayfields</p>
-<p><strong>Characteristics:</strong>
-- Managed grasslands for livestock
-- May be fertilized or irrigated
-- Often near crop areas (mixed farming)
-- Can be converted relatively easily</p>
-<p><strong>Typical Transitions:</strong>
-- <strong>To Crop:</strong> Agricultural intensification
-- <strong>To Urban:</strong> Development in rural-urban fringe
-- <strong>To Forest:</strong> Natural succession or tree planting
-- <strong>From Crop:</strong> Shift to livestock farming</p>
-<h3 id="forest">🌲 Forest<a class="headerlink" href="#forest" title="Permanent link">&para;</a></h3>
-<p><strong>Definition:</strong> Land dominated by trees and woody vegetation.</p>
-<p><strong>Includes:</strong>
-- Natural forests
-- Managed forests for timber
-- Forest plantations
-- Wooded wetlands
-- Young forest regeneration</p>
-<p><strong>Characteristics:</strong>
-- Tree canopy coverage &gt;10%
-- May be managed or unmanaged
-- Provides ecosystem services
-- Subject to conservation policies</p>
-<p><strong>Typical Transitions:</strong>
-- <strong>To Urban:</strong> Deforestation for development
-- <strong>To Crop:</strong> Agricultural expansion
-- <strong>To Pasture:</strong> Clearing for grazing
-- <strong>From Range:</strong> Natural succession or afforestation</p>
-<h3 id="urban">🏢 Urban<a class="headerlink" href="#urban" title="Permanent link">&para;</a></h3>
-<p><strong>Definition:</strong> Developed land with constructed materials and infrastructure.</p>
-<p><strong>Includes:</strong>
-- Cities and towns
-- Residential areas
-- Commercial and industrial zones
-- Transportation infrastructure
-- Urban green spaces (parks)</p>
-<p><strong>Characteristics:</strong>
-- Permanent land use change
-- High economic value
-- Rarely converts to other uses
-- Expanding in most scenarios</p>
-<p><strong>Typical Transitions:</strong>
-- <strong>From Forest:</strong> Suburban expansion
-- <strong>From Crop:</strong> Agricultural land conversion
-- <strong>From Pasture:</strong> Rural development
-- <strong>To Urban:</strong> Essentially none (permanent)</p>
-<h3 id="range-rangeland">🌿 Range (Rangeland)<a class="headerlink" href="#range-rangeland" title="Permanent link">&para;</a></h3>
-<p><strong>Definition:</strong> Natural grasslands and shrublands, typically in arid/semi-arid regions.</p>
-<p><strong>Includes:</strong>
-- Native grasslands
-- Shrublands
-- Desert vegetation
-- Non-improved grazing lands
-- Prairie ecosystems</p>
-<p><strong>Characteristics:</strong>
-- Natural vegetation
-- Minimal management
-- Often used for extensive grazing
-- Climate-limited productivity</p>
-<p><strong>Typical Transitions:</strong>
-- <strong>To Pasture:</strong> Improvement for livestock
-- <strong>To Crop:</strong> Irrigation development
-- <strong>To Forest:</strong> Succession in wetter areas
-- <strong>To Urban:</strong> Limited (usually near cities)</p>
-<h3 id="total">📊 Total<a class="headerlink" href="#total" title="Permanent link">&para;</a></h3>
-<p><strong>Definition:</strong> Sum of all land use categories for validation.</p>
-<p><strong>Purpose:</strong>
-- Data quality check
-- Ensures accounting completeness
-- Not a real land use category</p>
-<p><strong>Usage in Queries:</strong>
-<div class="language-sql highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1">-- Always exclude Total from analyses</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="k">WHERE</span><span class="w"> </span><span class="n">from_land_use</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="s1">&#39;Total&#39;</span><span class="w"> </span>
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">  </span><span class="k">AND</span><span class="w"> </span><span class="n">to_land_use</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="s1">&#39;Total&#39;</span>
-</span></code></pre></div></p>
-<h2 id="agricultural-aggregation">Agricultural Aggregation<a class="headerlink" href="#agricultural-aggregation" title="Permanent link">&para;</a></h2>
-<p>In the <code>*_ag</code> tables, agricultural land is combined:</p>
-<h3 id="agriculture-combined">🚜 Agriculture (Combined)<a class="headerlink" href="#agriculture-combined" title="Permanent link">&para;</a></h3>
-<p><strong>Definition:</strong> Crop + Pasture combined into a single category.</p>
-<p><strong>Rationale:</strong>
-- Simplifies agricultural analysis
-- Both are managed for food production
-- Often intermixed on farms
-- Similar policy implications</p>
-<p><strong>When to Use:</strong>
-- Analyzing total agricultural land
-- Food security assessments
-- Comparing agricultural vs. natural land
-- Policy scenario analysis</p>
-<h2 id="understanding-transitions">Understanding Transitions<a class="headerlink" href="#understanding-transitions" title="Permanent link">&para;</a></h2>
-<h3 id="natural-progressions">Natural Progressions<a class="headerlink" href="#natural-progressions" title="Permanent link">&para;</a></h3>
-<p>Some transitions follow natural succession patterns:</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>Range → Forest (increasing precipitation)
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>Pasture → Forest (abandonment)
-</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>Crop → Pasture → Forest (land retirement)
-</span></code></pre></div>
-<h3 id="economic-drivers">Economic Drivers<a class="headerlink" href="#economic-drivers" title="Permanent link">&para;</a></h3>
-<p>Market forces drive many transitions:</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>Forest → Crop (commodity prices high)
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>Pasture → Crop (intensification)
-</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>Range → Pasture (livestock expansion)
-</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>All → Urban (development pressure)
-</span></code></pre></div>
-<h3 id="policy-influences">Policy Influences<a class="headerlink" href="#policy-influences" title="Permanent link">&para;</a></h3>
-<p>Conservation and development policies affect transitions:</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>Crop → Forest (conservation programs)
-</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>Forest → Forest (protection policies)
-</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>Pasture → Urban (zoning changes)
-</span></code></pre></div>
-<h2 id="regional-variations">Regional Variations<a class="headerlink" href="#regional-variations" title="Permanent link">&para;</a></h2>
-<h3 id="eastern-us">Eastern US<a class="headerlink" href="#eastern-us" title="Permanent link">&para;</a></h3>
+<p>This data dictionary provides comprehensive business definitions, technical specifications, and usage guidelines for all data elements in the RPA Land Use Analytics database.</p>
+<h2 id="business-context">Business Context<a class="headerlink" href="#business-context" title="Permanent link">&para;</a></h2>
+<p>The database contains land use transition projections from the <strong>2020 USDA Forest Service RPA Assessment</strong>, covering 3,075 US counties across 20 climate scenarios from 2012-2070. All projections focus on <strong>private land only</strong> (public lands assumed static) and include integrated socioeconomic data.</p>
+<hr />
+<h2 id="core-business-concepts">Core Business Concepts<a class="headerlink" href="#core-business-concepts" title="Permanent link">&para;</a></h2>
+<h3 id="land-use-transitions">Land Use Transitions<a class="headerlink" href="#land-use-transitions" title="Permanent link">&para;</a></h3>
+<p><strong>Definition</strong>: Changes in land use from one category to another over a specified time period, measured in acres.</p>
+<p><strong>Business Rules</strong>:
+- <strong>Irreversible Development</strong>: Once land becomes Urban, it never converts back
+- <strong>Private Land Only</strong>: Public lands (national forests, parks) excluded from projections
+- <strong>County Aggregation</strong>: Sub-county variations are aggregated to county level
+- <strong>Decade Intervals</strong>: Transitions measured over 10-year periods (except 2012-2020: 8 years)</p>
+<p><strong>Key Insights</strong>:
+- ~46% of new urban development comes from forest conversion
+- Agricultural land conversion varies significantly by economic scenario
+- Range to pasture conversions often occur with livestock expansion</p>
+<h3 id="climate-scenarios">Climate Scenarios<a class="headerlink" href="#climate-scenarios" title="Permanent link">&para;</a></h3>
+<p><strong>Definition</strong>: Combinations of climate models with Representative Concentration Pathways (RCP) and Shared Socioeconomic Pathways (SSP).</p>
+<p><strong>Business Context</strong>:
+- <strong>Climate Models</strong>: Different climate sensitivities (wet, hot, dry, moderate)
+- <strong>RCP Pathways</strong>: Greenhouse gas concentration trajectories
+- <strong>SSP Pathways</strong>: Socioeconomic development narratives</p>
+<hr />
+<h2 id="data-elements-by-category">Data Elements by Category<a class="headerlink" href="#data-elements-by-category" title="Permanent link">&para;</a></h2>
+<h3 id="geographic-identifiers">Geographic Identifiers<a class="headerlink" href="#geographic-identifiers" title="Permanent link">&para;</a></h3>
+<h4 id="fips-code">FIPS Code<a class="headerlink" href="#fips-code" title="Permanent link">&para;</a></h4>
 <ul>
-<li>More Forest ↔ Crop transitions</li>
-<li>Higher Forest → Urban pressure</li>
-<li>Limited rangeland</li>
+<li><strong>Field Name</strong>: <code>fips_code</code></li>
+<li><strong>Type</strong>: VARCHAR(5)</li>
+<li><strong>Definition</strong>: Federal Information Processing Standards county identifier</li>
+<li><strong>Format</strong>: 5-digit string (SSFFF where SS=state, FFF=county)</li>
+<li><strong>Business Use</strong>: Unique county identification for data joining and mapping</li>
+<li><strong>Example</strong>: "06037" = Los Angeles County, California</li>
+<li><strong>Data Quality</strong>: All 3,075 US counties represented</li>
 </ul>
-<h3 id="western-us">Western US<a class="headerlink" href="#western-us" title="Permanent link">&para;</a></h3>
+<h4 id="county-name">County Name<a class="headerlink" href="#county-name" title="Permanent link">&para;</a></h4>
 <ul>
-<li>Extensive rangelands</li>
-<li>Range ↔ Pasture transitions</li>
-<li>Water-limited crop expansion</li>
+<li><strong>Field Name</strong>: <code>county_name</code></li>
+<li><strong>Type</strong>: VARCHAR</li>
+<li><strong>Definition</strong>: Official county name as recognized by US Census</li>
+<li><strong>Business Use</strong>: Human-readable geographic identification</li>
+<li><strong>Example</strong>: "Los Angeles County"</li>
+<li><strong>Note</strong>: Includes "County", "Parish", "Borough" suffixes as appropriate</li>
 </ul>
-<h3 id="midwest">Midwest<a class="headerlink" href="#midwest" title="Permanent link">&para;</a></h3>
+<h4 id="state-information">State Information<a class="headerlink" href="#state-information" title="Permanent link">&para;</a></h4>
 <ul>
-<li>Crop ↔ Pasture rotations</li>
-<li>Stable agricultural land</li>
-<li>Urban expansion into farmland</li>
+<li><strong>Field Names</strong>: <code>state_code</code>, <code>state_name</code>, <code>state_abbrev</code></li>
+<li><strong>Types</strong>: VARCHAR(2), VARCHAR, VARCHAR(2)</li>
+<li><strong>Definition</strong>: State identification in multiple formats</li>
+<li><strong>Business Use</strong>: State-level aggregation and filtering</li>
+<li><strong>Examples</strong>: "06", "California", "CA"</li>
 </ul>
-<h3 id="coastal-areas">Coastal Areas<a class="headerlink" href="#coastal-areas" title="Permanent link">&para;</a></h3>
+<h4 id="region">Region<a class="headerlink" href="#region" title="Permanent link">&para;</a></h4>
 <ul>
-<li>High Urban expansion pressure</li>
-<li>Forest → Urban common</li>
-<li>Agricultural land loss</li>
+<li><strong>Field Name</strong>: <code>region</code></li>
+<li><strong>Type</strong>: VARCHAR</li>
+<li><strong>Definition</strong>: US Census region classification</li>
+<li><strong>Values</strong>: Northeast, Midwest, South, West</li>
+<li><strong>Business Use</strong>: Large-scale regional analysis and comparison</li>
+<li><strong>Distribution</strong>: South (45.2%), Midwest (34.3%), West (13.5%), Northeast (7.1%)</li>
 </ul>
-<h2 id="query-examples-by-category">Query Examples by Category<a class="headerlink" href="#query-examples-by-category" title="Permanent link">&para;</a></h2>
-<h3 id="cropland-analysis">Cropland Analysis<a class="headerlink" href="#cropland-analysis" title="Permanent link">&para;</a></h3>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>You&gt; Show me counties with the most cropland expansion
-</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>You&gt; What&#39;s converting to cropland in the High Crop Demand scenario?
-</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>You&gt; Track cropland changes in Iowa counties
+<h3 id="land-use-categories">Land Use Categories<a class="headerlink" href="#land-use-categories" title="Permanent link">&para;</a></h3>
+<h4 id="land-use-code">Land Use Code<a class="headerlink" href="#land-use-code" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Field Name</strong>: <code>landuse_code</code></li>
+<li><strong>Type</strong>: VARCHAR(2)</li>
+<li><strong>Definition</strong>: Standardized 2-character land use identifier</li>
+<li><strong>Values</strong>:</li>
+<li><strong>cr</strong>: Cropland</li>
+<li><strong>ps</strong>: Pasture</li>
+<li><strong>rg</strong>: Rangeland</li>
+<li><strong>fr</strong>: Forest</li>
+<li><strong>ur</strong>: Urban</li>
+<li><strong>Business Use</strong>: Compact representation for analysis and storage</li>
+</ul>
+<h4 id="land-use-name">Land Use Name<a class="headerlink" href="#land-use-name" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Field Name</strong>: <code>landuse_name</code></li>
+<li><strong>Type</strong>: VARCHAR</li>
+<li><strong>Definition</strong>: Full descriptive name for land use category</li>
+<li><strong>Business Use</strong>: Human-readable reports and visualizations</li>
+<li><strong>Values</strong>: Crop, Pasture, Rangeland, Forest, Urban</li>
+</ul>
+<h4 id="land-use-category">Land Use Category<a class="headerlink" href="#land-use-category" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Field Name</strong>: <code>landuse_category</code></li>
+<li><strong>Type</strong>: VARCHAR</li>
+<li><strong>Definition</strong>: High-level grouping for policy analysis</li>
+<li><strong>Values</strong>:</li>
+<li><strong>Agriculture</strong>: Crop, Pasture</li>
+<li><strong>Natural</strong>: Rangeland, Forest</li>
+<li><strong>Developed</strong>: Urban</li>
+<li><strong>Business Use</strong>: Simplified analysis focusing on broad land use types</li>
+</ul>
+<h3 id="scenario-definitions">Scenario Definitions<a class="headerlink" href="#scenario-definitions" title="Permanent link">&para;</a></h3>
+<h4 id="climate-model">Climate Model<a class="headerlink" href="#climate-model" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Field Name</strong>: <code>climate_model</code></li>
+<li><strong>Type</strong>: VARCHAR</li>
+<li><strong>Definition</strong>: Global Climate Model used for projections</li>
+<li><strong>Business Context</strong>:</li>
+<li><strong>CNRM_CM5</strong>: "Wet" climate model (higher precipitation)</li>
+<li><strong>HadGEM2_ES365</strong>: "Hot" climate model (higher temperatures)</li>
+<li><strong>IPSL_CM5A_MR</strong>: "Dry" climate model (lower precipitation)</li>
+<li><strong>MRI_CGCM3</strong>: "Least warm" climate model (moderate temperature increase)</li>
+<li><strong>NorESM1_M</strong>: "Middle" climate model (balanced)</li>
+</ul>
+<h4 id="rcp-scenario">RCP Scenario<a class="headerlink" href="#rcp-scenario" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Field Name</strong>: <code>rcp_scenario</code></li>
+<li><strong>Type</strong>: VARCHAR</li>
+<li><strong>Definition</strong>: Representative Concentration Pathway - greenhouse gas trajectory</li>
+<li><strong>Values</strong>:</li>
+<li><strong>rcp45</strong>: Lower emissions scenario (+2.4°C by 2100)</li>
+<li><strong>rcp85</strong>: Higher emissions scenario (+4.3°C by 2100)</li>
+<li><strong>Business Use</strong>: Climate impact analysis and mitigation planning</li>
+</ul>
+<h4 id="ssp-scenario">SSP Scenario<a class="headerlink" href="#ssp-scenario" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Field Name</strong>: <code>ssp_scenario</code></li>
+<li><strong>Type</strong>: VARCHAR</li>
+<li><strong>Definition</strong>: Shared Socioeconomic Pathway - development narrative</li>
+<li><strong>Values &amp; Narratives</strong>:</li>
+<li><strong>ssp1</strong>: Sustainability (low population growth, medium economic growth)</li>
+<li><strong>ssp2</strong>: Middle of the Road (medium population/economic growth)</li>
+<li><strong>ssp3</strong>: Regional Rivalry (high population growth, low economic growth)</li>
+<li><strong>ssp4</strong>: Inequality (medium population growth, high economic growth)</li>
+<li><strong>ssp5</strong>: Fossil-fueled Development (low population growth, high economic growth)</li>
+</ul>
+<h3 id="temporal-elements">Temporal Elements<a class="headerlink" href="#temporal-elements" title="Permanent link">&para;</a></h3>
+<h4 id="time-period">Time Period<a class="headerlink" href="#time-period" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Field Name</strong>: <code>year_range</code></li>
+<li><strong>Type</strong>: VARCHAR</li>
+<li><strong>Definition</strong>: Decade-long transition period</li>
+<li><strong>Format</strong>: "YYYY-YYYY"</li>
+<li><strong>Business Context</strong>:</li>
+<li><strong>2012-2020</strong>: Historical calibration period (8 years)</li>
+<li><strong>2020-2070</strong>: 10-year projection intervals</li>
+<li><strong>Example</strong>: "2040-2050"</li>
+</ul>
+<h4 id="start-year-end-year">Start Year / End Year<a class="headerlink" href="#start-year-end-year" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Field Names</strong>: <code>start_year</code>, <code>end_year</code></li>
+<li><strong>Type</strong>: INTEGER</li>
+<li><strong>Definition</strong>: Numeric year boundaries for calculations</li>
+<li><strong>Business Use</strong>: Time-series analysis and trend calculations</li>
+</ul>
+<h3 id="measurement-units">Measurement Units<a class="headerlink" href="#measurement-units" title="Permanent link">&para;</a></h3>
+<h4 id="acres">Acres<a class="headerlink" href="#acres" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Field Name</strong>: <code>acres</code></li>
+<li><strong>Type</strong>: DECIMAL(15,4)</li>
+<li><strong>Definition</strong>: Area measurement for land use transitions</li>
+<li><strong>Unit</strong>: US acres (1 acre = 0.404686 hectares)</li>
+<li><strong>Business Context</strong>: </li>
+<li><strong>Small Values</strong>: Precision for urban development (typical: 1-50 acres)</li>
+<li><strong>Large Values</strong>: Agricultural and forest areas (typical: 100-10,000+ acres)</li>
+<li><strong>Conversion Factors</strong>:</li>
+<li>1 acre = 4,047 square meters</li>
+<li>640 acres = 1 square mile</li>
+<li>1 acre = 0.404686 hectares</li>
+</ul>
+<h4 id="population-thousands">Population (Thousands)<a class="headerlink" href="#population-thousands" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Field Name</strong>: <code>population_thousands</code>, <code>value</code> (in socioeconomic data)</li>
+<li><strong>Type</strong>: DECIMAL(15,4)</li>
+<li><strong>Definition</strong>: County population in thousands of persons</li>
+<li><strong>Business Use</strong>: Demographic pressure analysis and development planning</li>
+<li><strong>Example</strong>: 9,818.5 = 9,818,500 people</li>
+</ul>
+<h4 id="income-per-capita">Income Per Capita<a class="headerlink" href="#income-per-capita" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Field Name</strong>: <code>income_per_capita_2009usd</code>, <code>value</code> (in socioeconomic data)</li>
+<li><strong>Type</strong>: DECIMAL(15,4)</li>
+<li><strong>Definition</strong>: Per capita income in thousands of 2009 US dollars</li>
+<li><strong>Business Context</strong>: </li>
+<li><strong>Inflation Adjusted</strong>: Constant 2009 dollars for temporal comparison</li>
+<li><strong>Economic Indicator</strong>: Purchasing power and development pressure</li>
+<li><strong>Example</strong>: 42.6 = $42,600 per person per year</li>
+</ul>
+<h3 id="transition-characteristics">Transition Characteristics<a class="headerlink" href="#transition-characteristics" title="Permanent link">&para;</a></h3>
+<h4 id="transition-type">Transition Type<a class="headerlink" href="#transition-type" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Field Name</strong>: <code>transition_type</code></li>
+<li><strong>Type</strong>: VARCHAR</li>
+<li><strong>Definition</strong>: Whether land use changed or remained the same</li>
+<li><strong>Values</strong>:</li>
+<li><strong>change</strong>: Land converted from one use to another</li>
+<li><strong>same</strong>: Land remained in the same use category</li>
+<li><strong>Business Context</strong>:</li>
+<li><strong>Change Transitions</strong>: Focus of policy and environmental analysis</li>
+<li><strong>Same Transitions</strong>: Baseline for calculating conversion rates</li>
+</ul>
+<h4 id="fromto-land-use">From/To Land Use<a class="headerlink" href="#fromto-land-use" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Field Names</strong>: <code>from_landuse_id</code>, <code>to_landuse_id</code></li>
+<li><strong>Type</strong>: INTEGER (foreign keys)</li>
+<li><strong>Definition</strong>: Source and destination land use categories</li>
+<li><strong>Business Use</strong>: Transition matrix analysis and conversion pattern identification</li>
+<li><strong>Common Patterns</strong>:</li>
+<li>Forest → Urban (suburban development)</li>
+<li>Crop ↔ Pasture (agricultural intensification/extensification)</li>
+<li>Range → Pasture (livestock expansion)</li>
+</ul>
+<hr />
+<h2 id="socioeconomic-indicators">Socioeconomic Indicators<a class="headerlink" href="#socioeconomic-indicators" title="Permanent link">&para;</a></h2>
+<h3 id="population-projections">Population Projections<a class="headerlink" href="#population-projections" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Definition</strong>: County-level population forecasts by SSP scenario</li>
+<li><strong>Data Source</strong>: Integrated from SSP scenario narratives</li>
+<li><strong>Business Use</strong>: </li>
+<li>Development pressure assessment</li>
+<li>Infrastructure planning</li>
+<li>Environmental impact analysis</li>
+<li><strong>Coverage</strong>: 2010-2050 (historical + projections)</li>
+</ul>
+<h3 id="income-projections">Income Projections<a class="headerlink" href="#income-projections" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Definition</strong>: Per capita income forecasts by SSP scenario</li>
+<li><strong>Data Source</strong>: Economic growth assumptions from SSP narratives</li>
+<li><strong>Business Use</strong>:</li>
+<li>Economic development planning</li>
+<li>Land value and conversion pressure analysis</li>
+<li>Environmental justice considerations</li>
+<li><strong>Unit</strong>: Constant 2009 US dollars (inflation-adjusted)</li>
+</ul>
+<hr />
+<h2 id="data-quality-and-validation">Data Quality and Validation<a class="headerlink" href="#data-quality-and-validation" title="Permanent link">&para;</a></h2>
+<h3 id="completeness">Completeness<a class="headerlink" href="#completeness" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Geographic Coverage</strong>: All 3,075 US counties included</li>
+<li><strong>Temporal Coverage</strong>: Complete time series 2012-2070</li>
+<li><strong>Scenario Coverage</strong>: All 20 climate/socioeconomic combinations</li>
+<li><strong>Land Use Coverage</strong>: All major land use categories tracked</li>
+</ul>
+<h3 id="accuracy-considerations">Accuracy Considerations<a class="headerlink" href="#accuracy-considerations" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Model Calibration</strong>: 2012-2020 period used for historical validation</li>
+<li><strong>County Aggregation</strong>: Sub-county variations smoothed to county level</li>
+<li><strong>Private Land Focus</strong>: Public lands excluded (may underestimate total change)</li>
+<li><strong>Edge Effects</strong>: County boundary effects not captured</li>
+</ul>
+<h3 id="business-rules-validation">Business Rules Validation<a class="headerlink" href="#business-rules-validation" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Total Area Conservation</strong>: County total land area remains constant</li>
+<li><strong>Urban Irreversibility</strong>: No urban-to-other transitions (verified)</li>
+<li><strong>Logical Transitions</strong>: Unrealistic transitions flagged during processing</li>
+</ul>
+<hr />
+<h2 id="usage-guidelines">Usage Guidelines<a class="headerlink" href="#usage-guidelines" title="Permanent link">&para;</a></h2>
+<h3 id="query-patterns">Query Patterns<a class="headerlink" href="#query-patterns" title="Permanent link">&para;</a></h3>
+<h4 id="basic-land-use-analysis">Basic Land Use Analysis<a class="headerlink" href="#basic-land-use-analysis" title="Permanent link">&para;</a></h4>
+<div class="language-sql highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1">-- Focus on actual changes</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="k">WHERE</span><span class="w"> </span><span class="n">transition_type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;change&#39;</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="c1">-- Exclude validation/total rows  </span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="k">WHERE</span><span class="w"> </span><span class="n">from_landuse</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="s1">&#39;Total&#39;</span><span class="w"> </span><span class="k">AND</span><span class="w"> </span><span class="n">to_landuse</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="s1">&#39;Total&#39;</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="c1">-- Current land use (unchanged areas)</span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="k">WHERE</span><span class="w"> </span><span class="n">from_landuse_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">to_landuse_id</span>
 </span></code></pre></div>
-<h3 id="forest-conservation">Forest Conservation<a class="headerlink" href="#forest-conservation" title="Permanent link">&para;</a></h3>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>You&gt; Which counties maintain the most forest cover through 2100?
-</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>You&gt; Show forest to urban conversion rates by decade
-</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>You&gt; Compare forest outcomes across scenarios
+<h4 id="scenario-comparison">Scenario Comparison<a class="headerlink" href="#scenario-comparison" title="Permanent link">&para;</a></h4>
+<div class="language-sql highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1">-- Compare emission scenarios</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="k">WHERE</span><span class="w"> </span><span class="n">rcp_scenario</span><span class="w"> </span><span class="k">IN</span><span class="w"> </span><span class="p">(</span><span class="s1">&#39;rcp45&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;rcp85&#39;</span><span class="p">)</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="c1">-- Focus on specific socioeconomic narrative</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="k">WHERE</span><span class="w"> </span><span class="n">ssp_scenario</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;ssp1&#39;</span><span class="w">  </span><span class="c1">-- Sustainability</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="c1">-- Climate model sensitivity analysis</span>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="k">WHERE</span><span class="w"> </span><span class="n">climate_model</span><span class="w"> </span><span class="k">IN</span><span class="w"> </span><span class="p">(</span><span class="s1">&#39;HadGEM2_ES365&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;IPSL_CM5A_MR&#39;</span><span class="p">)</span><span class="w">  </span><span class="c1">-- Hot vs Dry</span>
 </span></code></pre></div>
-<h3 id="urban-growth">Urban Growth<a class="headerlink" href="#urban-growth" title="Permanent link">&para;</a></h3>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>You&gt; Calculate urban expansion rates for major metropolitan areas
-</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>You&gt; What land uses are consumed by urban growth?
-</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>You&gt; Project when urban area will double from 2020 levels
+<h4 id="geographic-analysis">Geographic Analysis<a class="headerlink" href="#geographic-analysis" title="Permanent link">&para;</a></h4>
+<div class="language-sql highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1">-- Regional analysis</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="k">WHERE</span><span class="w"> </span><span class="n">region</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;West&#39;</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="c1">-- State-level analysis</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="k">WHERE</span><span class="w"> </span><span class="n">state_name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;California&#39;</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="c1">-- Large counties (development pressure)</span>
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="k">WHERE</span><span class="w"> </span><span class="n">area_sqmi</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">1000</span>
 </span></code></pre></div>
-<h3 id="agricultural-trends">Agricultural Trends<a class="headerlink" href="#agricultural-trends" title="Permanent link">&para;</a></h3>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>You&gt; Show the balance between crop and pasture over time
-</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>You&gt; Which scenario maximizes agricultural productivity?
-</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>You&gt; Find counties shifting from crops to livestock
+<h4 id="temporal-analysis">Temporal Analysis<a class="headerlink" href="#temporal-analysis" title="Permanent link">&para;</a></h4>
+<div class="language-sql highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1">-- Near-term projections</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="k">WHERE</span><span class="w"> </span><span class="n">start_year</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="mi">2020</span><span class="w"> </span><span class="k">AND</span><span class="w"> </span><span class="n">end_year</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mi">2040</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="c1">-- Long-term trends</span>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="k">WHERE</span><span class="w"> </span><span class="n">end_year</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2070</span>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="c1">-- Historical calibration period</span>
+</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="k">WHERE</span><span class="w"> </span><span class="n">year_range</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;2012-2020&#39;</span>
 </span></code></pre></div>
-<h3 id="rangeland-changes">Rangeland Changes<a class="headerlink" href="#rangeland-changes" title="Permanent link">&para;</a></h3>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>You&gt; How much rangeland converts to other uses?
-</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>You&gt; Show rangeland preservation by scenario
-</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>You&gt; Identify counties with significant range to pasture conversion
-</span></code></pre></div>
-<h2 id="data-quality-considerations">Data Quality Considerations<a class="headerlink" href="#data-quality-considerations" title="Permanent link">&para;</a></h2>
-<h3 id="classification-accuracy">Classification Accuracy<a class="headerlink" href="#classification-accuracy" title="Permanent link">&para;</a></h3>
+<h3 id="common-business-questions">Common Business Questions<a class="headerlink" href="#common-business-questions" title="Permanent link">&para;</a></h3>
+<h4 id="development-pressure">Development Pressure<a class="headerlink" href="#development-pressure" title="Permanent link">&para;</a></h4>
 <ul>
-<li>Based on remote sensing and surveys</li>
-<li>Some mixed land uses simplified</li>
-<li>Urban includes various developed types</li>
+<li><strong>Question</strong>: "Which counties face the highest urban development pressure?"</li>
+<li><strong>Data Elements</strong>: Urban transitions, population growth, income trends</li>
+<li><strong>Key Metrics</strong>: Acres converted to urban, population density, economic growth</li>
 </ul>
-<h3 id="temporal-consistency">Temporal Consistency<a class="headerlink" href="#temporal-consistency" title="Permanent link">&para;</a></h3>
+<h4 id="agricultural-impact">Agricultural Impact<a class="headerlink" href="#agricultural-impact" title="Permanent link">&para;</a></h4>
 <ul>
-<li>Categories stable across time periods</li>
-<li>Same definitions used throughout</li>
-<li>Allows valid historical comparisons</li>
+<li><strong>Question</strong>: "How much agricultural land is lost under different scenarios?"</li>
+<li><strong>Data Elements</strong>: Crop/Pasture to other transitions, scenario comparisons</li>
+<li><strong>Key Metrics</strong>: Total agricultural acres lost, conversion rates by scenario</li>
 </ul>
-<h3 id="spatial-resolution">Spatial Resolution<a class="headerlink" href="#spatial-resolution" title="Permanent link">&para;</a></h3>
+<h4 id="climate-sensitivity">Climate Sensitivity<a class="headerlink" href="#climate-sensitivity" title="Permanent link">&para;</a></h4>
 <ul>
-<li>County-level aggregation</li>
-<li>Sub-county variations not captured</li>
-<li>Edge effects at county boundaries</li>
+<li><strong>Question</strong>: "How do land use outcomes vary between climate models?"</li>
+<li><strong>Data Elements</strong>: Climate model comparisons, transition patterns</li>
+<li><strong>Key Metrics</strong>: Forest loss rates, agricultural adaptation patterns</li>
 </ul>
-<h2 id="best-practices">Best Practices<a class="headerlink" href="#best-practices" title="Permanent link">&para;</a></h2>
-<ol>
-<li><strong>Consider Regional Context</strong></li>
-<li>Land use meanings vary by region</li>
-<li>Climate affects transition likelihood</li>
-<li>
-<p>Local policies matter</p>
-</li>
-<li>
-<p><strong>Aggregate Thoughtfully</strong></p>
-</li>
-<li>Use agricultural aggregation for food analysis</li>
-<li>Keep separate for detailed studies</li>
-<li>
-<p>Remember Total is for validation only</p>
-</li>
-<li>
-<p><strong>Interpret Transitions</strong></p>
-</li>
-<li>Some transitions are rare/unlikely</li>
-<li>Consider economic feasibility</li>
-<li>Account for policy constraints</li>
-</ol>
+<h4 id="regional-planning">Regional Planning<a class="headerlink" href="#regional-planning" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Question</strong>: "What are the regional patterns of land use change?"</li>
+<li><strong>Data Elements</strong>: Regional aggregations, state-level comparisons</li>
+<li><strong>Key Metrics</strong>: Land use change by region, cross-state patterns</li>
+</ul>
+<hr />
+<h2 id="integration-considerations">Integration Considerations<a class="headerlink" href="#integration-considerations" title="Permanent link">&para;</a></h2>
+<h3 id="external-data-sources">External Data Sources<a class="headerlink" href="#external-data-sources" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Census Data</strong>: Population and economic statistics for validation</li>
+<li><strong>Agricultural Statistics</strong>: USDA NASS for agricultural trends</li>
+<li><strong>Land Cover Data</strong>: Remote sensing for land use verification</li>
+<li><strong>Climate Data</strong>: Temperature and precipitation for model validation</li>
+</ul>
+<h3 id="data-relationships">Data Relationships<a class="headerlink" href="#data-relationships" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Hierarchical Geography</strong>: County → State → Region → Nation</li>
+<li><strong>Temporal Sequences</strong>: Historical → Near-term → Long-term projections</li>
+<li><strong>Scenario Families</strong>: Climate Model × RCP × SSP combinations</li>
+<li><strong>Land Use Transitions</strong>: Source → Destination patterns</li>
+</ul>
+<h3 id="business-intelligence-applications">Business Intelligence Applications<a class="headerlink" href="#business-intelligence-applications" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Dashboards</strong>: County-level land use dashboards for planners</li>
+<li><strong>Reports</strong>: Scenario comparison reports for policy makers</li>
+<li><strong>APIs</strong>: Programmatic access for research applications</li>
+<li><strong>Visualizations</strong>: Maps and charts for public communication</li>
+</ul>
+<hr />
+<h2 id="technical-notes">Technical Notes<a class="headerlink" href="#technical-notes" title="Permanent link">&para;</a></h2>
+<h3 id="data-types-and-precision">Data Types and Precision<a class="headerlink" href="#data-types-and-precision" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Spatial Precision</strong>: County-level aggregation (~3,000 units)</li>
+<li><strong>Temporal Precision</strong>: Decade-level intervals</li>
+<li><strong>Measurement Precision</strong>: 4 decimal places for acres (0.1 square meter accuracy)</li>
+<li><strong>Scenario Precision</strong>: 20 distinct scenario combinations</li>
+</ul>
+<h3 id="performance-characteristics">Performance Characteristics<a class="headerlink" href="#performance-characteristics" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Query Performance</strong>: Star schema optimized for analytical queries</li>
+<li><strong>Storage Efficiency</strong>: 98.99% database block utilization</li>
+<li><strong>Index Strategy</strong>: Composite indexes on frequently joined columns</li>
+<li><strong>View Performance</strong>: Pre-computed views for common query patterns</li>
+</ul>
+<h3 id="maintenance-and-updates">Maintenance and Updates<a class="headerlink" href="#maintenance-and-updates" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Static Data</strong>: Historical and projection data (no ongoing updates)</li>
+<li><strong>Schema Stability</strong>: Core structure stable for analytical consistency</li>
+<li><strong>Data Lineage</strong>: Clear transformation pipeline from raw to analytical data</li>
+<li><strong>Quality Monitoring</strong>: Automated validation checks during data loading</li>
+</ul>
+<hr />
+<h2 id="glossary">Glossary<a class="headerlink" href="#glossary" title="Permanent link">&para;</a></h2>
+<p><strong>RPA Assessment</strong>: Resources Planning Act - periodic assessment of US forest and rangeland resources mandated by Congress</p>
+<p><strong>County FIPS</strong>: Federal Information Processing Standard codes uniquely identifying US counties</p>
+<p><strong>Star Schema</strong>: Data warehouse design with central fact table surrounded by dimension tables</p>
+<p><strong>Land Use Transition</strong>: Change (or lack of change) in land use category over a time period</p>
+<p><strong>Private Land</strong>: Non-government owned land subject to market forces and development pressure</p>
+<p><strong>Climate Model</strong>: Mathematical representation of Earth's climate system for future projections</p>
+<p><strong>Socioeconomic Pathway</strong>: Narrative describing potential societal development trajectories</p>
+<p><strong>Representative Concentration Pathway</strong>: Greenhouse gas concentration trajectory used in climate models</p>
 <h2 id="next-steps">Next Steps<a class="headerlink" href="#next-steps" title="Permanent link">&para;</a></h2>
 <ul>
-<li>Review <a href="../schema/">Database Schema</a> for technical details</li>
-<li>Explore <a href="../sources/">Data Sources</a> for methodology</li>
-<li>See <a href="../../queries/examples/">Query Examples</a> for category-specific analyses</li>
+<li><strong>Technical Implementation</strong>: See <a href="../table-reference/">Table Reference</a> for technical specifications</li>
+<li><strong>Query Examples</strong>: See <a href="../../queries/basic-queries/">Basic Queries</a> for practical usage</li>
+<li><strong>Business Context</strong>: See <a href="../categories/">Land Use Categories</a> for detailed category definitions</li>
+<li><strong>Methodology</strong>: See <a href="../../LAND_USE_METHODOLOGY/">Land Use Methodology</a> for projection methods</li>
 </ul>
 
 

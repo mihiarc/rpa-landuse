@@ -81,6 +81,14 @@
          <lastmod>2025-07-26</lastmod>
     </url>
     <url>
+         <loc>https://mihiarc.github.io/rpa-landuse/data/data-dictionary/</loc>
+         <lastmod>2025-07-26</lastmod>
+    </url>
+    <url>
+         <loc>https://mihiarc.github.io/rpa-landuse/data/database-overview/</loc>
+         <lastmod>2025-07-26</lastmod>
+    </url>
+    <url>
          <loc>https://mihiarc.github.io/rpa-landuse/data/duckdb-schema/</loc>
          <lastmod>2025-07-26</lastmod>
     </url>
@@ -101,7 +109,19 @@
          <lastmod>2025-07-26</lastmod>
     </url>
     <url>
+         <loc>https://mihiarc.github.io/rpa-landuse/data/table-reference/</loc>
+         <lastmod>2025-07-26</lastmod>
+    </url>
+    <url>
+         <loc>https://mihiarc.github.io/rpa-landuse/data/technical-specifications/</loc>
+         <lastmod>2025-07-26</lastmod>
+    </url>
+    <url>
          <loc>https://mihiarc.github.io/rpa-landuse/data/variable-descriptions/</loc>
+         <lastmod>2025-07-26</lastmod>
+    </url>
+    <url>
+         <loc>https://mihiarc.github.io/rpa-landuse/data/view-definitions/</loc>
          <lastmod>2025-07-26</lastmod>
     </url>
     <url>

@@ -1,0 +1,3901 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="AI-powered analytics tool for USDA Forest Service RPA Assessment land use data">
+      
+      
+        <meta name="author" content="RPA Analytics Team">
+      
+      
+        <link rel="canonical" href="https://mihiarc.github.io/rpa-landuse/data/table-reference/">
+      
+      
+        <link rel="prev" href="../database-overview/">
+      
+      
+        <link rel="next" href="../view-definitions/">
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.16">
+    
+    
+      
+        <title>Table Reference - RPA Land Use Analytics</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.7e37652d.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="green" data-md-color-accent="light-green">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#table-reference-guide" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="RPA Land Use Analytics" class="md-header__button md-logo" aria-label="RPA Land Use Analytics" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            RPA Land Use Analytics
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Table Reference
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="green" data-md-color-accent="light-green"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="green" data-md-color-accent="light-green"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/mihiarc/rpa-landuse" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.0.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path fill="currentColor" d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    rpa-landuse-analytics
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../rpa/overview/" class="md-tabs__link">
+          
+  
+  
+  RPA Assessment
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../getting-started/installation/" class="md-tabs__link">
+          
+  
+  
+  Getting Started
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../queries/overview/" class="md-tabs__link">
+          
+  
+  
+  Natural Language Queries
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../database-overview/" class="md-tabs__link">
+          
+  
+  
+  Data & Schemas
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../api/agent/" class="md-tabs__link">
+          
+  
+  
+  API Reference
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../examples/use-cases/" class="md-tabs__link">
+          
+  
+  
+  Examples
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../development/architecture/" class="md-tabs__link">
+          
+  
+  
+  Development
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../performance/duckdb-copy-optimization/" class="md-tabs__link">
+          
+  
+  
+  Performance
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../faq/" class="md-tabs__link">
+          
+  
+  
+  Help
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../SECURITY/" class="md-tabs__link">
+          
+  
+  
+  Project Info
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="RPA Land Use Analytics" class="md-nav__button md-logo" aria-label="RPA Land Use Analytics" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    RPA Land Use Analytics
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/mihiarc/rpa-landuse" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.0.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path fill="currentColor" d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    rpa-landuse-analytics
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    RPA Assessment
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            RPA Assessment
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../rpa/overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../RPA_SCENARIOS/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    RPA Scenarios
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../LAND_USE_METHODOLOGY/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Land Use Methodology
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../rpa/climate-models/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Climate Models
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Getting Started
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            Getting Started
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Installation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/quickstart/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Quick Start
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Configuration
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Natural Language Queries
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Natural Language Queries
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../queries/overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../queries/basic-queries/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Basic Queries
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../queries/advanced-queries/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Advanced Queries
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../queries/examples/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Query Examples
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    Data & Schemas
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Data & Schemas
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../database-overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Database Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Table Reference
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    Table Reference
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      Overview
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fact-tables" class="md-nav__link">
+    <span class="md-ellipsis">
+      Fact Tables
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Fact Tables">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fact_landuse_transitions" class="md-nav__link">
+    <span class="md-ellipsis">
+      fact_landuse_transitions
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="fact_landuse_transitions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#schema-definition" class="md-nav__link">
+    <span class="md-ellipsis">
+      Schema Definition
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sample-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      Sample Data
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#data-distribution" class="md-nav__link">
+    <span class="md-ellipsis">
+      Data Distribution
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#performance-notes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Performance Notes
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fact_socioeconomic_projections" class="md-nav__link">
+    <span class="md-ellipsis">
+      fact_socioeconomic_projections
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="fact_socioeconomic_projections">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#schema-definition_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Schema Definition
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sample-data_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Sample Data
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#performance-notes_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Performance Notes
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dimension-tables" class="md-nav__link">
+    <span class="md-ellipsis">
+      Dimension Tables
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Dimension Tables">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#dim_geography" class="md-nav__link">
+    <span class="md-ellipsis">
+      dim_geography
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="dim_geography">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#schema-definition_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      Schema Definition
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sample-data_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      Sample Data
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#regional-distribution" class="md-nav__link">
+    <span class="md-ellipsis">
+      Regional Distribution
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#performance-notes_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      Performance Notes
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dim_scenario" class="md-nav__link">
+    <span class="md-ellipsis">
+      dim_scenario
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="dim_scenario">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#schema-definition_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      Schema Definition
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#climate-models" class="md-nav__link">
+    <span class="md-ellipsis">
+      Climate Models
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rcpssp-combinations" class="md-nav__link">
+    <span class="md-ellipsis">
+      RCP/SSP Combinations
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sample-data_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      Sample Data
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dim_time" class="md-nav__link">
+    <span class="md-ellipsis">
+      dim_time
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="dim_time">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#schema-definition_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      Schema Definition
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#time-periods" class="md-nav__link">
+    <span class="md-ellipsis">
+      Time Periods
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dim_landuse" class="md-nav__link">
+    <span class="md-ellipsis">
+      dim_landuse
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="dim_landuse">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#schema-definition_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      Schema Definition
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#land-use-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      Land Use Types
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dim_socioeconomic" class="md-nav__link">
+    <span class="md-ellipsis">
+      dim_socioeconomic
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="dim_socioeconomic">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#schema-definition_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      Schema Definition
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ssp-scenarios" class="md-nav__link">
+    <span class="md-ellipsis">
+      SSP Scenarios
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dim_indicators" class="md-nav__link">
+    <span class="md-ellipsis">
+      dim_indicators
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="dim_indicators">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#schema-definition_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      Schema Definition
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#available-indicators" class="md-nav__link">
+    <span class="md-ellipsis">
+      Available Indicators
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#common-query-patterns" class="md-nav__link">
+    <span class="md-ellipsis">
+      Common Query Patterns
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Common Query Patterns">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#basic-table-queries" class="md-nav__link">
+    <span class="md-ellipsis">
+      Basic Table Queries
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#join-patterns" class="md-nav__link">
+    <span class="md-ellipsis">
+      Join Patterns
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#aggregation-patterns" class="md-nav__link">
+    <span class="md-ellipsis">
+      Aggregation Patterns
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#data-relationships" class="md-nav__link">
+    <span class="md-ellipsis">
+      Data Relationships
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Data Relationships">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#foreign-key-constraints" class="md-nav__link">
+    <span class="md-ellipsis">
+      Foreign Key Constraints
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#data-integrity" class="md-nav__link">
+    <span class="md-ellipsis">
+      Data Integrity
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#usage-guidelines" class="md-nav__link">
+    <span class="md-ellipsis">
+      Usage Guidelines
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      Next Steps
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../view-definitions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    View Definitions
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../data-dictionary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Data Dictionary
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../technical-specifications/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Technical Specifications
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../sources/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Data Sources
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../schema/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Database Schema
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../duckdb-schema/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    DuckDB Schema
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../categories/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Land Use Categories
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../variable-descriptions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Variable Descriptions
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../rpa-model-diagram/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    RPA Model Diagram
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../processing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Data Processing
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    API Reference
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            API Reference
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/agent/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    LanduseAgent API
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/landuse-query-agent/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Natural Language Queries
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/converters/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Data Converters
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/tools/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Tools & Utilities
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Examples
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            Examples
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/use-cases/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Use Cases
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/workflows/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Sample Workflows
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/notebooks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Jupyter Notebooks
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Development
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            Development
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development/architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Architecture
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development/contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Contributing
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development/testing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Testing
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development/ci-cd-pipeline/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    CI/CD Pipeline
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development/retry-logic/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Retry Logic
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development/BRANDING_STRATEGY/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Branding Strategy
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development/modern-duckdb-tools/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Modern DuckDB Tools
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development/pydantic-models/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Pydantic Models
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Performance
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            Performance
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../performance/duckdb-copy-optimization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    DuckDB Optimization
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../performance/streamlit-fragments/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Streamlit Fragments
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Help
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_10">
+            <span class="md-nav__icon md-icon"></span>
+            Help
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../faq/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    FAQ
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Troubleshooting
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../GITHUB_PAGES_SETUP/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    GitHub Pages Setup
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../troubleshooting/streamlit-duplicate-ids/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Streamlit Duplicate IDs
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../troubleshooting/streamlit-fragments/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Streamlit Fragments Guide
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_11" >
+        
+          
+          <label class="md-nav__link" for="__nav_11" id="__nav_11_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Project Info
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_11_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_11">
+            <span class="md-nav__icon md-icon"></span>
+            Project Info
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../SECURITY/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Security Policy
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../TESTING/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Testing Guide
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../CLAUDE.local/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Local Configuration
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="table-reference-guide">Table Reference Guide<a class="headerlink" href="#table-reference-guide" title="Permanent link">&para;</a></h1>
+<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
+<p>This document provides detailed specifications for all 8 tables in the RPA Land Use Analytics database, including column definitions, data types, constraints, and usage examples.</p>
+<h2 id="fact-tables">Fact Tables<a class="headerlink" href="#fact-tables" title="Permanent link">&para;</a></h2>
+<h3 id="fact_landuse_transitions">fact_landuse_transitions<a class="headerlink" href="#fact_landuse_transitions" title="Permanent link">&para;</a></h3>
+<p><strong>Purpose</strong>: Core table containing all land use transitions between categories across scenarios, time periods, and counties.</p>
+<p><strong>Records</strong>: 5,432,198 | <strong>Size</strong>: 5.18 MB | <strong>Type</strong>: Fact Table</p>
+<h4 id="schema-definition">Schema Definition<a class="headerlink" href="#schema-definition" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Data Type</th>
+<th>Constraints</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>transition_id</code></td>
+<td>BIGINT</td>
+<td></td>
+<td>Unique identifier for each transition record</td>
+</tr>
+<tr>
+<td><code>scenario_id</code></td>
+<td>INTEGER</td>
+<td>NOT NULL, FK</td>
+<td>Reference to dim_scenario table</td>
+</tr>
+<tr>
+<td><code>time_id</code></td>
+<td>INTEGER</td>
+<td>NOT NULL, FK</td>
+<td>Reference to dim_time table</td>
+</tr>
+<tr>
+<td><code>geography_id</code></td>
+<td>INTEGER</td>
+<td>NOT NULL, FK</td>
+<td>Reference to dim_geography table</td>
+</tr>
+<tr>
+<td><code>from_landuse_id</code></td>
+<td>INTEGER</td>
+<td>NOT NULL, FK</td>
+<td>Reference to dim_landuse (source land use)</td>
+</tr>
+<tr>
+<td><code>to_landuse_id</code></td>
+<td>INTEGER</td>
+<td>NOT NULL, FK</td>
+<td>Reference to dim_landuse (destination land use)</td>
+</tr>
+<tr>
+<td><code>acres</code></td>
+<td>DECIMAL(15,4)</td>
+<td></td>
+<td>Area in acres for this transition</td>
+</tr>
+<tr>
+<td><code>transition_type</code></td>
+<td>VARCHAR</td>
+<td></td>
+<td>'change' or 'same'</td>
+</tr>
+<tr>
+<td><code>created_at</code></td>
+<td>TIMESTAMP</td>
+<td></td>
+<td>Record creation timestamp</td>
+</tr>
+</tbody>
+</table>
+<h4 id="sample-data">Sample Data<a class="headerlink" href="#sample-data" title="Permanent link">&para;</a></h4>
+<div class="language-sql highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">fact_landuse_transitions</span><span class="w"> </span><span class="k">LIMIT</span><span class="w"> </span><span class="mi">5</span><span class="p">;</span>
+</span></code></pre></div>
+<table>
+<thead>
+<tr>
+<th>transition_id</th>
+<th>scenario_id</th>
+<th>time_id</th>
+<th>geography_id</th>
+<th>from_landuse_id</th>
+<th>to_landuse_id</th>
+<th>acres</th>
+<th>transition_type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>737281</td>
+<td>3</td>
+<td>4</td>
+<td>459</td>
+<td>4</td>
+<td>3</td>
+<td>3.7577</td>
+<td>change</td>
+</tr>
+<tr>
+<td>737282</td>
+<td>3</td>
+<td>4</td>
+<td>459</td>
+<td>4</td>
+<td>4</td>
+<td>265.0467</td>
+<td>same</td>
+</tr>
+<tr>
+<td>737283</td>
+<td>3</td>
+<td>4</td>
+<td>459</td>
+<td>4</td>
+<td>5</td>
+<td>0.1956</td>
+<td>change</td>
+</tr>
+<tr>
+<td>737284</td>
+<td>3</td>
+<td>4</td>
+<td>459</td>
+<td>5</td>
+<td>1</td>
+<td>0.0000</td>
+<td>change</td>
+</tr>
+<tr>
+<td>737285</td>
+<td>3</td>
+<td>4</td>
+<td>459</td>
+<td>5</td>
+<td>2</td>
+<td>0.0000</td>
+<td>change</td>
+</tr>
+</tbody>
+</table>
+<h4 id="data-distribution">Data Distribution<a class="headerlink" href="#data-distribution" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Transition Type</th>
+<th>Count</th>
+<th>Percentage</th>
+<th>Avg Acres</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>change</td>
+<td>3,887,318</td>
+<td>71.5%</td>
+<td>13.3</td>
+</tr>
+<tr>
+<td>same</td>
+<td>1,544,880</td>
+<td>28.5%</td>
+<td>1,045.6</td>
+</tr>
+</tbody>
+</table>
+<h4 id="performance-notes">Performance Notes<a class="headerlink" href="#performance-notes" title="Permanent link">&para;</a></h4>
+<ul>
+<li>Primary composite index on <code>(scenario_id, time_id, geography_id)</code></li>
+<li>Secondary indexes on <code>from_landuse_id</code>, <code>to_landuse_id</code>, <code>acres</code>, <code>transition_type</code></li>
+<li>Optimized for analytical queries with dimensional filtering</li>
+</ul>
+<hr />
+<h3 id="fact_socioeconomic_projections">fact_socioeconomic_projections<a class="headerlink" href="#fact_socioeconomic_projections" title="Permanent link">&para;</a></h3>
+<p><strong>Purpose</strong>: Population and income projections by county and SSP scenario.</p>
+<p><strong>Records</strong>: 291,936 | <strong>Size</strong>: 0.28 MB | <strong>Type</strong>: Fact Table</p>
+<h4 id="schema-definition_1">Schema Definition<a class="headerlink" href="#schema-definition_1" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Data Type</th>
+<th>Constraints</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>projection_id</code></td>
+<td>BIGINT</td>
+<td>NOT NULL, PK</td>
+<td>Unique identifier for each projection</td>
+</tr>
+<tr>
+<td><code>geography_id</code></td>
+<td>INTEGER</td>
+<td>NOT NULL, FK</td>
+<td>Reference to dim_geography table</td>
+</tr>
+<tr>
+<td><code>socioeconomic_id</code></td>
+<td>INTEGER</td>
+<td>NOT NULL, FK</td>
+<td>Reference to dim_socioeconomic table</td>
+</tr>
+<tr>
+<td><code>indicator_id</code></td>
+<td>INTEGER</td>
+<td>NOT NULL, FK</td>
+<td>Reference to dim_indicators table</td>
+</tr>
+<tr>
+<td><code>year</code></td>
+<td>INTEGER</td>
+<td>NOT NULL</td>
+<td>Projection year</td>
+</tr>
+<tr>
+<td><code>value</code></td>
+<td>DECIMAL(15,4)</td>
+<td>NOT NULL</td>
+<td>Indicator value (population in thousands, income in 2009 USD thousands)</td>
+</tr>
+<tr>
+<td><code>is_historical</code></td>
+<td>BOOLEAN</td>
+<td>DEFAULT FALSE</td>
+<td>Whether this is historical (TRUE) or projected (FALSE) data</td>
+</tr>
+<tr>
+<td><code>created_at</code></td>
+<td>TIMESTAMP</td>
+<td>DEFAULT CURRENT_TIMESTAMP</td>
+<td>Record creation timestamp</td>
+</tr>
+</tbody>
+</table>
+<h4 id="sample-data_1">Sample Data<a class="headerlink" href="#sample-data_1" title="Permanent link">&para;</a></h4>
+<div class="language-sql highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">fact_socioeconomic_projections</span><span class="w"> </span><span class="k">LIMIT</span><span class="w"> </span><span class="mi">5</span><span class="p">;</span>
+</span></code></pre></div>
+<table>
+<thead>
+<tr>
+<th>projection_id</th>
+<th>geography_id</th>
+<th>socioeconomic_id</th>
+<th>indicator_id</th>
+<th>year</th>
+<th>value</th>
+<th>is_historical</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>2010</td>
+<td>54.4210</td>
+<td>TRUE</td>
+</tr>
+<tr>
+<td>2</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>2020</td>
+<td>55.3690</td>
+<td>FALSE</td>
+</tr>
+<tr>
+<td>3</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>2030</td>
+<td>56.2520</td>
+<td>FALSE</td>
+</tr>
+<tr>
+<td>4</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>2040</td>
+<td>56.9500</td>
+<td>FALSE</td>
+</tr>
+<tr>
+<td>5</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>2050</td>
+<td>57.4030</td>
+<td>FALSE</td>
+</tr>
+</tbody>
+</table>
+<h4 id="performance-notes_1">Performance Notes<a class="headerlink" href="#performance-notes_1" title="Permanent link">&para;</a></h4>
+<ul>
+<li>Composite index on <code>(geography_id, socioeconomic_id, indicator_id, year)</code></li>
+<li>Optimized for time-series analysis and demographic queries</li>
+</ul>
+<hr />
+<h2 id="dimension-tables">Dimension Tables<a class="headerlink" href="#dimension-tables" title="Permanent link">&para;</a></h2>
+<h3 id="dim_geography">dim_geography<a class="headerlink" href="#dim_geography" title="Permanent link">&para;</a></h3>
+<p><strong>Purpose</strong>: Geographic reference data for all US counties with enhanced metadata.</p>
+<p><strong>Records</strong>: 3,075 | <strong>Size</strong>: 0.003 MB | <strong>Type</strong>: Dimension Table</p>
+<h4 id="schema-definition_2">Schema Definition<a class="headerlink" href="#schema-definition_2" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Data Type</th>
+<th>Constraints</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>geography_id</code></td>
+<td>INTEGER</td>
+<td>PK</td>
+<td>Unique identifier for each county</td>
+</tr>
+<tr>
+<td><code>fips_code</code></td>
+<td>VARCHAR</td>
+<td>UNIQUE</td>
+<td>5-digit FIPS county code</td>
+</tr>
+<tr>
+<td><code>county_name</code></td>
+<td>VARCHAR</td>
+<td></td>
+<td>County name</td>
+</tr>
+<tr>
+<td><code>state_code</code></td>
+<td>VARCHAR</td>
+<td></td>
+<td>2-character state code</td>
+</tr>
+<tr>
+<td><code>state_name</code></td>
+<td>VARCHAR</td>
+<td></td>
+<td>Full state name</td>
+</tr>
+<tr>
+<td><code>state_abbrev</code></td>
+<td>VARCHAR</td>
+<td></td>
+<td>2-character state abbreviation</td>
+</tr>
+<tr>
+<td><code>region</code></td>
+<td>VARCHAR</td>
+<td></td>
+<td>US Census region (Northeast, Midwest, South, West)</td>
+</tr>
+<tr>
+<td><code>geometry</code></td>
+<td>GEOMETRY</td>
+<td></td>
+<td>County boundary geometry (spatial data)</td>
+</tr>
+<tr>
+<td><code>area_sqmi</code></td>
+<td>DOUBLE</td>
+<td></td>
+<td>County area in square miles</td>
+</tr>
+<tr>
+<td><code>centroid_lat</code></td>
+<td>DOUBLE</td>
+<td></td>
+<td>County centroid latitude</td>
+</tr>
+<tr>
+<td><code>centroid_lon</code></td>
+<td>DOUBLE</td>
+<td></td>
+<td>County centroid longitude</td>
+</tr>
+<tr>
+<td><code>created_at</code></td>
+<td>TIMESTAMP</td>
+<td></td>
+<td>Record creation timestamp</td>
+</tr>
+<tr>
+<td><code>updated_at</code></td>
+<td>TIMESTAMP</td>
+<td></td>
+<td>Last update timestamp</td>
+</tr>
+</tbody>
+</table>
+<h4 id="sample-data_2">Sample Data<a class="headerlink" href="#sample-data_2" title="Permanent link">&para;</a></h4>
+<div class="language-sql highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="k">SELECT</span><span class="w"> </span><span class="n">fips_code</span><span class="p">,</span><span class="w"> </span><span class="n">county_name</span><span class="p">,</span><span class="w"> </span><span class="n">state_name</span><span class="p">,</span><span class="w"> </span><span class="n">region</span><span class="p">,</span><span class="w"> </span><span class="n">area_sqmi</span><span class="w"> </span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="k">FROM</span><span class="w"> </span><span class="n">dim_geography</span><span class="w"> </span><span class="k">LIMIT</span><span class="w"> </span><span class="mi">5</span><span class="p">;</span>
+</span></code></pre></div>
+<table>
+<thead>
+<tr>
+<th>fips_code</th>
+<th>county_name</th>
+<th>state_name</th>
+<th>region</th>
+<th>area_sqmi</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>01001</td>
+<td>Autauga County</td>
+<td>Alabama</td>
+<td>South</td>
+<td>594.44</td>
+</tr>
+<tr>
+<td>01003</td>
+<td>Baldwin County</td>
+<td>Alabama</td>
+<td>South</td>
+<td>1589.78</td>
+</tr>
+<tr>
+<td>01005</td>
+<td>Barbour County</td>
+<td>Alabama</td>
+<td>South</td>
+<td>884.88</td>
+</tr>
+<tr>
+<td>01007</td>
+<td>Bibb County</td>
+<td>Alabama</td>
+<td>South</td>
+<td>622.58</td>
+</tr>
+<tr>
+<td>01009</td>
+<td>Blount County</td>
+<td>Alabama</td>
+<td>South</td>
+<td>644.78</td>
+</tr>
+</tbody>
+</table>
+<h4 id="regional-distribution">Regional Distribution<a class="headerlink" href="#regional-distribution" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Region</th>
+<th>Counties</th>
+<th>Avg Size (sq mi)</th>
+<th>Percentage</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>South</td>
+<td>1,389</td>
+<td>624</td>
+<td>45.2%</td>
+</tr>
+<tr>
+<td>Midwest</td>
+<td>1,055</td>
+<td>711</td>
+<td>34.3%</td>
+</tr>
+<tr>
+<td>West</td>
+<td>414</td>
+<td>2,836</td>
+<td>13.5%</td>
+</tr>
+<tr>
+<td>Northeast</td>
+<td>217</td>
+<td>746</td>
+<td>7.1%</td>
+</tr>
+</tbody>
+</table>
+<h4 id="performance-notes_2">Performance Notes<a class="headerlink" href="#performance-notes_2" title="Permanent link">&para;</a></h4>
+<ul>
+<li>Primary index on <code>geography_id</code></li>
+<li>Secondary indexes on <code>fips_code</code> and <code>state_name</code> for fast lookups</li>
+<li>Spatial index on <code>geometry</code> for geographic queries</li>
+</ul>
+<hr />
+<h3 id="dim_scenario">dim_scenario<a class="headerlink" href="#dim_scenario" title="Permanent link">&para;</a></h3>
+<p><strong>Purpose</strong>: Climate and socioeconomic scenario definitions combining climate models with RCP/SSP pathways.</p>
+<p><strong>Records</strong>: 20 | <strong>Size</strong>: 0.00002 MB | <strong>Type</strong>: Dimension Table</p>
+<h4 id="schema-definition_3">Schema Definition<a class="headerlink" href="#schema-definition_3" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Data Type</th>
+<th>Constraints</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>scenario_id</code></td>
+<td>INTEGER</td>
+<td>NOT NULL, PK</td>
+<td>Unique identifier for each scenario</td>
+</tr>
+<tr>
+<td><code>scenario_name</code></td>
+<td>VARCHAR</td>
+<td>NOT NULL, UNIQUE</td>
+<td>Full scenario name (e.g., "CNRM_CM5_rcp45_ssp1")</td>
+</tr>
+<tr>
+<td><code>climate_model</code></td>
+<td>VARCHAR</td>
+<td></td>
+<td>Climate model used</td>
+</tr>
+<tr>
+<td><code>rcp_scenario</code></td>
+<td>VARCHAR</td>
+<td></td>
+<td>Representative Concentration Pathway</td>
+</tr>
+<tr>
+<td><code>ssp_scenario</code></td>
+<td>VARCHAR</td>
+<td></td>
+<td>Shared Socioeconomic Pathway</td>
+</tr>
+<tr>
+<td><code>created_at</code></td>
+<td>TIMESTAMP</td>
+<td>DEFAULT CURRENT_TIMESTAMP</td>
+<td>Record creation timestamp</td>
+</tr>
+</tbody>
+</table>
+<h4 id="climate-models">Climate Models<a class="headerlink" href="#climate-models" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Model</th>
+<th>Description</th>
+<th>Characteristics</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CNRM_CM5</td>
+<td>"Wet" climate model</td>
+<td>Higher precipitation scenarios</td>
+</tr>
+<tr>
+<td>HadGEM2_ES365</td>
+<td>"Hot" climate model</td>
+<td>Higher temperature scenarios</td>
+</tr>
+<tr>
+<td>IPSL_CM5A_MR</td>
+<td>"Dry" climate model</td>
+<td>Lower precipitation scenarios</td>
+</tr>
+<tr>
+<td>MRI_CGCM3</td>
+<td>"Least warm" climate model</td>
+<td>More moderate temperature increases</td>
+</tr>
+<tr>
+<td>NorESM1_M</td>
+<td>"Middle" climate model</td>
+<td>Balanced temperature/precipitation</td>
+</tr>
+</tbody>
+</table>
+<h4 id="rcpssp-combinations">RCP/SSP Combinations<a class="headerlink" href="#rcpssp-combinations" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Combination</th>
+<th>Emissions</th>
+<th>Growth</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>rcp45_ssp1</td>
+<td>Low</td>
+<td>Medium</td>
+<td>Sustainability pathway</td>
+</tr>
+<tr>
+<td>rcp85_ssp2</td>
+<td>High</td>
+<td>Medium</td>
+<td>Middle of the road</td>
+</tr>
+<tr>
+<td>rcp85_ssp3</td>
+<td>High</td>
+<td>Low</td>
+<td>Regional rivalry</td>
+</tr>
+<tr>
+<td>rcp85_ssp5</td>
+<td>High</td>
+<td>High</td>
+<td>Fossil-fueled development</td>
+</tr>
+</tbody>
+</table>
+<h4 id="sample-data_3">Sample Data<a class="headerlink" href="#sample-data_3" title="Permanent link">&para;</a></h4>
+<div class="language-sql highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">dim_scenario</span><span class="w"> </span><span class="k">LIMIT</span><span class="w"> </span><span class="mi">5</span><span class="p">;</span>
+</span></code></pre></div>
+<table>
+<thead>
+<tr>
+<th>scenario_id</th>
+<th>scenario_name</th>
+<th>climate_model</th>
+<th>rcp_scenario</th>
+<th>ssp_scenario</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>CNRM_CM5_rcp45_ssp1</td>
+<td>CNRM_CM5</td>
+<td>rcp45</td>
+<td>ssp1</td>
+</tr>
+<tr>
+<td>2</td>
+<td>CNRM_CM5_rcp85_ssp2</td>
+<td>CNRM_CM5</td>
+<td>rcp85</td>
+<td>ssp2</td>
+</tr>
+<tr>
+<td>3</td>
+<td>CNRM_CM5_rcp85_ssp3</td>
+<td>CNRM_CM5</td>
+<td>rcp85</td>
+<td>ssp3</td>
+</tr>
+<tr>
+<td>4</td>
+<td>CNRM_CM5_rcp85_ssp5</td>
+<td>CNRM_CM5</td>
+<td>rcp85</td>
+<td>ssp5</td>
+</tr>
+<tr>
+<td>5</td>
+<td>HadGEM2_ES365_rcp45_ssp1</td>
+<td>HadGEM2_ES365</td>
+<td>rcp45</td>
+<td>ssp1</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="dim_time">dim_time<a class="headerlink" href="#dim_time" title="Permanent link">&para;</a></h3>
+<p><strong>Purpose</strong>: Time period definitions for land use projection intervals.</p>
+<p><strong>Records</strong>: 6 | <strong>Size</strong>: 0.000006 MB | <strong>Type</strong>: Dimension Table</p>
+<h4 id="schema-definition_4">Schema Definition<a class="headerlink" href="#schema-definition_4" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Data Type</th>
+<th>Constraints</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>time_id</code></td>
+<td>INTEGER</td>
+<td>NOT NULL, PK</td>
+<td>Unique identifier for each time period</td>
+</tr>
+<tr>
+<td><code>year_range</code></td>
+<td>VARCHAR</td>
+<td>NOT NULL, UNIQUE</td>
+<td>Year range string (e.g., "2012-2020")</td>
+</tr>
+<tr>
+<td><code>start_year</code></td>
+<td>INTEGER</td>
+<td></td>
+<td>Starting year of the period</td>
+</tr>
+<tr>
+<td><code>end_year</code></td>
+<td>INTEGER</td>
+<td></td>
+<td>Ending year of the period</td>
+</tr>
+<tr>
+<td><code>period_length</code></td>
+<td>INTEGER</td>
+<td></td>
+<td>Duration in years</td>
+</tr>
+<tr>
+<td><code>created_at</code></td>
+<td>TIMESTAMP</td>
+<td>DEFAULT CURRENT_TIMESTAMP</td>
+<td>Record creation timestamp</td>
+</tr>
+</tbody>
+</table>
+<h4 id="time-periods">Time Periods<a class="headerlink" href="#time-periods" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>time_id</th>
+<th>year_range</th>
+<th>start_year</th>
+<th>end_year</th>
+<th>period_length</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>2012-2020</td>
+<td>2012</td>
+<td>2020</td>
+<td>8</td>
+<td>Historical calibration</td>
+</tr>
+<tr>
+<td>2</td>
+<td>2020-2030</td>
+<td>2020</td>
+<td>2030</td>
+<td>10</td>
+<td>Near-term projections</td>
+</tr>
+<tr>
+<td>3</td>
+<td>2030-2040</td>
+<td>2030</td>
+<td>2040</td>
+<td>10</td>
+<td>Medium-term projections</td>
+</tr>
+<tr>
+<td>4</td>
+<td>2040-2050</td>
+<td>2040</td>
+<td>2050</td>
+<td>10</td>
+<td>Mid-century projections</td>
+</tr>
+<tr>
+<td>5</td>
+<td>2050-2060</td>
+<td>2050</td>
+<td>2060</td>
+<td>10</td>
+<td>Extended projections</td>
+</tr>
+<tr>
+<td>6</td>
+<td>2060-2070</td>
+<td>2060</td>
+<td>2070</td>
+<td>10</td>
+<td>Long-term projections</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="dim_landuse">dim_landuse<a class="headerlink" href="#dim_landuse" title="Permanent link">&para;</a></h3>
+<p><strong>Purpose</strong>: Land use category definitions with business descriptions.</p>
+<p><strong>Records</strong>: 5 | <strong>Size</strong>: 0.000005 MB | <strong>Type</strong>: Dimension Table</p>
+<h4 id="schema-definition_5">Schema Definition<a class="headerlink" href="#schema-definition_5" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Data Type</th>
+<th>Constraints</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>landuse_id</code></td>
+<td>INTEGER</td>
+<td>NOT NULL, PK</td>
+<td>Unique identifier for each land use type</td>
+</tr>
+<tr>
+<td><code>landuse_code</code></td>
+<td>VARCHAR</td>
+<td>UNIQUE</td>
+<td>Short code (cr, ps, rg, fr, ur)</td>
+</tr>
+<tr>
+<td><code>landuse_name</code></td>
+<td>VARCHAR</td>
+<td></td>
+<td>Full descriptive name</td>
+</tr>
+<tr>
+<td><code>landuse_category</code></td>
+<td>VARCHAR</td>
+<td></td>
+<td>High-level category (Agriculture, Natural, Developed)</td>
+</tr>
+<tr>
+<td><code>description</code></td>
+<td>VARCHAR</td>
+<td></td>
+<td>Detailed description of land use type</td>
+</tr>
+<tr>
+<td><code>created_at</code></td>
+<td>TIMESTAMP</td>
+<td></td>
+<td>Record creation timestamp</td>
+</tr>
+</tbody>
+</table>
+<h4 id="land-use-types">Land Use Types<a class="headerlink" href="#land-use-types" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>landuse_id</th>
+<th>landuse_code</th>
+<th>landuse_name</th>
+<th>landuse_category</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>cr</td>
+<td>Crop</td>
+<td>Agriculture</td>
+<td>Agricultural cropland for food production</td>
+</tr>
+<tr>
+<td>2</td>
+<td>ps</td>
+<td>Pasture</td>
+<td>Agriculture</td>
+<td>Grazing land for livestock</td>
+</tr>
+<tr>
+<td>3</td>
+<td>rg</td>
+<td>Rangeland</td>
+<td>Natural</td>
+<td>Natural grasslands and shrublands</td>
+</tr>
+<tr>
+<td>4</td>
+<td>fr</td>
+<td>Forest</td>
+<td>Natural</td>
+<td>Forested areas including managed timber</td>
+</tr>
+<tr>
+<td>5</td>
+<td>ur</td>
+<td>Urban</td>
+<td>Developed</td>
+<td>Developed areas with infrastructure</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="dim_socioeconomic">dim_socioeconomic<a class="headerlink" href="#dim_socioeconomic" title="Permanent link">&para;</a></h3>
+<p><strong>Purpose</strong>: Shared Socioeconomic Pathway (SSP) scenario definitions with narrative descriptions.</p>
+<p><strong>Records</strong>: 5 | <strong>Size</strong>: 0.000005 MB | <strong>Type</strong>: Dimension Table</p>
+<h4 id="schema-definition_6">Schema Definition<a class="headerlink" href="#schema-definition_6" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Data Type</th>
+<th>Constraints</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>socioeconomic_id</code></td>
+<td>INTEGER</td>
+<td>NOT NULL, PK</td>
+<td>Unique identifier for each SSP scenario</td>
+</tr>
+<tr>
+<td><code>ssp_scenario</code></td>
+<td>VARCHAR</td>
+<td>NOT NULL, UNIQUE</td>
+<td>SSP identifier (ssp1, ssp2, etc.)</td>
+</tr>
+<tr>
+<td><code>scenario_name</code></td>
+<td>VARCHAR</td>
+<td>NOT NULL</td>
+<td>Descriptive scenario name</td>
+</tr>
+<tr>
+<td><code>narrative_description</code></td>
+<td>VARCHAR</td>
+<td></td>
+<td>Detailed scenario narrative</td>
+</tr>
+<tr>
+<td><code>population_growth_trend</code></td>
+<td>VARCHAR</td>
+<td></td>
+<td>Population growth characterization</td>
+</tr>
+<tr>
+<td><code>economic_growth_trend</code></td>
+<td>VARCHAR</td>
+<td></td>
+<td>Economic growth characterization</td>
+</tr>
+<tr>
+<td><code>urbanization_level</code></td>
+<td>VARCHAR</td>
+<td></td>
+<td>Urbanization trend description</td>
+</tr>
+<tr>
+<td><code>created_at</code></td>
+<td>TIMESTAMP</td>
+<td>DEFAULT CURRENT_TIMESTAMP</td>
+<td>Record creation timestamp</td>
+</tr>
+</tbody>
+</table>
+<h4 id="ssp-scenarios">SSP Scenarios<a class="headerlink" href="#ssp-scenarios" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>ssp_scenario</th>
+<th>scenario_name</th>
+<th>Population Growth</th>
+<th>Economic Growth</th>
+<th>Urbanization</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ssp1</td>
+<td>Sustainability</td>
+<td>Low</td>
+<td>Medium</td>
+<td>Moderate</td>
+</tr>
+<tr>
+<td>ssp2</td>
+<td>Middle of the Road</td>
+<td>Medium</td>
+<td>Medium</td>
+<td>Moderate</td>
+</tr>
+<tr>
+<td>ssp3</td>
+<td>Regional Rivalry</td>
+<td>High</td>
+<td>Low</td>
+<td>Slow</td>
+</tr>
+<tr>
+<td>ssp4</td>
+<td>Inequality</td>
+<td>Medium</td>
+<td>High</td>
+<td>Fast</td>
+</tr>
+<tr>
+<td>ssp5</td>
+<td>Fossil-fueled Development</td>
+<td>Low</td>
+<td>High</td>
+<td>Fast</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="dim_indicators">dim_indicators<a class="headerlink" href="#dim_indicators" title="Permanent link">&para;</a></h3>
+<p><strong>Purpose</strong>: Socioeconomic indicator definitions for measurement units and descriptions.</p>
+<p><strong>Records</strong>: 2 | <strong>Size</strong>: 0.000002 MB | <strong>Type</strong>: Dimension Table</p>
+<h4 id="schema-definition_7">Schema Definition<a class="headerlink" href="#schema-definition_7" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Data Type</th>
+<th>Constraints</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>indicator_id</code></td>
+<td>INTEGER</td>
+<td>NOT NULL, PK</td>
+<td>Unique identifier for each indicator</td>
+</tr>
+<tr>
+<td><code>indicator_name</code></td>
+<td>VARCHAR</td>
+<td>NOT NULL, UNIQUE</td>
+<td>Indicator name</td>
+</tr>
+<tr>
+<td><code>indicator_type</code></td>
+<td>VARCHAR</td>
+<td>NOT NULL</td>
+<td>Type category (demographic, economic)</td>
+</tr>
+<tr>
+<td><code>unit_of_measure</code></td>
+<td>VARCHAR</td>
+<td>NOT NULL</td>
+<td>Measurement units</td>
+</tr>
+<tr>
+<td><code>description</code></td>
+<td>VARCHAR</td>
+<td></td>
+<td>Detailed indicator description</td>
+</tr>
+<tr>
+<td><code>created_at</code></td>
+<td>TIMESTAMP</td>
+<td>DEFAULT CURRENT_TIMESTAMP</td>
+<td>Record creation timestamp</td>
+</tr>
+</tbody>
+</table>
+<h4 id="available-indicators">Available Indicators<a class="headerlink" href="#available-indicators" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>indicator_id</th>
+<th>indicator_name</th>
+<th>indicator_type</th>
+<th>unit_of_measure</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Population</td>
+<td>Demographic</td>
+<td>Thousands</td>
+<td>County population in thousands</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Income Per Capita</td>
+<td>Economic</td>
+<td>2009 USD Thousands</td>
+<td>Per capita income in thousands of 2009 USD</td>
+</tr>
+</tbody>
+</table>
+<h2 id="common-query-patterns">Common Query Patterns<a class="headerlink" href="#common-query-patterns" title="Permanent link">&para;</a></h2>
+<h3 id="basic-table-queries">Basic Table Queries<a class="headerlink" href="#basic-table-queries" title="Permanent link">&para;</a></h3>
+<div class="language-sql highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="c1">-- Get all scenarios with their climate models</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="k">SELECT</span><span class="w"> </span><span class="n">scenario_name</span><span class="p">,</span><span class="w"> </span><span class="n">climate_model</span><span class="p">,</span><span class="w"> </span><span class="n">rcp_scenario</span><span class="p">,</span><span class="w"> </span><span class="n">ssp_scenario</span><span class="w"> </span>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="k">FROM</span><span class="w"> </span><span class="n">dim_scenario</span><span class="p">;</span>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="c1">-- Find counties in a specific state</span>
+</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="k">SELECT</span><span class="w"> </span><span class="n">fips_code</span><span class="p">,</span><span class="w"> </span><span class="n">county_name</span><span class="p">,</span><span class="w"> </span><span class="n">area_sqmi</span><span class="w"> </span>
+</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="k">FROM</span><span class="w"> </span><span class="n">dim_geography</span><span class="w"> </span>
+</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="k">WHERE</span><span class="w"> </span><span class="n">state_name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;California&#39;</span><span class="p">;</span>
+</span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>
+</span><span id="__span-4-10"><a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a><span class="c1">-- Get all time periods</span>
+</span><span id="__span-4-11"><a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a><span class="k">SELECT</span><span class="w"> </span><span class="n">year_range</span><span class="p">,</span><span class="w"> </span><span class="n">start_year</span><span class="p">,</span><span class="w"> </span><span class="n">end_year</span><span class="p">,</span><span class="w"> </span><span class="n">period_length</span><span class="w"> </span>
+</span><span id="__span-4-12"><a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a><span class="k">FROM</span><span class="w"> </span><span class="n">dim_time</span><span class="w"> </span>
+</span><span id="__span-4-13"><a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a><span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">start_year</span><span class="p">;</span>
+</span></code></pre></div>
+<h3 id="join-patterns">Join Patterns<a class="headerlink" href="#join-patterns" title="Permanent link">&para;</a></h3>
+<div class="language-sql highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1">-- Land use transitions with readable names</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="k">SELECT</span><span class="w"> </span>
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">    </span><span class="k">g</span><span class="p">.</span><span class="n">county_name</span><span class="p">,</span>
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="w">    </span><span class="k">g</span><span class="p">.</span><span class="n">state_name</span><span class="p">,</span>
+</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="w">    </span><span class="n">s</span><span class="p">.</span><span class="n">scenario_name</span><span class="p">,</span>
+</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="w">    </span><span class="n">t</span><span class="p">.</span><span class="n">year_range</span><span class="p">,</span>
+</span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="w">    </span><span class="n">lu_from</span><span class="p">.</span><span class="n">landuse_name</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">from_landuse</span><span class="p">,</span>
+</span><span id="__span-5-8"><a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="w">    </span><span class="n">lu_to</span><span class="p">.</span><span class="n">landuse_name</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">to_landuse</span><span class="p">,</span>
+</span><span id="__span-5-9"><a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a><span class="w">    </span><span class="n">f</span><span class="p">.</span><span class="n">acres</span>
+</span><span id="__span-5-10"><a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a><span class="k">FROM</span><span class="w"> </span><span class="n">fact_landuse_transitions</span><span class="w"> </span><span class="n">f</span>
+</span><span id="__span-5-11"><a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a><span class="k">JOIN</span><span class="w"> </span><span class="n">dim_geography</span><span class="w"> </span><span class="k">g</span><span class="w"> </span><span class="k">ON</span><span class="w"> </span><span class="n">f</span><span class="p">.</span><span class="n">geography_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">g</span><span class="p">.</span><span class="n">geography_id</span>
+</span><span id="__span-5-12"><a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a><span class="k">JOIN</span><span class="w"> </span><span class="n">dim_scenario</span><span class="w"> </span><span class="n">s</span><span class="w"> </span><span class="k">ON</span><span class="w"> </span><span class="n">f</span><span class="p">.</span><span class="n">scenario_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">s</span><span class="p">.</span><span class="n">scenario_id</span>
+</span><span id="__span-5-13"><a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a><span class="k">JOIN</span><span class="w"> </span><span class="n">dim_time</span><span class="w"> </span><span class="n">t</span><span class="w"> </span><span class="k">ON</span><span class="w"> </span><span class="n">f</span><span class="p">.</span><span class="n">time_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">t</span><span class="p">.</span><span class="n">time_id</span>
+</span><span id="__span-5-14"><a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a><span class="k">JOIN</span><span class="w"> </span><span class="n">dim_landuse</span><span class="w"> </span><span class="n">lu_from</span><span class="w"> </span><span class="k">ON</span><span class="w"> </span><span class="n">f</span><span class="p">.</span><span class="n">from_landuse_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lu_from</span><span class="p">.</span><span class="n">landuse_id</span>
+</span><span id="__span-5-15"><a id="__codelineno-5-15" name="__codelineno-5-15" href="#__codelineno-5-15"></a><span class="k">JOIN</span><span class="w"> </span><span class="n">dim_landuse</span><span class="w"> </span><span class="n">lu_to</span><span class="w"> </span><span class="k">ON</span><span class="w"> </span><span class="n">f</span><span class="p">.</span><span class="n">to_landuse_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lu_to</span><span class="p">.</span><span class="n">landuse_id</span>
+</span><span id="__span-5-16"><a id="__codelineno-5-16" name="__codelineno-5-16" href="#__codelineno-5-16"></a><span class="k">WHERE</span><span class="w"> </span><span class="n">f</span><span class="p">.</span><span class="n">transition_type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;change&#39;</span>
+</span><span id="__span-5-17"><a id="__codelineno-5-17" name="__codelineno-5-17" href="#__codelineno-5-17"></a><span class="k">LIMIT</span><span class="w"> </span><span class="mi">10</span><span class="p">;</span>
+</span></code></pre></div>
+<h3 id="aggregation-patterns">Aggregation Patterns<a class="headerlink" href="#aggregation-patterns" title="Permanent link">&para;</a></h3>
+<div class="language-sql highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="c1">-- Total acres by land use category and region</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="k">SELECT</span><span class="w"> </span>
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="w">    </span><span class="k">g</span><span class="p">.</span><span class="n">region</span><span class="p">,</span>
+</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="w">    </span><span class="n">lu</span><span class="p">.</span><span class="n">landuse_category</span><span class="p">,</span>
+</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="w">    </span><span class="k">SUM</span><span class="p">(</span><span class="n">f</span><span class="p">.</span><span class="n">acres</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">total_acres</span>
+</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="k">FROM</span><span class="w"> </span><span class="n">fact_landuse_transitions</span><span class="w"> </span><span class="n">f</span>
+</span><span id="__span-6-7"><a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="k">JOIN</span><span class="w"> </span><span class="n">dim_geography</span><span class="w"> </span><span class="k">g</span><span class="w"> </span><span class="k">ON</span><span class="w"> </span><span class="n">f</span><span class="p">.</span><span class="n">geography_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">g</span><span class="p">.</span><span class="n">geography_id</span>
+</span><span id="__span-6-8"><a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a><span class="k">JOIN</span><span class="w"> </span><span class="n">dim_landuse</span><span class="w"> </span><span class="n">lu</span><span class="w"> </span><span class="k">ON</span><span class="w"> </span><span class="n">f</span><span class="p">.</span><span class="n">to_landuse_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lu</span><span class="p">.</span><span class="n">landuse_id</span>
+</span><span id="__span-6-9"><a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a><span class="k">WHERE</span><span class="w"> </span><span class="n">f</span><span class="p">.</span><span class="n">transition_type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;same&#39;</span><span class="w">  </span><span class="c1">-- Only current land use</span>
+</span><span id="__span-6-10"><a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a><span class="k">GROUP</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="k">g</span><span class="p">.</span><span class="n">region</span><span class="p">,</span><span class="w"> </span><span class="n">lu</span><span class="p">.</span><span class="n">landuse_category</span>
+</span><span id="__span-6-11"><a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a><span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="k">g</span><span class="p">.</span><span class="n">region</span><span class="p">,</span><span class="w"> </span><span class="n">total_acres</span><span class="w"> </span><span class="k">DESC</span><span class="p">;</span>
+</span></code></pre></div>
+<h2 id="data-relationships">Data Relationships<a class="headerlink" href="#data-relationships" title="Permanent link">&para;</a></h2>
+<h3 id="foreign-key-constraints">Foreign Key Constraints<a class="headerlink" href="#foreign-key-constraints" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>fact_landuse_transitions.scenario_id</code> → <code>dim_scenario.scenario_id</code></li>
+<li><code>fact_landuse_transitions.time_id</code> → <code>dim_time.time_id</code></li>
+<li><code>fact_landuse_transitions.geography_id</code> → <code>dim_geography.geography_id</code></li>
+<li><code>fact_landuse_transitions.from_landuse_id</code> → <code>dim_landuse.landuse_id</code></li>
+<li><code>fact_landuse_transitions.to_landuse_id</code> → <code>dim_landuse.landuse_id</code></li>
+<li><code>fact_socioeconomic_projections.geography_id</code> → <code>dim_geography.geography_id</code></li>
+<li><code>fact_socioeconomic_projections.socioeconomic_id</code> → <code>dim_socioeconomic.socioeconomic_id</code></li>
+<li><code>fact_socioeconomic_projections.indicator_id</code> → <code>dim_indicators.indicator_id</code></li>
+</ul>
+<h3 id="data-integrity">Data Integrity<a class="headerlink" href="#data-integrity" title="Permanent link">&para;</a></h3>
+<p>All foreign key relationships are enforced at the application level and validated during data loading. The star schema design ensures referential integrity and optimal query performance.</p>
+<h2 id="usage-guidelines">Usage Guidelines<a class="headerlink" href="#usage-guidelines" title="Permanent link">&para;</a></h2>
+<ol>
+<li><strong>Always filter dimension tables first</strong> to reduce the size of fact table joins</li>
+<li><strong>Use appropriate indexes</strong> by including indexed columns in WHERE clauses</li>
+<li><strong>Exclude validation rows</strong> with <code>WHERE transition_type != 'Total'</code> when applicable</li>
+<li><strong>Consider using views</strong> for complex, frequently-used join patterns</li>
+<li><strong>Aggregate before filtering</strong> when possible for better performance</li>
+</ol>
+<h2 id="next-steps">Next Steps<a class="headerlink" href="#next-steps" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>View Documentation</strong>: See <a href="../view-definitions/">View Definitions</a> for pre-built analytical views</li>
+<li><strong>Query Examples</strong>: See <a href="../../queries/advanced-queries/">Advanced Queries</a> for complex analysis patterns</li>
+<li><strong>Performance Guide</strong>: See <a href="../../performance/duckdb-copy-optimization/">DuckDB Optimization</a> for performance tuning</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      &copy; 2025 <a href="https://github.com/mihiarc/rpa-landuse"  target="_blank" rel="noopener">RPA Analytics Team</a> | Data source: USDA Forest Service 2020 RPA Assessment
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        <div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/mihiarc/rpa-landuse" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.0.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path fill="currentColor" d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://www.fs.usda.gov/research/rpa" target="_blank" rel="noopener" title="www.fs.usda.gov" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.0.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path fill="currentColor" d="M384 512H96c-53 0-96-43-96-96V96C0 43 43 0 96 0h304c26.5 0 48 21.5 48 48v288c0 20.9-13.4 38.7-32 45.3V448c17.7 0 32 14.3 32 32s-14.3 32-32 32zM96 384c-17.7 0-32 14.3-32 32s14.3 32 32 32h256v-64zm32-232c0 13.3 10.7 24 24 24h176c13.3 0 24-10.7 24-24s-10.7-24-24-24H152c-13.3 0-24 10.7-24 24m24 72c-13.3 0-24 10.7-24 24s10.7 24 24 24h176c13.3 0 24-10.7 24-24s-10.7-24-24-24z"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.path", "navigation.top", "search.suggest", "search.highlight", "content.tabs.link", "content.code.annotation", "content.code.copy", "toc.integrate"], "search": "../../assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.50899def.min.js"></script>
+      
+    
+  </body>
+</html>
