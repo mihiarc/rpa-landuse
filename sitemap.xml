@@ -2,198 +2,202 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://mihiarc.github.io/langchain-landuse/</loc>
-         <lastmod>2025-07-25</lastmod>
+         <lastmod>2025-07-26</lastmod>
     </url>
     <url>
          <loc>https://mihiarc.github.io/langchain-landuse/AGENT_CONSOLIDATION/</loc>
-         <lastmod>2025-07-25</lastmod>
+         <lastmod>2025-07-26</lastmod>
     </url>
     <url>
          <loc>https://mihiarc.github.io/langchain-landuse/CLAUDE.local/</loc>
-         <lastmod>2025-07-25</lastmod>
+         <lastmod>2025-07-26</lastmod>
     </url>
     <url>
          <loc>https://mihiarc.github.io/langchain-landuse/GITHUB_PAGES_SETUP/</loc>
-         <lastmod>2025-07-25</lastmod>
+         <lastmod>2025-07-26</lastmod>
     </url>
     <url>
          <loc>https://mihiarc.github.io/langchain-landuse/KNOWLEDGE_BASE_INTEGRATION/</loc>
-         <lastmod>2025-07-25</lastmod>
+         <lastmod>2025-07-26</lastmod>
     </url>
     <url>
          <loc>https://mihiarc.github.io/langchain-landuse/LAND_USE_METHODOLOGY/</loc>
-         <lastmod>2025-07-25</lastmod>
+         <lastmod>2025-07-26</lastmod>
     </url>
     <url>
          <loc>https://mihiarc.github.io/langchain-landuse/RPA_SCENARIOS/</loc>
-         <lastmod>2025-07-25</lastmod>
+         <lastmod>2025-07-26</lastmod>
     </url>
     <url>
          <loc>https://mihiarc.github.io/langchain-landuse/SECURITY/</loc>
-         <lastmod>2025-07-25</lastmod>
+         <lastmod>2025-07-26</lastmod>
     </url>
     <url>
          <loc>https://mihiarc.github.io/langchain-landuse/TESTING/</loc>
-         <lastmod>2025-07-25</lastmod>
+         <lastmod>2025-07-26</lastmod>
     </url>
     <url>
          <loc>https://mihiarc.github.io/langchain-landuse/faq/</loc>
-         <lastmod>2025-07-25</lastmod>
+         <lastmod>2025-07-26</lastmod>
+    </url>
+    <url>
+         <loc>https://mihiarc.github.io/langchain-landuse/mkdocs_structure_report/</loc>
+         <lastmod>2025-07-26</lastmod>
     </url>
     <url>
          <loc>https://mihiarc.github.io/langchain-landuse/troubleshooting/</loc>
-         <lastmod>2025-07-25</lastmod>
+         <lastmod>2025-07-26</lastmod>
     </url>
     <url>
          <loc>https://mihiarc.github.io/langchain-landuse/agents/CONSTANTS_ARCHITECTURE/</loc>
-         <lastmod>2025-07-25</lastmod>
+         <lastmod>2025-07-26</lastmod>
     </url>
     <url>
          <loc>https://mihiarc.github.io/langchain-landuse/agents/SYSTEM_PROMPT_ARCHITECTURE/</loc>
-         <lastmod>2025-07-25</lastmod>
+         <lastmod>2025-07-26</lastmod>
     </url>
     <url>
          <loc>https://mihiarc.github.io/langchain-landuse/api/agent/</loc>
-         <lastmod>2025-07-25</lastmod>
+         <lastmod>2025-07-26</lastmod>
     </url>
     <url>
          <loc>https://mihiarc.github.io/langchain-landuse/api/converters/</loc>
-         <lastmod>2025-07-25</lastmod>
+         <lastmod>2025-07-26</lastmod>
     </url>
     <url>
          <loc>https://mihiarc.github.io/langchain-landuse/api/landuse-query-agent/</loc>
-         <lastmod>2025-07-25</lastmod>
+         <lastmod>2025-07-26</lastmod>
     </url>
     <url>
          <loc>https://mihiarc.github.io/langchain-landuse/api/langgraph-agent/</loc>
-         <lastmod>2025-07-25</lastmod>
+         <lastmod>2025-07-26</lastmod>
     </url>
     <url>
          <loc>https://mihiarc.github.io/langchain-landuse/api/tools/</loc>
-         <lastmod>2025-07-25</lastmod>
+         <lastmod>2025-07-26</lastmod>
     </url>
     <url>
          <loc>https://mihiarc.github.io/langchain-landuse/data/categories/</loc>
-         <lastmod>2025-07-25</lastmod>
+         <lastmod>2025-07-26</lastmod>
     </url>
     <url>
          <loc>https://mihiarc.github.io/langchain-landuse/data/duckdb-schema/</loc>
-         <lastmod>2025-07-25</lastmod>
+         <lastmod>2025-07-26</lastmod>
     </url>
     <url>
          <loc>https://mihiarc.github.io/langchain-landuse/data/processing/</loc>
-         <lastmod>2025-07-25</lastmod>
+         <lastmod>2025-07-26</lastmod>
     </url>
     <url>
          <loc>https://mihiarc.github.io/langchain-landuse/data/rpa-model-diagram/</loc>
-         <lastmod>2025-07-25</lastmod>
+         <lastmod>2025-07-26</lastmod>
     </url>
     <url>
          <loc>https://mihiarc.github.io/langchain-landuse/data/schema/</loc>
-         <lastmod>2025-07-25</lastmod>
+         <lastmod>2025-07-26</lastmod>
     </url>
     <url>
          <loc>https://mihiarc.github.io/langchain-landuse/data/sources/</loc>
-         <lastmod>2025-07-25</lastmod>
+         <lastmod>2025-07-26</lastmod>
     </url>
     <url>
          <loc>https://mihiarc.github.io/langchain-landuse/data/variable-descriptions/</loc>
-         <lastmod>2025-07-25</lastmod>
+         <lastmod>2025-07-26</lastmod>
     </url>
     <url>
          <loc>https://mihiarc.github.io/langchain-landuse/development/BRANDING_STRATEGY/</loc>
-         <lastmod>2025-07-25</lastmod>
+         <lastmod>2025-07-26</lastmod>
     </url>
     <url>
          <loc>https://mihiarc.github.io/langchain-landuse/development/architecture/</loc>
-         <lastmod>2025-07-25</lastmod>
+         <lastmod>2025-07-26</lastmod>
     </url>
     <url>
          <loc>https://mihiarc.github.io/langchain-landuse/development/ci-cd-pipeline/</loc>
-         <lastmod>2025-07-25</lastmod>
+         <lastmod>2025-07-26</lastmod>
     </url>
     <url>
          <loc>https://mihiarc.github.io/langchain-landuse/development/contributing/</loc>
-         <lastmod>2025-07-25</lastmod>
+         <lastmod>2025-07-26</lastmod>
     </url>
     <url>
          <loc>https://mihiarc.github.io/langchain-landuse/development/modern-duckdb-tools/</loc>
-         <lastmod>2025-07-25</lastmod>
+         <lastmod>2025-07-26</lastmod>
     </url>
     <url>
          <loc>https://mihiarc.github.io/langchain-landuse/development/pydantic-models/</loc>
-         <lastmod>2025-07-25</lastmod>
+         <lastmod>2025-07-26</lastmod>
     </url>
     <url>
          <loc>https://mihiarc.github.io/langchain-landuse/development/retry-logic/</loc>
-         <lastmod>2025-07-25</lastmod>
+         <lastmod>2025-07-26</lastmod>
     </url>
     <url>
          <loc>https://mihiarc.github.io/langchain-landuse/development/testing/</loc>
-         <lastmod>2025-07-25</lastmod>
+         <lastmod>2025-07-26</lastmod>
     </url>
     <url>
          <loc>https://mihiarc.github.io/langchain-landuse/examples/notebooks/</loc>
-         <lastmod>2025-07-25</lastmod>
+         <lastmod>2025-07-26</lastmod>
     </url>
     <url>
          <loc>https://mihiarc.github.io/langchain-landuse/examples/use-cases/</loc>
-         <lastmod>2025-07-25</lastmod>
+         <lastmod>2025-07-26</lastmod>
     </url>
     <url>
          <loc>https://mihiarc.github.io/langchain-landuse/examples/workflows/</loc>
-         <lastmod>2025-07-25</lastmod>
+         <lastmod>2025-07-26</lastmod>
     </url>
     <url>
          <loc>https://mihiarc.github.io/langchain-landuse/getting-started/configuration/</loc>
-         <lastmod>2025-07-25</lastmod>
+         <lastmod>2025-07-26</lastmod>
     </url>
     <url>
          <loc>https://mihiarc.github.io/langchain-landuse/getting-started/installation/</loc>
-         <lastmod>2025-07-25</lastmod>
+         <lastmod>2025-07-26</lastmod>
     </url>
     <url>
          <loc>https://mihiarc.github.io/langchain-landuse/getting-started/quickstart/</loc>
-         <lastmod>2025-07-25</lastmod>
+         <lastmod>2025-07-26</lastmod>
     </url>
     <url>
          <loc>https://mihiarc.github.io/langchain-landuse/performance/duckdb-copy-optimization/</loc>
-         <lastmod>2025-07-25</lastmod>
+         <lastmod>2025-07-26</lastmod>
     </url>
     <url>
          <loc>https://mihiarc.github.io/langchain-landuse/performance/streamlit-fragments/</loc>
-         <lastmod>2025-07-25</lastmod>
+         <lastmod>2025-07-26</lastmod>
     </url>
     <url>
          <loc>https://mihiarc.github.io/langchain-landuse/queries/advanced-queries/</loc>
-         <lastmod>2025-07-25</lastmod>
+         <lastmod>2025-07-26</lastmod>
     </url>
     <url>
          <loc>https://mihiarc.github.io/langchain-landuse/queries/basic-queries/</loc>
-         <lastmod>2025-07-25</lastmod>
+         <lastmod>2025-07-26</lastmod>
     </url>
     <url>
          <loc>https://mihiarc.github.io/langchain-landuse/queries/examples/</loc>
-         <lastmod>2025-07-25</lastmod>
+         <lastmod>2025-07-26</lastmod>
     </url>
     <url>
          <loc>https://mihiarc.github.io/langchain-landuse/queries/overview/</loc>
-         <lastmod>2025-07-25</lastmod>
+         <lastmod>2025-07-26</lastmod>
     </url>
     <url>
          <loc>https://mihiarc.github.io/langchain-landuse/rpa/climate-models/</loc>
-         <lastmod>2025-07-25</lastmod>
+         <lastmod>2025-07-26</lastmod>
     </url>
     <url>
          <loc>https://mihiarc.github.io/langchain-landuse/rpa/overview/</loc>
-         <lastmod>2025-07-25</lastmod>
+         <lastmod>2025-07-26</lastmod>
     </url>
     <url>
          <loc>https://mihiarc.github.io/langchain-landuse/troubleshooting/streamlit-duplicate-ids/</loc>
-         <lastmod>2025-07-25</lastmod>
+         <lastmod>2025-07-26</lastmod>
     </url>
     <url>
          <loc>https://mihiarc.github.io/langchain-landuse/troubleshooting/streamlit-fragments/</loc>
-         <lastmod>2025-07-25</lastmod>
+         <lastmod>2025-07-26</lastmod>
     </url>
 </urlset>
