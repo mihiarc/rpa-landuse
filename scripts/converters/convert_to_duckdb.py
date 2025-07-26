@@ -100,9 +100,9 @@ class LanduseDataConverter:
 
     def _create_geography_dim(self):
         """Create geography dimension table"""
-        self.conn.execute("DROP TABLE IF EXISTS dim_geography_enhanced")
+        self.conn.execute("DROP TABLE IF EXISTS dim_geography")
         self.conn.execute("""
-            CREATE TABLE dim_geography_enhanced (
+            CREATE TABLE dim_geography (
                 geography_id INTEGER PRIMARY KEY,
                 fips_code VARCHAR(10) NOT NULL UNIQUE,
                 county_name VARCHAR(100),
@@ -152,7 +152,7 @@ class LanduseDataConverter:
 
                 FOREIGN KEY (scenario_id) REFERENCES dim_scenario(scenario_id),
                 FOREIGN KEY (time_id) REFERENCES dim_time(time_id),
-                FOREIGN KEY (geography_id) REFERENCES dim_geography_enhanced(geography_id),
+                FOREIGN KEY (geography_id) REFERENCES dim_geography(geography_id),
                 FOREIGN KEY (from_landuse_id) REFERENCES dim_landuse(landuse_id),
                 FOREIGN KEY (to_landuse_id) REFERENCES dim_landuse(landuse_id)
             )
@@ -163,7 +163,7 @@ class LanduseDataConverter:
         indexes = [
             "CREATE INDEX idx_scenario_name ON dim_scenario(scenario_name)",
             "CREATE INDEX idx_time_range ON dim_time(year_range)",
-            "CREATE INDEX idx_geography_fips ON dim_geography_enhanced(fips_code)",
+            "CREATE INDEX idx_geography_fips ON dim_geography(fips_code)",
             "CREATE INDEX idx_landuse_code ON dim_landuse(landuse_code)",
             "CREATE INDEX idx_fact_scenario ON fact_landuse_transitions(scenario_id)",
             "CREATE INDEX idx_fact_time ON fact_landuse_transitions(time_id)",
@@ -362,7 +362,7 @@ class LanduseDataConverter:
 
             console.print(f"📥 Loading {len(fips_codes)} geographies via COPY...")
             self.conn.execute(f"""
-                COPY dim_geography_enhanced (geography_id, fips_code, state_code, county_name, state_name, region)
+                COPY dim_geography (geography_id, fips_code, state_code, county_name, state_name, region)
                 FROM '{temp_file}' (FORMAT PARQUET)
             """)
         else:
@@ -382,7 +382,7 @@ class LanduseDataConverter:
                     county_code = fips[2:]
 
                     self.conn.execute("""
-                        INSERT INTO dim_geography_enhanced (geography_id, fips_code, state_code)
+                        INSERT INTO dim_geography (geography_id, fips_code, state_code)
                         VALUES (?, ?, ?)
                     """, (i + 1, fips, state_code))
 
@@ -395,7 +395,7 @@ class LanduseDataConverter:
         # Get dimension lookups
         scenario_lookup = {row[1]: row[0] for row in self.conn.execute("SELECT scenario_id, scenario_name FROM dim_scenario").fetchall()}
         time_lookup = {row[1]: row[0] for row in self.conn.execute("SELECT time_id, year_range FROM dim_time").fetchall()}
-        geography_lookup = {row[1]: row[0] for row in self.conn.execute("SELECT geography_id, fips_code FROM dim_geography_enhanced").fetchall()}
+        geography_lookup = {row[1]: row[0] for row in self.conn.execute("SELECT geography_id, fips_code FROM dim_geography").fetchall()}
         landuse_lookup = {row[1]: row[0] for row in self.conn.execute("SELECT landuse_id, landuse_code FROM dim_landuse").fetchall()}
 
         if self.use_bulk_copy:
@@ -603,7 +603,7 @@ class LanduseDataConverter:
             FROM fact_landuse_transitions f
             JOIN dim_scenario s ON f.scenario_id = s.scenario_id
             JOIN dim_time t ON f.time_id = t.time_id
-            JOIN dim_geography_enhanced g ON f.geography_id = g.geography_id
+            JOIN dim_geography g ON f.geography_id = g.geography_id
             JOIN dim_landuse fl ON f.from_landuse_id = fl.landuse_id
             JOIN dim_landuse tl ON f.to_landuse_id = tl.landuse_id
             WHERE fl.landuse_category = 'Agriculture' OR tl.landuse_category = 'Agriculture'
@@ -639,7 +639,7 @@ class LanduseDataConverter:
                     -- Sum all land area (both 'same' and 'change' transitions give total area)
                     SUM(f.acres) as total_land_acres
                 FROM fact_landuse_transitions f
-                JOIN dim_geography_enhanced g ON f.geography_id = g.geography_id
+                JOIN dim_geography g ON f.geography_id = g.geography_id
                 JOIN dim_time t ON f.time_id = t.time_id
                 JOIN dim_scenario s ON f.scenario_id = s.scenario_id
                 -- Use earliest time period as baseline (most representative of actual area)
@@ -685,7 +685,7 @@ class LanduseDataConverter:
         tables = [
             ("dim_scenario", "Climate scenarios and models"),
             ("dim_time", "Time periods and ranges"),
-            ("dim_geography_enhanced", "Geographic locations (FIPS codes)"),
+            ("dim_geography", "Geographic locations (FIPS codes)"),
             ("dim_landuse", "Land use types and categories"),
             ("fact_landuse_transitions", "Main fact table with all transitions")
         ]
