@@ -130,7 +130,7 @@ def get_available_options():
         # Get states
         states = conn.execute("""
             SELECT DISTINCT state_name
-            FROM dim_geography_enhanced
+            FROM dim_geography
             WHERE state_name IS NOT NULL
             ORDER BY state_name
         """).fetchall()

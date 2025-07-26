@@ -56,7 +56,7 @@ def load_summary_data():
         stats = {}
 
         # Use query method with appropriate TTL
-        counties_df = conn.query("SELECT COUNT(DISTINCT fips_code) as count FROM dim_geography_enhanced", ttl=3600)
+        counties_df = conn.query("SELECT COUNT(DISTINCT fips_code) as count FROM dim_geography", ttl=3600)
         stats['total_counties'] = counties_df['count'].iloc[0]
 
         scenarios_df = conn.query("SELECT COUNT(*) as count FROM dim_scenario", ttl=3600)
@@ -117,7 +117,7 @@ def load_urbanization_data():
             fl.landuse_name as from_landuse,
             SUM(f.acres) as total_acres_urbanized
         FROM fact_landuse_transitions f
-        JOIN dim_geography_enhanced g ON f.geography_id = g.geography_id
+        JOIN dim_geography g ON f.geography_id = g.geography_id
         JOIN dim_landuse fl ON f.from_landuse_id = fl.landuse_id
         JOIN dim_landuse tl ON f.to_landuse_id = tl.landuse_id
         WHERE tl.landuse_name = 'Urban'
@@ -152,7 +152,7 @@ def load_forest_analysis_data():
         JOIN dim_scenario s ON f.scenario_id = s.scenario_id
         JOIN dim_landuse fl ON f.from_landuse_id = fl.landuse_id
         JOIN dim_landuse tl ON f.to_landuse_id = tl.landuse_id
-        JOIN dim_geography_enhanced g ON f.geography_id = g.geography_id
+        JOIN dim_geography g ON f.geography_id = g.geography_id
         WHERE fl.landuse_name = 'Forest'
           AND tl.landuse_name != 'Forest'
           AND f.transition_type = 'change'
@@ -172,7 +172,7 @@ def load_forest_analysis_data():
         JOIN dim_scenario s ON f.scenario_id = s.scenario_id
         JOIN dim_landuse fl ON f.from_landuse_id = fl.landuse_id
         JOIN dim_landuse tl ON f.to_landuse_id = tl.landuse_id
-        JOIN dim_geography_enhanced g ON f.geography_id = g.geography_id
+        JOIN dim_geography g ON f.geography_id = g.geography_id
         WHERE tl.landuse_name = 'Forest'
           AND fl.landuse_name != 'Forest'
           AND f.transition_type = 'change'
@@ -191,7 +191,7 @@ def load_forest_analysis_data():
                 END as change_type,
                 SUM(f.acres) as total_acres
             FROM fact_landuse_transitions f
-            JOIN dim_geography_enhanced g ON f.geography_id = g.geography_id
+            JOIN dim_geography g ON f.geography_id = g.geography_id
             JOIN dim_landuse fl ON f.from_landuse_id = fl.landuse_id
             JOIN dim_landuse tl ON f.to_landuse_id = tl.landuse_id
             WHERE f.transition_type = 'change'
@@ -599,7 +599,7 @@ def load_state_transitions():
                 SUM(f.acres) as total_acres,
                 AVG(f.acres) as avg_acres_per_scenario
             FROM fact_landuse_transitions f
-            JOIN dim_geography_enhanced g ON f.geography_id = g.geography_id
+            JOIN dim_geography g ON f.geography_id = g.geography_id
             JOIN dim_landuse fl ON f.from_landuse_id = fl.landuse_id
             JOIN dim_landuse tl ON f.to_landuse_id = tl.landuse_id
             WHERE f.transition_type = 'change'
@@ -820,7 +820,7 @@ def load_animated_timeline_data():
         FROM fact_landuse_transitions f
         JOIN dim_time t ON f.time_id = t.time_id
         JOIN dim_scenario s ON f.scenario_id = s.scenario_id
-        JOIN dim_geography_enhanced g ON f.geography_id = g.geography_id
+        JOIN dim_geography g ON f.geography_id = g.geography_id
         JOIN dim_landuse fl ON f.from_landuse_id = fl.landuse_id
         JOIN dim_landuse tl ON f.to_landuse_id = tl.landuse_id
         WHERE f.transition_type = 'change'

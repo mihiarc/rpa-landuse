@@ -74,7 +74,7 @@ def get_filter_options():
         # Get states
         states_query = """
         SELECT DISTINCT state_code, state_name
-        FROM dim_geography_enhanced
+        FROM dim_geography
         WHERE state_name IS NOT NULL
         ORDER BY state_name
         """
@@ -120,7 +120,7 @@ def build_extraction_query(extract_type, filters):
             FROM fact_landuse_transitions f
             JOIN dim_scenario s ON f.scenario_id = s.scenario_id
             JOIN dim_time t ON f.time_id = t.time_id
-            JOIN dim_geography_enhanced g ON f.geography_id = g.geography_id
+            JOIN dim_geography g ON f.geography_id = g.geography_id
             JOIN dim_landuse fl ON f.from_landuse_id = fl.landuse_id
             JOIN dim_landuse tl ON f.to_landuse_id = tl.landuse_id
         """,
@@ -139,7 +139,7 @@ def build_extraction_query(extract_type, filters):
             FROM fact_landuse_transitions f
             JOIN dim_scenario s ON f.scenario_id = s.scenario_id
             JOIN dim_time t ON f.time_id = t.time_id
-            JOIN dim_geography_enhanced g ON f.geography_id = g.geography_id
+            JOIN dim_geography g ON f.geography_id = g.geography_id
             JOIN dim_landuse fl ON f.from_landuse_id = fl.landuse_id
             JOIN dim_landuse tl ON f.to_landuse_id = tl.landuse_id
             WHERE f.transition_type = 'change'
@@ -158,7 +158,7 @@ def build_extraction_query(extract_type, filters):
                 COUNT(DISTINCT g.state_code) as states_affected
             FROM fact_landuse_transitions f
             JOIN dim_scenario s ON f.scenario_id = s.scenario_id
-            JOIN dim_geography_enhanced g ON f.geography_id = g.geography_id
+            JOIN dim_geography g ON f.geography_id = g.geography_id
             JOIN dim_landuse fl ON f.from_landuse_id = fl.landuse_id
             JOIN dim_landuse tl ON f.to_landuse_id = tl.landuse_id
             WHERE f.transition_type = 'change'
@@ -724,7 +724,7 @@ def show_bulk_export():
             "queries": {
                 "dim_scenario": "SELECT * FROM dim_scenario",
                 "dim_time": "SELECT * FROM dim_time",
-                "dim_geography_enhanced": "SELECT * FROM dim_geography_enhanced",
+                "dim_geography": "SELECT * FROM dim_geography",
                 "dim_landuse": "SELECT * FROM dim_landuse"
             }
         }

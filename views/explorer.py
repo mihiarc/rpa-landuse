@@ -87,7 +87,7 @@ SELECT 'dim_scenario' as table_name, COUNT(*) as row_count FROM dim_scenario
 UNION ALL
 SELECT 'dim_time', COUNT(*) FROM dim_time
 UNION ALL
-SELECT 'dim_geography_enhanced', COUNT(*) FROM dim_geography_enhanced
+SELECT 'dim_geography', COUNT(*) FROM dim_geography
 UNION ALL
 SELECT 'dim_landuse', COUNT(*) FROM dim_landuse
 UNION ALL
@@ -113,7 +113,7 @@ SELECT
     state_code,
     state_name,
     region
-FROM dim_geography_enhanced
+FROM dim_geography
 WHERE state_name IS NOT NULL
 ORDER BY state_name, county_name
 LIMIT 20;
@@ -734,7 +734,7 @@ def run_custom_query_enhanced(query: str):
                 bad_column = match.group(1)
                 st.warning(f"Column '{bad_column}' not found. Check the schema for correct column names.")
         elif "table" in error_str and "not exist" in error_str:
-            st.info("💡 **Tip:** Available tables: fact_landuse_transitions, dim_scenario, dim_geography_enhanced, dim_landuse, dim_time")
+            st.info("💡 **Tip:** Available tables: fact_landuse_transitions, dim_scenario, dim_geography, dim_landuse, dim_time")
         elif "syntax" in error_str:
             st.info("💡 **Tip:** DuckDB uses standard SQL syntax. Common issues: missing commas, unclosed quotes, invalid keywords.")
         elif "type" in error_str:
