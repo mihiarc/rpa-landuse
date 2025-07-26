@@ -1,6 +1,7 @@
 """Consolidated landuse agent with modern LangGraph architecture."""
 
 import os
+import time
 from typing import Any, Optional, TypedDict
 
 import duckdb
@@ -20,6 +21,7 @@ from landuse.agents.formatting import clean_sql_query, format_query_results
 from landuse.agents.prompts import get_system_prompt
 from landuse.config.landuse_config import LanduseConfig
 from landuse.tools.common_tools import create_analysis_tool, create_execute_query_tool, create_schema_tool
+from landuse.tools.state_lookup_tool import create_state_lookup_tool
 from landuse.utils.retry_decorators import database_retry
 
 
@@ -51,6 +53,10 @@ class LanduseAgent:
         self.db_connection = self._create_db_connection()
         self.schema = self._get_schema()
         self.knowledge_base = None
+        
+        # Initialize conversation history for simple mode
+        self.conversation_history = []  # Store (role, content) tuples
+        self.max_history_length = 20  # Keep last N messages
         
         # Initialize knowledge base if enabled
         if self.config.enable_knowledge_base:
@@ -178,7 +184,8 @@ class LanduseAgent:
         tools = [
             create_execute_query_tool(self.config, self.db_connection, self.schema),
             create_analysis_tool(),
-            create_schema_tool(self.schema)
+            create_schema_tool(self.schema),
+            create_state_lookup_tool()
         ]
         
         # Add knowledge base retriever if available
@@ -223,40 +230,36 @@ class LanduseAgent:
         workflow.add_edge("analyzer", "agent")
         workflow.add_edge("human_review", "agent")
 
-        # Compile without memory to avoid state corruption issues
-        return workflow.compile()
+        # Compile with memory if enabled
+        if self.config.enable_memory:
+            return workflow.compile(checkpointer=self.memory)
+        else:
+            return workflow.compile()
 
     def _agent_node(self, state: AgentState) -> dict[str, Any]:
         """Main agent node that decides next action."""
         messages = state["messages"]
 
-        # Convert tuple messages to proper LangChain message objects if needed
-        converted_messages = []
-        for msg in messages:
-            if isinstance(msg, tuple):
-                role, content = msg
-                if role == "user":
-                    converted_messages.append(HumanMessage(content=content))
-                elif role == "assistant":
-                    converted_messages.append(AIMessage(content=content))
-                elif role == "system":
-                    converted_messages.append(HumanMessage(content=content))  # System as human for Claude
-                else:
-                    converted_messages.append(HumanMessage(content=content))
-            else:
-                converted_messages.append(msg)
-
+        # Ensure we have proper message types
+        if not messages:
+            messages = []
+        
         # Add system prompt as first message if needed
-        if not converted_messages or not any(isinstance(m, HumanMessage) and "landuse" in str(m.content).lower() for m in converted_messages[:1]):
-            system_msg = HumanMessage(content=self.system_prompt)
-            converted_messages = [system_msg] + converted_messages
+        has_system = any(
+            isinstance(m, (HumanMessage, AIMessage)) and 
+            self.system_prompt[:50] in str(m.content) 
+            for m in messages[:1]
+        )
+        
+        if not has_system:
+            messages = [HumanMessage(content=self.system_prompt)] + messages
 
-        # Get LLM response
-        response = self.llm.bind_tools(self.tools).invoke(converted_messages)
+        # Get LLM response with tools bound
+        response = self.llm.bind_tools(self.tools).invoke(messages)
 
-        # Update state with proper message list
+        # Update state with new message
         return {
-            "messages": converted_messages + [response],
+            "messages": messages + [response],
             "iteration_count": state.get("iteration_count", 0) + 1
         }
 
@@ -344,10 +347,26 @@ Focus on:
             if "rows returned" in content or "│" in content:
                 return content
         return None
+    
+    def _update_conversation_history(self, question: str, response: str) -> None:
+        """Update conversation history with new question and response."""
+        # Add user question
+        self.conversation_history.append(("user", question))
+        # Add assistant response
+        self.conversation_history.append(("assistant", response))
+        
+        # Trim history if it gets too long (keep last N messages)
+        if len(self.conversation_history) > self.max_history_length:
+            # Keep only the last max_history_length messages
+            self.conversation_history = self.conversation_history[-self.max_history_length:]
 
     def _execute_query(self, query: str) -> dict[str, Any]:
         """Execute a SQL query with standard error handling and formatting."""
         cleaned_query = clean_sql_query(query)
+        
+        if self.config.debug:
+            print(f"\nDEBUG _execute_query: Executing SQL query")
+            print(f"DEBUG _execute_query: Query: {cleaned_query}")
 
         try:
             conn = self.db_connection
@@ -358,9 +377,21 @@ Focus on:
 
             result = conn.execute(cleaned_query).fetchall()
             columns = [desc[0] for desc in conn.description] if conn.description else []
+            
+            if self.config.debug:
+                print(f"DEBUG _execute_query: Result row count: {len(result)}")
+                print(f"DEBUG _execute_query: Columns: {columns}")
+                if result and len(result) > 0:
+                    print(f"DEBUG _execute_query: First row: {result[0]}")
+                else:
+                    print("DEBUG _execute_query: No rows returned")
 
-            # Format results
-            formatted_results = format_query_results(result, columns)
+            # Convert to DataFrame for formatting
+            import pandas as pd
+            df = pd.DataFrame(result, columns=columns)
+            
+            # Format results - format_query_results expects (DataFrame, sql_query)
+            formatted_results = format_query_results(df, cleaned_query)
 
             return {
                 "success": True,
@@ -374,6 +405,12 @@ Focus on:
         except Exception as e:
             error_msg = str(e)
             suggestion = self._get_error_suggestion(error_msg)
+            
+            if self.config.debug:
+                print(f"DEBUG _execute_query: SQL Error: {error_msg}")
+                print(f"DEBUG _execute_query: Suggestion: {suggestion}")
+                import traceback
+                traceback.print_exc()
 
             return {
                 "success": False,
@@ -389,7 +426,7 @@ Focus on:
         if "no such column" in error_lower or "could not find column" in error_lower:
             return "Check column names in the schema. Use exact column names from the database schema."
         elif "no such table" in error_lower:
-            return "Check table names. Available tables: fact_landuse_transitions, dim_scenario, dim_geography, dim_landuse, dim_time"
+            return "Check table names. Available tables: fact_landuse_transitions, dim_scenario, dim_geography_enhanced, dim_landuse, dim_time"
         elif "syntax error" in error_lower:
             return "Check SQL syntax. Common issues: missing commas, unclosed quotes, invalid keywords."
         elif "ambiguous column" in error_lower:
@@ -400,15 +437,28 @@ Focus on:
     def simple_query(self, question: str) -> str:
         """Execute a query using simple direct LLM interaction without LangGraph state management."""
         try:
-            # Create a fresh conversation with system prompt
-            messages = [
-                HumanMessage(content=self.system_prompt),
-                HumanMessage(content=question)
-            ]
+            # Build conversation with history
+            messages = [HumanMessage(content=self.system_prompt)]
+            
+            # Add conversation history
+            for role, content in self.conversation_history:
+                if role == "user":
+                    messages.append(HumanMessage(content=content))
+                elif role == "assistant":
+                    messages.append(AIMessage(content=content))
+            
+            # Add current question
+            messages.append(HumanMessage(content=question))
             
             # Get initial response
             response = self.llm.bind_tools(self.tools).invoke(messages)
             messages.append(response)
+            
+            if self.config.debug:
+                print(f"DEBUG: Initial response type: {type(response)}")
+                print(f"DEBUG: Has tool calls: {hasattr(response, 'tool_calls') and bool(response.tool_calls)}")
+                if hasattr(response, 'content'):
+                    print(f"DEBUG: Initial content: {response.content[:200] if response.content else 'Empty'}")
             
             # Handle tool calls if any
             max_iterations = 3
@@ -434,10 +484,32 @@ Focus on:
                         if tool.name == tool_name:
                             try:
                                 if self.config.debug:
-                                    print(f"DEBUG: Executing tool {tool_name} with args: {tool_args}")
+                                    print(f"\nDEBUG: Executing tool '{tool_name}'")
+                                    print(f"DEBUG: Tool args: {tool_args}")
+                                    
                                 tool_result = tool.invoke(tool_args)
+                                
                                 if self.config.debug:
-                                    print(f"DEBUG: Tool result length: {len(str(tool_result))}")
+                                    result_str = str(tool_result)
+                                    print(f"DEBUG: Tool result length: {len(result_str)} chars")
+                                    
+                                    # Show more details for query execution
+                                    if tool_name == "execute_landuse_query" and "query" in tool_args:
+                                        print(f"DEBUG: SQL Query: {tool_args['query']}")
+                                        if "rows returned" in result_str:
+                                            # Extract row count
+                                            import re
+                                            row_match = re.search(r'(\d+) rows returned', result_str)
+                                            if row_match:
+                                                print(f"DEBUG: Query returned {row_match.group(1)} rows")
+                                        if "No results found" in result_str:
+                                            print("DEBUG: Query returned NO RESULTS")
+                                        # Show first 300 chars of results
+                                        print(f"DEBUG: Query result preview: {result_str[:300]}...")
+                                    
+                                    # Show analysis details
+                                    elif tool_name == "analyze_landuse_results":
+                                        print(f"DEBUG: Analysis preview: {result_str[:200]}...")
                                 
                                 # Store results for formatting
                                 if tool_name == "execute_landuse_query":
@@ -466,16 +538,34 @@ Focus on:
                 # Get next response
                 response = self.llm.bind_tools(self.tools).invoke(messages)
                 messages.append(response)
+                
+                if self.config.debug:
+                    print(f"DEBUG: Response after tool execution: {type(response)}")
+                    if hasattr(response, 'content'):
+                        print(f"DEBUG: Response content type: {type(response.content)}")
+                        print(f"DEBUG: Response content: {response.content[:200] if response.content else 'None'}")
             
             # Extract the final text content from the response
+            if self.config.debug:
+                print(f"\nDEBUG: Extracting final content from response")
+                print(f"DEBUG: Response type: {type(response)}")
+                print(f"DEBUG: Has content attr: {hasattr(response, 'content')}")
+                print(f"DEBUG: Has text attr: {hasattr(response, 'text')}")
+                
             final_content = ""
             if hasattr(response, 'content'):
                 content = response.content
+                if self.config.debug:
+                    print(f"DEBUG: Content type: {type(content)}")
+                    print(f"DEBUG: Content value: {content[:200] if content else 'None'}")
+                    
                 # Handle different content formats
                 if isinstance(content, list):
                     # Extract text from list of content blocks
                     text_parts = []
-                    for item in content:
+                    for i, item in enumerate(content):
+                        if self.config.debug:
+                            print(f"DEBUG: Content item {i}: type={type(item)}, value={str(item)[:100]}")
                         if isinstance(item, dict) and item.get('type') == 'text':
                             text_parts.append(item.get('text', ''))
                         elif isinstance(item, str):
@@ -491,24 +581,143 @@ Focus on:
             else:
                 final_content = str(response)
             
-            # Return clean final content without any special formatting
+            # If we still have no content, check if we have tool results we can summarize
+            if not final_content.strip() and (query_results or analysis_results):
+                if self.config.debug:
+                    print(f"\nDEBUG: Final content is empty, checking tool results")
+                    print(f"DEBUG: Query results count: {len(query_results)}")
+                    print(f"DEBUG: Analysis results count: {len(analysis_results)}")
+                    
+                # Build a response from the tool results
+                if query_results and analysis_results:
+                    final_content = f"{query_results[-1]}\n\n{analysis_results[-1]}"
+                elif query_results:
+                    final_content = query_results[-1]
+                elif analysis_results:
+                    final_content = analysis_results[-1]
+                    
+                # If still empty, provide helpful message
+                if not final_content.strip():
+                    final_content = "I executed the query but couldn't generate a formatted response. The query completed successfully but may have returned no results."
             
+            # Update conversation history
+            self._update_conversation_history(question, final_content)
+            
+            # Return clean final content without any special formatting
+            if self.config.debug:
+                print(f"\nDEBUG: Final content length: {len(final_content)}")
+                print(f"DEBUG: Final content preview: {final_content[:200]}...")
+                print("DEBUG: === End of simple_query execution ===")
+                
             return final_content
             
         except Exception as e:
-            return f"Error processing query: {str(e)}"
+            error_msg = f"Error processing query: {str(e)}"
+            # Still update history even on error
+            self._update_conversation_history(question, error_msg)
+            return error_msg
 
-    def query(self, question: str) -> str:
-        """Execute a natural language query using the agent."""
-        # Use the simple approach to avoid LangGraph state issues for now
-        return self.simple_query(question)
+    def _graph_query(self, question: str, thread_id: Optional[str] = None) -> str:
+        """Execute a query using the LangGraph workflow."""
+        try:
+            # Build graph if not already built
+            if not self.graph:
+                self.graph = self._build_graph()
+            
+            # Prepare initial state with conversation history
+            initial_messages = [HumanMessage(content=self.system_prompt)]
+            
+            # Add conversation history to context
+            for role, content in self.conversation_history:
+                if role == "user":
+                    initial_messages.append(HumanMessage(content=content))
+                elif role == "assistant":
+                    initial_messages.append(AIMessage(content=content))
+            
+            # Add current question
+            initial_messages.append(HumanMessage(content=question))
+            
+            initial_state = {
+                "messages": initial_messages,
+                "context": {},
+                "iteration_count": 0,
+                "max_iterations": self.config.max_iterations
+            }
+            
+            # Prepare config with thread_id for memory
+            config = {}
+            if thread_id and self.config.enable_memory:
+                config = {"configurable": {"thread_id": thread_id}}
+            
+            # Execute the graph
+            result = self.graph.invoke(initial_state, config=config)
+            
+            # Extract the final response from messages
+            if result and "messages" in result:
+                messages = result["messages"]
+                # Find the last AI message that's not a tool call
+                for msg in reversed(messages):
+                    if isinstance(msg, AIMessage) and not hasattr(msg, 'tool_calls'):
+                        return str(msg.content)
+                    elif isinstance(msg, AIMessage) and hasattr(msg, 'content'):
+                        # Handle AIMessage with content even if it has tool_calls
+                        content = msg.content
+                        if isinstance(content, list):
+                            # Extract text content from list
+                            text_parts = []
+                            for item in content:
+                                if isinstance(item, dict) and item.get('type') == 'text':
+                                    text_parts.append(item.get('text', ''))
+                                elif isinstance(item, str):
+                                    text_parts.append(item)
+                            if text_parts:
+                                final_response = ' '.join(text_parts)
+                                self._update_conversation_history(question, final_response)
+                                return final_response
+                        elif content:
+                            final_response = str(content)
+                            self._update_conversation_history(question, final_response)
+                            return final_response
+            
+            default_response = "I couldn't generate a proper response. Please try rephrasing your question."
+            self._update_conversation_history(question, default_response)
+            return default_response
+            
+        except Exception as e:
+            error_msg = f"Error in graph execution: {str(e)}"
+            if self.config.debug:
+                import traceback
+                self.console.print(f"[red]DEBUG: {error_msg}[/red]")
+                self.console.print(f"[red]{traceback.format_exc()}[/red]")
+            error_response = f"I encountered an error while processing your query: {str(e)}"
+            self._update_conversation_history(question, error_response)
+            return error_response
 
-    def stream_query(self, question: str) -> Any:
+    def query(self, question: str, use_graph: bool = False, thread_id: Optional[str] = None) -> str:
+        """
+        Execute a natural language query using the agent.
+        
+        Args:
+            question: The natural language question to answer
+            use_graph: Whether to use the full LangGraph workflow (default: False for stability)
+            thread_id: Optional thread ID for conversation memory (only used with graph)
+            
+        Returns:
+            The agent's response as a string
+        """
+        if use_graph:
+            return self._graph_query(question, thread_id)
+        else:
+            # Use the simple approach for stability
+            return self.simple_query(question)
+
+    def stream_query(self, question: str, thread_id: Optional[str] = None) -> Any:
         """
         Stream responses for real-time interaction.
 
         Args:
             question: Natural language question
+            thread_id: Optional thread ID for conversation memory
 
         Yields:
             Streaming response chunks
@@ -516,11 +725,27 @@ Focus on:
         if not self.graph:
             self.graph = self._build_graph()
 
+        # Prepare initial state
+        initial_state = {
+            "messages": [HumanMessage(content=question)],
+            "context": {},
+            "iteration_count": 0,
+            "max_iterations": self.config.max_iterations
+        }
+        
+        # Prepare config
+        config = {}
+        if thread_id and self.config.enable_memory:
+            config = {"configurable": {"thread_id": thread_id}}
+        elif not thread_id:
+            config = {"configurable": {"thread_id": f"landuse-stream-{int(time.time())}"}}
+
         # Stream the response
-        yield from self.graph.stream(
-            {"messages": [HumanMessage(content=question)], "max_iterations": self.config.max_iterations},
-            config={"configurable": {"thread_id": "landuse-stream"}}
-        )
+        try:
+            for chunk in self.graph.stream(initial_state, config=config):
+                yield chunk
+        except Exception as e:
+            yield {"error": f"Streaming error: {str(e)}"}
 
     def create_subgraph(self, name: str, specialized_tools: list[BaseTool]) -> StateGraph:
         """
@@ -588,12 +813,17 @@ Focus on:
 
         self.console.print(table)
     
+    def clear_history(self) -> None:
+        """Clear conversation history."""
+        self.conversation_history = []
+        self.console.print("[yellow]Conversation history cleared.[/yellow]")
+    
     def chat(self) -> None:
         """Interactive chat interface for the agent."""
         self.console.print(Panel.fit(
             "[bold green]RPA Land Use Analytics Agent[/bold green]\n"
             "Ask questions about land use projections and transitions.\n"
-            "Type 'exit' to quit, 'help' for examples.",
+            "Type 'exit' to quit, 'help' for examples, 'clear' to reset conversation.",
             title="Welcome",
             border_style="green"
         ))
@@ -611,6 +841,10 @@ Focus on:
                     
                 if question.lower() in ['help', '?']:
                     self._show_help()
+                    continue
+                
+                if question.lower() == 'clear':
+                    self.clear_history()
                     continue
                 
                 # Process the question

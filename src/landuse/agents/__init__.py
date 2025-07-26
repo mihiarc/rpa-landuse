@@ -1,7 +1,7 @@
 # Agents package initialization
 
 # Import the primary agent and components
-from .landuse_agent import LanduseAgent
+from .landuse_agent import LanduseAgent, AgentState
 from .llm_factory import LLMFactory
 
 # Import constants and utilities for backward compatibility
@@ -32,6 +32,7 @@ from .prompts import get_system_prompt, create_custom_prompt, PromptVariations
 __all__ = [
     # Agent classes
     'LanduseAgent',
+    'AgentState',
     'LLMFactory',
     
     # Constants

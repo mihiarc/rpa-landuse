@@ -55,7 +55,20 @@ QUERY PATTERNS:
 - "Agricultural land loss" → Agriculture → non-Agriculture transitions
 - "Forest loss" → Forest → non-Forest transitions  
 - "Compare X across scenarios" → GROUP BY scenario_name
-- "Urbanization" → Any → Urban transitions"""
+- "Urbanization" → Any → Urban transitions
+
+IMPORTANT - GEOGRAPHIC QUERIES:
+When users mention states by name or abbreviation:
+1. Use the lookup_state_info tool to resolve the correct state_code (FIPS code)
+2. The tool will return the proper SQL condition (e.g., "state_code = '06' -- California")
+3. Use this in your WHERE clause
+
+Examples:
+- User says "California" → Use lookup_state_info("California") → Returns "state_code = '06'"
+- User says "CA" → Use lookup_state_info("CA") → Returns "state_code = '06'"
+- User says "Texas" → Use lookup_state_info("Texas") → Returns "state_code = '48'"
+
+Alternative: You can also query using state_name = 'California' directly, but state_code with FIPS is more reliable."""
 
 # Additional prompt section for map generation
 MAP_GENERATION_PROMPT = """

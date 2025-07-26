@@ -53,8 +53,9 @@ This database contains USDA Forest Service 2020 RPA Assessment land use projecti
 - **dim_geography_enhanced**: Geographic locations
   - geography_id (INTEGER): Primary key
   - fips_code (VARCHAR): 5-digit FIPS county code
-  - state_code (VARCHAR): 2-digit state code
-  - state_name (VARCHAR): Full state name (if available)
+  - state_code (VARCHAR): 2-digit FIPS state code (e.g., '06' for California, NOT 'CA')
+  - state_name (VARCHAR): Full state name (e.g., 'California')
+  - state_abbrev (VARCHAR): Also FIPS code (same as state_code)
 
 - **dim_landuse**: Land use types
   - landuse_id (INTEGER): Primary key
