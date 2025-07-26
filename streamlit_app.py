@@ -365,7 +365,7 @@ def show_welcome_page():
             # Get basic stats
             stats = {}
             try:
-                stats["counties"] = conn.execute("SELECT COUNT(DISTINCT fips_code) FROM dim_geography_enhanced").fetchone()[0]
+                stats["counties"] = conn.execute("SELECT COUNT(DISTINCT fips_code) FROM dim_geography").fetchone()[0]
                 stats["scenarios"] = conn.execute("SELECT COUNT(*) FROM dim_scenario").fetchone()[0]
                 stats["transitions"] = conn.execute("SELECT COUNT(*) FROM fact_landuse_transitions").fetchone()[0]
                 stats["time_periods"] = conn.execute("SELECT COUNT(*) FROM dim_time").fetchone()[0]
