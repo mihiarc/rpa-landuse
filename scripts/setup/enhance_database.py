@@ -37,20 +37,20 @@ def add_state_names_to_geography(db_path: str):
         columns = conn.execute("""
             SELECT column_name
             FROM information_schema.columns
-            WHERE table_name = 'dim_geography_enhanced'
+            WHERE table_name = 'dim_geography'
             AND column_name = 'state_name'
         """).fetchall()
 
         if not columns:
-            console.print("Adding state_name column to dim_geography_enhanced...")
+            console.print("Adding state_name column to dim_geography...")
 
             # Add the column
-            conn.execute("ALTER TABLE dim_geography_enhanced ADD COLUMN state_name VARCHAR(50)")
+            conn.execute("ALTER TABLE dim_geography ADD COLUMN state_name VARCHAR(50)")
 
             # Update with state names
             for code, name in state_names.items():
                 conn.execute("""
-                    UPDATE dim_geography_enhanced
+                    UPDATE dim_geography
                     SET state_name = ?
                     WHERE state_code = ?
                 """, (name, code))
@@ -65,7 +65,7 @@ def add_state_names_to_geography(db_path: str):
                     COALESCE(state_name, 'Unknown') as state_name,
                     county_name,
                     region
-                FROM dim_geography_enhanced
+                FROM dim_geography
             """)
 
             console.print("✅ State names added successfully!")
@@ -73,7 +73,7 @@ def add_state_names_to_geography(db_path: str):
             # Show sample
             sample = conn.execute("""
                 SELECT state_code, state_name, COUNT(*) as counties
-                FROM dim_geography_enhanced
+                FROM dim_geography
                 WHERE state_name IS NOT NULL
                 GROUP BY state_code, state_name
                 ORDER BY state_name
@@ -84,7 +84,7 @@ def add_state_names_to_geography(db_path: str):
             console.print(sample)
 
         else:
-            console.print("✓ State names already exist in dim_geography_enhanced")
+            console.print("✓ State names already exist in dim_geography")
 
         conn.close()
 
@@ -125,7 +125,7 @@ def create_enhanced_views(db_path: str):
             FROM fact_landuse_transitions f
             JOIN dim_scenario s ON f.scenario_id = s.scenario_id
             JOIN dim_time t ON f.time_id = t.time_id
-            JOIN dim_geography_enhanced g ON f.geography_id = g.geography_id
+            JOIN dim_geography g ON f.geography_id = g.geography_id
             JOIN dim_landuse fl ON f.from_landuse_id = fl.landuse_id
             JOIN dim_landuse tl ON f.to_landuse_id = tl.landuse_id
         """)
