@@ -52,6 +52,22 @@ nav:
     - Basic Queries: queries/basic-queries.md
     - Advanced Queries: queries/advanced-queries.md
     - Query Examples: queries/examples.md
+  - Agent System:
+    - Overview: agents/overview.md
+    - Architecture: agents/README.md
+    - System Prompts: agents/SYSTEM_PROMPT_ARCHITECTURE.md
+    - Configuration: agents/CONSTANTS_ARCHITECTURE.md
+    - API Reference:
+      - Main Agent: api/agent.md
+      - Query Capabilities: api/landuse-query-agent.md
+      - LangGraph Integration: api/langgraph-agent.md
+    - Advanced Topics:
+      - Tool System: agents/TOOL_SYSTEM_ARCHITECTURE.md
+      - Memory & State: agents/MEMORY_STATE_MANAGEMENT.md
+      - Error Handling: agents/ERROR_HANDLING_RESILIENCE.md
+      - Performance: agents/PERFORMANCE_MONITORING.md
+      - Integration: agents/INTEGRATION_EXTENSION.md
+    - Advanced Configuration: agents/ADVANCED_CONFIGURATION.md
   - Data & Schemas:
     - Database Overview: data/database-overview.md
     - Table Reference: data/table-reference.md
