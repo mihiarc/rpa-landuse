@@ -162,14 +162,14 @@ The database contains land use transition projections from the **2020 USDA Fores
 - **Field Name**: `acres`
 - **Type**: DECIMAL(15,4)
 - **Definition**: Area measurement for land use transitions
-- **Unit**: US acres (1 acre = 0.404686 hectares)
+- **Unit**: Hundreds of acres (multiply by 100 for actual acres)
 - **Business Context**: 
-  - **Small Values**: Precision for urban development (typical: 1-50 acres)
-  - **Large Values**: Agricultural and forest areas (typical: 100-10,000+ acres)
+  - **Small Values**: Urban development (typical: 0.1-5.0 = 10-500 actual acres)
+  - **Large Values**: Agricultural and forest areas (typical: 10-1,000 = 1,000-100,000 actual acres)
 - **Conversion Factors**:
-  - 1 acre = 4,047 square meters
-  - 640 acres = 1 square mile
-  - 1 acre = 0.404686 hectares
+  - Stored value × 100 = actual acres
+  - Stored value × 100 × 0.404686 = hectares
+  - Stored value × 100 ÷ 640 = square miles
 
 #### Population (Thousands)
 - **Field Name**: `population_thousands`, `value` (in socioeconomic data)

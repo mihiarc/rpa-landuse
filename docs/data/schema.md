@@ -4,319 +4,76 @@ This page documents the structure of the RPA land use analytics database, includ
 
 ## Database Overview
 
-The DuckDB database (`landuse_analytics.duckdb`) uses a modern star schema design with the following tables:
+The DuckDB database (`landuse_analytics.duckdb`) uses a modern star schema design optimized for analytical queries. For comprehensive details, see the [Database Overview](database-overview.md) and [Table Reference](table-reference.md).
 
-### Modern Star Schema (RECOMMENDED)
-The current system uses a normalized star schema optimized for analytics:
+### Current Star Schema
+The system uses a normalized star schema with:
 - `fact_landuse_transitions` - Central fact table with all transitions
+- `fact_socioeconomic_projections` - Population and income projections
 - `dim_scenario` - Climate and socioeconomic scenarios  
-- `dim_geography_enhanced` - County geography with enhanced metadata
+- `dim_geography` - County geography with enhanced metadata
 - `dim_landuse` - Land use type definitions
 - `dim_time` - Time period dimensions
+- `dim_socioeconomic` - SSP scenario descriptions
+- `dim_indicators` - Socioeconomic indicator definitions
 
-### Legacy Schema (DEPRECATED)
-The legacy SQLite database (`landuse_transitions_with_ag.db`) contains flat tables:
+## Current Database Structure
 
-```mermaid
-erDiagram
-    fact_landuse_transitions {
-        INTEGER scenario_id FK
-        INTEGER geography_id FK
-        INTEGER time_id FK
-        INTEGER from_landuse_id FK
-        INTEGER to_landuse_id FK
-        DOUBLE acres
-        VARCHAR transition_type
-    }
-    
-    dim_scenario {
-        INTEGER scenario_id PK
-        VARCHAR scenario_name
-        VARCHAR rcp_scenario
-        VARCHAR ssp_scenario
-        VARCHAR description
-    }
-    
-    dim_geography_enhanced {
-        INTEGER geography_id PK
-        VARCHAR county_fips
-        VARCHAR county_name
-        VARCHAR state_code
-        VARCHAR state_name
-        VARCHAR region_name
-        DOUBLE land_area_sq_miles
-    }
-    
-    dim_landuse {
-        INTEGER landuse_id PK
-        VARCHAR landuse_code
-        VARCHAR landuse_name
-        VARCHAR landuse_category
-        VARCHAR description
-    }
-    
-    dim_time {
-        INTEGER time_id PK
-        INTEGER start_year
-        INTEGER end_year
-        VARCHAR time_period
-        VARCHAR decade
-    }
-    
-    fact_landuse_transitions }o--|| dim_scenario : "scenario_id"
-    fact_landuse_transitions }o--|| dim_geography_enhanced : "geography_id"
-    fact_landuse_transitions }o--|| dim_time : "time_id"
-    fact_landuse_transitions }o--|| dim_landuse : "from_landuse_id"
-    fact_landuse_transitions }o--|| dim_landuse : "to_landuse_id"
-    
-    landuse_changes_only {
-        TEXT scenario
-        INTEGER year
-        TEXT year_range
-        TEXT fips
-        TEXT from_land_use
-        TEXT to_land_use
-        REAL area_1000_acres
-    }
-    
-    landuse_changes_only_ag {
-        TEXT scenario
-        INTEGER year
-        TEXT year_range
-        TEXT fips
-        TEXT from_land_use
-        TEXT to_land_use
-        REAL area_1000_acres
-    }
-```
+**Note**: This page contains legacy information. For complete current database documentation, see:
+- [Database Overview](database-overview.md) - Executive summary and architecture
+- [Table Reference](table-reference.md) - Detailed table specifications  
+- [View Definitions](view-definitions.md) - Analytical views and usage
+- [Data Dictionary](data-dictionary.md) - Business definitions and guidelines
 
-## Table Descriptions
+## Key Concepts
 
-### 1. `landuse_transitions`
+### Climate Scenarios
+The database contains 20 climate scenarios combining:
+- 5 Climate models (CNRM_CM5, HadGEM2_ES365, IPSL_CM5A_MR, MRI_CGCM3, NorESM1_M)  
+- 4 RCP/SSP combinations (rcp45_ssp1, rcp85_ssp2, rcp85_ssp3, rcp85_ssp5)
 
-The main table containing all land use transitions, including same-to-same transitions (land that doesn't change use).
+### Land Use Categories
+- **Crop (cr)**: Agricultural cropland
+- **Pasture (ps)**: Livestock grazing land  
+- **Rangeland (rg)**: Natural grasslands/shrublands
+- **Forest (fr)**: Forested areas
+- **Urban (ur)**: Developed/built areas
 
-**Purpose:** Complete transition matrix for all land uses
+### Time Coverage
+6 time periods from 2012-2070:
+- 2012-2020 (calibration period)
+- 2020-2030, 2030-2040, 2040-2050, 2050-2060, 2060-2070
 
-**Key Features:**
-- Includes unchanged land (e.g., Forest → Forest)
-- Separates Crop and Pasture as distinct categories
-- Contains "Total" rows for validation
+### Geographic Coverage  
+- 3,075 US counties across all 50 states
+- Organized by US Census regions (Northeast, Midwest, South, West)
 
-### 2. `landuse_transitions_ag`
+## Basic Query Examples
 
-Same as `landuse_transitions` but with agricultural aggregation.
-
-**Purpose:** Simplified view with combined agricultural land
-
-**Key Features:**
-- Combines Crop + Pasture into "Agriculture"
-- Reduces complexity for agricultural analysis
-- Maintains all other land use categories
-
-### 3. `landuse_changes_only`
-
-Filtered view excluding same-to-same transitions.
-
-**Purpose:** Focus on actual land use changes
-
-**Key Features:**
-- Excludes unchanged land (e.g., no Forest → Forest)
-- Smaller dataset for change analysis
-- Same schema as main table
-
-### 4. `landuse_changes_only_ag`
-
-Combines agricultural aggregation with change-only filtering.
-
-**Purpose:** Simplified change analysis with agricultural grouping
-
-**Key Features:**
-- Only actual changes
-- Agricultural land combined
-- Most focused view for policy analysis
-
-## Column Definitions
-
-### Core Columns (All Tables)
-
-| Column | Type | Description | Example |
-|--------|------|-------------|---------|
-| `scenario` | TEXT | Projection scenario name | "Baseline", "High Crop Demand" |
-| `year` | INTEGER | End year of the period | 2050 |
-| `year_range` | TEXT | Time period of transition | "2040-2050" |
-| `fips` | TEXT | County FIPS code | "06037" (Los Angeles) |
-| `from_land_use` | TEXT | Original land use | "Forest" |
-| `to_land_use` | TEXT | New land use | "Urban" |
-| `area_1000_acres` | REAL | Area in thousands of acres | 123.45 |
-
-### Indexes
-
-All tables have indexes on:
-- `scenario` - Fast filtering by scenario
-- `year` - Efficient time-based queries  
-- `fips` - Quick county lookups
-
-## Data Relationships
-
-### Scenario Values
+For detailed query patterns and examples, see [Basic Queries](../queries/basic-queries.md) and [Advanced Queries](../queries/advanced-queries.md).
 
 ```sql
--- Available scenarios
-SELECT DISTINCT scenario FROM landuse_transitions;
+-- Get all scenarios
+SELECT * FROM dim_scenario;
+
+-- Find counties in California
+SELECT * FROM dim_geography WHERE state_name = 'California';
+
+-- Basic land use transition query
+SELECT 
+    g.county_name,
+    s.scenario_name,
+    lu_from.landuse_name as from_landuse,
+    lu_to.landuse_name as to_landuse,
+    f.acres
+FROM fact_landuse_transitions f
+JOIN dim_geography g ON f.geography_id = g.geography_id
+JOIN dim_scenario s ON f.scenario_id = s.scenario_id
+JOIN dim_landuse lu_from ON f.from_landuse_id = lu_from.landuse_id
+JOIN dim_landuse lu_to ON f.to_landuse_id = lu_to.landuse_id
+WHERE f.transition_type = 'change'
+LIMIT 10;
 ```
-
-Common scenarios:
-- **Baseline** - Standard projections
-- **High Crop Demand** - Increased agricultural pressure
-- **High Forest** - Forest conservation emphasis
-- **High Urban** - Accelerated urbanization
-
-### Year Ranges
-
-The data uses decade intervals:
-
-| year_range | year (end) |
-|------------|------------|
-| 2012-2020 | 2020 |
-| 2020-2030 | 2030 |
-| 2030-2040 | 2040 |
-| ... | ... |
-| 2090-2100 | 2100 |
-
-### FIPS Code Structure
-
-FIPS codes identify counties:
-- First 2 digits: State (e.g., "06" = California)
-- Next 3 digits: County (e.g., "037" = Los Angeles)
-- Full code: "06037"
-
-## Land Use Categories
-
-### Standard Categories
-
-| Code | Land Use | Description |
-|------|----------|-------------|
-| Crop | Cropland | Agricultural land for crops |
-| Pasture | Pasture | Grazing land for livestock |
-| Forest | Forest | Forested areas |
-| Urban | Urban | Developed/built areas |
-| Range | Range | Rangeland/grassland |
-| Total | Total | Sum row/column (validation) |
-
-### Agricultural Aggregation
-
-In `*_ag` tables:
-- **Agriculture** = Crop + Pasture
-- Reduces 6 categories to 5
-- Simplifies agricultural analysis
-
-## Area Calculations
-
-### Understanding area_1000_acres
-
-```sql
--- Convert to acres
-actual_acres = area_1000_acres * 1000
-
--- Convert to square miles  
-square_miles = area_1000_acres * 1000 / 640
-
--- Convert to hectares
-hectares = area_1000_acres * 1000 * 0.404686
-```
-
-### Validation Queries
-
-```sql
--- Check total area consistency
-SELECT year, fips, SUM(area_1000_acres) as total_area
-FROM landuse_transitions
-WHERE from_land_use != 'Total'
-  AND to_land_use != 'Total'
-GROUP BY year, fips;
-
--- Verify transitions balance
-SELECT year, 
-       SUM(CASE WHEN from_land_use = 'Forest' THEN area_1000_acres ELSE 0 END) as forest_from,
-       SUM(CASE WHEN to_land_use = 'Forest' THEN area_1000_acres ELSE 0 END) as forest_to
-FROM landuse_transitions
-WHERE from_land_use != 'Total' AND to_land_use != 'Total'
-GROUP BY year;
-```
-
-## Query Patterns
-
-### Basic Transition Query
-
-```sql
--- Find specific transitions
-SELECT * FROM landuse_transitions
-WHERE from_land_use = 'Forest' 
-  AND to_land_use = 'Urban'
-  AND scenario = 'Baseline';
-```
-
-### Aggregation Query
-
-```sql
--- Total area by land use and year
-SELECT year, to_land_use, SUM(area_1000_acres) as total_area
-FROM landuse_transitions  
-WHERE from_land_use = to_land_use  -- Only unchanged land
-  AND to_land_use != 'Total'
-GROUP BY year, to_land_use;
-```
-
-### Change Analysis Query
-
-```sql
--- Net change in forest area
-SELECT year, 
-       SUM(CASE WHEN to_land_use = 'Forest' THEN area_1000_acres 
-                WHEN from_land_use = 'Forest' THEN -area_1000_acres 
-                ELSE 0 END) as net_forest_change
-FROM landuse_changes_only
-GROUP BY year;
-```
-
-### Cross-Scenario Comparison
-
-```sql
--- Compare scenarios
-SELECT scenario, SUM(area_1000_acres) as total_urban
-FROM landuse_transitions
-WHERE to_land_use = 'Urban' 
-  AND from_land_use = to_land_use
-  AND year = 2050
-GROUP BY scenario;
-```
-
-## Performance Tips
-
-1. **Use Appropriate Tables**
-   - Full analysis: `landuse_transitions`
-   - Change focus: `landuse_changes_only`
-   - Agricultural studies: `*_ag` tables
-
-2. **Leverage Indexes**
-   - Filter by indexed columns first
-   - Use scenario, year, fips in WHERE clauses
-
-3. **Aggregate Wisely**
-   - Sum areas before calculating percentages
-   - Group by fewer columns when possible
-
-4. **Exclude Totals**
-   - Always exclude 'Total' land use in calculations
-   - Use `WHERE from_land_use != 'Total'`
-
-## Data Quality Notes
-
-- **Consistency**: Total area per county should remain constant
-- **Completeness**: All counties have data for all years/scenarios
-- **Validation**: 'Total' rows/columns for cross-checking
-- **Precision**: Areas in 1000-acre units for manageable numbers
 
 ## Next Steps
 

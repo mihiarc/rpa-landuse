@@ -14,7 +14,7 @@ The RPA Land Use Analytics database is a comprehensive 372 MB DuckDB repository 
 | **Geographic Coverage** | 3,075 US counties |
 | **Climate Scenarios** | 20 scenarios (5 models × 4 combinations) |
 | **Time Periods** | 6 periods (2012-2070) |
-| **Total Land Tracked** | 1.67 billion acres |
+| **Total Land Tracked** | 16.7 million (1.67 billion actual acres) |
 | **Storage Efficiency** | 98.99% block utilization |
 
 ## Database Architecture
@@ -195,18 +195,18 @@ erDiagram
 
 | Type | Records | Percentage | Avg Acres |
 |------|---------|------------|-----------|
-| **Change** | 3,887,318 | 71.5% | 13.3 |
-| **Same** | 1,544,880 | 28.5% | 1,045.6 |
+| **Change** | 3,887,318 | 71.5% | 0.133 (13.3 actual acres) |
+| **Same** | 1,544,880 | 28.5% | 10.456 (1,045.6 actual acres) |
 
 ### Top Land Use Transitions
 
 | Transition | Total Acres | Number of Transitions |
 |------------|-------------|----------------------|
-| Crop → Pasture | 15.32 million | 347,000 |
-| Pasture → Crop | 12.63 million | 347,000 |
-| Forest → Urban | 5.10 million | 336,000 |
-| Pasture → Forest | 3.71 million | 333,000 |
-| Crop → Urban | 2.47 million | 348,000 |
+| Crop → Pasture | 153.2 thousand (15.32 million actual acres) | 347,000 |
+| Pasture → Crop | 126.3 thousand (12.63 million actual acres) | 347,000 |
+| Forest → Urban | 51.0 thousand (5.10 million actual acres) | 336,000 |
+| Pasture → Forest | 37.1 thousand (3.71 million actual acres) | 333,000 |
+| Crop → Urban | 24.7 thousand (2.47 million actual acres) | 348,000 |
 
 ## Analytical Views
 

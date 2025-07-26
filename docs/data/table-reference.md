@@ -22,7 +22,7 @@ This document provides detailed specifications for all 8 tables in the RPA Land 
 | `geography_id` | INTEGER | NOT NULL, FK | Reference to dim_geography table |
 | `from_landuse_id` | INTEGER | NOT NULL, FK | Reference to dim_landuse (source land use) |
 | `to_landuse_id` | INTEGER | NOT NULL, FK | Reference to dim_landuse (destination land use) |
-| `acres` | DECIMAL(15,4) | | Area in acres for this transition |
+| `acres` | DECIMAL(15,4) | | Area in hundreds of acres for this transition |
 | `transition_type` | VARCHAR | | 'change' or 'same' |
 | `created_at` | TIMESTAMP | | Record creation timestamp |
 
@@ -44,8 +44,8 @@ SELECT * FROM fact_landuse_transitions LIMIT 5;
 
 | Transition Type | Count | Percentage | Avg Acres |
 |----------------|-------|------------|-----------|
-| change | 3,887,318 | 71.5% | 13.3 |
-| same | 1,544,880 | 28.5% | 1,045.6 |
+| change | 3,887,318 | 71.5% | 0.133 (13.3 actual acres) |
+| same | 1,544,880 | 28.5% | 10.456 (1,045.6 actual acres) |
 
 #### Performance Notes
 

@@ -540,5 +540,5 @@ time duckdb data/processed/landuse_analytics.duckdb \
 
 - **Query Optimization**: See [DuckDB Optimization](../performance/duckdb-copy-optimization.md)
 - **Application Integration**: See [API Reference](../api/tools.md)
-- **Deployment Guide**: See [Streamlit Deployment](../docs/STREAMLIT_DEPLOYMENT.md)
+- **Performance Guide**: See [Streamlit Fragments](../performance/streamlit-fragments.md)
 - **Monitoring Setup**: See [Development Guide](../development/architecture.md)
