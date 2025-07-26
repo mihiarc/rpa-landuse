@@ -157,3 +157,4 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+data/processed/landuse_analytics.duckdb
