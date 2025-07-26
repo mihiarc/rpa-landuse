@@ -46,7 +46,7 @@ def add_land_area_view(db_path: str = "data/processed/landuse_analytics.duckdb")
                     -- Sum all land area (both 'same' and 'change' transitions give total area)
                     SUM(f.acres) as total_land_acres
                 FROM fact_landuse_transitions f
-                JOIN dim_geography_enhanced g ON f.geography_id = g.geography_id
+                JOIN dim_geography g ON f.geography_id = g.geography_id
                 JOIN dim_time t ON f.time_id = t.time_id
                 JOIN dim_scenario s ON f.scenario_id = s.scenario_id
                 -- Use earliest time period as baseline (most representative of actual area)
