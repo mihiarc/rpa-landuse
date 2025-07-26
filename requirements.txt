@@ -111,7 +111,7 @@ langchain-anthropic==0.3.17
     # via rpa-landuse-analytics (pyproject.toml)
 langchain-community==0.3.27
     # via rpa-landuse-analytics (pyproject.toml)
-langchain-core==0.3.68
+langchain-core==0.3.72
     # via
     #   langchain
     #   langchain-anthropic
