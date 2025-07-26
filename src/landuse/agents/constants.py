@@ -29,7 +29,7 @@ This database contains USDA Forest Service 2020 RPA Assessment land use projecti
   - transition_id (BIGINT): Unique identifier
   - scenario_id (INTEGER): Links to dim_scenario
   - time_id (INTEGER): Links to dim_time
-  - geography_id (INTEGER): Links to dim_geography_enhanced
+  - geography_id (INTEGER): Links to dim_geography
   - from_landuse_id (INTEGER): Source land use type
   - to_landuse_id (INTEGER): Destination land use type
   - acres (DECIMAL): Area in acres for this transition
@@ -50,7 +50,7 @@ This database contains USDA Forest Service 2020 RPA Assessment land use projecti
   - end_year (INTEGER): Ending year
   - period_length (INTEGER): Duration in years
 
-- **dim_geography_enhanced**: Geographic locations
+- **dim_geography**: Geographic locations
   - geography_id (INTEGER): Primary key
   - fips_code (VARCHAR): 5-digit FIPS county code
   - state_code (VARCHAR): 2-digit FIPS state code (e.g., '06' for California, NOT 'CA')
@@ -97,7 +97,7 @@ SELECT
     fl.landuse_name as from_landuse,
     AVG(f.acres) as avg_acres_urbanized
 FROM fact_landuse_transitions f
-JOIN dim_geography_enhanced g ON f.geography_id = g.geography_id
+JOIN dim_geography g ON f.geography_id = g.geography_id
 JOIN dim_landuse fl ON f.from_landuse_id = fl.landuse_id
 JOIN dim_landuse tl ON f.to_landuse_id = tl.landuse_id
 WHERE tl.landuse_name = 'Urban'

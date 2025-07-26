@@ -59,7 +59,27 @@ class SSPScenario(str, Enum):
 class TransitionType(str, Enum):
     """Types of land use transitions"""
     CHANGE = "change"
-    STABLE = "stable"
+    STABLE = "same"  # Fixed to match database values
+
+
+class IndicatorType(str, Enum):
+    """Types of socioeconomic indicators"""
+    DEMOGRAPHIC = "Demographic"
+    ECONOMIC = "Economic"
+
+
+class GrowthTrend(str, Enum):
+    """Growth trend classifications"""
+    LOW = "Low"
+    MEDIUM = "Medium"
+    HIGH = "High"
+
+
+class UrbanizationLevel(str, Enum):
+    """Urbanization level classifications"""
+    LOW = "Low"
+    MEDIUM = "Medium"
+    HIGH = "High"
 
 
 # Data Models
@@ -383,3 +403,161 @@ class SystemStatus(BaseModel):
     total_records: int
     last_query_time: Optional[float] = None
     error_message: Optional[str] = None
+
+
+# Socioeconomic Models
+class SocioeconomicDimension(DimensionTable):
+    """Socioeconomic scenario dimension data"""
+    socioeconomic_id: int
+    ssp_scenario: SSPScenario
+    scenario_name: str
+    narrative_description: Optional[str] = None
+    population_growth_trend: Optional[GrowthTrend] = None
+    economic_growth_trend: Optional[GrowthTrend] = None
+    urbanization_level: Optional[UrbanizationLevel] = None
+
+
+class IndicatorDimension(DimensionTable):
+    """Socioeconomic indicator dimension data"""
+    indicator_id: int
+    indicator_name: str
+    indicator_type: IndicatorType
+    unit_of_measure: str
+    description: Optional[str] = None
+
+
+class SocioeconomicProjection(BaseModel):
+    """Fact table record for socioeconomic projections"""
+    model_config = ConfigDict(extra="forbid")
+
+    projection_id: int
+    geography_id: int
+    socioeconomic_id: int
+    indicator_id: int
+    year: int = Field(ge=2010, le=2100)
+    value: float = Field(ge=0)
+    is_historical: bool = Field(default=False)
+
+    @field_validator('year')
+    @classmethod
+    def validate_year(cls, v: int) -> int:
+        """Validate projection year"""
+        if v < 2010 or v > 2100:
+            raise ValueError("Year must be between 2010 and 2100")
+        return v
+
+    @model_validator(mode='after')
+    def validate_historical_flag(self) -> 'SocioeconomicProjection':
+        """Validate historical flag based on year"""
+        if self.year <= 2020 and not self.is_historical:
+            self.is_historical = True
+        elif self.year > 2020 and self.is_historical:
+            self.is_historical = False
+        return self
+
+
+class PopulationMetric(BaseModel):
+    """Population-specific validation and processing"""
+    model_config = ConfigDict(extra="forbid")
+
+    fips_code: str
+    ssp_scenario: SSPScenario
+    year: int
+    population_thousands: float = Field(gt=0, description="Population in thousands")
+    growth_rate: Optional[float] = None
+
+    @field_validator('fips_code')
+    @classmethod
+    def validate_fips(cls, v: str) -> str:
+        """Validate FIPS code format"""
+        if not v.isdigit() or len(v) != 5:
+            raise ValueError("FIPS code must be 5 digits")
+        return v
+
+    @field_validator('population_thousands')
+    @classmethod
+    def validate_population(cls, v: float) -> float:
+        """Validate population is reasonable"""
+        if v > 50000:  # 50 million people in one county seems unreasonable
+            raise ValueError("Population seems unreasonably high")
+        return v
+
+
+class IncomeMetric(BaseModel):
+    """Income-specific validation and processing"""
+    model_config = ConfigDict(extra="forbid")
+
+    fips_code: str
+    ssp_scenario: SSPScenario
+    year: int
+    income_per_capita_2009usd: float = Field(gt=0, description="Per capita income in 2009 USD thousands")
+    income_category: str = Field(default="Per Capita")
+
+    @field_validator('fips_code')
+    @classmethod
+    def validate_fips(cls, v: str) -> str:
+        """Validate FIPS code format"""
+        if not v.isdigit() or len(v) != 5:
+            raise ValueError("FIPS code must be 5 digits")
+        return v
+
+    @field_validator('income_per_capita_2009usd')
+    @classmethod
+    def validate_income(cls, v: float) -> float:
+        """Validate income is reasonable"""
+        if v < 5 or v > 500:  # $5k to $500k in 2009 USD seems reasonable
+            raise ValueError("Income per capita outside reasonable range (5-500k USD)")
+        return v
+
+
+class SocioeconomicAnalysisRequest(BaseModel):
+    """Request for socioeconomic analysis"""
+    model_config = ConfigDict(extra="forbid")
+
+    analysis_type: Literal[
+        "population_growth",
+        "income_trends",
+        "ssp_comparison",
+        "demographic_drivers",
+        "economic_landuse_correlation"
+    ]
+    ssp_scenarios: Optional[list[SSPScenario]] = None
+    states: Optional[list[str]] = None
+    years: Optional[list[int]] = Field(
+        default=None,
+        description="Years to analyze"
+    )
+    indicators: Optional[list[str]] = Field(
+        default=None,
+        description="Indicators to include"
+    )
+    limit: int = Field(default=100, gt=0, le=1000)
+
+    @field_validator('years')
+    @classmethod
+    def validate_years(cls, v: Optional[list[int]]) -> Optional[list[int]]:
+        """Validate analysis years"""
+        if v is not None:
+            for year in v:
+                if year < 2010 or year > 2100:
+                    raise ValueError("Years must be between 2010 and 2100")
+        return v
+
+
+class IntegratedAnalysisResult(BaseModel):
+    """Result from integrated landuse + socioeconomic analysis"""
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
+    landuse_data: pd.DataFrame = Field(exclude=True)
+    socioeconomic_data: pd.DataFrame = Field(exclude=True)
+    correlation_metrics: dict[str, float]
+    insights: list[str]
+    demographic_drivers: Optional[dict[str, Any]] = None
+    economic_indicators: Optional[dict[str, Any]] = None
+
+    def to_dict(self) -> dict[str, Any]:
+        """Convert to dictionary for serialization"""
+        result = self.model_dump(exclude={'landuse_data', 'socioeconomic_data'})
+        result['landuse_data'] = self.landuse_data.to_dict(orient='records') if self.landuse_data is not None else []
+        result['socioeconomic_data'] = self.socioeconomic_data.to_dict(orient='records') if self.socioeconomic_data is not None else []
+        return result

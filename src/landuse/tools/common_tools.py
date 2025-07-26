@@ -41,7 +41,10 @@ def create_execute_query_tool(
         The database contains:
         - fact_landuse_transitions: Land use changes by county, year, and scenario
         - dim_scenario: Climate scenario details (RCP45/85, SSP1-5)
-        - dim_geography: County and state information
+        - dim_geography: County and state information with enhanced metadata
+        - fact_socioeconomic_projections: Population and income projections by SSP scenario
+        - dim_socioeconomic: SSP scenario narratives and characteristics  
+        - dim_indicators: Socioeconomic indicator definitions
         - dim_landuse: Land use categories (crop, pasture, forest, urban, rangeland)
         - dim_time: Time periods from 2012 to 2100
 
@@ -126,7 +129,7 @@ def _get_error_suggestion(error_msg: str) -> str:
     suggestions = {
         "no such column": "Check column names in the schema. Use exact column names.",
         "could not find column": "Verify column exists in the specified table.",
-        "no such table": "Available tables: fact_landuse_transitions, dim_scenario, dim_geography, dim_landuse, dim_time",
+        "no such table": "Available tables: fact_landuse_transitions, dim_scenario, dim_geography, dim_landuse, dim_time, fact_socioeconomic_projections, dim_socioeconomic, dim_indicators",
         "syntax error": "Check SQL syntax. Common issues: missing commas, unclosed quotes.",
         "ambiguous column": "Specify table name for columns (e.g., fact.year instead of year)",
         "division by zero": "Add WHERE clause to filter out zero values.",
@@ -198,6 +201,32 @@ def create_analysis_tool() -> Any:
                 "Consider both cropland and pasture when analyzing total agricultural impact."
             )
 
+        # Socioeconomic insights
+        if "population" in query_results.lower() and "growth" in original_question.lower():
+            insights.append(
+                "Population growth is a key driver of land use change. Higher population scenarios "
+                "(SSP3) typically lead to more urban expansion and agricultural pressure."
+            )
+
+        if "income" in query_results.lower() or "economic" in original_question.lower():
+            insights.append(
+                "Income levels correlate with development patterns. Higher income areas may experience "
+                "more rapid urban expansion, while economic development drives land use transitions."
+            )
+
+        if "ssp" in query_results.lower():
+            insights.append(
+                "SSP scenarios represent different socioeconomic pathways: "
+                "SSP1 (Sustainability), SSP2 (Middle Road), SSP3 (Regional Rivalry), SSP5 (Fossil Development). "
+                "Each scenario has distinct population, economic, and urbanization trends."
+            )
+
+        if "correlation" in original_question.lower() or "relationship" in original_question.lower():
+            insights.append(
+                "Consider analyzing both direct correlations (population vs. urban growth) and "
+                "indirect relationships (income growth driving agricultural intensification)."
+            )
+
         # Add geographic context if present
         if any(state in query_results.lower() for state in ["california", "texas", "florida"]):
             insights.append(
@@ -254,8 +283,264 @@ def create_schema_tool(schema: str) -> Any:
             if table_schema:
                 return "\n".join(table_schema)
             else:
-                return f"Table '{table_name}' not found. Available tables: fact_landuse_transitions, dim_scenario, dim_geography, dim_landuse, dim_time"
+                return f"Table '{table_name}' not found. Available tables: fact_landuse_transitions, dim_scenario, dim_geography, dim_landuse, dim_time, fact_socioeconomic_projections, dim_socioeconomic, dim_indicators"
         else:
             return schema
 
     return explore_landuse_schema
+
+
+def create_socioeconomic_analysis_tool() -> Any:
+    """
+    Create a tool for analyzing socioeconomic projections and correlations.
+
+    Returns:
+        Configured socioeconomic analysis tool
+    """
+
+    @tool
+    def analyze_socioeconomic_trends(
+        query_results: str,
+        analysis_type: str,
+        original_question: str,
+        additional_context: Optional[str] = None
+    ) -> str:
+        """
+        Analyze socioeconomic projections and their relationship to land use changes.
+
+        This tool provides specialized analysis for:
+        - Population growth trends and drivers
+        - Income and economic development patterns  
+        - SSP scenario comparisons
+        - Demographic-landuse correlations
+        - Economic drivers of land conversion
+
+        Args:
+            query_results: The socioeconomic query results to analyze
+            analysis_type: Type of analysis (population, income, correlation, etc.)
+            original_question: The original user question for context
+            additional_context: Any additional context for analysis
+
+        Returns:
+            Analysis and insights specific to socioeconomic trends
+        """
+        insights = []
+        
+        # Population-specific analysis
+        if "population" in analysis_type.lower():
+            insights.append(
+                "Population projections follow SSP narrative pathways. SSP3 shows highest growth "
+                "due to regional rivalry and slower demographic transition, while SSP1 shows "
+                "lower growth with rapid development and education improvements."
+            )
+            
+            if "growth" in query_results.lower() or "increase" in query_results.lower():
+                insights.append(
+                    "Population growth drives land development pressure. Fast-growing counties "
+                    "typically experience more forest-to-urban and agricultural-to-urban transitions."
+                )
+        
+        # Income-specific analysis  
+        if "income" in analysis_type.lower():
+            insights.append(
+                "Income projections reflect economic development pathways. SSP5 shows highest "
+                "per capita income growth due to fossil-fueled development, while SSP3 shows "
+                "slower income growth due to regional conflicts and inequality."
+            )
+            
+            if "per capita" in query_results.lower():
+                insights.append(
+                    "Per capita income (in constant 2009 USD) accounts for inflation. Rising income "
+                    "typically correlates with increased urban development and agricultural intensification."
+                )
+        
+        # Correlation analysis
+        if "correlation" in analysis_type.lower() or "relationship" in analysis_type.lower():
+            insights.append(
+                "Key correlations to examine: (1) Population growth → Urban expansion, "
+                "(2) Income growth → Agricultural intensification, (3) Economic development → Forest loss, "
+                "(4) Urbanization → Infrastructure development."
+            )
+            
+            insights.append(
+                "Consider time lags between socioeconomic changes and land use responses. "
+                "Population growth may precede urban development by 5-10 years."
+            )
+        
+        # SSP scenario context
+        if any(ssp in query_results.lower() for ssp in ["ssp1", "ssp2", "ssp3", "ssp5"]):
+            insights.append(
+                "SSP Scenario Context:\n"
+                "• SSP1 (Sustainability): Low population growth, medium-high income, sustainable development\n"
+                "• SSP2 (Middle Road): Medium population/income growth, gradual progress\n" 
+                "• SSP3 (Regional Rivalry): High population growth, low income growth, fragmented development\n"
+                "• SSP5 (Fossil Development): Low population growth, high income growth, energy-intensive lifestyle"
+            )
+        
+        # Regional patterns
+        if any(region in query_results.lower() for region in ["south", "west", "northeast", "midwest"]):
+            insights.append(
+                "Regional differences in socioeconomic trends reflect historical patterns, policy differences, "
+                "and economic structures. Southern and Western states often show higher population growth rates."
+            )
+        
+        # Combine insights
+        if insights:
+            return "\n\n".join(["Socioeconomic Analysis:"] + [f"• {insight}" for insight in insights])
+        else:
+            return "Socioeconomic data analysis complete. Consider examining trends over time or comparing scenarios for deeper insights."
+
+    return analyze_socioeconomic_trends
+
+
+def create_integration_query_tool() -> Any:
+    """
+    Create a tool for suggesting integrated landuse + socioeconomic queries.
+
+    Returns:
+        Configured integration query suggestion tool
+    """
+
+    @tool 
+    def suggest_integration_queries(
+        user_question: str,
+        analysis_focus: Optional[str] = None
+    ) -> str:
+        """
+        Suggest SQL queries that integrate landuse and socioeconomic data.
+
+        This tool helps construct queries that combine:
+        - Land use transitions with population/income trends
+        - Development patterns with demographic drivers
+        - Climate scenarios with socioeconomic pathways
+        - County-level correlations across datasets
+
+        Args:
+            user_question: The user's question about integrated analysis
+            analysis_focus: Optional focus area (population, income, development, etc.)
+
+        Returns:
+            Suggested SQL queries and analysis approaches
+        """
+        suggestions = []
+        
+        # Base integration patterns
+        if "population" in user_question.lower() and "urban" in user_question.lower():
+            suggestions.append(
+                "Population-Urban Development Analysis:\n"
+                "```sql\n"
+                "SELECT \n"
+                "    g.state_name,\n"
+                "    lu.ssp_scenario,\n"
+                "    SUM(lu.acres) as urban_expansion_acres,\n"
+                "    AVG(lu.population_start) as avg_population,\n"
+                "    SUM(lu.acres) / AVG(lu.population_start) as acres_per_1000_people\n"
+                "FROM v_landuse_socioeconomic lu\n"
+                "JOIN dim_geography g ON lu.fips_code = g.fips_code\n"
+                "WHERE lu.to_landuse = 'Urban' AND lu.from_landuse != 'Urban'\n"
+                "GROUP BY g.state_name, lu.ssp_scenario\n"
+                "ORDER BY urban_expansion_acres DESC\n"
+                "```"
+            )
+        
+        if "income" in user_question.lower() and ("agricultural" in user_question.lower() or "farm" in user_question.lower()):
+            suggestions.append(
+                "Income-Agricultural Change Analysis:\n"
+                "```sql\n"
+                "SELECT \n"
+                "    lu.county_name,\n"
+                "    lu.ssp_scenario,\n"
+                "    SUM(CASE WHEN lu.from_landuse IN ('Crop', 'Pasture') AND lu.to_landuse = 'Urban' \n"
+                "             THEN lu.acres ELSE 0 END) as ag_to_urban_acres,\n"
+                "    AVG(lu.income_start) as avg_income,\n"
+                "    CASE WHEN AVG(lu.income_start) > 50 THEN 'High Income'\n"
+                "         WHEN AVG(lu.income_start) > 30 THEN 'Medium Income'\n"
+                "         ELSE 'Low Income' END as income_category\n"
+                "FROM v_landuse_socioeconomic lu\n"
+                "WHERE lu.from_landuse IN ('Crop', 'Pasture')\n"
+                "GROUP BY lu.county_name, lu.ssp_scenario, income_category\n"
+                "HAVING ag_to_urban_acres > 0\n"
+                "ORDER BY ag_to_urban_acres DESC\n"
+                "```"
+            )
+        
+        if "correlation" in user_question.lower() or "relationship" in user_question.lower():
+            suggestions.append(
+                "Cross-Dataset Correlation Analysis:\n"
+                "```sql\n"
+                "WITH county_metrics AS (\n"
+                "    SELECT \n"
+                "        g.fips_code,\n"
+                "        g.county_name,\n"
+                "        g.state_name,\n"
+                "        -- Population metrics\n"
+                "        p1.value as pop_2020,\n"
+                "        p2.value as pop_2050,\n"
+                "        (p2.value - p1.value) / p1.value as pop_growth_rate,\n"
+                "        -- Income metrics\n"
+                "        i1.value as income_2020,\n"
+                "        i2.value as income_2050,\n"
+                "        (i2.value - i1.value) / i1.value as income_growth_rate,\n"
+                "        -- Land use metrics\n"
+                "        SUM(CASE WHEN f.to_landuse_id = (SELECT landuse_id FROM dim_landuse WHERE landuse_code = 'ur') \n"
+                "                 AND f.from_landuse_id != f.to_landuse_id THEN f.acres ELSE 0 END) as urban_expansion\n"
+                "    FROM dim_geography g\n"
+                "    LEFT JOIN v_population_trends p1 ON g.fips_code = p1.fips_code AND p1.year = 2020 AND p1.ssp_scenario = 'SSP2'\n"
+                "    LEFT JOIN v_population_trends p2 ON g.fips_code = p2.fips_code AND p2.year = 2050 AND p2.ssp_scenario = 'SSP2'\n"
+                "    LEFT JOIN v_income_trends i1 ON g.fips_code = i1.fips_code AND i1.year = 2020 AND i1.ssp_scenario = 'SSP2'\n"
+                "    LEFT JOIN v_income_trends i2 ON g.fips_code = i2.fips_code AND i2.year = 2050 AND i2.ssp_scenario = 'SSP2'\n"
+                "    LEFT JOIN fact_landuse_transitions f ON g.geography_id = f.geography_id\n"
+                "    GROUP BY 1,2,3,4,5,6,7,8,9\n"
+                ")\n"
+                "SELECT \n"
+                "    state_name,\n"
+                "    CORR(pop_growth_rate, urban_expansion) as pop_urban_correlation,\n"
+                "    CORR(income_growth_rate, urban_expansion) as income_urban_correlation,\n"
+                "    COUNT(*) as county_count\n"
+                "FROM county_metrics\n"
+                "WHERE pop_growth_rate IS NOT NULL AND income_growth_rate IS NOT NULL\n"
+                "GROUP BY state_name\n"
+                "ORDER BY pop_urban_correlation DESC\n"
+                "```"
+            )
+        
+        if "scenario" in user_question.lower() and "comparison" in user_question.lower():
+            suggestions.append(
+                "Multi-Scenario Comparison:\n"
+                "```sql\n"
+                "SELECT \n"
+                "    sc.ssp_scenario,\n"
+                "    sc.scenario_name,\n"
+                "    -- Population projections\n"
+                "    AVG(CASE WHEN pt.year = 2050 THEN pt.population_thousands END) as avg_pop_2050,\n"
+                "    -- Income projections\n"
+                "    AVG(CASE WHEN it.year = 2050 THEN it.income_per_capita_2009usd END) as avg_income_2050,\n"
+                "    -- Land use changes\n"
+                "    SUM(CASE WHEN s.ssp_scenario = sc.ssp_scenario AND lu_to.landuse_code = 'ur' \n"
+                "             AND lu_from.landuse_code != 'ur' THEN f.acres ELSE 0 END) as total_urban_expansion\n"
+                "FROM dim_socioeconomic sc\n"
+                "LEFT JOIN v_population_trends pt ON sc.ssp_scenario = pt.ssp_scenario\n"
+                "LEFT JOIN v_income_trends it ON sc.ssp_scenario = it.ssp_scenario AND it.year = pt.year\n"
+                "LEFT JOIN dim_scenario s ON sc.ssp_scenario = s.ssp_scenario\n"
+                "LEFT JOIN fact_landuse_transitions f ON s.scenario_id = f.scenario_id\n"
+                "LEFT JOIN dim_landuse lu_from ON f.from_landuse_id = lu_from.landuse_id\n"
+                "LEFT JOIN dim_landuse lu_to ON f.to_landuse_id = lu_to.landuse_id\n"
+                "GROUP BY sc.ssp_scenario, sc.scenario_name\n"
+                "ORDER BY total_urban_expansion DESC\n"
+                "```"
+            )
+        
+        # Generic suggestions if no specific pattern matched
+        if not suggestions:
+            suggestions.append(
+                "General Integration Approaches:\n"
+                "1. Use v_landuse_socioeconomic view for combined analysis\n"
+                "2. Join v_population_trends and v_income_trends with landuse data on FIPS codes and scenarios\n"
+                "3. Compare SSP scenarios across both socioeconomic and landuse dimensions\n"
+                "4. Analyze time series relationships between demographic and land use changes\n"
+                "5. Examine county-level correlations using statistical functions (CORR, REGR_SLOPE)"
+            )
+        
+        return "\n\n".join(["Integration Query Suggestions:"] + suggestions)
+
+    return suggest_integration_queries

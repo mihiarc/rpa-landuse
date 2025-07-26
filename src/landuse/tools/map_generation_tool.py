@@ -113,7 +113,7 @@ class MapGenerationTool:
                         g.area_sqmi,
                         SUM(CASE WHEN l.landuse_name = ? THEN f.acres ELSE 0 END) as landuse_acres,
                         SUM(f.acres) as total_acres
-                    FROM dim_geography_enhanced g
+                    FROM dim_geography g
                     JOIN fact_landuse_transitions f ON g.geography_id = f.geography_id
                     JOIN dim_landuse l ON f.to_landuse_id = l.landuse_id
                     JOIN dim_scenario s ON f.scenario_id = s.scenario_id
@@ -209,7 +209,7 @@ class MapGenerationTool:
                         SUM(CASE WHEN l.landuse_name = ? THEN f.acres ELSE 0 END) as landuse_acres,
                         SUM(f.acres) as total_acres
                     FROM fact_landuse_transitions f
-                    JOIN dim_geography_enhanced g ON f.geography_id = g.geography_id
+                    JOIN dim_geography g ON f.geography_id = g.geography_id
                     JOIN dim_landuse l ON f.to_landuse_id = l.landuse_id
                     JOIN dim_scenario s ON f.scenario_id = s.scenario_id
                     JOIN dim_time t ON f.time_id = t.time_id
@@ -289,7 +289,7 @@ class MapGenerationTool:
                     g.state_name,
                     SUM(f.acres) as transition_acres
                 FROM fact_landuse_transitions f
-                JOIN dim_geography_enhanced g ON f.geography_id = g.geography_id
+                JOIN dim_geography g ON f.geography_id = g.geography_id
                 JOIN dim_landuse fl ON f.from_landuse_id = fl.landuse_id
                 JOIN dim_landuse tl ON f.to_landuse_id = tl.landuse_id
                 JOIN dim_scenario s ON f.scenario_id = s.scenario_id

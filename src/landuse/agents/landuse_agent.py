@@ -426,7 +426,7 @@ Focus on:
         if "no such column" in error_lower or "could not find column" in error_lower:
             return "Check column names in the schema. Use exact column names from the database schema."
         elif "no such table" in error_lower:
-            return "Check table names. Available tables: fact_landuse_transitions, dim_scenario, dim_geography_enhanced, dim_landuse, dim_time"
+            return "Check table names. Available tables: fact_landuse_transitions, dim_scenario, dim_geography, dim_landuse, dim_time"
         elif "syntax error" in error_lower:
             return "Check SQL syntax. Common issues: missing commas, unclosed quotes, invalid keywords."
         elif "ambiguous column" in error_lower:
