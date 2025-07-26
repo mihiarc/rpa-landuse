@@ -49,10 +49,10 @@ class TestStreamlitApp:
     def test_check_environment_all_good(self, mock_env):
         """Test environment check when everything is configured"""
         # Import here to avoid issues with module-level imports
-        with patch('streamlit_app.Path') as mock_path:
+        with patch('landuse_app.Path') as mock_path:
             mock_path.return_value.exists.return_value = True
 
-            from streamlit_app import check_environment
+            from landuse_app import check_environment
 
             checks = check_environment()
 
@@ -65,7 +65,7 @@ class TestStreamlitApp:
         monkeypatch.setenv("LANDUSE_DB_PATH", "/nonexistent/path.duckdb")
         monkeypatch.setenv("OPENAI_API_KEY", "test-key")
 
-        from streamlit_app import check_environment
+        from landuse_app import check_environment
 
         checks = check_environment()
 
@@ -78,7 +78,7 @@ class TestStreamlitApp:
         monkeypatch.delenv("OPENAI_API_KEY", raising=False)
         monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
 
-        from streamlit_app import check_environment
+        from landuse_app import check_environment
 
         checks = check_environment()
 
@@ -86,9 +86,9 @@ class TestStreamlitApp:
         assert checks['api_keys'] is False
         assert checks['dependencies'] is True
 
-    @patch('streamlit_app.st')
-    @patch('streamlit_app.check_environment')
-    @patch('streamlit_app.duckdb')
+    @patch('landuse_app.st')
+    @patch('landuse_app.check_environment')
+    @patch('landuse_app.duckdb')
     def test_show_welcome_page(self, mock_duckdb, mock_check_env, mock_st, mock_env):
         """Test welcome page display"""
         # Mock environment checks
@@ -107,7 +107,7 @@ class TestStreamlitApp:
         mock_st.columns.return_value = [Mock(), Mock()]
         mock_st.metric = Mock()
 
-        from streamlit_app import show_welcome_page
+        from landuse_app import show_welcome_page
 
         show_welcome_page()
 
@@ -122,8 +122,8 @@ class TestStreamlitApp:
         assert mock_conn.execute.called
         mock_conn.close.assert_called()
 
-    @patch('streamlit_app.st')
-    @patch('streamlit_app.check_environment')
+    @patch('landuse_app.st')
+    @patch('landuse_app.check_environment')
     def test_show_welcome_page_with_warnings(self, mock_check_env, mock_st):
         """Test welcome page with system warnings"""
         # Mock environment checks with issues
@@ -135,7 +135,7 @@ class TestStreamlitApp:
 
         mock_st.columns.return_value = [Mock(), Mock()]
 
-        from streamlit_app import show_welcome_page
+        from landuse_app import show_welcome_page
 
         show_welcome_page()
 
@@ -143,7 +143,7 @@ class TestStreamlitApp:
         mock_st.warning.assert_called()
         assert "Some components need setup" in str(mock_st.warning.call_args)
 
-    @patch('streamlit_app.st')
+    @patch('landuse_app.st')
     def test_create_pages(self, mock_st):
         """Test page creation"""
         mock_st.Page = Mock(side_effect=lambda *args, **kwargs: Mock(
@@ -151,7 +151,7 @@ class TestStreamlitApp:
             icon=kwargs.get('icon')
         ))
 
-        from streamlit_app import create_pages
+        from landuse_app import create_pages
 
         pages = create_pages()
 
@@ -179,8 +179,8 @@ class TestStreamlitApp:
         assert "Data Extraction" in page_titles
         assert "Settings & Help" in page_titles
 
-    @patch('streamlit_app.st')
-    @patch('streamlit_app.create_pages')
+    @patch('landuse_app.st')
+    @patch('landuse_app.create_pages')
     def test_main_function(self, mock_create_pages, mock_st):
         """Test main application entry point"""
         # Mock page structure
@@ -195,7 +195,7 @@ class TestStreamlitApp:
         mock_pg = Mock()
         mock_st.navigation.return_value = mock_pg
 
-        from streamlit_app import main
+        from landuse_app import main
 
         main()
 
@@ -212,7 +212,7 @@ class TestStreamlitApp:
         """Test that page config is set correctly"""
         with patch('streamlit.set_page_config') as mock_config:
             # Import triggers the set_page_config call
-            import streamlit_app
+            import landuse_app
 
             # Verify set_page_config was called
             mock_config.assert_called_once()
@@ -232,7 +232,7 @@ class TestStreamlitApp:
         """Test that custom CSS is injected"""
         with patch('streamlit.markdown') as mock_markdown:
             with patch('streamlit.set_page_config'):
-                import streamlit_app
+                import landuse_app
 
                 # Find CSS injection call
                 css_calls = [call for call in mock_markdown.call_args_list
@@ -248,11 +248,11 @@ class TestStreamlitApp:
                 assert '.status-ok' in css_content
                 assert 'unsafe_allow_html=True' in str(css_calls[0][1])
 
-    @patch('streamlit_app.load_dotenv')
+    @patch('landuse_app.load_dotenv')
     def test_environment_loading(self, mock_load_dotenv):
         """Test that environment variables are loaded"""
         with patch('streamlit.set_page_config'):
-            import streamlit_app
+            import landuse_app
 
             # Verify load_dotenv was called for both .env files
             assert mock_load_dotenv.call_count >= 2

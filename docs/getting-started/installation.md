@@ -110,7 +110,7 @@ uv run landuse-agent
 uv run python -m landuse.agents.agent
 
 # Test the Streamlit dashboard
-uv run streamlit run streamlit_app.py
+uv run streamlit run landuse_app.py
 ```
 
 If your API keys are configured correctly, you should see:

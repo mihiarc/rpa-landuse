@@ -22,7 +22,7 @@ uv run python setup_agents.py
 #### Streamlit Dashboard (Recommended)
 ```bash
 # Modern web dashboard with chat interface and visualizations
-uv run streamlit run streamlit_app.py
+uv run streamlit run landuse_app.py
 
 # Features:
 # - Natural language chat interface
@@ -89,7 +89,7 @@ duckdb data/processed/landuse_analytics.duckdb
 
 ### Key Components
 
-**Streamlit Dashboard** (`streamlit_app.py`):
+**Streamlit Dashboard** (`landuse_app.py`):
 - Modern web interface with multipage navigation using st.Page and st.navigation
 - 💬 **Chat Interface**: Natural language queries with conversation history
 - 📊 **Analytics Dashboard**: 
@@ -271,7 +271,7 @@ duckdb data/processed/landuse_analytics.duckdb
 ## Key Features
 
 ### Web Dashboard (Streamlit)
-**Modern Multipage Architecture** (`streamlit_app.py`):
+**Modern Multipage Architecture** (`landuse_app.py`):
 - **Navigation**: Uses modern `st.navigation()` API with organized page groups
 - **Responsive Design**: Optimized CSS for wide layouts and mobile compatibility
 - **Error Handling**: Comprehensive error catching with helpful diagnostics

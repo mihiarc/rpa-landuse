@@ -96,7 +96,7 @@ Get started analyzing RPA land use projections:
 
 3. **Launch the dashboard**
    ```bash
-   uv run streamlit run streamlit_app.py
+   uv run streamlit run landuse_app.py
    ```
 
 4. **Start exploring!**

@@ -23,7 +23,7 @@ uv run landuse-agent
 uv run python -m landuse.agents.agent
 
 # Or launch the web dashboard
-uv run streamlit run streamlit_app.py
+uv run streamlit run landuse_app.py
 ```
 
 ### 2. Explore RPA Scenarios

@@ -22,7 +22,7 @@ The repository is configured with Git LFS to handle large files:
 ### Required Files
 
 Ensure these files are present in your repository:
-- `streamlit_app.py` - Main Streamlit application with modern navigation
+- `landuse_app.py` - Main Streamlit application with modern navigation
 - `views/` directory - Individual page implementations:
   - `views/chat.py` - Natural language chat interface
   - `views/analytics.py` - Pre-built analytics dashboard
@@ -55,7 +55,7 @@ git push origin main
 3. Connect your GitHub account if not already connected
 4. Select your repository: `rpa-landuse`
 5. Select branch: `main`
-6. Main file path: `streamlit_app.py`
+6. Main file path: `landuse_app.py`
 
 ### 3. Configure Secrets
 
@@ -148,10 +148,10 @@ cp config/.env.example config/.env
 # Edit config/.env to add your API keys
 
 # Run the app
-uv run streamlit run streamlit_app.py
+uv run streamlit run landuse_app.py
 
 # Or run with environment variables directly
-OPENAI_API_KEY="your-key" uv run streamlit run streamlit_app.py
+OPENAI_API_KEY="your-key" uv run streamlit run landuse_app.py
 ```
 
 ### Streamlit Version Requirements

@@ -10,7 +10,7 @@ import sys
 from pathlib import Path
 
 if os.getenv("STREAMLIT_RUNTIME_ENV") != "cloud":
-    print("DEBUG: Starting streamlit_app.py")
+    print("DEBUG: Starting landuse_app.py")
     print(f"DEBUG: Python executable: {sys.executable}")
     print(f"DEBUG: Python version: {sys.version}")
 

@@ -65,7 +65,7 @@ with LanduseAgent(config) as agent:
 The knowledge base is automatically available in the Streamlit app when enabled:
 
 ```bash
-LANDUSE_ENABLE_KNOWLEDGE_BASE=true uv run streamlit run streamlit_app.py
+LANDUSE_ENABLE_KNOWLEDGE_BASE=true uv run streamlit run landuse_app.py
 ```
 
 ## Example Queries

@@ -237,12 +237,14 @@ The database includes 4 pre-built analytical views for common query patterns:
 ### Index Strategy
 
 **Primary Indexes:**
+
 - `idx_geography_fips` - County lookups
 - `idx_geography_state` - State-level filtering
 - `idx_scenario_name` - Scenario comparisons
 - `idx_landuse_code` - Land use filtering
 
 **Composite Indexes:**
+
 - `idx_fact_composite` - Multi-dimensional fact table queries
 - `idx_fact_landuse` - Land use transition patterns
 - `idx_socioeconomic_composite` - Demographic analysis
@@ -283,7 +285,7 @@ duckdb data/processed/landuse_analytics.duckdb
 ### Application Interfaces
 ```bash
 # Streamlit Web Dashboard
-uv run streamlit run streamlit_app.py
+uv run streamlit run landuse_app.py
 
 # Natural Language Query Agent
 uv run python -m landuse.agents.agent

@@ -6,43 +6,49 @@ The `constants.py` file serves as a centralized configuration and knowledge base
 
 ## Architecture Diagram
 
-```
-┌─────────────────────────────────────────────────────────┐
-│                    constants.py                          │
-│                                                          │
-│  ┌─────────────────┐  ┌──────────────────┐             │
-│  │  STATE_NAMES    │  │ SCHEMA_INFO      │             │
-│  │  - State codes  │  │  TEMPLATE        │             │
-│  │  - State names  │  │ - Table schemas  │             │
-│  └────────┬────────┘  └────────┬─────────┘             │
-│           │                     │                        │
-│  ┌────────▼────────┐  ┌────────▼─────────┐             │
-│  │ DEFAULT_        │  │ QUERY_EXAMPLES   │             │
-│  │ ASSUMPTIONS     │  │ - SQL templates  │             │
-│  │ - Scenarios     │  │ - Common queries │             │
-│  │ - Time periods  │  └────────┬─────────┘             │
-│  └────────┬────────┘           │                        │
-│           │                     │                        │
-│  ┌────────▼────────┐  ┌────────▼─────────┐             │
-│  │ DB_CONFIG       │  │ MODEL_CONFIG     │             │
-│  │ - Default path  │  │ - Temperature    │             │
-│  │ - Query limits  │  │ - Max tokens     │             │
-│  └────────┬────────┘  └────────┬─────────┘             │
-└───────────┼────────────────────┼────────────────────────┘
-            │                     │
-            └─────────┬───────────┘
-                      │
-                      ▼
-        ┌─────────────────────────────┐
-        │       agent.py              │
-        │                             │
-        │  Uses constants for:        │
-        │  • Configuration           │
-        │  • Schema knowledge        │
-        │  • Query templates         │
-        │  • State mappings         │
-        │  • Default behaviors      │
-        └─────────────────────────────┘
+```mermaid
+graph TD
+    subgraph "Configuration Layer"
+        A[constants.py] --> B[STATE_NAMES<br/>State codes & names]
+        A --> C[SCHEMA_INFO_TEMPLATE<br/>Table schemas]
+        A --> D[DEFAULT_ASSUMPTIONS<br/>Scenarios & time periods]
+        A --> E[QUERY_EXAMPLES<br/>SQL templates]
+        A --> F[DB_CONFIG<br/>Default path & limits]
+        A --> G[MODEL_CONFIG<br/>Temperature & tokens]
+    end
+    
+    subgraph "Agent Layer"
+        H[LanduseAgent<br/>agent.py]
+    end
+    
+    B --> H
+    C --> H
+    D --> H
+    E --> H
+    F --> H
+    G --> H
+    
+    subgraph "Agent Uses Constants For"
+        I[Configuration]
+        J[Schema Knowledge]
+        K[Query Templates]
+        L[State Mappings]
+        M[Default Behaviors]
+    end
+    
+    H --> I
+    H --> J
+    H --> K
+    H --> L
+    H --> M
+    
+    style A fill:#e1f5fe
+    style H fill:#f3e5f5
+    style I fill:#e8f5e8
+    style J fill:#e8f5e8
+    style K fill:#e8f5e8
+    style L fill:#e8f5e8
+    style M fill:#e8f5e8
 ```
 
 ## How Each Constant is Used
