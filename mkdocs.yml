@@ -53,6 +53,11 @@ nav:
     - Advanced Queries: queries/advanced-queries.md
     - Query Examples: queries/examples.md
   - Data & Schemas:
+    - Database Overview: data/database-overview.md
+    - Table Reference: data/table-reference.md
+    - View Definitions: data/view-definitions.md
+    - Data Dictionary: data/data-dictionary.md
+    - Technical Specifications: data/technical-specifications.md
     - Data Sources: data/sources.md
     - Database Schema: data/schema.md
     - DuckDB Schema: data/duckdb-schema.md
