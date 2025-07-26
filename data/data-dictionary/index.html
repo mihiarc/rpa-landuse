@@ -2940,14 +2940,14 @@
 <li><strong>Field Name</strong>: <code>acres</code></li>
 <li><strong>Type</strong>: DECIMAL(15,4)</li>
 <li><strong>Definition</strong>: Area measurement for land use transitions</li>
-<li><strong>Unit</strong>: US acres (1 acre = 0.404686 hectares)</li>
+<li><strong>Unit</strong>: Hundreds of acres (multiply by 100 for actual acres)</li>
 <li><strong>Business Context</strong>: </li>
-<li><strong>Small Values</strong>: Precision for urban development (typical: 1-50 acres)</li>
-<li><strong>Large Values</strong>: Agricultural and forest areas (typical: 100-10,000+ acres)</li>
+<li><strong>Small Values</strong>: Urban development (typical: 0.1-5.0 = 10-500 actual acres)</li>
+<li><strong>Large Values</strong>: Agricultural and forest areas (typical: 10-1,000 = 1,000-100,000 actual acres)</li>
 <li><strong>Conversion Factors</strong>:</li>
-<li>1 acre = 4,047 square meters</li>
-<li>640 acres = 1 square mile</li>
-<li>1 acre = 0.404686 hectares</li>
+<li>Stored value × 100 = actual acres</li>
+<li>Stored value × 100 × 0.404686 = hectares</li>
+<li>Stored value × 100 ÷ 640 = square miles</li>
 </ul>
 <h4 id="population-thousands">Population (Thousands)<a class="headerlink" href="#population-thousands" title="Permanent link">&para;</a></h4>
 <ul>
