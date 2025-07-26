@@ -1,146 +1,347 @@
-# Where and How the System Prompt is Stored
+# Modern System Prompt Architecture
 
-## Location
+## Location and Design
 
-The system prompt is **not stored in a separate file**. Instead, it's dynamically generated within the `agent.py` file by the `_get_system_prompt()` method (lines 391-429).
+The system prompt system has been **modernized with a centralized, modular approach**. Instead of being hardcoded in agent files, prompts are now managed through a dedicated `prompts.py` module with configurable variations and domain specialization.
 
-## Architecture
+## Modern Modular Architecture
 
+```mermaid
+graph TD
+    A[prompts.py] --> B[get_system_prompt\\(\\)]
+    C[LanduseConfig] --> B
+    D[constants.py] --> E[SCHEMA_INFO_TEMPLATE]
+    E --> B
+    
+    B --> F[SYSTEM_PROMPT_BASE]
+    B --> G[Analysis Style Variants]
+    B --> H[Domain Focus Variants]
+    B --> I[Map Generation Section]
+    
+    F --> J[Complete System Prompt]
+    G --> J
+    H --> J
+    I --> J
+    
+    J --> K[LanduseAgent]
+    
+    subgraph "Prompt Templates"
+        F
+        L[DETAILED_ANALYSIS_PROMPT]
+        M[EXECUTIVE_SUMMARY_PROMPT]
+        N[AGRICULTURAL_FOCUS_PROMPT]
+        O[CLIMATE_FOCUS_PROMPT]
+        P[URBAN_PLANNING_PROMPT]
+    end
+    
+    subgraph "Configuration-Driven"
+        C
+        Q[analysis_style]
+        R[domain_focus]
+        S[include_maps]
+    end
+    
+    L --> G
+    M --> G
+    N --> H
+    O --> H
+    P --> H
+    
+    Q --> G
+    R --> H
+    S --> I
 ```
-┌─────────────────────────────────────────────────┐
-│                  agent.py                        │
-│                                                  │
-│  def _get_system_prompt(self, include_maps):    │
-│      ┌─────────────────────────────────┐        │
-│      │  Base Prompt (hardcoded)        │        │
-│      │  - Role definition              │        │
-│      │  - Instructions                 │        │
-│      │  - Query patterns               │        │
-│      └──────────────┬──────────────────┘        │
-│                     │                            │
-│      ┌──────────────▼──────────────────┐        │
-│      │  Dynamic Content                │        │
-│      │  - {self.schema_info}           │◄───────┼── From SCHEMA_INFO_TEMPLATE
-│      │  - DEFAULT_ASSUMPTIONS          │◄───────┼── From constants.py
-│      │  - State codes                  │        │
-│      └──────────────┬──────────────────┘        │
-│                     │                            │
-│      ┌──────────────▼──────────────────┐        │
-│      │  Conditional Content            │        │
-│      │  - Map generation instructions  │        │
-│      │  (if include_maps=True)        │        │
-│      └─────────────────────────────────┘        │
-└─────────────────────────────────────────────────┘
-```
 
-## System Prompt Structure
+## Modular Prompt System
 
-### 1. **Base Prompt** (Hardcoded in method)
+### 1. **Base Prompt Template** (From prompts.py)
 ```python
-"""You are a specialized Landuse Data Analyst AI that converts natural language questions into DuckDB SQL queries.
+# From src/landuse/agents/prompts.py
+SYSTEM_PROMPT_BASE = """You are a land use analytics expert with access to the RPA Assessment database.
+
+The database contains projections for land use changes across US counties from 2012-2100 under different climate scenarios.
+
+KEY CONTEXT:
+- Land use categories: crop, pasture, forest, urban, rangeland
+- Scenarios combine climate (RCP45/85) and socioeconomic (SSP1-5) pathways
+- Development is irreversible - once land becomes urban, it stays urban
 
 DATABASE SCHEMA:
-{self.schema_info}  # <-- Injected from constants.py
+{schema_info}  # <-- Injected from constants.py
 
-INSTRUCTIONS:
-1. Convert natural language questions to appropriate SQL queries
-2. Use the star schema joins to get meaningful results
-3. Focus on relevant metrics (acres, transitions, geographic patterns)
-4. Add meaningful ORDER BY clauses
-5. Include appropriate LIMIT clauses
-6. Explain the business meaning of results
+CRITICAL INSTRUCTION: ALWAYS EXECUTE ANALYTICAL QUERIES, NOT JUST DATA CHECKS!
 
-DEFAULT ASSUMPTIONS (when user doesn't specify):
-- Scenarios: Average across all scenarios (typical outcome)
-- Time Periods: Full range 2012-2100
-- Geographic Scope: All states/counties
-- Transition Type: Focus on 'change' transitions
+When a user asks analytical questions like "compare forest loss across scenarios", you MUST:
+1. Execute SQL queries that provide the actual comparison data
+2. Show numerical results, not just confirm data exists
+3. Analyze the differences between scenarios
+4. Provide specific insights based on the actual numbers
 
-ALWAYS CLEARLY STATE YOUR ASSUMPTIONS in the response.
-
-COMMON STATE CODES:
-- Texas: '48', California: '06', New York: '36', Florida: '12'
-
-QUERY PATTERNS:
-- "Agricultural land loss" → Agriculture → non-Agriculture transitions
-- "Forest loss" → Forest → non-Forest transitions
-- "Urbanization" → Any → Urban transitions"""
+IMPORTANT - GEOGRAPHIC QUERIES:
+When users mention states by name or abbreviation:
+1. Use the lookup_state_info tool to resolve the correct state_code (FIPS code)
+2. The tool will return the proper SQL condition (e.g., "state_code = '06' -- California")
+3. Use this in your WHERE clause
+"""
 ```
 
-### 2. **Dynamic Schema Section**
-- `{self.schema_info}` is populated from `SCHEMA_INFO_TEMPLATE` in constants.py
-- Contains the full database schema description
-- Updated with actual table counts during initialization
-
-### 3. **Optional Map Section** (Conditional)
+### 2. **Analysis Style Variations**
 ```python
-if include_maps:
-    base_prompt += """
+# Detailed analysis mode
+DETAILED_ANALYSIS_PROMPT = """
+DETAILED ANALYSIS MODE:
+When providing results:
+1. Include summary statistics (mean, median, std dev)
+2. Identify outliers and anomalies
+3. Suggest statistical significance where relevant
+4. Provide confidence intervals if applicable
+5. Compare results to historical baselines"""
 
+# Executive summary mode
+EXECUTIVE_SUMMARY_PROMPT = """
+EXECUTIVE SUMMARY MODE:
+When providing results:
+1. Lead with the key finding in one sentence
+2. Use user-friendly language (avoid technical jargon)
+3. Focus on implications rather than raw numbers
+4. Provide actionable insights
+5. Keep responses concise (3-5 key points max)
+6. Use the create_map tool when appropriate"""
+```
+
+### 3. **Domain Focus Specializations**
+```python
+# Agricultural analysis focus
+AGRICULTURAL_FOCUS_PROMPT = """
+AGRICULTURAL ANALYSIS FOCUS:
+You are particularly focused on agricultural land use:
+1. Pay special attention to Crop and Pasture transitions
+2. Highlight food security implications
+3. Consider agricultural productivity impacts
+4. Note irrigation and water resource connections
+5. Flag significant agricultural land losses (>10%)"""
+
+# Climate scenario focus
+CLIMATE_FOCUS_PROMPT = """
+CLIMATE SCENARIO FOCUS:
+You are analyzing climate impacts on land use:
+1. Always compare RCP4.5 vs RCP8.5 scenarios
+2. Highlight differences between SSP pathways
+3. Emphasize climate-driven transitions
+4. Note temperature and precipitation influences
+5. Project long-term trends (2050, 2070, 2100)"""
+```
+
+### 4. **Optional Features** (Configuration-Driven)
+```python
+# Map generation (when enabled)
+MAP_GENERATION_PROMPT = """
 MAP GENERATION:
 When results include geographic data (state_code), consider creating choropleth maps to visualize patterns.
-Use the create_choropleth_map tool when appropriate."""
+Use the create_choropleth_map tool when appropriate.
+Use the create_map tool when appropriate."""
 ```
 
-## How It's Used
+## Configuration-Driven Prompt Assembly
 
 ```python
-# In _agent_node method:
-def _agent_node(self, state: LanduseAgentState) -> dict:
-    # Get system prompt with current state
-    system_prompt = self._get_system_prompt(state.get("include_maps", False))
+# In landuse_agent.py initialization:
+from landuse.agents.prompts import get_system_prompt
+
+# Agent assembles prompt based on configuration
+self.system_prompt = get_system_prompt(
+    include_maps=self.config.enable_map_generation,
+    analysis_style=self.config.analysis_style,  # "standard", "detailed", "executive"
+    domain_focus=None if self.config.domain_focus == 'none' else self.config.domain_focus,
+    schema_info=self.schema
+)
+
+# Function signature from prompts.py:
+def get_system_prompt(
+    include_maps: bool = False,
+    analysis_style: str = "standard",
+    domain_focus: str = None,
+    schema_info: str = ""
+) -> str:
+    """Generate a system prompt with the specified configuration."""
+    prompt = SYSTEM_PROMPT_BASE.format(schema_info=schema_info)
     
-    # Use it with the LLM
-    response = self.llm.bind_tools(self.tools).invoke([
-        {"role": "system", "content": system_prompt},
-        *messages
-    ])
+    # Add analysis style modifications
+    if analysis_style == "detailed":
+        prompt += DETAILED_ANALYSIS_PROMPT
+    elif analysis_style == "executive":
+        prompt += EXECUTIVE_SUMMARY_PROMPT
+    
+    # Add domain focus if specified
+    if domain_focus == "agricultural":
+        prompt += AGRICULTURAL_FOCUS_PROMPT
+    elif domain_focus == "climate":
+        prompt += CLIMATE_FOCUS_PROMPT
+    elif domain_focus == "urban":
+        prompt += URBAN_PLANNING_PROMPT
+    
+    # Add map generation if enabled
+    if include_maps:
+        prompt += MAP_GENERATION_PROMPT
+    
+    return prompt
 ```
 
-## Why This Design?
+## Benefits of Modular Design
 
-### Advantages:
-1. **Dynamic Generation**: Can adjust based on agent configuration
-2. **Incorporates Live Data**: Uses actual schema info with table counts
-3. **Conditional Features**: Adds map instructions only when needed
-4. **Single Source**: No separate prompt file to maintain
+### Configuration Advantages
+1. **Flexible Specialization**: Easy domain-specific customization
+2. **Environment-Driven**: Behavior changes via configuration
+3. **Reusability**: Shared prompt components across use cases
+4. **Maintainability**: Centralized prompt management
 
-### Disadvantages:
-1. **Harder to Find**: Not immediately obvious where prompt lives
-2. **Mixed with Code**: Business logic mixed with implementation
-3. **Harder to Version**: Can't track prompt changes separately
+### Development Benefits
+1. **Version Control**: Clear prompt evolution tracking
+2. **Testing**: Isolated prompt testing and validation
+3. **Documentation**: Self-documenting prompt variations
+4. **Extensibility**: Easy addition of new specializations
 
-## Relationship to Constants
+### Production Advantages
+1. **Consistency**: Standardized prompt patterns
+2. **Performance**: Pre-compiled prompt templates
+3. **Monitoring**: Configuration-aware prompt selection
+4. **Debugging**: Clear prompt composition visibility
 
-The system prompt pulls from constants.py:
-- **SCHEMA_INFO_TEMPLATE** → Becomes `{self.schema_info}`
-- **DEFAULT_ASSUMPTIONS** → Referenced but hardcoded in prompt
-- **STATE_NAMES** → Sample codes hardcoded in prompt
+## Integration with Configuration System
 
-## Customization Options
+### Schema Integration
+```python
+# constants.py provides comprehensive schema documentation
+SCHEMA_INFO_TEMPLATE = """
+# RPA Land Use Transitions Database Schema
+## Overview
+This database contains USDA Forest Service 2020 RPA Assessment...
+## RPA Scenarios Quick Reference
+- **LM (RCP4.5-SSP1)**: Lower warming, moderate growth...
+"""
 
-To modify the system prompt:
+# Injected into all prompt variations
+prompt = SYSTEM_PROMPT_BASE.format(schema_info=SCHEMA_INFO_TEMPLATE)
+```
 
-1. **Edit the method directly** in `agent.py`
-2. **Override in a subclass**:
-   ```python
-   class CustomAgent(LanduseAgent):
-       def _get_system_prompt(self, include_maps: bool = False) -> str:
-           return "Your custom prompt here"
-   ```
-3. **Make it configurable** (not currently implemented):
-   ```python
-   # Could add to constants.py:
-   SYSTEM_PROMPT_TEMPLATE = "..."
-   ```
+### Configuration Mapping
+```python
+# LanduseConfig drives prompt selection
+@dataclass
+class LanduseConfig:
+    analysis_style: str = "standard"  # → prompt variation
+    domain_focus: str = "none"        # → domain specialization
+    enable_map_generation: bool = True # → feature inclusion
+    
+# Automatic prompt assembly
+system_prompt = get_system_prompt(
+    analysis_style=config.analysis_style,
+    domain_focus=config.domain_focus,
+    include_maps=config.enable_map_generation,
+    schema_info=SCHEMA_INFO_TEMPLATE
+)
+```
+
+### Environment Variable Control
+```bash
+# Prompt behavior via environment
+export LANDUSE_ANALYSIS_STYLE=detailed
+export LANDUSE_DOMAIN_FOCUS=agricultural
+export LANDUSE_ENABLE_MAPS=true
+
+# Results in specialized agricultural analyst with detailed analysis and maps
+```
+
+## Customization and Extension Patterns
+
+### 1. Pre-Built Variations (Recommended)
+```python
+# Use PromptVariations class for common patterns
+from landuse.agents.prompts import PromptVariations
+
+# Research analyst configuration
+research_prompt = PromptVariations.research_analyst(schema_info)
+
+# Policy maker configuration  
+policy_prompt = PromptVariations.policy_maker(schema_info)
+
+# Agricultural analyst configuration
+agricultural_prompt = PromptVariations.agricultural_analyst(schema_info)
+```
+
+### 2. Custom Prompt Creation
+```python
+# Create fully custom prompts for specialized use cases
+from landuse.agents.prompts import create_custom_prompt
+
+custom_prompt = create_custom_prompt(
+    expertise_area="water resource management",
+    expertise_description="You understand connections between land use and water resources...",
+    analysis_approach="1. Consider watershed boundaries\n2. Analyze impervious surface changes...",
+    response_guidelines="1. Always mention water quality implications\n2. Note stormwater management needs...",
+    schema_info=schema_info
+)
+```
+
+### 3. Configuration-Based Customization
+```python
+# Environment-driven customization
+config = LanduseConfig(
+    analysis_style="executive",        # Concise, actionable insights
+    domain_focus="climate",           # Climate scenario emphasis
+    enable_map_generation=True        # Include visualization instructions
+)
+
+# Results in climate-focused executive summary agent with maps
+agent = LanduseAgent(config)
+```
+
+### 4. Adding New Specializations
+```python
+# Extend prompts.py with new domain focus
+WATER_RESOURCES_PROMPT = """
+WATER RESOURCES FOCUS:
+You are analyzing land use impacts on water resources:
+1. Consider watershed boundaries and drainage patterns
+2. Analyze impervious surface changes (urban expansion)
+3. Note agricultural irrigation implications
+4. Highlight stormwater management needs
+5. Connect land use to water quality impacts
+"""
+
+# Add to get_system_prompt() function
+if domain_focus == "water_resources":
+    prompt += WATER_RESOURCES_PROMPT
+```
 
 ## Summary
 
-The system prompt is:
-- **Stored**: In the `_get_system_prompt()` method in `agent.py`
-- **Type**: Dynamically generated string
-- **Location**: Lines 391-429 of `agent.py`
-- **Composition**: Base template + dynamic schema + optional features
-- **Not**: In a separate file or constants.py
+The modern system prompt architecture provides:
 
-This design keeps the prompt close to where it's used but makes it less discoverable and harder to maintain separately from the code.
+### Location and Structure
+- **Primary Module**: `src/landuse/agents/prompts.py` (centralized prompt management)
+- **Configuration Integration**: `LanduseConfig` drives prompt selection
+- **Schema Integration**: `constants.py` provides domain knowledge
+- **Agent Integration**: `landuse_agent.py` assembles configured prompt
+
+### Key Components
+1. **Base Template**: Core RPA analysis instructions
+2. **Analysis Styles**: Standard, detailed, executive variations
+3. **Domain Focus**: Agricultural, climate, urban specializations
+4. **Feature Sections**: Map generation, knowledge base integration
+5. **Pre-built Combinations**: Research analyst, policy maker, etc.
+
+### Configuration Flow
+```
+Environment Variables → LanduseConfig → get_system_prompt() → Agent
+```
+
+### Benefits Over Legacy Approach
+- **Discoverability**: Clear module organization
+- **Maintainability**: Separated from business logic
+- **Flexibility**: Configuration-driven behavior
+- **Extensibility**: Easy addition of new specializations
+- **Testing**: Isolated prompt validation
+- **Documentation**: Self-documenting variations
+
+This architecture enables both simple usage (`LanduseAgent()` with defaults) and sophisticated domain specialization while maintaining clear separation of concerns and production reliability.

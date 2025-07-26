@@ -173,10 +173,25 @@ This provides flexibility without code changes.
 
 ## Summary
 
-The `constants.py` file acts as the agent's "knowledge base" and configuration center. It provides:
-- Domain knowledge (schema, state mappings)
-- Behavioral defaults (assumptions, limits)
-- Query patterns (examples)
-- System configuration (database, model)
+The modern RPA Land Use Analytics configuration architecture provides:
 
-This clean separation makes the agent more maintainable and allows easy customization of its behavior through a single file.
+### Layered Configuration
+- **`LanduseConfig`**: Type-safe, environment-aware configuration dataclass
+- **`constants.py`**: RPA domain knowledge and tested query patterns  
+- **`prompts.py`**: Modular system prompts with domain specialization
+- **`state_mappings.py`**: Geographic utilities and FIPS code management
+
+### Key Improvements Over Legacy Patterns
+1. **Type Safety**: Dataclass-based configuration with validation
+2. **Environment Integration**: Seamless deployment configuration
+3. **Modularity**: Clear separation of concerns
+4. **Extensibility**: Easy addition of new capabilities and domains
+5. **Testing**: Configuration isolation and mocking support
+
+### Production Benefits
+- **Reliability**: Robust configuration loading with fallbacks
+- **Monitoring**: Configuration-aware logging and diagnostics  
+- **Deployment**: Environment-based configuration for different stages
+- **Maintenance**: Single source of truth for domain knowledge
+
+This architecture enables both simple usage (`LanduseAgent()`) and sophisticated customization while maintaining production reliability and developer experience.

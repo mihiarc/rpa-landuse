@@ -7,10 +7,12 @@ This page documents the structure of the RPA land use analytics database, includ
 The DuckDB database (`landuse_analytics.duckdb`) uses a modern star schema design optimized for analytical queries. For comprehensive details, see the [Database Overview](database-overview.md) and [Table Reference](table-reference.md).
 
 ### Current Star Schema
+
 The system uses a normalized star schema with:
+
 - `fact_landuse_transitions` - Central fact table with all transitions
 - `fact_socioeconomic_projections` - Population and income projections
-- `dim_scenario` - Climate and socioeconomic scenarios  
+- `dim_scenario` - Climate and socioeconomic scenarios
 - `dim_geography` - County geography with enhanced metadata
 - `dim_landuse` - Land use type definitions
 - `dim_time` - Time period dimensions
@@ -20,31 +22,38 @@ The system uses a normalized star schema with:
 ## Current Database Structure
 
 **Note**: This page contains legacy information. For complete current database documentation, see:
+
 - [Database Overview](database-overview.md) - Executive summary and architecture
-- [Table Reference](table-reference.md) - Detailed table specifications  
+- [Table Reference](table-reference.md) - Detailed table specifications
 - [View Definitions](view-definitions.md) - Analytical views and usage
 - [Data Dictionary](data-dictionary.md) - Business definitions and guidelines
 
 ## Key Concepts
 
 ### Climate Scenarios
+
 The database contains 20 climate scenarios combining:
-- 5 Climate models (CNRM_CM5, HadGEM2_ES365, IPSL_CM5A_MR, MRI_CGCM3, NorESM1_M)  
+
+- 5 Climate models (CNRM_CM5, HadGEM2_ES365, IPSL_CM5A_MR, MRI_CGCM3, NorESM1_M)
 - 4 RCP/SSP combinations (rcp45_ssp1, rcp85_ssp2, rcp85_ssp3, rcp85_ssp5)
 
 ### Land Use Categories
+
 - **Crop (cr)**: Agricultural cropland
-- **Pasture (ps)**: Livestock grazing land  
+- **Pasture (ps)**: Livestock grazing land
 - **Rangeland (rg)**: Natural grasslands/shrublands
 - **Forest (fr)**: Forested areas
 - **Urban (ur)**: Developed/built areas
 
 ### Time Coverage
+
 6 time periods from 2012-2070:
+
 - 2012-2020 (calibration period)
 - 2020-2030, 2030-2040, 2040-2050, 2050-2060, 2060-2070
 
-### Geographic Coverage  
+### Geographic Coverage
+
 - 3,075 US counties across all 50 states
 - Organized by US Census regions (Northeast, Midwest, South, West)
 
