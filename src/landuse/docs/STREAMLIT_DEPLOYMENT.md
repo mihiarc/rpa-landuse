@@ -22,10 +22,17 @@ The repository is configured with Git LFS to handle large files:
 ### Required Files
 
 Ensure these files are present in your repository:
-- `streamlit_app.py` - Main Streamlit application
-- `requirements.txt` or `pyproject.toml` - Python dependencies
+- `streamlit_app.py` - Main Streamlit application with modern navigation
+- `views/` directory - Individual page implementations:
+  - `views/chat.py` - Natural language chat interface
+  - `views/analytics.py` - Pre-built analytics dashboard
+  - `views/explorer.py` - Data exploration interface
+  - `views/extraction.py` - Data export functionality
+  - `views/settings.py` - System status and configuration
+- `pyproject.toml` - Python dependencies managed by uv
 - `data/processed/landuse_analytics.duckdb` - Analytics database (via Git LFS)
 - `data/chroma_db/` - Vector database for domain knowledge (via Git LFS)
+- `src/landuse/` - Source code modules
 - `.streamlit/config.toml` - Streamlit configuration (optional)
 
 ## Deployment Steps
@@ -113,10 +120,20 @@ If the app runs out of memory:
 
 ### Connection Issues
 
-The app uses a custom DuckDB connection with caching:
-- Read-only mode by default
-- Automatic result caching
-- Thread-safe operations
+The app uses a custom DuckDB connection implementing st.connection pattern:
+- **Custom Connection Class**: `DuckDBConnection` extends `BaseConnection`
+- **Automatic Caching**: Query results cached with configurable TTL (default: 3600s)
+- **Retry Logic**: Database operations use exponential backoff retry pattern
+- **Read-only Mode**: Safe database access with connection validation
+- **Thread Safety**: Concurrent access support for multi-user environments
+- **Path Resolution**: Automatic database path detection with environment variable fallback
+
+### Navigation Issues
+
+The app requires Streamlit 1.36.0+ for the modern navigation API:
+- Uses `st.navigation()` with organized page groups
+- Graceful fallback to welcome page if navigation is unavailable
+- Check Streamlit version if navigation errors occur
 
 ## Local Testing
 
@@ -126,12 +143,24 @@ Before deploying, test locally to match the cloud environment:
 # Install dependencies
 uv sync
 
-# Set environment variables
-export OPENAI_API_KEY="your-key"
+# Create local environment file
+cp config/.env.example config/.env
+# Edit config/.env to add your API keys
 
 # Run the app
 uv run streamlit run streamlit_app.py
+
+# Or run with environment variables directly
+OPENAI_API_KEY="your-key" uv run streamlit run streamlit_app.py
 ```
+
+### Streamlit Version Requirements
+
+The app uses modern Streamlit features:
+- **Streamlit 1.36.0+**: Required for `st.navigation()` API
+- **st.connection pattern**: Custom DuckDB connection implementation
+- **st.fragment**: Performance optimization for chat interface
+- **Modern CSS**: Responsive design with mobile optimization
 
 ## Monitoring
 

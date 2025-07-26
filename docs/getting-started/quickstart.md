@@ -6,17 +6,21 @@ Get up and running with RPA Land Use Analytics in 5 minutes!
 
 Make sure you've completed the [installation](installation.md) steps:
 
-- ✅ Dependencies installed
-- ✅ OpenAI API key configured
-- ✅ Test agent runs successfully
+- ✅ Dependencies installed with `uv sync`
+- ✅ API key configured (OpenAI or Anthropic)
+- ✅ Database exists at `data/processed/landuse_analytics.duckdb`
 
 ## Your First Query
 
 ### 1. Start the RPA Analytics Agent
 
 ```bash
-# Interactive command-line interface
+# Interactive command-line interface (recommended)
 uv run rpa-analytics
+
+# Alternative entry points
+uv run landuse-agent
+uv run python -m landuse.agents.agent
 
 # Or launch the web dashboard
 uv run streamlit run streamlit_app.py
@@ -53,10 +57,10 @@ RPA Land Use Analytics Database:
 ### 4. Understand the Schema
 
 ```
-You> Describe the landuse_transitions table
+You> Describe the fact_landuse_transitions table
 ```
 
-The agent will show columns, data types, and sample data.
+The agent will show columns, data types, and sample data from the star schema.
 
 ## Natural Language Query Examples
 
@@ -185,7 +189,7 @@ The agent can work with multiple formats:
 
 ### Databases
 ```
-You> Query processed/landuse_transitions.db: SELECT COUNT(*) FROM landuse_transitions WHERE scenario = 'Baseline'
+You> Query the landuse database: SELECT COUNT(*) FROM fact_landuse_transitions WHERE scenario_id = 1
 ```
 
 ### CSV Files
@@ -193,6 +197,9 @@ You> Query processed/landuse_transitions.db: SELECT COUNT(*) FROM landuse_transi
 You> Analyze the sample_data.csv file
 You> Query sample_data.csv: SELECT category, AVG(price) FROM data GROUP BY category
 ```
+
+!!! note "DuckDB CSV Support"
+    DuckDB can directly query CSV files without importing them first.
 
 ### JSON Files
 ```
@@ -213,8 +220,11 @@ Save query results in different formats:
 ```
 You> Export the top 100 urban growth counties to a CSV file
 You> Save forest transition data for California as Parquet
-You> Export the landuse_transitions table to JSON format
+You> Export the fact_landuse_transitions table to JSON format
 ```
+
+!!! tip "Export Formats"
+    DuckDB supports export to CSV, Parquet, JSON, and Excel formats directly.
 
 ## Next Steps
 

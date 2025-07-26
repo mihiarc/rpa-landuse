@@ -47,6 +47,20 @@ LANDUSE_RATE_LIMIT_WINDOW=60     # Rate limit window (seconds)
 # Debugging
 VERBOSE=false                    # Enable verbose output
 DEBUG=false                      # Enable debug mode
+
+# Map Generation Settings
+LANDUSE_MAP_OUTPUT_DIR=maps/agent_generated  # Output directory for maps
+
+# Knowledge Base Settings  
+LANDUSE_KNOWLEDGE_BASE_PATH=src/landuse/docs # Path to documentation
+LANDUSE_CHROMA_PERSIST_DIR=data/chroma_db    # Vector database location
+
+# Streamlit Settings
+STREAMLIT_CACHE_TTL=300          # Cache time-to-live (seconds)
+
+# Domain Configuration
+LANDUSE_ANALYSIS_STYLE=standard  # Analysis style (standard, detailed, brief)
+LANDUSE_DOMAIN_FOCUS=none        # Domain focus (agriculture, forest, urban, none)
 ```
 
 ## Using LanduseConfig
@@ -106,6 +120,7 @@ LANDUSE_MODEL=gpt-4o                # Best performance
 LANDUSE_MODEL=gpt-4-turbo           # Good balance
 
 # Anthropic Models
+LANDUSE_MODEL=claude-3-5-sonnet-20241022  # Latest Claude Sonnet (recommended)
 LANDUSE_MODEL=claude-3-sonnet-20240229    # Excellent reasoning
 LANDUSE_MODEL=claude-3-haiku-20240307     # Fast, economical
 ```
@@ -116,7 +131,8 @@ LANDUSE_MODEL=claude-3-haiku-20240307     # Fast, economical
 |-------|----------|------|------|----------|
 | gpt-4o-mini | OpenAI | Fast, cheap, good accuracy | Smaller context | Development, simple queries |
 | gpt-4o | OpenAI | Best accuracy, large context | More expensive | Production, complex analysis |
-| claude-3-sonnet | Anthropic | Excellent reasoning | Higher cost | Complex SQL, analysis |
+| claude-3-5-sonnet | Anthropic | Latest model, excellent reasoning | Higher cost | Complex SQL, analysis |
+| claude-3-sonnet | Anthropic | Good reasoning, reliable | Higher cost | Complex queries |
 | claude-3-haiku | Anthropic | Very fast, economical | Less capable | Simple queries, high volume |
 
 ## Temperature Settings
@@ -188,7 +204,10 @@ custom_config = LanduseConfig.from_env(
 
 # Use with an agent
 from landuse.agents.landuse_agent import LanduseAgent
-agent = LanduseAgent(config=custom_config)
+with LanduseAgent(config=custom_config) as agent:
+    agent.chat()  # Start interactive session
+    # or
+    result = agent.query("Show me urban growth in California")
 ```
 
 ### Configuration for Different Use Cases
@@ -381,19 +400,23 @@ Tool(
 Create different configurations for different environments:
 
 ```bash
-# config/.env.development
+# .env.development
 LANDUSE_MODEL=gpt-4o-mini
 TEMPERATURE=0.2
 MAX_TOKENS=2000
 LANDUSE_MAX_ITERATIONS=5
 VERBOSE=true
+DEBUG=true
+LANDUSE_ENABLE_MAPS=false
 
-# config/.env.production  
+# .env.production  
 LANDUSE_MODEL=gpt-4o
 TEMPERATURE=0.0
 MAX_TOKENS=4000
 LANDUSE_MAX_ITERATIONS=8
 VERBOSE=false
+DEBUG=false
+LANDUSE_ENABLE_MAPS=true
 ```
 
 Load appropriate config:

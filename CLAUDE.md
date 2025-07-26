@@ -129,11 +129,30 @@ duckdb data/processed/landuse_analytics.duckdb
 - Handles 20M+ lines efficiently with progress tracking
 
 **DuckDB Connection** (`src/landuse/connections/duckdb_connection.py`):
-- Custom connection class implementing st.connection pattern
-- Automatic result caching with configurable TTL
-- Support for both file-based and in-memory databases
-- Thread-safe operations with read-only mode by default
-- Compatible with testing environments
+- **Custom st.connection Implementation**: Extends Streamlit's BaseConnection pattern
+- **Automatic Caching**: Query results cached with configurable TTL (default: 3600s)
+- **Database Retry Logic**: Robust connection handling with exponential backoff
+- **Thread Safety**: Read-only mode by default with concurrent access support
+- **Connection Features**:
+  - Supports both file-based and in-memory databases
+  - Automatic path resolution with environment variable fallback
+  - Query validation and parameterization support
+  - Health check and monitoring capabilities
+  - Compatible with testing environments (graceful Streamlit import fallback)
+
+**Agent Tools** (`src/landuse/tools/`):
+- **Common Tools** (`common_tools.py`):
+  - `execute_landuse_query`: SQL execution with error handling and suggestions
+  - `analyze_landuse_results`: Business insights and interpretation
+  - `explore_landuse_schema`: Database schema exploration
+  - Integrated retry logic and result formatting
+- **Map Generation Tool** (`map_generation_tool.py`):
+  - LangGraph-compatible tool with `response_format="content_and_artifact"`
+  - Creates county-level, regional, and transition maps
+  - Supports state-specific visualizations (Texas, California, Florida)
+  - Uses GeoPandas for spatial data and Plotly for interactive maps
+  - Automatic filename generation with timestamps
+  - Output formats: PNG (matplotlib) and HTML (plotly)
 
 ### Land Use Categories
 - **Crop**: Agricultural cropland (cr)
@@ -176,6 +195,35 @@ LANDUSE_DEFAULT_DISPLAY_LIMIT=50 # Default rows to display
 LANDUSE_RATE_LIMIT_CALLS=60     # Max calls per time window
 LANDUSE_RATE_LIMIT_WINDOW=60    # Time window in seconds
 ```
+
+## Pydantic v2 Data Models
+
+**Core Models** (`src/landuse/models.py`):
+- **Configuration Models**: 
+  - `AgentConfig`: Comprehensive agent configuration with validation
+  - `QueryInput`: Natural language query validation and cleaning
+  - `SQLQuery`: SQL validation preventing destructive operations
+- **Data Models**:
+  - `QueryResult`: Query execution results with metadata and DataFrame handling
+  - `LandUseTransition`: Fact table records with business logic validation
+  - Dimension models: `ScenarioDimension`, `TimeDimension`, `GeographyDimension`, `LandUseDimension`
+- **Analysis Models**:
+  - `AnalysisRequest`: Structured analysis requests with parameter validation
+  - `ChatMessage`: Chat interface data structure with timestamp and metadata
+  - `SystemStatus`: System health and configuration monitoring
+- **Enums**: Controlled vocabularies for land use types, scenarios, and transitions
+- **Features**: Field validation, model validation, protected namespaces, extra field control
+
+**Conversion Models** (`src/landuse/converter_models.py`):
+- **ETL Configuration**: `ConversionConfig` with bulk loading optimization
+- **Processing Models**:
+  - `RawLandUseData`: Input validation for JSON data
+  - `ProcessedTransition`: Validated database-ready records
+  - `ConversionStats`: Performance metrics and success rates
+- **Quality Control**:
+  - `ValidationResult`: Data quality validation with errors and warnings
+  - `CheckpointData`: Recovery and progress tracking
+- **Conversion Modes**: Streaming, batch, parallel, and optimized bulk copy operations
 
 ## Development Patterns
 
@@ -223,11 +271,36 @@ duckdb data/processed/landuse_analytics.duckdb
 ## Key Features
 
 ### Web Dashboard (Streamlit)
-1. **Modern Web Interface**: Responsive design with multipage navigation
-2. **Interactive Chat**: Real-time natural language queries with streaming responses
-3. **Rich Visualizations**: Plotly charts for agricultural loss, urbanization, climate scenarios
-4. **Data Exploration**: SQL query interface with schema browser and example queries
-5. **System Management**: Configuration, status monitoring, and troubleshooting tools
+**Modern Multipage Architecture** (`streamlit_app.py`):
+- **Navigation**: Uses modern `st.navigation()` API with organized page groups
+- **Responsive Design**: Optimized CSS for wide layouts and mobile compatibility
+- **Error Handling**: Comprehensive error catching with helpful diagnostics
+
+**Dashboard Pages**:
+1. **Home Page**: Feature overview with dataset statistics and navigation cards
+2. **Natural Language Chat** (`views/chat.py`): 
+   - Real-time streaming responses with agent conversation
+   - Model selection (GPT-4o-mini, Claude 3.5 Sonnet)
+   - Conversation history with agent reasoning display
+   - Error handling with rate limit detection
+3. **Analytics Dashboard** (`views/analytics.py`):
+   - Pre-built visualizations using Plotly
+   - Agricultural impact analysis
+   - Climate scenario comparisons
+   - Geographic trend maps with choropleth visualization
+4. **Data Explorer** (`views/explorer.py`):
+   - Interactive SQL query interface
+   - Schema browser with table information
+   - Example queries and documentation
+   - Export capabilities (CSV, JSON, Parquet)
+5. **Data Extraction** (`views/extraction.py`):
+   - Custom query builder
+   - Bulk data export functionality
+   - Format selection and download
+6. **Settings & Help** (`views/settings.py`):
+   - System status monitoring
+   - Configuration management
+   - Troubleshooting tools and diagnostics
 
 ### Command Line Interface
 1. **Natural Language Understanding**: Converts questions to optimized SQL

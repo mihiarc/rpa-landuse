@@ -1,16 +1,18 @@
-# LangGraph Agent API Reference
+# LanduseAgent API Reference
 
 ## Overview
 
-The LangGraph Agent is the modern, graph-based natural language agent for RPA Land Use Analytics. It provides enhanced state management, conversation memory, and streaming capabilities compared to the traditional LangChain agent.
+The **LanduseAgent** is the unified, modern natural language agent for RPA Land Use Analytics. It combines graph-based LangGraph architecture with traditional query capabilities, providing enhanced state management, conversation memory, and streaming capabilities.
 
 ## Key Features
 
-- **Graph-based Architecture**: Uses LangGraph for complex workflow orchestration
-- **Conversation Memory**: Built-in checkpointing for session continuity
-- **Streaming Support**: Real-time response streaming
-- **Enhanced Error Handling**: Graceful recovery from failures
-- **RPA Context Aware**: Specialized for 2020 RPA Assessment data
+- **Unified Architecture**: Single agent class with both simple and graph-based execution modes
+- **LangGraph Integration**: Graph-based workflow orchestration for complex queries
+- **Conversation Memory**: Built-in conversation history and checkpointing
+- **Streaming Support**: Real-time response streaming capabilities
+- **Enhanced Error Handling**: Graceful recovery from failures with helpful suggestions
+- **RPA Context Aware**: Specialized for 2020 RPA Assessment data analysis
+- **Memory-First Design**: Modern 2025 architecture with persistent state
 
 ## Usage
 
@@ -18,31 +20,48 @@ The LangGraph Agent is the modern, graph-based natural language agent for RPA La
 
 ```bash
 # Start the interactive agent
-uv run python -m landuse.agents.langgraph_agent
+uv run python -m landuse.agents.landuse_agent
 
-# Or use the CLI shortcut
+# Or use the package shortcut
+uv run python -m landuse
+
+# Or use the CLI shortcut if configured
 uv run rpa-analytics
 ```
 
 ### Python API
 
 ```python
-from landuse.agents.langgraph_agent import LanduseLangGraphAgent
+from landuse.agents import LanduseAgent
+from landuse.config import LanduseConfig
 
-# Initialize the agent
-agent = LanduseLangGraphAgent(
-    db_path="data/processed/landuse_analytics.duckdb",
+# Initialize with default configuration
+agent = LanduseAgent()
+
+# Initialize with custom configuration
+config = LanduseConfig(
     model_name="claude-3-5-sonnet-20241022",  # or "gpt-4o-mini"
-    temperature=0.1
+    temperature=0.1,
+    enable_memory=True,
+    enable_map_generation=True
 )
+agent = LanduseAgent(config=config)
 
-# Query the agent
-result = await agent.aquery("Which RPA scenarios show the most forest loss?")
+# Simple query (recommended for stability)
+result = agent.query("Which RPA scenarios show the most forest loss?")
 print(result)
 
-# Or use synchronous API
-result = agent.query("Compare urban expansion between LM and HH scenarios")
+# Graph-based query with memory
+result = agent.query(
+    "Compare urban expansion between scenarios", 
+    use_graph=True, 
+    thread_id="analysis_session_1"
+)
 print(result)
+
+# Streaming query for real-time responses
+for chunk in agent.stream_query("Show me agricultural trends", thread_id="stream_1"):
+    print(chunk)
 ```
 
 ## Configuration
@@ -68,63 +87,81 @@ LANDUSE_MAX_QUERY_ROWS=1000
 
 ### Agent State
 
-The agent maintains state using TypedDict:
+The agent maintains state using TypedDict for LangGraph operations:
 
 ```python
 class AgentState(TypedDict):
-    messages: Annotated[list[BaseMessage], add_messages]
-    query: str
-    results: Optional[str]
-    error: Optional[str]
-    iterations: int
+    """State definition for the landuse agent."""
+    messages: list[BaseMessage]
+    context: dict[str, Any]
+    iteration_count: int
     max_iterations: int
+```
+
+### Configuration
+
+The agent uses `LanduseConfig` for all configuration:
+
+```python
+from landuse.config import LanduseConfig
+
+# Load from environment variables
+config = LanduseConfig()
+
+# Custom configuration
+config = LanduseConfig(
+    model_name="claude-3-5-sonnet-20241022",
+    temperature=0.1,
+    max_tokens=4000,
+    enable_memory=True,
+    enable_map_generation=False,
+    debug=True
+)
 ```
 
 ## Available Tools
 
+The LanduseAgent uses a comprehensive set of tools for RPA data analysis:
+
 ### execute_landuse_query
-Executes DuckDB SQL queries on the RPA database.
+Executes optimized DuckDB SQL queries on the RPA database.
 
 ```python
-# Example usage
-"Execute SQL: SELECT * FROM dim_scenario WHERE rcp_scenario = 'rcp85'"
+# The agent automatically converts natural language to SQL
+"Which scenarios show the most agricultural land loss?"
+# Generates and executes: SELECT s.scenario_name, SUM(f.acres) as acres_lost ...
+```
+
+### analyze_landuse_results
+Provides business context and insights for query results.
+
+```python
+# Automatically interprets results in RPA context
+"Explain the implications of this forest loss data"
 ```
 
 ### get_schema_info
-Returns detailed schema information about the RPA database.
+Returns detailed schema information about the RPA star schema.
 
 ```python
-# Returns star schema structure with RPA context
-"Get database schema information"
-```
-
-### suggest_query_examples
-Provides example queries for common RPA analysis patterns.
-
-```python
-# Categories: agricultural_loss, urbanization, climate_comparison, time_series
-"Suggest query examples for climate_comparison"
-```
-
-### explain_query_results
-Interprets query results in RPA business context.
-
-```python
-"Explain these results: [query results]"
-```
-
-### get_default_assumptions
-Shows default assumptions for scenarios, time periods, and geography.
-
-```python
-"What are the default analysis assumptions?"
+# Shows table structure and relationships
+"What tables are available in the database?"
 ```
 
 ### get_state_code
-Converts state names to FIPS codes.
+Converts state names to FIPS codes for geographic queries.
 
 ```python
-"Get state code for California"
+# Handles state name variations
+"Show me data for California"  # Automatically converts to state code
+```
+
+### Knowledge Base Integration (Optional)
+If enabled, provides access to RPA methodology documentation.
+
+```python
+# When knowledge base is enabled
+"What is the methodology behind forest transition projections?"
 ```
 
 ## Example Queries
@@ -183,47 +220,67 @@ except Exception as e:
 
 ## Integration with Streamlit
 
-The LangGraph agent powers the Streamlit chat interface:
+The LanduseAgent powers the Streamlit chat interface:
 
 ```python
 # In Streamlit app
 import streamlit as st
-from landuse.agents.langgraph_agent import LanduseLangGraphAgent
+from landuse.agents import LanduseAgent
+from landuse.config import LanduseConfig
 
-agent = LanduseLangGraphAgent()
+# Initialize agent with Streamlit-optimized config
+config = LanduseConfig(enable_memory=False, debug=False)
+agent = LanduseAgent(config=config)
 
-# Stream responses
-for chunk in agent.stream(user_query):
+# Simple query for Streamlit (most stable)
+response = agent.query(user_query)
+st.write(response)
+
+# Or streaming for real-time updates
+for chunk in agent.stream_query(user_query, thread_id=st.session_state.get('thread_id')):
     st.write(chunk)
 ```
 
-## Comparison with Traditional Agent
+## Execution Modes
 
-| Feature | LangGraph Agent | Traditional Agent |
-|---------|----------------|-------------------|
-| Architecture | Graph-based | Linear REACT |
-| State Management | Built-in checkpointing | Session-based |
-| Streaming | Native support | Not supported |
-| Error Recovery | Advanced retry logic | Basic error handling |
-| Memory | Conversation history | Single query |
-| Performance | Optimized iteration | Standard execution |
+The LanduseAgent supports multiple execution modes:
+
+| Mode | Description | Use Case | Stability |
+|------|-------------|----------|----------|
+| Simple Query | Direct LLM interaction | Most queries, production use | High |
+| Graph Workflow | LangGraph state management | Complex analysis, development | Medium |
+| Streaming | Real-time response chunks | UI applications | Medium |
+| Chat Interface | Interactive terminal mode | Development, testing | High |
+
+**Recommendation**: Use `simple_query()` or `query(use_graph=False)` for production applications.
 
 ## API Methods
 
-### query(question: str) -> str
-Synchronous query method for simple interactions.
+### query(question: str, use_graph: bool = False, thread_id: Optional[str] = None) -> str
+Main query method with flexible execution modes.
 
-### aquery(question: str) -> str
-Asynchronous query method for better performance.
+**Parameters:**
+- `question`: Natural language question about RPA data
+- `use_graph`: Whether to use LangGraph workflow (default: False for stability)
+- `thread_id`: Optional thread ID for conversation memory
 
-### stream(question: str) -> Iterator[str]
-Streaming method for real-time responses.
+### simple_query(question: str) -> str
+Direct LLM interaction without LangGraph state management (recommended).
 
-### astream(question: str) -> AsyncIterator[str]
-Asynchronous streaming for web applications.
+### stream_query(question: str, thread_id: Optional[str] = None) -> Iterator[Any]
+Streaming method for real-time responses using LangGraph.
 
-### clear_memory()
+### chat()
+Interactive chat interface with rich terminal formatting.
+
+### clear_history()
 Clears conversation history and resets state.
+
+### create_subgraph(name: str, specialized_tools: list[BaseTool]) -> StateGraph
+Creates specialized subgraphs for complex workflows.
+
+### create_map_subgraph() -> StateGraph
+Creates a specialized subgraph for map-based analysis.
 
 ## Best Practices
 

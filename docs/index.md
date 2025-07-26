@@ -72,7 +72,7 @@ Explore the 2020 RPA Assessment data with queries like:
 graph LR
     A[RPA JSON Data<br/>20M+ lines] --> B[DuckDB Converter<br/>Star Schema]
     B --> C[Analytics Database<br/>5.4M transitions]
-    C --> D[LangGraph Agent<br/>Natural Language]
+    C --> D[LanduseAgent<br/>Natural Language]
     D --> E[Streamlit Dashboard<br/>Web Interface]
     E --> F[User Insights]
     F --> E
@@ -130,8 +130,9 @@ Get started analyzing RPA land use projections:
 - **[Processing Pipeline](data/processing.md)** - JSON to DuckDB transformation
 
 ### API Reference
-- **[LangGraph Agent](api/langgraph-agent.md)** - Modern graph-based agent
-- **[Traditional Agent](api/agent.md)** - Legacy LangChain agent
+- **[LanduseAgent Overview](api/langgraph-agent.md)** - Unified agent architecture and features
+- **[Agent API Reference](api/agent.md)** - Complete API documentation
+- **[Natural Language Queries](api/landuse-query-agent.md)** - Query processing capabilities
 - **[Converters](api/converters.md)** - Data transformation tools
 - **[Tools](api/tools.md)** - Available agent capabilities
 

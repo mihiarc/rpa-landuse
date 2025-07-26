@@ -1,32 +1,73 @@
 # Database Schema
 
-This page documents the structure of the land use transitions database, including all tables, columns, and relationships.
+This page documents the structure of the RPA land use analytics database, including all tables, columns, and relationships.
 
 ## Database Overview
 
-The SQLite database (`landuse_transitions_with_ag.db`) contains four main tables:
+The DuckDB database (`landuse_analytics.duckdb`) uses a modern star schema design with the following tables:
+
+### Modern Star Schema (RECOMMENDED)
+The current system uses a normalized star schema optimized for analytics:
+- `fact_landuse_transitions` - Central fact table with all transitions
+- `dim_scenario` - Climate and socioeconomic scenarios  
+- `dim_geography_enhanced` - County geography with enhanced metadata
+- `dim_landuse` - Land use type definitions
+- `dim_time` - Time period dimensions
+
+### Legacy Schema (DEPRECATED)
+The legacy SQLite database (`landuse_transitions_with_ag.db`) contains flat tables:
 
 ```mermaid
 erDiagram
-    landuse_transitions {
-        TEXT scenario
-        INTEGER year
-        TEXT year_range
-        TEXT fips
-        TEXT from_land_use
-        TEXT to_land_use
-        REAL area_1000_acres
+    fact_landuse_transitions {
+        INTEGER scenario_id FK
+        INTEGER geography_id FK
+        INTEGER time_id FK
+        INTEGER from_landuse_id FK
+        INTEGER to_landuse_id FK
+        DOUBLE acres
+        VARCHAR transition_type
     }
     
-    landuse_transitions_ag {
-        TEXT scenario
-        INTEGER year
-        TEXT year_range
-        TEXT fips
-        TEXT from_land_use
-        TEXT to_land_use
-        REAL area_1000_acres
+    dim_scenario {
+        INTEGER scenario_id PK
+        VARCHAR scenario_name
+        VARCHAR rcp_scenario
+        VARCHAR ssp_scenario
+        VARCHAR description
     }
+    
+    dim_geography_enhanced {
+        INTEGER geography_id PK
+        VARCHAR county_fips
+        VARCHAR county_name
+        VARCHAR state_code
+        VARCHAR state_name
+        VARCHAR region_name
+        DOUBLE land_area_sq_miles
+    }
+    
+    dim_landuse {
+        INTEGER landuse_id PK
+        VARCHAR landuse_code
+        VARCHAR landuse_name
+        VARCHAR landuse_category
+        VARCHAR description
+    }
+    
+    dim_time {
+        INTEGER time_id PK
+        INTEGER start_year
+        INTEGER end_year
+        VARCHAR time_period
+        VARCHAR decade
+    }
+    
+    fact_landuse_transitions }o--|| dim_scenario : "scenario_id"
+    fact_landuse_transitions }o--|| dim_geography_enhanced : "geography_id"
+    fact_landuse_transitions }o--|| dim_time : "time_id"
+    fact_landuse_transitions }o--|| dim_landuse : "from_landuse_id"
+    fact_landuse_transitions }o--|| dim_landuse : "to_landuse_id"
     
     landuse_changes_only {
         TEXT scenario

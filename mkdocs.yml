@@ -61,10 +61,9 @@ nav:
     - RPA Model Diagram: data/rpa-model-diagram.md
     - Data Processing: data/processing.md
   - API Reference:
-    - LangGraph Agent: api/langgraph-agent.md
-    - Traditional Agent: api/agent.md
-    - Landuse Query Agent: api/landuse-query-agent.md
-    - Converters: api/converters.md
+    - LanduseAgent API: api/agent.md
+    - Natural Language Queries: api/landuse-query-agent.md
+    - Data Converters: api/converters.md
     - Tools & Utilities: api/tools.md
   - Examples:
     - Use Cases: examples/use-cases.md

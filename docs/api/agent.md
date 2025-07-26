@@ -1,58 +1,51 @@
-# SQL Query Agents API
+# LanduseAgent API Reference
 
-Complete API reference for our specialized SQL agents and their natural language interfaces.
+Complete API reference for the unified RPA Land Use Analytics agent.
 
 ## Overview
 
-We provide two specialized agents for different data analysis needs:
+The **LanduseAgent** is the primary and only agent for RPA Land Use Analytics. It provides a unified interface for natural language queries about USDA Forest Service RPA Assessment data with both simple and advanced execution modes.
 
-### 🌾 **Landuse Natural Language Query Agent**
-Specialized for landuse transition analysis - converts natural language questions into optimized DuckDB SQL queries.
-
-**[📖 Complete Documentation →](landuse-query-agent.md)**
+### 🌾 **Unified Architecture**
+Single agent class that combines:
+- **Natural Language Processing**: Converts questions to optimized DuckDB SQL
+- **LangGraph Integration**: Graph-based workflows for complex analysis
+- **Memory Management**: Conversation history and state persistence
+- **Rich Formatting**: Beautiful terminal output with Rich library
+- **RPA Expertise**: Specialized knowledge of 2020 RPA Assessment data
 
 ```python
-from scripts.agents.landuse_query_agent import LanduseQueryAgent
+from landuse.agents import LanduseAgent
+from landuse.config import LanduseConfig
 
-# Initialize the specialized landuse agent
-agent = LanduseQueryAgent()
+# Initialize with default configuration
+agent = LanduseAgent()
 
 # Ask natural language questions
 result = agent.query("Which scenarios show the most agricultural land loss?")
-```
-
-### 🔍 **General SQL Query Agent**
-Multi-database support for SQLite, DuckDB, CSV, JSON, and Parquet files.
-
-```python
-from scripts.agents.sql_query_agent import SQLQueryAgent
-
-# Initialize the general SQL agent
-agent = SQLQueryAgent(root_dir="./data")
-
-# Run SQL queries on various data sources
-result = agent.run("Show me the tables in landuse_transitions.db")
+print(result)
 ```
 
 ---
 
-## General SQL Query Agent (Legacy)
-
-The `SQLQueryAgent` is the original component that interprets natural language queries and performs data operations on various databases and files.
-
 ```python
-from landuse.agents.landuse_agent import LanduseAgent
-from landuse.config.landuse_config import LanduseConfig
+from landuse.agents import LanduseAgent
+from landuse.config import LanduseConfig
 
 # Initialize with default configuration
 agent = LanduseAgent()
 
 # Initialize with custom configuration
-config = LanduseConfig.from_env(model_name="gpt-4o", enable_map_generation=True)
+config = LanduseConfig(
+    model_name="claude-3-5-sonnet-20241022", 
+    enable_map_generation=True,
+    enable_memory=True,
+    debug=True
+)
 agent = LanduseAgent(config=config)
 
 # Run a query
-result = agent.run("Show me the tables in the database")
+result = agent.query("Show me the tables in the database")
 ```
 
 ## Class: LanduseAgent
@@ -78,20 +71,62 @@ agent = LanduseAgent(config=config)
 
 ### Methods
 
-#### run(query: str) -> str
+#### query(question: str, use_graph: bool = False, thread_id: Optional[str] = None) -> str
 
 Execute a natural language query and return results.
 
 **Parameters:**
-- `query` (str): Natural language query to execute
+- `question` (str): Natural language question about RPA data
+- `use_graph` (bool): Whether to use LangGraph workflow (default: False)
+- `thread_id` (Optional[str]): Thread ID for conversation memory
 
 **Returns:**
-- `str`: Query results formatted as text
+- `str`: Query results formatted as text with business context
 
 **Example:**
 ```python
-result = agent.run("What are the top 5 counties by urban growth?")
+result = agent.query("What are the top 5 counties by urban growth?")
 print(result)
+
+# With graph workflow and memory
+result = agent.query(
+    "Compare this to agricultural land loss", 
+    use_graph=True, 
+    thread_id="analysis_session"
+)
+```
+
+#### simple_query(question: str) -> str
+
+Direct LLM interaction without LangGraph (recommended for production).
+
+**Parameters:**
+- `question` (str): Natural language question
+
+**Returns:**
+- `str`: Formatted response with query results and analysis
+
+**Example:**
+```python
+result = agent.simple_query("Show me forest transition patterns")
+print(result)
+```
+
+#### stream_query(question: str, thread_id: Optional[str] = None) -> Iterator[Any]
+
+Streaming query execution for real-time responses.
+
+**Parameters:**
+- `question` (str): Natural language question
+- `thread_id` (Optional[str]): Thread ID for memory
+
+**Yields:**
+- Response chunks for real-time display
+
+**Example:**
+```python
+for chunk in agent.stream_query("Analyze urbanization trends"):
+    print(chunk, end="")
 ```
 
 #### chat()
@@ -107,85 +142,79 @@ agent.chat()
 
 ## Available Tools
 
-The agent has access to numerous tools for data operations:
+The LanduseAgent has access to specialized tools for RPA data analysis:
 
-### File Management Tools
-
-| Tool | Description | Example Query |
-|------|-------------|---------------|
-| `list_files` | List files in directory | "Show me all files in the data folder" |
-| `read_file` | Read file contents | "Read the README file" |
-| `write_file` | Create/update files | "Save these results to output.txt" |
-| `copy_file` | Copy files | "Copy the database to backup folder" |
-
-### Data Analysis Tools
+### Core RPA Analysis Tools
 
 | Tool | Description | Example Query |
 |------|-------------|---------------|
-| `read_csv` | Load CSV files | "Analyze the sample_data.csv file" |
-| `read_parquet` | Load Parquet files | "Show me the sensor_data.parquet contents" |
-| `analyze_dataframe` | Get detailed statistics | "Analyze the land use data in detail" |
-| `query_data` | SQL queries on files | "Query the CSV: SELECT * FROM data WHERE value > 100" |
+| `execute_landuse_query` | Execute DuckDB SQL on RPA data | "Which scenarios show most forest loss?" |
+| `analyze_landuse_results` | Interpret results in RPA context | "Explain these urbanization patterns" |
+| `get_schema_info` | Show RPA database schema | "What tables are available?" |
+| `get_state_code` | Convert state names to FIPS codes | "Show me data for California" |
 
-### Database Tools
-
-| Tool | Description | Example Query |
-|------|-------------|---------------|
-| `list_database_tables` | Show all tables | "What tables are in the database?" |
-| `describe_database_table` | Get schema info | "Describe the landuse_transitions table" |
-| `query_database` | Execute SQL | "Query the database: SELECT COUNT(*) FROM transitions" |
-| `export_database_table` | Export to file | "Export the results to CSV" |
-
-### Transformation Tools
+### Optional Enhancement Tools
 
 | Tool | Description | Example Query |
 |------|-------------|---------------|
-| `transform_data` | Convert formats | "Convert the JSON file to Parquet" |
-| `optimize_storage` | Suggest optimal format | "What's the best format for this data?" |
-| `json_to_database` | Convert large JSON | "Convert the JSON to a SQLite database" |
+| `rpa_knowledge_retriever` | Access RPA methodology docs | "What is the forest projection methodology?" |
+| `create_choropleth_map` | Generate geographic visualizations | "Map agricultural losses by county" |
+| `create_heatmap` | Create data heatmaps | "Show urbanization hotspots" |
+
+**Note**: Map generation and knowledge base tools are optional and controlled by configuration.
 
 ## Query Patterns
 
-### Basic Information Queries
+### RPA Scenario Analysis
 
 ```python
-# List available data
-agent.run("Show me all data files")
+# Climate scenario comparisons
+agent.query("Compare forest loss between RCP45 and RCP85 scenarios")
 
-# Get table information  
-agent.run("What tables are in landuse_transitions.db?")
+# Socioeconomic scenario analysis
+agent.query("Which SSP scenarios show the most urban expansion?")
 
-# View sample data
-agent.run("Show me 5 rows from the landuse_transitions table")
+# Model ensemble analysis
+agent.query("Show variation across different climate models")
 ```
 
-### Analysis Queries
+### Geographic Analysis
 
 ```python
-# Aggregations
-agent.run("What's the total urban area in 2050?")
+# State-level analysis
+agent.query("Which states have the most agricultural land loss?")
 
-# Comparisons
-agent.run("Compare forest area between scenarios")
+# Regional comparisons
+agent.query("Compare urbanization between the South and Midwest")
 
-# Trends
-agent.run("Show me urban growth trends by decade")
+# County-level patterns
+agent.query("Show me the top 10 counties for forest to urban conversion")
 ```
 
-### Complex Queries
+### Land Use Transition Analysis
 
 ```python
-# Multi-step analysis
-agent.run("""
-Find counties with the most forest loss, 
-then show what that forest is converting to
-""")
+# Transition matrices
+agent.query("What land use types are converting to urban?")
 
-# Custom calculations
-agent.run("""
-Calculate the percentage of land that changes use 
-vs stays the same for each scenario
-""")
+# Agricultural analysis
+agent.query("How much cropland is being lost to development?")
+
+# Forest analysis
+agent.query("Show me forest conversion patterns by scenario")
+```
+
+### Temporal Analysis
+
+```python
+# Time series trends
+agent.query("Show urbanization trends from 2020 to 2070")
+
+# Acceleration patterns
+agent.query("When does urban expansion accelerate the most?")
+
+# Cumulative changes
+agent.query("Total land use change by 2100 under high warming")
 ```
 
 ## Response Format
@@ -221,15 +250,45 @@ result = agent.run("Calculate the average of text columns")
 
 ## Memory and Context
 
-The agent maintains conversation context:
+The LanduseAgent maintains conversation context across queries:
 
 ```python
-# First query establishes context
-agent.run("Show me counties in California")
+# Initialize conversation context
+agent.query("Show me counties in California")
 
-# Follow-up query uses context
-agent.run("Now show me just the ones with high urban growth")
-# Agent remembers we're looking at California counties
+# Follow-up queries use conversation history
+agent.query("Now show me just the ones with high urban growth")
+# Agent remembers we're analyzing California counties
+
+# Context persists across multiple queries
+agent.query("What scenarios show the biggest changes?")
+# Still in California context
+
+# Clear context when needed
+agent.clear_history()
+agent.query("Now analyze Texas counties")  # Fresh context
+```
+
+### Memory Configuration
+
+```python
+# Enable persistent memory with thread IDs
+config = LanduseConfig(enable_memory=True)
+agent = LanduseAgent(config=config)
+
+# Use graph mode for advanced memory features
+result = agent.query(
+    "Analyze forest trends", 
+    use_graph=True, 
+    thread_id="forest_analysis_session"
+)
+
+# Continue conversation in same thread
+result = agent.query(
+    "Now compare to agricultural trends", 
+    use_graph=True, 
+    thread_id="forest_analysis_session"
+)
 ```
 
 ## Performance Considerations
@@ -282,93 +341,163 @@ for query in queries:
     results[query] = agent.run(query)
 ```
 
-### Pipeline Integration
+### RPA Analysis Pipeline
 
 ```python
-# Data processing pipeline
-def analyze_county(fips_code):
-    config = LanduseConfig.for_agent_type('basic')
+# RPA scenario analysis pipeline
+def analyze_scenario(scenario_name):
+    config = LanduseConfig(enable_memory=True)
     agent = LanduseAgent(config=config)
     
-    # Get county profile
-    profile = agent.run(f"Show land use for FIPS {fips_code}")
+    # Get scenario overview
+    overview = agent.query(f"Analyze {scenario_name} scenario overview")
     
-    # Calculate changes
-    changes = agent.run(f"Calculate land use changes for FIPS {fips_code}")
+    # Agricultural impacts
+    ag_impacts = agent.query(f"Show agricultural impacts in {scenario_name}")
     
-    # Export results
-    agent.run(f"Export analysis for FIPS {fips_code} to CSV")
+    # Forest transitions
+    forest_changes = agent.query(f"Analyze forest changes in {scenario_name}")
     
-    return profile, changes
+    # Geographic patterns
+    geo_patterns = agent.query(f"Show geographic patterns for {scenario_name}")
+    
+    return {
+        'overview': overview,
+        'agriculture': ag_impacts,
+        'forest': forest_changes,
+        'geography': geo_patterns
+    }
+
+# Batch scenario comparison
+def compare_scenarios(scenarios):
+    agent = LanduseAgent()
+    results = {}
+    
+    for scenario in scenarios:
+        agent.clear_history()  # Fresh context for each scenario
+        results[scenario] = analyze_scenario(scenario)
+    
+    return results
 ```
 
 ### Web Service Integration
 
 ```python
 from flask import Flask, request, jsonify
-from landuse.agents.landuse_agent import LanduseAgent
-from landuse.config.landuse_config import LanduseConfig
+from landuse.agents import LanduseAgent
+from landuse.config import LanduseConfig
 
 app = Flask(__name__)
-config = LanduseConfig.for_agent_type('basic')
+# Disable memory for stateless web service
+config = LanduseConfig(enable_memory=False, debug=False)
 agent = LanduseAgent(config=config)
 
 @app.route('/query', methods=['POST'])
 def query():
     user_query = request.json.get('query')
-    result = agent.run(user_query)
-    return jsonify({'result': result})
+    thread_id = request.json.get('thread_id')  # Optional
+    
+    # Use simple_query for web service stability
+    result = agent.simple_query(user_query)
+    
+    return jsonify({
+        'result': result,
+        'thread_id': thread_id,
+        'model': agent.model_name
+    })
+
+@app.route('/stream', methods=['POST'])
+def stream_query():
+    user_query = request.json.get('query')
+    thread_id = request.json.get('thread_id')
+    
+    def generate():
+        for chunk in agent.stream_query(user_query, thread_id):
+            yield f"data: {json.dumps(chunk)}\n\n"
+    
+    return Response(generate(), mimetype='text/event-stream')
 ```
 
 ## Advanced Features
 
-### Custom Tools
+### Custom Tools and Subgraphs
 
-Add custom analysis tools by extending the LanduseAgent:
+Extend the LanduseAgent with specialized capabilities:
 
 ```python
-from landuse.agents.landuse_agent import LanduseAgent
-from landuse.config.landuse_config import LanduseConfig
+from landuse.agents import LanduseAgent
+from landuse.config import LanduseConfig
 from langchain_core.tools import Tool
 
-class CustomAgent(LanduseAgent):
+class CustomRPAAgent(LanduseAgent):
     def __init__(self, config: LanduseConfig = None):
         super().__init__(config)
-        # Add custom tools to the existing toolset
-        self.tools.append(self._create_custom_tool())
+        # Add custom RPA-specific tools
+        self.custom_tools = self._create_custom_tools()
     
-    def _create_custom_tool(self):
-        return Tool(
-            name="custom_metric",
-            func=self._calculate_custom_metric,
-            description="Calculate custom sustainability metric"
-        )
+    def _create_custom_tools(self):
+        return [
+            Tool(
+                name="calculate_carbon_impact",
+                func=self._calculate_carbon_impact,
+                description="Calculate carbon impact of land use changes"
+            ),
+            Tool(
+                name="assess_water_resources",
+                func=self._assess_water_impact,
+                description="Assess water resource implications"
+            )
+        ]
     
-    def _calculate_custom_metric(self, params: str) -> str:
-        # Custom implementation
-        return "Custom metric calculation results"
+    def create_sustainability_subgraph(self):
+        """Create specialized subgraph for sustainability analysis."""
+        sustainability_tools = self.tools + self.custom_tools
+        return self.create_subgraph("sustainability", sustainability_tools)
+    
+    def _calculate_carbon_impact(self, params: str) -> str:
+        # Custom carbon analysis implementation
+        return "Carbon impact analysis results"
+    
+    def _assess_water_impact(self, params: str) -> str:
+        # Custom water resource analysis
+        return "Water resource impact assessment"
 ```
 
 ### Extending Functionality
 
 ```python
-# Add visualization capabilities
-agent.run("Create a chart showing urban growth trends")
+# Enable map generation in configuration
+config = LanduseConfig(enable_map_generation=True)
+agent = LanduseAgent(config=config)
 
-# Add geographic analysis
-agent.run("Show me a map of land use changes")
+# Generate geographic visualizations
+agent.query("Create a map showing urban growth by county")
 
-# Add statistical modeling
-agent.run("Predict future land use based on trends")
+# Use map subgraph for complex geographic analysis
+map_subgraph = agent.create_map_subgraph()
+
+# Access RPA methodology documentation
+config = LanduseConfig(enable_knowledge_base=True)
+agent = LanduseAgent(config=config)
+agent.query("What assumptions are used in the forest projection model?")
+
+# Advanced analysis with custom prompts
+from landuse.agents.prompts import create_custom_prompt
+custom_prompt = create_custom_prompt(
+    analysis_style="detailed",
+    domain_focus="forest_economics"
+)
 ```
 
 ## Best Practices
 
-1. **Clear Queries**: Be specific about what you want
-2. **Iterative Refinement**: Start broad, then narrow down
-3. **Use Context**: Leverage the agent's memory for complex analyses
-4. **Error Recovery**: Check for errors and refine queries as needed
-5. **Performance**: Use appropriate limits and filters for large datasets
+1. **Use RPA Terminology**: Reference scenarios (LM, HL, HM, HH), models (RCP45/85, SSP1/5), and land use types correctly
+2. **Start with Simple Queries**: Use `simple_query()` or `query(use_graph=False)` for production
+3. **Leverage Context**: Build up analysis through conversation history
+4. **Geographic Specificity**: Specify states, regions, or counties for focused analysis
+5. **Scenario Comparisons**: Compare multiple scenarios to understand uncertainty
+6. **Error Recovery**: Agent provides helpful suggestions when queries fail
+7. **Performance**: Agent automatically optimizes queries with appropriate limits
 
 ## Next Steps
 

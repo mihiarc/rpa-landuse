@@ -253,7 +253,7 @@ ORDER BY urban_total;
 ### Current Version
 - Data version: 2024 RPA Assessment
 - Processing date: 2024
-- Database format: SQLite 3
+- Database format: DuckDB (modern), SQLite 3 (legacy)
 
 ### Update Cycle
 - RPA assessments every 10 years
@@ -353,7 +353,11 @@ data/processed/landuse_transitions_with_ag.db
 
 ### Query Access
 ```python
-# Direct database access
+# Direct database access (modern DuckDB)
+import duckdb
+conn = duckdb.connect('data/processed/landuse_analytics.duckdb')
+
+# Legacy SQLite access
 import sqlite3
 conn = sqlite3.connect('data/processed/landuse_transitions_with_ag.db')
 

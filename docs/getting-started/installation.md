@@ -1,20 +1,20 @@
 # Installation
 
-This guide will help you set up the LangChain Land Use Analysis project on your system.
+This guide will help you set up the RPA Land Use Analytics project on your system.
 
 ## Prerequisites
 
 Before you begin, ensure you have the following installed:
 
-- **Python 3.8+** - The project requires Python 3.8 or higher
+- **Python 3.9+** - The project requires Python 3.9 or higher
 - **uv** - Python package installer and virtual environment manager
 - **Git** - For cloning the repository
 
 ## Step 1: Clone the Repository
 
 ```bash
-git clone https://github.com/yourusername/langchain-landuse.git
-cd langchain-landuse
+git clone https://github.com/yourusername/rpa-landuse.git
+cd rpa-landuse
 ```
 
 ## Step 2: Set Up Virtual Environment
@@ -29,46 +29,69 @@ source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 
 ## Step 3: Install Dependencies
 
-Install all required packages using uv:
+Install the project and all dependencies using uv:
 
 ```bash
-uv pip install -r config/requirements.txt
+# Install project in development mode with all dependencies
+uv sync
+
+# Or install manually if needed
+uv pip install -e .
 ```
 
 This will install:
 
 - **LangChain** (>=0.3.0) - Core framework for building LLM applications
+- **LangGraph** (>=0.2.0) - Modern graph-based agent framework
+- **LangChain Anthropic** (>=0.2.0) - Claude integration
 - **LangChain OpenAI** (>=0.2.0) - OpenAI integration
-- **LangChain Community** (>=0.3.0) - Community tools and integrations
+- **DuckDB** (>=1.0.0) - High-performance analytical database
 - **Pandas** (>=2.2.0) - Data manipulation and analysis
-- **SQLAlchemy** (>=2.0.0) - SQL toolkit and ORM
+- **Streamlit** (>=1.46.0) - Web dashboard framework
 - **Rich** (>=14.0.0) - Terminal formatting and progress bars
 - **Pydantic** (>=2.0.0) - Data validation
+- **Plotly** (>=5.17.0) - Interactive visualizations
+- **GeoPandas** (>=1.0.0) - Geographic data processing
 - And more...
 
 ## Step 4: Configure Environment Variables
 
-Create a `.env` file in the `config` directory:
+Create a `.env` file in the project root:
 
 ```bash
-cd config
-cp .env.example .env  # Or create a new file
+# Copy the example configuration
+cp .env.example .env
 ```
 
 Edit the `.env` file with your settings:
 
 ```bash
-# Required
+# Required API Keys (choose one based on your model preference)
 OPENAI_API_KEY=your_openai_api_key_here
+ANTHROPIC_API_KEY=your_anthropic_api_key_here
 
-# Optional (defaults shown)
-LANDUSE_DB_PATH=data/processed/landuse_analytics.duckdb
+# Model Configuration
 LANDUSE_MODEL=gpt-4o-mini
-TEMPERATURE=0.2
+TEMPERATURE=0.1
 MAX_TOKENS=4000
+
+# Database Configuration
+LANDUSE_DB_PATH=data/processed/landuse_analytics.duckdb
+LANDUSE_MAX_QUERY_ROWS=1000
+LANDUSE_DEFAULT_DISPLAY_LIMIT=50
+
+# Agent Execution Limits
 LANDUSE_MAX_ITERATIONS=8
+LANDUSE_MAX_EXECUTION_TIME=120
+
+# Features
 LANDUSE_ENABLE_MAPS=true
-MAX_FILE_SIZE_MB=100
+LANDUSE_ENABLE_MEMORY=true
+LANDUSE_ENABLE_KNOWLEDGE_BASE=false
+
+# Performance
+LANDUSE_RATE_LIMIT_CALLS=60
+LANDUSE_RATE_LIMIT_WINDOW=60
 ```
 
 !!! warning "API Key Security"
@@ -79,40 +102,50 @@ MAX_FILE_SIZE_MB=100
 Test that everything is working:
 
 ```bash
-# Go back to project root
-cd ..
+# Test the main RPA analytics agent (requires API key setup)
+uv run rpa-analytics
 
-# Run the test agent
-uv run python scripts/agents/test_agent.py
+# Alternative entry points
+uv run landuse-agent
+uv run python -m landuse.agents.agent
+
+# Test the Streamlit dashboard
+uv run streamlit run streamlit_app.py
 ```
 
-You should see:
+If your API keys are configured correctly, you should see:
 
 ```
-🚀 Creating Sample Data Files
-✅ sample_data.csv created
-✅ inventory.json created
-✅ sensor_data.parquet created
+🌲 RPA Land Use Analytics Agent
+USDA Forest Service RPA Assessment Data Analysis
 
-Data Engineering Agent
-🤖 Agent initialized. Working directory: ./data
-Type 'exit' to quit, 'help' for available commands
+RPA Land Use Analytics Database:
+✓ Found 5 tables in database
+✓ Knowledge base ready (if enabled)
 
-You>
+Welcome to RPA Land Use Analytics!
+Ask questions about land use projections and transitions.
+Type 'exit' to quit, 'help' for examples, 'clear' to reset conversation.
+
+[You] >
 ```
 
 ## Step 6: Prepare Land Use Data
 
-If you have the county land use projections data:
+If you have the RPA county land use projections data:
 
 1. Place your JSON file in `data/raw/`
-2. Run the converter:
+2. Run the DuckDB converter:
 
 ```bash
+# Convert JSON to DuckDB star schema (recommended)
+uv run python scripts/converters/convert_to_duckdb.py
+
+# Or use the legacy SQLite converter
 uv run python scripts/converters/convert_landuse_with_agriculture.py
 ```
 
-This creates the SQLite database in `data/processed/`.
+This creates the optimized DuckDB database in `data/processed/landuse_analytics.duckdb`.
 
 ## Troubleshooting
 
@@ -120,8 +153,9 @@ This creates the SQLite database in `data/processed/`.
 
 **Import Errors**
 ```bash
-# Ensure you're in the virtual environment
-which python  # Should show .venv/bin/python
+# Ensure you're in the virtual environment and project is installed
+uv run which python  # Should show .venv/bin/python
+uv pip list | grep rpa-landuse  # Should show the project is installed
 ```
 
 **OpenAI API Errors**

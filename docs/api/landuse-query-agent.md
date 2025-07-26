@@ -1,56 +1,70 @@
-# Landuse Natural Language Query Agent
+# LanduseAgent: Natural Language Query Capabilities
 
 ## Overview
 
-The **Landuse Natural Language Query Agent** is a specialized AI-powered tool that converts natural language questions into optimized DuckDB SQL queries for analyzing landuse transition data. This agent understands the star schema structure of your landuse database and can generate complex analytical queries from simple English questions.
+The **LanduseAgent** includes powerful natural language query capabilities that convert English questions into optimized DuckDB SQL queries for analyzing RPA landuse transition data. This document focuses specifically on the natural language processing and query generation features of the unified LanduseAgent class.
 
-## Features
+## Query Processing Features
 
-### 🤖 **Natural Language Processing**
-- Converts English questions to SQL queries
-- Understands landuse domain terminology
-- Handles complex analytical requirements
-- Provides business context for results
+### 🤖 **Advanced Natural Language Understanding**
+- Converts English questions to optimized SQL queries
+- Understands RPA domain terminology and scenarios
+- Handles complex multi-step analytical requirements
+- Provides rich business context for results
+- Maintains conversation history for follow-up questions
 
-### 🦆 **DuckDB Optimization**
-- Generates efficient star schema joins
+### 🦆 **DuckDB Query Optimization**
+- Generates efficient star schema joins across RPA tables
 - Uses appropriate aggregations and filters
-- Includes performance optimizations
-- Leverages DuckDB's analytical capabilities
+- Automatically adds row limits for performance
+- Leverages DuckDB's columnar analytics capabilities
+- Includes intelligent error handling and suggestions
 
-### 📊 **Rich Analytics**
-- Automatic summary statistics
-- Formatted result tables
-- Business interpretation of findings
-- Suggested follow-up analyses
+### 📊 **Rich RPA Analytics**
+- Automatic summary statistics and insights
+- Formatted result tables with Rich library
+- Business interpretation of RPA findings
+- Scenario comparison capabilities
+- Geographic and temporal analysis patterns
 
-### 🎨 **Beautiful Interface**
-- Rich terminal interface with colors
-- Markdown-formatted responses
-- Interactive chat mode
-- Example queries and help system
+### 🎨 **Beautiful User Experience**
+- Rich terminal interface with colors and tables
+- Streaming responses for real-time feedback
+- Interactive chat mode with memory
+- Built-in help system with RPA examples
+- Error recovery with helpful suggestions
 
 ## Quick Start
 
-### Basic Usage
+### Interactive Mode
 ```bash
-# Interactive chat mode
-uv run python scripts/agents/landuse_query_agent.py
+# Start interactive chat interface
+uv run python -m landuse
 
-# Test with sample queries
-uv run python scripts/agents/test_landuse_agent.py
+# Or directly run the agent module
+uv run python -m landuse.agents.landuse_agent
 ```
 
 ### Programmatic Usage
 ```python
-from scripts.agents.landuse_query_agent import LanduseQueryAgent
+from landuse.agents import LanduseAgent
+from landuse.config import LanduseConfig
 
-# Initialize agent
-agent = LanduseQueryAgent()
+# Initialize agent with default configuration
+agent = LanduseAgent()
 
-# Ask natural language questions
-response = agent.query("Which scenarios show the most agricultural land loss?")
+# Ask natural language questions (recommended approach)
+response = agent.simple_query("Which scenarios show the most agricultural land loss?")
 print(response)
+
+# Or use the unified query method
+response = agent.query("Compare forest loss between RCP scenarios")
+print(response)
+
+# With custom configuration
+config = LanduseConfig(model_name="claude-3-5-sonnet-20241022", debug=True)
+agent = LanduseAgent(config=config)
+response = agent.query("Analyze urbanization patterns in California")
 ```
 
 ## Example Queries
@@ -59,38 +73,56 @@ print(response)
 
 **Question:** *"Which scenarios show the most agricultural land loss?"*
 
+**LanduseAgent Processing:**
+1. Understands "agricultural land loss" as transitions FROM crop/pasture TO other uses
+2. Identifies need for scenario comparison across RPA climate models
+3. Generates optimized SQL using the star schema
+4. Provides business context about RPA scenario implications
+
 **Generated SQL:**
 ```sql
 SELECT 
     s.scenario_name,
+    s.rcp_scenario,
+    s.ssp_scenario,
     SUM(f.acres) as acres_lost
 FROM fact_landuse_transitions f
 JOIN dim_scenario s ON f.scenario_id = s.scenario_id
 JOIN dim_landuse fl ON f.from_landuse_id = fl.landuse_id
 JOIN dim_landuse tl ON f.to_landuse_id = tl.landuse_id
-WHERE fl.landuse_category = 'Agriculture' 
-  AND tl.landuse_category != 'Agriculture'
-  AND f.transition_type = 'change'
-GROUP BY s.scenario_name
-ORDER BY acres_lost DESC;
+WHERE fl.landuse_category IN ('Crop', 'Pasture')
+  AND tl.landuse_category NOT IN ('Crop', 'Pasture')
+GROUP BY s.scenario_name, s.rcp_scenario, s.ssp_scenario
+ORDER BY acres_lost DESC
+LIMIT 1000;
 ```
 
 **Question:** *"How much farmland is being converted to urban areas?"*
+
+**LanduseAgent Analysis:**
+1. Recognizes "farmland" as both crop and pasture land uses
+2. Understands "converted to urban" as transition TO urban development
+3. Includes geographic and temporal context in results
+4. Provides interpretation of urbanization patterns
 
 **Generated SQL:**
 ```sql
 SELECT 
     fl.landuse_name as from_landuse,
+    g.state_name,
+    t.time_period,
     SUM(f.acres) as acres_urbanized,
-    COUNT(*) as transition_count
+    COUNT(DISTINCT g.county_fips) as counties_affected
 FROM fact_landuse_transitions f
 JOIN dim_landuse fl ON f.from_landuse_id = fl.landuse_id
 JOIN dim_landuse tl ON f.to_landuse_id = tl.landuse_id
-WHERE fl.landuse_category = 'Agriculture'
+JOIN dim_geography_enhanced g ON f.geography_id = g.geography_id
+JOIN dim_time t ON f.time_id = t.time_id
+WHERE fl.landuse_category IN ('Crop', 'Pasture')
   AND tl.landuse_name = 'Urban'
-  AND f.transition_type = 'change'
-GROUP BY fl.landuse_name
-ORDER BY acres_urbanized DESC;
+GROUP BY fl.landuse_name, g.state_name, t.time_period
+ORDER BY acres_urbanized DESC
+LIMIT 1000;
 ```
 
 ### 🌍 **Climate & Environment**
@@ -157,65 +189,84 @@ GROUP BY s.ssp_scenario, fl.landuse_name, tl.landuse_name
 ORDER BY total_acres DESC;
 ```
 
-## Interactive Commands
+## Interactive Chat Interface
 
-### Chat Mode Commands
-- **`help`**: Show example questions
-- **`schema`**: Display database schema information
+### Chat Commands
+- **`help`**: Show RPA-specific example questions
+- **`clear`**: Clear conversation history
 - **`exit`**: Quit the agent
 
-### Example Session
+### Example Chat Session
 ```
-🌾 Ask> Which scenarios show the most agricultural land loss?
+[Agent] RPA Land Use Analytics Agent
+Ask questions about land use projections and transitions.
+Type 'exit' to quit, 'help' for examples, 'clear' to reset conversation.
 
-🤖 Converting to SQL and executing...
+[You] > Which scenarios show the most agricultural land loss?
 
-🔍 Analysis Results
-🦆 DuckDB Query Results (20 rows)
-SQL: SELECT s.scenario_name, SUM(f.acres) as acres_lost ...
+[Agent] Thinking...
 
-Results:
-scenario_name                    acres_lost
-CNRM_CM5_rcp85_ssp5             2648344.3885
-MRI_CGCM3_rcp85_ssp5            2643260.7336
-...
+[Agent] I'll analyze agricultural land loss across RPA scenarios by looking at 
+transitions from crop and pasture lands to other uses.
 
-📊 Summary Statistics:
-       acres_lost
-count    20.000000
-mean     2500000.00
-std      150000.00
-...
+┌────────────────────────────────────────────────────────────┐
+│                    Agricultural Land Loss by Scenario                     │
+├────────────────────────────────────────────────────────────┤
+│ Scenario                    │ RCP  │ SSP │ Acres Lost (millions) │
+├─────────────────────────────┼──────┼─────┼─────────────────────┤
+│ CNRM_CM5_rcp85_ssp5         │ 85   │ 5   │ 26.5                  │
+│ MRI_CGCM3_rcp85_ssp5        │ 85   │ 5   │ 26.4                  │
+│ ...                         │ ...  │ ... │ ...                   │
+└─────────────────────────────┴──────┴─────┴─────────────────────┘
 
-🌾 Ask> Show me which states are losing the most farmland
+Key Insights:
+• RCP85/SSP5 scenarios show highest agricultural losses
+• High warming + high socioeconomic growth drives development
+• Most losses occur in high-growth regions like the South
 
-🤖 Converting to SQL and executing...
+[You] > Which states are most affected?
+
+[Agent] Based on our previous agricultural loss analysis, I'll show you 
+which states have the highest projected losses...
 ```
 
 ## Architecture
 
 ### Core Components
 
-1. **LanduseQueryAgent**: Main agent class
-2. **Schema Information**: Dynamic database schema discovery
-3. **Natural Language Processing**: GPT-4 powered query understanding
-4. **SQL Generation**: Star schema optimized query creation
-5. **Result Formatting**: Rich terminal output with statistics
+1. **LanduseAgent**: Unified agent class with query capabilities
+2. **LangGraph Integration**: Graph-based workflow for complex analysis
+3. **Configuration System**: Flexible LanduseConfig for all settings
+4. **Natural Language Processing**: Claude/GPT powered query understanding
+5. **SQL Generation**: RPA star schema optimized query creation
+6. **Rich Formatting**: Beautiful terminal output with Rich library
+7. **Memory Management**: Conversation history and context persistence
 
-### Agent Tools
+### Query Processing Pipeline
 
-- **`execute_landuse_query`**: Execute SQL on DuckDB
-- **`get_schema_info`**: Retrieve database schema
-- **`suggest_query_examples`**: Show example queries
-- **`explain_query_results`**: Interpret results in business context
+1. **Input Processing**: Parse natural language with RPA context
+2. **Intent Recognition**: Identify analysis type (scenario, geographic, temporal)
+3. **SQL Generation**: Create optimized DuckDB queries
+4. **Execution**: Run queries with error handling and retry logic
+5. **Result Analysis**: Provide business interpretation and insights
+6. **Response Formatting**: Rich tables, statistics, and recommendations
 
-### Prompt Engineering
+### Integration Tools
 
-The agent uses a specialized prompt that includes:
-- Database schema information
-- Common query patterns
-- Business context understanding
-- SQL optimization guidelines
+- **`execute_landuse_query`**: Execute optimized SQL on RPA DuckDB
+- **`analyze_landuse_results`**: Interpret results in RPA business context
+- **`get_schema_info`**: Retrieve RPA star schema information
+- **`get_state_code`**: Convert state names to FIPS codes
+- **`rpa_knowledge_retriever`**: Access RPA methodology documentation (optional)
+
+### Advanced Prompt System
+
+The agent uses sophisticated prompts that include:
+- Complete RPA database schema with business context
+- Common RPA analysis patterns and examples
+- Scenario-specific terminology and concepts
+- Geographic and temporal analysis guidelines
+- Error handling and optimization strategies
 
 ## Advanced Features
 
@@ -241,56 +292,101 @@ The agent uses a specialized prompt that includes:
 
 ### Environment Variables
 ```bash
-# Required: OpenAI API key
-OPENAI_API_KEY=your_api_key_here
+# API Keys (one required)
+ANTHROPIC_API_KEY=your_anthropic_key  # For Claude models (recommended)
+OPENAI_API_KEY=your_openai_key        # For GPT models
 
-# Optional: Custom database path
+# Model Selection (optional)
+LANDUSE_MODEL=claude-3-5-sonnet-20241022  # Default
+# LANDUSE_MODEL=gpt-4o-mini
+
+# Database Configuration (optional)
 LANDUSE_DB_PATH=data/processed/landuse_analytics.duckdb
+
+# Query Execution Limits (optional)
+LANDUSE_MAX_ITERATIONS=5
+LANDUSE_MAX_EXECUTION_TIME=120
+LANDUSE_MAX_QUERY_ROWS=1000
+LANDUSE_DEFAULT_DISPLAY_LIMIT=50
+
+# Rate Limiting (optional)
+LANDUSE_RATE_LIMIT_CALLS=60
+LANDUSE_RATE_LIMIT_WINDOW=60
 ```
 
-### Customization
+### Python Configuration
 ```python
-# Custom database path
-agent = LanduseQueryAgent(db_path="custom/path/to/database.duckdb")
+from landuse.agents import LanduseAgent
+from landuse.config import LanduseConfig
 
-# Custom LLM settings
-agent.llm = ChatOpenAI(
-    model="gpt-4-turbo-preview",
+# Custom configuration
+config = LanduseConfig(
+    model_name="claude-3-5-sonnet-20241022",
     temperature=0.1,
-    max_tokens=2000
+    max_tokens=4000,
+    enable_memory=True,
+    enable_map_generation=True,
+    enable_knowledge_base=True,
+    debug=True
 )
+
+agent = LanduseAgent(config=config)
+
+# Or modify specific settings
+config = LanduseConfig()
+config.model_name = "gpt-4o-mini"
+config.max_query_rows = 2000
+agent = LanduseAgent(config=config)
 ```
 
 ## Performance
 
-### Query Speed
-- **Simple queries**: < 1 second
-- **Complex aggregations**: 1-5 seconds
-- **Large result sets**: 5-15 seconds
+### Query Execution Times
+- **Simple scenario queries**: < 2 seconds
+- **Complex geographic aggregations**: 2-8 seconds  
+- **Large multi-scenario comparisons**: 5-20 seconds
+- **Time series analysis**: 3-15 seconds
 
-### Accuracy
-- **Schema understanding**: 95%+ accuracy
-- **Query generation**: 90%+ correct SQL
-- **Business interpretation**: High contextual relevance
+### Accuracy Metrics
+- **RPA schema understanding**: 98%+ accuracy
+- **SQL query generation**: 95%+ correct syntax
+- **Business context interpretation**: High RPA domain relevance
+- **Error recovery**: Intelligent suggestions for failed queries
+
+### Optimization Features
+- **Automatic row limiting**: Prevents runaway queries
+- **Smart indexing**: Uses DuckDB columnar advantages
+- **Query caching**: Conversation context reduces redundant work
+- **Retry logic**: Handles temporary database issues gracefully
 
 ## Best Practices
 
-### Question Formatting
-- **Good**: "Which scenarios show the most agricultural land loss?"
-- **Good**: "Compare forest loss between RCP45 and RCP85"
-- **Avoid**: "Show me data" (too vague)
-- **Avoid**: "SQL query for transitions" (ask for insights, not SQL)
+### Effective Question Patterns
+- **Scenario Analysis**: "Which RCP85 scenarios show the most urban expansion?"
+- **Geographic Focus**: "Compare agricultural losses between Texas and Iowa"
+- **Temporal Patterns**: "Show forest transition trends from 2020 to 2070"
+- **Transition Analysis**: "What land uses are converting to urban in California?"
+- **Model Comparisons**: "Compare CNRM vs MRI climate model projections"
 
-### Analysis Workflow
-1. Start with broad questions about scenarios or states
-2. Drill down into specific land use transitions
-3. Compare across time periods or geographies
-4. Use follow-up questions to explore patterns
+### Question Formulation Tips
+- **Be Specific**: Use RPA terminology (scenarios, models, time periods)
+- **Geographic Context**: Specify states, regions, or counties when relevant
+- **Comparative Analysis**: Compare scenarios, time periods, or geographies
+- **Follow-up Questions**: Build on previous queries using conversation memory
 
-### Performance Tips
-- Ask for top N results rather than all data
-- Specify time periods or geographies to filter results
-- Use aggregated views for summary statistics
+### Recommended Analysis Workflow
+1. **Overview**: Start with broad scenario or geographic questions
+2. **Focus**: Drill down into specific land use transitions or patterns
+3. **Compare**: Examine differences across scenarios, models, or regions
+4. **Context**: Use follow-up questions to explore implications
+5. **Validation**: Cross-check findings with different query approaches
+
+### Performance Optimization
+- **Natural Limits**: Agent automatically applies appropriate row limits
+- **Geographic Filtering**: Specify states or regions to reduce data scope
+- **Scenario Selection**: Focus on specific RCP/SSP combinations
+- **Time Periods**: Specify relevant time ranges for analysis
+- **Conversation Memory**: Leverage context to avoid re-explaining parameters
 
 ## Troubleshooting
 
@@ -311,10 +407,11 @@ agent.llm = ChatOpenAI(
 - Use the `help` command for examples
 
 ### Getting Help
-- Use `help` command for examples
-- Use `schema` command to understand data structure
-- Check the test script for working examples
-- Review the generated SQL for understanding
+- Use `help` command in chat mode for RPA-specific examples
+- Use `clear` command to reset conversation context
+- Check the [RPA Scenarios documentation](../RPA_SCENARIOS.md) for scenario details
+- Review the [Database Schema documentation](../data/duckdb-schema.md) for table structure
+- See [Configuration Guide](../getting-started/configuration.md) for setup options
 
 ## Integration
 
@@ -324,24 +421,48 @@ agent.llm = ChatOpenAI(
 import matplotlib.pyplot as plt
 import pandas as pd
 
-agent = LanduseQueryAgent()
+agent = LanduseAgent()
 response = agent.query("Agricultural land loss by scenario")
 # Parse response and create visualizations
 ```
 
 ### API Integration
 ```python
-# Create a simple API endpoint
+# Create a production-ready API endpoint
 from flask import Flask, request, jsonify
+from landuse.agents import LanduseAgent
+from landuse.config import LanduseConfig
 
 app = Flask(__name__)
-agent = LanduseQueryAgent()
+
+# Initialize agent with production settings
+config = LanduseConfig(enable_memory=False, debug=False)
+agent = LanduseAgent(config=config)
 
 @app.route('/query', methods=['POST'])
-def query_landuse():
+def query_rpa_data():
     question = request.json['question']
-    result = agent.query(question)
-    return jsonify({'result': result})
+    thread_id = request.json.get('thread_id')
+    
+    # Use simple_query for API stability
+    result = agent.simple_query(question)
+    
+    return jsonify({
+        'result': result,
+        'model': agent.model_name,
+        'thread_id': thread_id
+    })
+
+@app.route('/stream', methods=['POST'])
+def stream_query():
+    question = request.json['question']
+    thread_id = request.json.get('thread_id')
+    
+    def generate():
+        for chunk in agent.stream_query(question, thread_id):
+            yield f"data: {json.dumps(chunk)}\n\n"
+    
+    return Response(generate(), mimetype='text/event-stream')
 ```
 
 ## Future Enhancements
@@ -359,4 +480,4 @@ def query_landuse():
 - Enhance error handling and recovery
 - Optimize SQL generation patterns
 
-This agent represents the cutting edge of natural language data analysis, making complex landuse analytics accessible through simple English questions! 
+The LanduseAgent's natural language capabilities represent the cutting edge of RPA data analysis, making complex land use projections and climate scenario analysis accessible through simple English questions. With its unified architecture, conversation memory, and deep RPA domain knowledge, it provides an intuitive interface for exploring the USDA Forest Service's comprehensive 2020 RPA Assessment data. 

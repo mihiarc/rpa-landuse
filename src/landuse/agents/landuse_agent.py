@@ -891,3 +891,13 @@ Focus on:
         if hasattr(self, 'db_connection') and self.db_connection:
             self.db_connection.close()
         # Knowledge base (Chroma) will persist automatically
+
+
+def main() -> None:
+    """Main entry point when run as module."""
+    from landuse.agents.agent import main as agent_main
+    agent_main()
+
+
+if __name__ == "__main__":
+    main()
