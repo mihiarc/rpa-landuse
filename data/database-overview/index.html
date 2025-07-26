@@ -2984,15 +2984,19 @@
 <li><strong>DuckDB Engine</strong>: Columnar storage optimized for aggregation</li>
 </ul>
 <h3 id="index-strategy">Index Strategy<a class="headerlink" href="#index-strategy" title="Permanent link">&para;</a></h3>
-<p><strong>Primary Indexes:</strong>
-- <code>idx_geography_fips</code> - County lookups
-- <code>idx_geography_state</code> - State-level filtering
-- <code>idx_scenario_name</code> - Scenario comparisons
-- <code>idx_landuse_code</code> - Land use filtering</p>
-<p><strong>Composite Indexes:</strong>
-- <code>idx_fact_composite</code> - Multi-dimensional fact table queries
-- <code>idx_fact_landuse</code> - Land use transition patterns
-- <code>idx_socioeconomic_composite</code> - Demographic analysis</p>
+<p><strong>Primary Indexes:</strong></p>
+<ul>
+<li><code>idx_geography_fips</code> - County lookups</li>
+<li><code>idx_geography_state</code> - State-level filtering</li>
+<li><code>idx_scenario_name</code> - Scenario comparisons</li>
+<li><code>idx_landuse_code</code> - Land use filtering</li>
+</ul>
+<p><strong>Composite Indexes:</strong></p>
+<ul>
+<li><code>idx_fact_composite</code> - Multi-dimensional fact table queries</li>
+<li><code>idx_fact_landuse</code> - Land use transition patterns</li>
+<li><code>idx_socioeconomic_composite</code> - Demographic analysis</li>
+</ul>
 <h2 id="use-cases">Use Cases<a class="headerlink" href="#use-cases" title="Permanent link">&para;</a></h2>
 <h3 id="policy-analysis">Policy Analysis<a class="headerlink" href="#policy-analysis" title="Permanent link">&para;</a></h3>
 <ul>
@@ -3028,7 +3032,7 @@
 </span></code></pre></div>
 <h3 id="application-interfaces">Application Interfaces<a class="headerlink" href="#application-interfaces" title="Permanent link">&para;</a></h3>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># Streamlit Web Dashboard</span>
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>uv<span class="w"> </span>run<span class="w"> </span>streamlit<span class="w"> </span>run<span class="w"> </span>streamlit_app.py
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>uv<span class="w"> </span>run<span class="w"> </span>streamlit<span class="w"> </span>run<span class="w"> </span>landuse_app.py
 </span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>
 </span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="c1"># Natural Language Query Agent</span>
 </span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>-m<span class="w"> </span>landuse.agents.agent

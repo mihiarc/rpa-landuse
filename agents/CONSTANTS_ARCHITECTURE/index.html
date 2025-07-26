@@ -2132,101 +2132,106 @@
 <h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
 <p>The <code>constants.py</code> file serves as a centralized configuration and knowledge base for the LanduseAgent. It contains all the domain-specific information, templates, and defaults that the agent needs to operate effectively.</p>
 <h2 id="architecture-diagram">Architecture Diagram<a class="headerlink" href="#architecture-diagram" title="Permanent link">&para;</a></h2>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>┌─────────────────────────────────────────────────────────┐
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>│                    constants.py                          │
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>│                                                          │
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>│  ┌─────────────────┐  ┌──────────────────┐             │
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>│  │  STATE_NAMES    │  │ SCHEMA_INFO      │             │
-</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>│  │  - State codes  │  │  TEMPLATE        │             │
-</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>│  │  - State names  │  │ - Table schemas  │             │
-</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>│  └────────┬────────┘  └────────┬─────────┘             │
-</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>│           │                     │                        │
-</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>│  ┌────────▼────────┐  ┌────────▼─────────┐             │
-</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>│  │ DEFAULT_        │  │ QUERY_EXAMPLES   │             │
-</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>│  │ ASSUMPTIONS     │  │ - SQL templates  │             │
-</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>│  │ - Scenarios     │  │ - Common queries │             │
-</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>│  │ - Time periods  │  └────────┬─────────┘             │
-</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>│  └────────┬────────┘           │                        │
-</span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>│           │                     │                        │
-</span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>│  ┌────────▼────────┐  ┌────────▼─────────┐             │
-</span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>│  │ DB_CONFIG       │  │ MODEL_CONFIG     │             │
-</span><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>│  │ - Default path  │  │ - Temperature    │             │
-</span><span id="__span-0-20"><a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a>│  │ - Query limits  │  │ - Max tokens     │             │
-</span><span id="__span-0-21"><a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a>│  └────────┬────────┘  └────────┬─────────┘             │
-</span><span id="__span-0-22"><a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a>└───────────┼────────────────────┼────────────────────────┘
-</span><span id="__span-0-23"><a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a>            │                     │
-</span><span id="__span-0-24"><a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a>            └─────────┬───────────┘
-</span><span id="__span-0-25"><a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a>                      │
-</span><span id="__span-0-26"><a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a>                      ▼
-</span><span id="__span-0-27"><a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a>        ┌─────────────────────────────┐
-</span><span id="__span-0-28"><a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a>        │       agent.py              │
-</span><span id="__span-0-29"><a id="__codelineno-0-29" name="__codelineno-0-29" href="#__codelineno-0-29"></a>        │                             │
-</span><span id="__span-0-30"><a id="__codelineno-0-30" name="__codelineno-0-30" href="#__codelineno-0-30"></a>        │  Uses constants for:        │
-</span><span id="__span-0-31"><a id="__codelineno-0-31" name="__codelineno-0-31" href="#__codelineno-0-31"></a>        │  • Configuration           │
-</span><span id="__span-0-32"><a id="__codelineno-0-32" name="__codelineno-0-32" href="#__codelineno-0-32"></a>        │  • Schema knowledge        │
-</span><span id="__span-0-33"><a id="__codelineno-0-33" name="__codelineno-0-33" href="#__codelineno-0-33"></a>        │  • Query templates         │
-</span><span id="__span-0-34"><a id="__codelineno-0-34" name="__codelineno-0-34" href="#__codelineno-0-34"></a>        │  • State mappings         │
-</span><span id="__span-0-35"><a id="__codelineno-0-35" name="__codelineno-0-35" href="#__codelineno-0-35"></a>        │  • Default behaviors      │
-</span><span id="__span-0-36"><a id="__codelineno-0-36" name="__codelineno-0-36" href="#__codelineno-0-36"></a>        └─────────────────────────────┘
-</span></code></pre></div>
+<pre class="mermaid"><code>graph TD
+    subgraph "Configuration Layer"
+        A[constants.py] --&gt; B[STATE_NAMES&lt;br/&gt;State codes &amp; names]
+        A --&gt; C[SCHEMA_INFO_TEMPLATE&lt;br/&gt;Table schemas]
+        A --&gt; D[DEFAULT_ASSUMPTIONS&lt;br/&gt;Scenarios &amp; time periods]
+        A --&gt; E[QUERY_EXAMPLES&lt;br/&gt;SQL templates]
+        A --&gt; F[DB_CONFIG&lt;br/&gt;Default path &amp; limits]
+        A --&gt; G[MODEL_CONFIG&lt;br/&gt;Temperature &amp; tokens]
+    end
+
+    subgraph "Agent Layer"
+        H[LanduseAgent&lt;br/&gt;agent.py]
+    end
+
+    B --&gt; H
+    C --&gt; H
+    D --&gt; H
+    E --&gt; H
+    F --&gt; H
+    G --&gt; H
+
+    subgraph "Agent Uses Constants For"
+        I[Configuration]
+        J[Schema Knowledge]
+        K[Query Templates]
+        L[State Mappings]
+        M[Default Behaviors]
+    end
+
+    H --&gt; I
+    H --&gt; J
+    H --&gt; K
+    H --&gt; L
+    H --&gt; M
+
+    style A fill:#e1f5fe
+    style H fill:#f3e5f5
+    style I fill:#e8f5e8
+    style J fill:#e8f5e8
+    style K fill:#e8f5e8
+    style L fill:#e8f5e8
+    style M fill:#e8f5e8</code></pre>
 <h2 id="how-each-constant-is-used">How Each Constant is Used<a class="headerlink" href="#how-each-constant-is-used" title="Permanent link">&para;</a></h2>
 <h3 id="1-schema_info_template-database-knowledge">1. <strong>SCHEMA_INFO_TEMPLATE</strong> (Database Knowledge)<a class="headerlink" href="#1-schema_info_template-database-knowledge" title="Permanent link">&para;</a></h3>
 <p>The agent uses this to understand the database structure:</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># In agent.py _get_schema_info() method:</span>
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="k">def</span><span class="w"> </span><span class="nf">_get_schema_info</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>    <span class="c1"># Start with template</span>
-</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>    <span class="n">schema_info</span> <span class="o">=</span> <span class="n">SCHEMA_INFO_TEMPLATE</span>
-</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>
-</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>    <span class="c1"># Add actual table counts...</span>
-</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>    <span class="c1"># The template provides the base knowledge about tables and relationships</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># In agent.py _get_schema_info() method:</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="k">def</span><span class="w"> </span><span class="nf">_get_schema_info</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="c1"># Start with template</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n">schema_info</span> <span class="o">=</span> <span class="n">SCHEMA_INFO_TEMPLATE</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    <span class="c1"># Add actual table counts...</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>    <span class="c1"># The template provides the base knowledge about tables and relationships</span>
 </span></code></pre></div>
 <p><strong>Purpose</strong>: Gives the LLM complete understanding of the database schema so it can generate correct SQL queries.</p>
 <h3 id="2-state_names-geographic-mapping">2. <strong>STATE_NAMES</strong> (Geographic Mapping)<a class="headerlink" href="#2-state_names-geographic-mapping" title="Permanent link">&para;</a></h3>
 <p>Used in the <code>get_state_code</code> tool:</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nd">@tool</span>
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="k">def</span><span class="w"> </span><span class="nf">get_state_code</span><span class="p">(</span><span class="n">state_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>    <span class="c1"># Create reverse mapping</span>
-</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>    <span class="n">name_to_code</span> <span class="o">=</span> <span class="p">{</span><span class="n">v</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span> <span class="n">k</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">STATE_NAMES</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
-</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>
-</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>    <span class="c1"># Convert &quot;Texas&quot; → &quot;48&quot;, &quot;California&quot; → &quot;06&quot;, etc.</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nd">@tool</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="k">def</span><span class="w"> </span><span class="nf">get_state_code</span><span class="p">(</span><span class="n">state_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>    <span class="c1"># Create reverse mapping</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>    <span class="n">name_to_code</span> <span class="o">=</span> <span class="p">{</span><span class="n">v</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span> <span class="n">k</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">STATE_NAMES</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>    <span class="c1"># Convert &quot;Texas&quot; → &quot;48&quot;, &quot;California&quot; → &quot;06&quot;, etc.</span>
 </span></code></pre></div>
 <p><strong>Purpose</strong>: Allows users to use state names naturally ("Texas") instead of codes ("48").</p>
 <h3 id="3-default_assumptions-query-defaults">3. <strong>DEFAULT_ASSUMPTIONS</strong> (Query Defaults)<a class="headerlink" href="#3-default_assumptions-query-defaults" title="Permanent link">&para;</a></h3>
 <p>Used in the system prompt to handle ambiguous queries:</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">_get_system_prompt</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
-</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="s2">    DEFAULT ASSUMPTIONS (when user doesn&#39;t specify):</span>
-</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="s2">    - Scenarios: </span><span class="si">{</span><span class="n">DEFAULT_ASSUMPTIONS</span><span class="p">[</span><span class="s2">&quot;scenarios&quot;</span><span class="p">]</span><span class="si">}</span>
-</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="s2">    - Time Periods: </span><span class="si">{</span><span class="n">DEFAULT_ASSUMPTIONS</span><span class="p">[</span><span class="s2">&quot;time_period&quot;</span><span class="p">]</span><span class="si">}</span>
-</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="s2">    - Geographic Scope: </span><span class="si">{</span><span class="n">DEFAULT_ASSUMPTIONS</span><span class="p">[</span><span class="s2">&quot;geographic_scope&quot;</span><span class="p">]</span><span class="si">}</span>
-</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="s2">    - Transition Type: </span><span class="si">{</span><span class="n">DEFAULT_ASSUMPTIONS</span><span class="p">[</span><span class="s2">&quot;transition_type&quot;</span><span class="p">]</span><span class="si">}</span>
-</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="s2">    &quot;&quot;&quot;</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">_get_system_prompt</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="s2">    DEFAULT ASSUMPTIONS (when user doesn&#39;t specify):</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="s2">    - Scenarios: </span><span class="si">{</span><span class="n">DEFAULT_ASSUMPTIONS</span><span class="p">[</span><span class="s2">&quot;scenarios&quot;</span><span class="p">]</span><span class="si">}</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="s2">    - Time Periods: </span><span class="si">{</span><span class="n">DEFAULT_ASSUMPTIONS</span><span class="p">[</span><span class="s2">&quot;time_period&quot;</span><span class="p">]</span><span class="si">}</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="s2">    - Geographic Scope: </span><span class="si">{</span><span class="n">DEFAULT_ASSUMPTIONS</span><span class="p">[</span><span class="s2">&quot;geographic_scope&quot;</span><span class="p">]</span><span class="si">}</span>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="s2">    - Transition Type: </span><span class="si">{</span><span class="n">DEFAULT_ASSUMPTIONS</span><span class="p">[</span><span class="s2">&quot;transition_type&quot;</span><span class="p">]</span><span class="si">}</span>
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="s2">    &quot;&quot;&quot;</span>
 </span></code></pre></div>
 <p><strong>Purpose</strong>: Provides sensible defaults when users ask vague questions like "How much forest is being lost?"</p>
 <h3 id="4-query_examples-sql-templates">4. <strong>QUERY_EXAMPLES</strong> (SQL Templates)<a class="headerlink" href="#4-query_examples-sql-templates" title="Permanent link">&para;</a></h3>
 <p>Used by the <code>suggest_query_examples</code> tool:</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="nd">@tool</span>
-</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="k">def</span><span class="w"> </span><span class="nf">suggest_query_examples</span><span class="p">(</span><span class="n">category</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;general&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>    <span class="k">if</span> <span class="n">category</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="n">QUERY_EXAMPLES</span><span class="p">:</span>
-</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Example Query - </span><span class="si">{</span><span class="n">category</span><span class="o">.</span><span class="n">title</span><span class="p">()</span><span class="si">}</span><span class="s2">:</span><span class="se">\n</span><span class="si">{</span><span class="n">QUERY_EXAMPLES</span><span class="p">[</span><span class="n">category</span><span class="o">.</span><span class="n">lower</span><span class="p">()]</span><span class="si">}</span><span class="s2">&quot;</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="nd">@tool</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="k">def</span><span class="w"> </span><span class="nf">suggest_query_examples</span><span class="p">(</span><span class="n">category</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;general&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>    <span class="k">if</span> <span class="n">category</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="n">QUERY_EXAMPLES</span><span class="p">:</span>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Example Query - </span><span class="si">{</span><span class="n">category</span><span class="o">.</span><span class="n">title</span><span class="p">()</span><span class="si">}</span><span class="s2">:</span><span class="se">\n</span><span class="si">{</span><span class="n">QUERY_EXAMPLES</span><span class="p">[</span><span class="n">category</span><span class="o">.</span><span class="n">lower</span><span class="p">()]</span><span class="si">}</span><span class="s2">&quot;</span>
 </span></code></pre></div>
 <p><strong>Purpose</strong>: Provides tested SQL patterns for common analysis types.</p>
 <h3 id="5-db_config-database-configuration">5. <strong>DB_CONFIG</strong> (Database Configuration)<a class="headerlink" href="#5-db_config-database-configuration" title="Permanent link">&para;</a></h3>
 <p>Used during initialization:</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="n">config_dict</span> <span class="o">=</span> <span class="p">{</span>
-</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>    <span class="s1">&#39;db_path&#39;</span><span class="p">:</span> <span class="n">Path</span><span class="p">(</span><span class="n">db_path</span> <span class="ow">or</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;LANDUSE_DB_PATH&#39;</span><span class="p">,</span> <span class="n">DB_CONFIG</span><span class="p">[</span><span class="s1">&#39;default_path&#39;</span><span class="p">])),</span>
-</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>    <span class="s1">&#39;max_query_rows&#39;</span><span class="p">:</span> <span class="n">DB_CONFIG</span><span class="p">[</span><span class="s1">&#39;max_query_limit&#39;</span><span class="p">],</span>
-</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>    <span class="s1">&#39;default_display_limit&#39;</span><span class="p">:</span> <span class="n">DB_CONFIG</span><span class="p">[</span><span class="s1">&#39;default_display_limit&#39;</span><span class="p">]</span>
-</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="p">}</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">config_dict</span> <span class="o">=</span> <span class="p">{</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>    <span class="s1">&#39;db_path&#39;</span><span class="p">:</span> <span class="n">Path</span><span class="p">(</span><span class="n">db_path</span> <span class="ow">or</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;LANDUSE_DB_PATH&#39;</span><span class="p">,</span> <span class="n">DB_CONFIG</span><span class="p">[</span><span class="s1">&#39;default_path&#39;</span><span class="p">])),</span>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>    <span class="s1">&#39;max_query_rows&#39;</span><span class="p">:</span> <span class="n">DB_CONFIG</span><span class="p">[</span><span class="s1">&#39;max_query_limit&#39;</span><span class="p">],</span>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>    <span class="s1">&#39;default_display_limit&#39;</span><span class="p">:</span> <span class="n">DB_CONFIG</span><span class="p">[</span><span class="s1">&#39;default_display_limit&#39;</span><span class="p">]</span>
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="p">}</span>
 </span></code></pre></div>
 <p><strong>Purpose</strong>: Centralizes database-related settings and limits.</p>
 <h3 id="6-model_config-llm-configuration">6. <strong>MODEL_CONFIG</strong> (LLM Configuration)<a class="headerlink" href="#6-model_config-llm-configuration" title="Permanent link">&para;</a></h3>
 <p>Used for model defaults:</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="s1">&#39;model_name&#39;</span><span class="p">:</span> <span class="n">model_name</span> <span class="ow">or</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;LANDUSE_MODEL&#39;</span><span class="p">,</span> <span class="n">MODEL_CONFIG</span><span class="p">[</span><span class="s1">&#39;default_openai_model&#39;</span><span class="p">]),</span>
-</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="s1">&#39;temperature&#39;</span><span class="p">:</span> <span class="n">temperature</span> <span class="ow">or</span> <span class="nb">float</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;TEMPERATURE&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">MODEL_CONFIG</span><span class="p">[</span><span class="s1">&#39;default_temperature&#39;</span><span class="p">]))),</span>
-</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="s1">&#39;max_tokens&#39;</span><span class="p">:</span> <span class="n">max_tokens</span> <span class="ow">or</span> <span class="nb">int</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;MAX_TOKENS&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">MODEL_CONFIG</span><span class="p">[</span><span class="s1">&#39;default_max_tokens&#39;</span><span class="p">]))),</span>
-</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="s1">&#39;max_iterations&#39;</span><span class="p">:</span> <span class="n">MODEL_CONFIG</span><span class="p">[</span><span class="s1">&#39;max_iterations&#39;</span><span class="p">],</span>
-</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="s1">&#39;max_execution_time&#39;</span><span class="p">:</span> <span class="n">MODEL_CONFIG</span><span class="p">[</span><span class="s1">&#39;max_execution_time&#39;</span><span class="p">]</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="s1">&#39;model_name&#39;</span><span class="p">:</span> <span class="n">model_name</span> <span class="ow">or</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;LANDUSE_MODEL&#39;</span><span class="p">,</span> <span class="n">MODEL_CONFIG</span><span class="p">[</span><span class="s1">&#39;default_openai_model&#39;</span><span class="p">]),</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="s1">&#39;temperature&#39;</span><span class="p">:</span> <span class="n">temperature</span> <span class="ow">or</span> <span class="nb">float</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;TEMPERATURE&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">MODEL_CONFIG</span><span class="p">[</span><span class="s1">&#39;default_temperature&#39;</span><span class="p">]))),</span>
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="s1">&#39;max_tokens&#39;</span><span class="p">:</span> <span class="n">max_tokens</span> <span class="ow">or</span> <span class="nb">int</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;MAX_TOKENS&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">MODEL_CONFIG</span><span class="p">[</span><span class="s1">&#39;default_max_tokens&#39;</span><span class="p">]))),</span>
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="s1">&#39;max_iterations&#39;</span><span class="p">:</span> <span class="n">MODEL_CONFIG</span><span class="p">[</span><span class="s1">&#39;max_iterations&#39;</span><span class="p">],</span>
+</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="s1">&#39;max_execution_time&#39;</span><span class="p">:</span> <span class="n">MODEL_CONFIG</span><span class="p">[</span><span class="s1">&#39;max_execution_time&#39;</span><span class="p">]</span>
 </span></code></pre></div>
 <p><strong>Purpose</strong>: Sets safe defaults for LLM behavior and execution limits.</p>
 <h2 id="benefits-of-this-architecture">Benefits of This Architecture<a class="headerlink" href="#benefits-of-this-architecture" title="Permanent link">&para;</a></h2>
@@ -2250,12 +2255,12 @@
 </ol>
 <h2 id="environment-variable-overrides">Environment Variable Overrides<a class="headerlink" href="#environment-variable-overrides" title="Permanent link">&para;</a></h2>
 <p>Many constants can be overridden via environment variables:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="c1"># Override defaults</span>
-</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="nb">export</span><span class="w"> </span><span class="nv">LANDUSE_MAX_QUERY_ROWS</span><span class="o">=</span><span class="m">5000</span>
-</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="nb">export</span><span class="w"> </span><span class="nv">LANDUSE_MAX_ITERATIONS</span><span class="o">=</span><span class="m">10</span>
-</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="nb">export</span><span class="w"> </span><span class="nv">LANDUSE_MODEL</span><span class="o">=</span>gpt-4
-</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>
-</span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="c1"># Constants.py reads these in DB_CONFIG and MODEL_CONFIG</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="c1"># Override defaults</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="nb">export</span><span class="w"> </span><span class="nv">LANDUSE_MAX_QUERY_ROWS</span><span class="o">=</span><span class="m">5000</span>
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="nb">export</span><span class="w"> </span><span class="nv">LANDUSE_MAX_ITERATIONS</span><span class="o">=</span><span class="m">10</span>
+</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="nb">export</span><span class="w"> </span><span class="nv">LANDUSE_MODEL</span><span class="o">=</span>gpt-4
+</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>
+</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="c1"># Constants.py reads these in DB_CONFIG and MODEL_CONFIG</span>
 </span></code></pre></div>
 <p>This provides flexibility without code changes.</p>
 <h2 id="summary">Summary<a class="headerlink" href="#summary" title="Permanent link">&para;</a></h2>
