@@ -1177,7 +1177,7 @@ def show_enhanced_visualizations():
             st.info("No scenario data available")
 
 def show_summary_metrics():
-    """Display summary metrics cards"""
+    """Display summary metrics cards in wide layout"""
     stats, error = load_summary_data()
 
     if error:
@@ -1185,35 +1185,80 @@ def show_summary_metrics():
         return
 
     if stats:
-        col1, col2, col3, col4 = st.columns(4)
+        # Create a container for metrics with custom styling
+        st.markdown("""
+        <style>
+        .metric-container {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 1.5rem;
+            border-radius: 12px;
+            color: white;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            text-align: center;
+            height: 100%;
+        }
+        .metric-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        .metric-label {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+        </style>
+        """, unsafe_allow_html=True)
+        
+        # Use 6 columns for better wide layout distribution
+        col1, col2, col3, col4, col5, col6 = st.columns([2, 2, 2, 2, 2, 2])
 
         with col1:
-            st.metric(
-                "🏛️ US Counties",
-                f"{stats['total_counties']:,}",
-                help="Total number of counties in the dataset"
-            )
+            st.markdown(f"""
+            <div class="metric-container">
+                <div class="metric-value">{stats['total_counties']:,}</div>
+                <div class="metric-label">🏛️ US Counties</div>
+            </div>
+            """, unsafe_allow_html=True)
 
         with col2:
-            st.metric(
-                "🌡️ Climate Scenarios",
-                stats['total_scenarios'],
-                help="Number of climate and socioeconomic scenarios"
-            )
+            st.markdown(f"""
+            <div class="metric-container">
+                <div class="metric-value">{stats['total_scenarios']}</div>
+                <div class="metric-label">🌡️ Climate Scenarios</div>
+            </div>
+            """, unsafe_allow_html=True)
 
         with col3:
-            st.metric(
-                "🔄 Land Transitions",
-                f"{stats['total_transitions']:,}",
-                help="Total number of land use change records"
-            )
+            st.markdown(f"""
+            <div class="metric-container">
+                <div class="metric-value">{stats['total_transitions']/1000000:.1f}M</div>
+                <div class="metric-label">🔄 Land Transitions</div>
+            </div>
+            """, unsafe_allow_html=True)
 
         with col4:
-            st.metric(
-                "📅 Time Periods",
-                stats['time_periods'],
-                help="Number of time periods (2012-2100)"
-            )
+            st.markdown(f"""
+            <div class="metric-container">
+                <div class="metric-value">{stats['time_periods']}</div>
+                <div class="metric-label">📅 Time Periods</div>
+            </div>
+            """, unsafe_allow_html=True)
+            
+        with col5:
+            st.markdown(f"""
+            <div class="metric-container">
+                <div class="metric-value">2012-2100</div>
+                <div class="metric-label">📆 Year Range</div>
+            </div>
+            """, unsafe_allow_html=True)
+            
+        with col6:
+            st.markdown(f"""
+            <div class="metric-container">
+                <div class="metric-value">5</div>
+                <div class="metric-label">🌍 Land Use Types</div>
+            </div>
+            """, unsafe_allow_html=True)
 
 def main():
     """Main analytics dashboard"""
@@ -1236,86 +1281,178 @@ def main():
     ])
 
     with tab1:
-        st.markdown("### Agricultural Land Loss Analysis")
-        st.markdown("**Scenarios showing the greatest loss of agricultural land to other uses**")
+        st.markdown("### 🌾 Agricultural Land Loss Analysis")
+        st.markdown("**Comprehensive analysis of agricultural land conversion across climate scenarios**")
 
         ag_data, ag_error = load_agricultural_loss_data()
         if ag_error:
             st.error(f"❌ {ag_error}")
         elif ag_data is not None and not ag_data.empty:
+            # Create side-by-side layout for charts
+            chart_col1, chart_col2 = st.columns([3, 2])
+            
+            with chart_col1:
+                # Main agricultural loss chart
+                fig = create_agricultural_loss_chart(ag_data)
+                if fig:
+                    fig.update_layout(height=600)  # Taller for wide layout
+                    st.plotly_chart(fig, use_container_width=True)
+            
+            with chart_col2:
+                # Additional visualization - pie chart of RCP scenarios
+                rcp_counts = ag_data['rcp_scenario'].value_counts()
+                fig_pie = px.pie(
+                    values=rcp_counts.values,
+                    names=[s.upper() for s in rcp_counts.index],
+                    title="Distribution by Climate Pathway",
+                    color_discrete_map={'RCP45': '#2E86AB', 'RCP85': '#F24236'}
+                )
+                fig_pie.update_layout(height=300)
+                st.plotly_chart(fig_pie, use_container_width=True)
+                
+                # Summary statistics
+                st.markdown("#### 📊 Summary Statistics")
+                total_loss = ag_data['total_acres_lost'].sum()
+                avg_loss = ag_data['total_acres_lost'].mean()
+                
+                col1, col2 = st.columns(2)
+                with col1:
+                    st.metric("Total Loss", f"{total_loss/1e6:.1f}M acres")
+                with col2:
+                    st.metric("Avg per Scenario", f"{avg_loss/1e6:.1f}M acres")
 
-            # Show chart
-            fig = create_agricultural_loss_chart(ag_data)
-            if fig:
-                st.plotly_chart(fig, use_container_width=True)
-
-            # Show insights
-            col1, col2 = st.columns([2, 1])
-            with col1:
+            # Insights and data table in full width
+            st.markdown("---")
+            
+            insight_col1, insight_col2, insight_col3 = st.columns([2, 2, 1])
+            
+            with insight_col1:
                 st.markdown("#### 🔍 Key Insights")
                 if not ag_data.empty:
                     top_scenario = ag_data.iloc[0]
                     rcp85_count = len(ag_data[ag_data['rcp_scenario'] == 'rcp85'])
                     total_scenarios = len(ag_data)
 
-                    st.markdown(f"""
-                    - **Highest Loss:** {top_scenario['scenario_name']} with {top_scenario['total_acres_lost']:,.0f} acres
-                    - **RCP8.5 Dominance:** {rcp85_count}/{total_scenarios} of top scenarios use RCP8.5 (higher emissions)
-                    - **Climate Impact:** Higher emission scenarios generally show more agricultural land loss
+                    st.info(f"""
+                    **Major Findings:**
+                    - **Highest Loss:** {top_scenario['scenario_name']} ({top_scenario['total_acres_lost']/1e6:.1f}M acres)
+                    - **RCP8.5 Dominance:** {rcp85_count}/{total_scenarios} scenarios ({rcp85_count/total_scenarios*100:.0f}%)
+                    - **Climate Impact:** Higher emissions → more agricultural loss
                     """)
 
-            with col2:
-                st.markdown("#### 📋 Data Table")
-                st.dataframe(
-                    ag_data.head(10)[['scenario_name', 'rcp_scenario', 'total_acres_lost']],
-                    use_container_width=True
-                )
+            with insight_col2:
+                st.markdown("#### 📋 Top 5 Scenarios")
+                display_df = ag_data.head(5)[['scenario_name', 'rcp_scenario', 'ssp_scenario', 'total_acres_lost']].copy()
+                display_df['total_acres_lost'] = display_df['total_acres_lost'].apply(lambda x: f"{x/1e6:.2f}M")
+                display_df.columns = ['Scenario', 'RCP', 'SSP', 'Acres Lost']
+                st.dataframe(display_df, use_container_width=True, hide_index=True)
+                
+            with insight_col3:
+                st.markdown("#### 🎯 Quick Actions")
+                if st.button("📥 Export Data", key="export_ag"):
+                    st.download_button(
+                        label="Download CSV",
+                        data=ag_data.to_csv(index=False),
+                        file_name="agricultural_loss_data.csv",
+                        mime="text/csv"
+                    )
         else:
             st.info("📊 No agricultural data available")
 
     with tab2:
-        st.markdown("### Urbanization Patterns")
-        st.markdown("**States experiencing the most land conversion to urban use**")
+        st.markdown("### 🏙️ Urbanization Patterns")
+        st.markdown("**Comprehensive analysis of urban expansion across states and land use sources**")
 
         urban_data, urban_error = load_urbanization_data()
         if urban_error:
             st.error(f"❌ {urban_error}")
         elif urban_data is not None and not urban_data.empty:
-
-            # Show chart
-            fig = create_urbanization_chart(urban_data)
-            if fig:
-                st.plotly_chart(fig, use_container_width=True)
-
-            # Show breakdown by source land use
-            col1, col2 = st.columns([2, 1])
-            with col1:
+            # Create three-column layout for urbanization analysis
+            viz_col1, viz_col2, viz_col3 = st.columns([3, 2, 2])
+            
+            with viz_col1:
+                # Main urbanization chart
+                fig = create_urbanization_chart(urban_data)
+                if fig:
+                    fig.update_layout(height=600)
+                    st.plotly_chart(fig, use_container_width=True)
+            
+            with viz_col2:
+                # Sources of urbanization
                 st.markdown("#### 🏘️ Urbanization Sources")
                 source_breakdown = urban_data.groupby('from_landuse')['total_acres_urbanized'].sum().sort_values(ascending=False)
-
+                
                 fig_pie = px.pie(
                     values=source_breakdown.values,
                     names=source_breakdown.index,
-                    title="Sources of Urban Development",
-                    color_discrete_sequence=px.colors.qualitative.Set3
+                    title="Land Converted to Urban",
+                    color_discrete_sequence=px.colors.qualitative.Set3,
+                    hole=0.4  # Donut chart
                 )
-                fig_pie.update_layout(height=400)
+                fig_pie.update_traces(textinfo='percent+label')
+                fig_pie.update_layout(height=350, showlegend=False)
                 st.plotly_chart(fig_pie, use_container_width=True)
+                
+            with viz_col3:
+                # Top converting states map preview
+                st.markdown("#### 📍 Geographic Distribution")
+                state_totals = urban_data.groupby('state_code')['total_acres_urbanized'].sum().reset_index()
+                state_totals['state_abbr'] = state_totals['state_code'].map(StateMapper.FIPS_TO_ABBREV)
+                
+                # Mini choropleth
+                fig_map = px.choropleth(
+                    state_totals.head(20),
+                    locations='state_abbr',
+                    locationmode='USA-states',
+                    color='total_acres_urbanized',
+                    color_continuous_scale='Reds',
+                    title="Urban Expansion Hotspots"
+                )
+                fig_map.update_layout(
+                    geo=dict(scope='usa'),
+                    height=350,
+                    margin={"r":0,"t":30,"l":0,"b":0}
+                )
+                st.plotly_chart(fig_map, use_container_width=True)
 
-            with col2:
-                st.markdown("#### 🔍 Key Insights")
-                if not urban_data.empty:
-                    top_state = urban_data.groupby('state_code')['total_acres_urbanized'].sum().sort_values(ascending=False).iloc[0]
-
-                    st.markdown(f"""
-                    - **Most Active State:** Leading in urban expansion
-                    - **Primary Source:** {source_breakdown.index[0]} land most commonly converted
-                    - **Development Pressure:** Concentrated in specific regions
-                    """)
-
-                st.markdown("#### 📊 Top States")
-                state_totals = urban_data.groupby('state_code')['total_acres_urbanized'].sum().sort_values(ascending=False).head(10)
-                st.dataframe(state_totals, use_container_width=True)
+            # Detailed insights in full width
+            st.markdown("---")
+            
+            # Create expandable sections for detailed analysis
+            with st.container():
+                detail_col1, detail_col2, detail_col3 = st.columns([2, 2, 2])
+                
+                with detail_col1:
+                    st.markdown("#### 🔍 Key Insights")
+                    if not urban_data.empty:
+                        top_state_data = urban_data.groupby('state_code')['total_acres_urbanized'].sum().sort_values(ascending=False)
+                        top_state = top_state_data.index[0]
+                        top_state_acres = top_state_data.iloc[0]
+                        
+                        st.success(f"""
+                        **Urban Development Patterns:**
+                        - **Top State:** {StateMapper.FIPS_TO_NAME.get(top_state, top_state)} ({top_state_acres/1e6:.1f}M acres)
+                        - **Primary Source:** {source_breakdown.index[0]} → Urban
+                        - **Total Urbanized:** {source_breakdown.sum()/1e6:.1f}M acres nationwide
+                        """)
+                        
+                with detail_col2:
+                    st.markdown("#### 📊 Source Breakdown")
+                    source_df = pd.DataFrame({
+                        'Land Type': source_breakdown.index,
+                        'Acres': source_breakdown.apply(lambda x: f"{x/1e6:.2f}M"),
+                        'Percent': source_breakdown.apply(lambda x: f"{x/source_breakdown.sum()*100:.1f}%")
+                    })
+                    st.dataframe(source_df, use_container_width=True, hide_index=True)
+                    
+                with detail_col3:
+                    st.markdown("#### 🏆 Top 10 States")
+                    top_states_df = top_state_data.head(10).reset_index()
+                    top_states_df['state_name'] = top_states_df['state_code'].map(StateMapper.FIPS_TO_NAME)
+                    top_states_df['acres'] = top_states_df['total_acres_urbanized'].apply(lambda x: f"{x/1e6:.2f}M")
+                    display_df = top_states_df[['state_name', 'acres']].copy()
+                    display_df.columns = ['State', 'Urban Expansion']
+                    st.dataframe(display_df, use_container_width=True, hide_index=True)
         else:
             st.info("📊 No urbanization data available")
 
@@ -1337,64 +1474,109 @@ def main():
             ])
 
             with forest_tab1:
-                st.markdown("#### Forest Transition Overview")
+                st.markdown("#### 🌲 Forest Transition Overview")
 
                 if df_loss is not None and df_gain is not None:
-                    # Show flow chart
-                    fig = create_forest_flow_chart(df_loss, df_gain)
-                    if fig:
-                        st.plotly_chart(fig, use_container_width=True)
-
-                    # Key metrics
-                    col1, col2, col3 = st.columns(3)
-
-                    with col1:
+                    # Wide layout with main visualization and side metrics
+                    main_col, metrics_col = st.columns([4, 2])
+                    
+                    with main_col:
+                        # Show flow chart
+                        fig = create_forest_flow_chart(df_loss, df_gain)
+                        if fig:
+                            fig.update_layout(height=500)
+                            st.plotly_chart(fig, use_container_width=True)
+                    
+                    with metrics_col:
+                        # Key metrics in vertical layout
                         total_loss = df_loss['total_acres'].sum()
+                        total_gain = df_gain['total_acres'].sum()
+                        net_change = total_gain - total_loss
+                        
+                        st.markdown("#### 📊 Forest Metrics")
+                        
                         st.metric(
                             "🔻 Total Forest Loss",
                             f"{total_loss/1e6:.1f}M acres",
                             help="Total forest converted to other land uses"
                         )
-
-                    with col2:
-                        total_gain = df_gain['total_acres'].sum()
+                        
                         st.metric(
                             "🔺 Total Forest Gain",
                             f"{total_gain/1e6:.1f}M acres",
                             help="Total land converted to forest"
                         )
-
-                    with col3:
-                        net_change = total_gain - total_loss
+                        
                         st.metric(
                             "📊 Net Change",
                             f"{net_change/1e6:+.1f}M acres",
                             delta=f"{(net_change/total_loss)*100:+.1f}%",
                             help="Net forest change across all scenarios"
                         )
+                        
+                        # Quick insight box
+                        if net_change < 0:
+                            st.error(f"⚠️ Net forest loss of {abs(net_change/1e6):.1f}M acres projected")
+                        else:
+                            st.success(f"✅ Net forest gain of {net_change/1e6:.1f}M acres projected")
 
-                    # Detailed breakdowns
-                    col1, col2 = st.columns(2)
+                    # Detailed breakdowns in full width
+                    st.markdown("---")
+                    
+                    # Use three columns for detailed analysis
+                    detail_col1, detail_col2, detail_col3 = st.columns([2, 2, 2])
 
-                    with col1:
-                        st.markdown("##### 🔻 Where Forests Are Lost To")
+                    with detail_col1:
+                        st.markdown("##### 🔻 Forest Loss Destinations")
                         loss_summary = df_loss.groupby('to_landuse')['total_acres'].sum().sort_values(ascending=False)
-                        loss_df = pd.DataFrame({
-                            'Land Use': loss_summary.index,
-                            'Acres Lost': loss_summary.apply(lambda x: f"{x/1e6:.2f}M"),
-                            'Percentage': loss_summary.apply(lambda x: f"{(x/loss_summary.sum())*100:.1f}%")
-                        })
-                        st.dataframe(loss_df, use_container_width=True, hide_index=True)
+                        
+                        # Create a horizontal bar chart
+                        fig_loss = px.bar(
+                            x=loss_summary.values,
+                            y=loss_summary.index,
+                            orientation='h',
+                            title="Where Forests Convert To",
+                            labels={'x': 'Acres', 'y': 'Land Use Type'},
+                            color=loss_summary.values,
+                            color_continuous_scale='Reds'
+                        )
+                        fig_loss.update_layout(height=300, showlegend=False)
+                        st.plotly_chart(fig_loss, use_container_width=True)
 
-                    with col2:
-                        st.markdown("##### 🔺 Where Forest Gains Come From")
+                    with detail_col2:
+                        st.markdown("##### 🔺 Forest Gain Sources")
                         gain_summary = df_gain.groupby('from_landuse')['total_acres'].sum().sort_values(ascending=False)
-                        gain_df = pd.DataFrame({
-                            'Land Use': gain_summary.index,
-                            'Acres Gained': gain_summary.apply(lambda x: f"{x/1e6:.2f}M"),
-                            'Percentage': gain_summary.apply(lambda x: f"{(x/gain_summary.sum())*100:.1f}%")
-                        })
-                        st.dataframe(gain_df, use_container_width=True, hide_index=True)
+                        
+                        # Create a horizontal bar chart
+                        fig_gain = px.bar(
+                            x=gain_summary.values,
+                            y=gain_summary.index,
+                            orientation='h',
+                            title="Where Forest Gains Come From",
+                            labels={'x': 'Acres', 'y': 'Land Use Type'},
+                            color=gain_summary.values,
+                            color_continuous_scale='Greens'
+                        )
+                        fig_gain.update_layout(height=300, showlegend=False)
+                        st.plotly_chart(fig_gain, use_container_width=True)
+                        
+                    with detail_col3:
+                        st.markdown("##### 📊 Transition Summary")
+                        
+                        # Combined summary table
+                        loss_pct = loss_summary / loss_summary.sum() * 100
+                        gain_pct = gain_summary / gain_summary.sum() * 100
+                        
+                        summary_data = []
+                        for landuse in set(loss_summary.index) | set(gain_summary.index):
+                            summary_data.append({
+                                'Land Use': landuse,
+                                'Loss %': f"{loss_pct.get(landuse, 0):.1f}%" if landuse in loss_pct else "-",
+                                'Gain %': f"{gain_pct.get(landuse, 0):.1f}%" if landuse in gain_pct else "-"
+                            })
+                        
+                        summary_df = pd.DataFrame(summary_data)
+                        st.dataframe(summary_df, use_container_width=True, hide_index=True)
                 else:
                     st.info("No forest transition data available")
 
