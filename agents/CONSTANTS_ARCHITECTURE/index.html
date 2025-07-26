@@ -2259,12 +2259,30 @@
 </span></code></pre></div>
 <p>This provides flexibility without code changes.</p>
 <h2 id="summary">Summary<a class="headerlink" href="#summary" title="Permanent link">&para;</a></h2>
-<p>The <code>constants.py</code> file acts as the agent's "knowledge base" and configuration center. It provides:
-- Domain knowledge (schema, state mappings)
-- Behavioral defaults (assumptions, limits)
-- Query patterns (examples)
-- System configuration (database, model)</p>
-<p>This clean separation makes the agent more maintainable and allows easy customization of its behavior through a single file.</p>
+<p>The modern RPA Land Use Analytics configuration architecture provides:</p>
+<h3 id="layered-configuration">Layered Configuration<a class="headerlink" href="#layered-configuration" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong><code>LanduseConfig</code></strong>: Type-safe, environment-aware configuration dataclass</li>
+<li><strong><code>constants.py</code></strong>: RPA domain knowledge and tested query patterns  </li>
+<li><strong><code>prompts.py</code></strong>: Modular system prompts with domain specialization</li>
+<li><strong><code>state_mappings.py</code></strong>: Geographic utilities and FIPS code management</li>
+</ul>
+<h3 id="key-improvements-over-legacy-patterns">Key Improvements Over Legacy Patterns<a class="headerlink" href="#key-improvements-over-legacy-patterns" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Type Safety</strong>: Dataclass-based configuration with validation</li>
+<li><strong>Environment Integration</strong>: Seamless deployment configuration</li>
+<li><strong>Modularity</strong>: Clear separation of concerns</li>
+<li><strong>Extensibility</strong>: Easy addition of new capabilities and domains</li>
+<li><strong>Testing</strong>: Configuration isolation and mocking support</li>
+</ol>
+<h3 id="production-benefits">Production Benefits<a class="headerlink" href="#production-benefits" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Reliability</strong>: Robust configuration loading with fallbacks</li>
+<li><strong>Monitoring</strong>: Configuration-aware logging and diagnostics  </li>
+<li><strong>Deployment</strong>: Environment-based configuration for different stages</li>
+<li><strong>Maintenance</strong>: Single source of truth for domain knowledge</li>
+</ul>
+<p>This architecture enables both simple usage (<code>LanduseAgent()</code>) and sophisticated customization while maintaining production reliability and developer experience.</p>
 
 
 

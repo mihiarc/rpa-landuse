@@ -2288,38 +2288,46 @@
 <h2 id="database-overview">Database Overview<a class="headerlink" href="#database-overview" title="Permanent link">&para;</a></h2>
 <p>The DuckDB database (<code>landuse_analytics.duckdb</code>) uses a modern star schema design optimized for analytical queries. For comprehensive details, see the <a href="../database-overview/">Database Overview</a> and <a href="../table-reference/">Table Reference</a>.</p>
 <h3 id="current-star-schema">Current Star Schema<a class="headerlink" href="#current-star-schema" title="Permanent link">&para;</a></h3>
-<p>The system uses a normalized star schema with:
-- <code>fact_landuse_transitions</code> - Central fact table with all transitions
-- <code>fact_socioeconomic_projections</code> - Population and income projections
-- <code>dim_scenario</code> - Climate and socioeconomic scenarios<br />
-- <code>dim_geography</code> - County geography with enhanced metadata
-- <code>dim_landuse</code> - Land use type definitions
-- <code>dim_time</code> - Time period dimensions
-- <code>dim_socioeconomic</code> - SSP scenario descriptions
-- <code>dim_indicators</code> - Socioeconomic indicator definitions</p>
+<p>The system uses a normalized star schema with:</p>
+<ul>
+<li><code>fact_landuse_transitions</code> - Central fact table with all transitions</li>
+<li><code>fact_socioeconomic_projections</code> - Population and income projections</li>
+<li><code>dim_scenario</code> - Climate and socioeconomic scenarios</li>
+<li><code>dim_geography</code> - County geography with enhanced metadata</li>
+<li><code>dim_landuse</code> - Land use type definitions</li>
+<li><code>dim_time</code> - Time period dimensions</li>
+<li><code>dim_socioeconomic</code> - SSP scenario descriptions</li>
+<li><code>dim_indicators</code> - Socioeconomic indicator definitions</li>
+</ul>
 <h2 id="current-database-structure">Current Database Structure<a class="headerlink" href="#current-database-structure" title="Permanent link">&para;</a></h2>
-<p><strong>Note</strong>: This page contains legacy information. For complete current database documentation, see:
-- <a href="../database-overview/">Database Overview</a> - Executive summary and architecture
-- <a href="../table-reference/">Table Reference</a> - Detailed table specifications<br />
-- <a href="../view-definitions/">View Definitions</a> - Analytical views and usage
-- <a href="../data-dictionary/">Data Dictionary</a> - Business definitions and guidelines</p>
+<p><strong>Note</strong>: This page contains legacy information. For complete current database documentation, see:</p>
+<ul>
+<li><a href="../database-overview/">Database Overview</a> - Executive summary and architecture</li>
+<li><a href="../table-reference/">Table Reference</a> - Detailed table specifications</li>
+<li><a href="../view-definitions/">View Definitions</a> - Analytical views and usage</li>
+<li><a href="../data-dictionary/">Data Dictionary</a> - Business definitions and guidelines</li>
+</ul>
 <h2 id="key-concepts">Key Concepts<a class="headerlink" href="#key-concepts" title="Permanent link">&para;</a></h2>
 <h3 id="climate-scenarios">Climate Scenarios<a class="headerlink" href="#climate-scenarios" title="Permanent link">&para;</a></h3>
-<p>The database contains 20 climate scenarios combining:
-- 5 Climate models (CNRM_CM5, HadGEM2_ES365, IPSL_CM5A_MR, MRI_CGCM3, NorESM1_M)<br />
-- 4 RCP/SSP combinations (rcp45_ssp1, rcp85_ssp2, rcp85_ssp3, rcp85_ssp5)</p>
+<p>The database contains 20 climate scenarios combining:</p>
+<ul>
+<li>5 Climate models (CNRM_CM5, HadGEM2_ES365, IPSL_CM5A_MR, MRI_CGCM3, NorESM1_M)</li>
+<li>4 RCP/SSP combinations (rcp45_ssp1, rcp85_ssp2, rcp85_ssp3, rcp85_ssp5)</li>
+</ul>
 <h3 id="land-use-categories">Land Use Categories<a class="headerlink" href="#land-use-categories" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>Crop (cr)</strong>: Agricultural cropland</li>
-<li><strong>Pasture (ps)</strong>: Livestock grazing land  </li>
+<li><strong>Pasture (ps)</strong>: Livestock grazing land</li>
 <li><strong>Rangeland (rg)</strong>: Natural grasslands/shrublands</li>
 <li><strong>Forest (fr)</strong>: Forested areas</li>
 <li><strong>Urban (ur)</strong>: Developed/built areas</li>
 </ul>
 <h3 id="time-coverage">Time Coverage<a class="headerlink" href="#time-coverage" title="Permanent link">&para;</a></h3>
-<p>6 time periods from 2012-2070:
-- 2012-2020 (calibration period)
-- 2020-2030, 2030-2040, 2040-2050, 2050-2060, 2060-2070</p>
+<p>6 time periods from 2012-2070:</p>
+<ul>
+<li>2012-2020 (calibration period)</li>
+<li>2020-2030, 2030-2040, 2040-2050, 2050-2060, 2060-2070</li>
+</ul>
 <h3 id="geographic-coverage">Geographic Coverage<a class="headerlink" href="#geographic-coverage" title="Permanent link">&para;</a></h3>
 <ul>
 <li>3,075 US counties across all 50 states</li>

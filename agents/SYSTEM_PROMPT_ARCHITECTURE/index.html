@@ -22,7 +22,7 @@
     
     
       
-        <title>Where and How the System Prompt is Stored - RPA Land Use Analytics</title>
+        <title>Modern System Prompt Architecture - RPA Land Use Analytics</title>
       
     
     
@@ -76,7 +76,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#where-and-how-the-system-prompt-is-stored" class="md-skip">
+        <a href="#modern-system-prompt-architecture" class="md-skip">
           Skip to content
         </a>
       
@@ -110,7 +110,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Where and How the System Prompt is Stored
+              Modern System Prompt Architecture
             
           </span>
         </div>
@@ -2128,133 +2128,319 @@
   
 
 
-<h1 id="where-and-how-the-system-prompt-is-stored">Where and How the System Prompt is Stored<a class="headerlink" href="#where-and-how-the-system-prompt-is-stored" title="Permanent link">&para;</a></h1>
-<h2 id="location">Location<a class="headerlink" href="#location" title="Permanent link">&para;</a></h2>
-<p>The system prompt is <strong>not stored in a separate file</strong>. Instead, it's dynamically generated within the <code>agent.py</code> file by the <code>_get_system_prompt()</code> method (lines 391-429).</p>
-<h2 id="architecture">Architecture<a class="headerlink" href="#architecture" title="Permanent link">&para;</a></h2>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>┌─────────────────────────────────────────────────┐
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>│                  agent.py                        │
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>│                                                  │
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>│  def _get_system_prompt(self, include_maps):    │
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>│      ┌─────────────────────────────────┐        │
-</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>│      │  Base Prompt (hardcoded)        │        │
-</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>│      │  - Role definition              │        │
-</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>│      │  - Instructions                 │        │
-</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>│      │  - Query patterns               │        │
-</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>│      └──────────────┬──────────────────┘        │
-</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>│                     │                            │
-</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>│      ┌──────────────▼──────────────────┐        │
-</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>│      │  Dynamic Content                │        │
-</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>│      │  - {self.schema_info}           │◄───────┼── From SCHEMA_INFO_TEMPLATE
-</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>│      │  - DEFAULT_ASSUMPTIONS          │◄───────┼── From constants.py
-</span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>│      │  - State codes                  │        │
-</span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>│      └──────────────┬──────────────────┘        │
-</span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>│                     │                            │
-</span><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>│      ┌──────────────▼──────────────────┐        │
-</span><span id="__span-0-20"><a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a>│      │  Conditional Content            │        │
-</span><span id="__span-0-21"><a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a>│      │  - Map generation instructions  │        │
-</span><span id="__span-0-22"><a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a>│      │  (if include_maps=True)        │        │
-</span><span id="__span-0-23"><a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a>│      └─────────────────────────────────┘        │
-</span><span id="__span-0-24"><a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a>└─────────────────────────────────────────────────┘
+<h1 id="modern-system-prompt-architecture">Modern System Prompt Architecture<a class="headerlink" href="#modern-system-prompt-architecture" title="Permanent link">&para;</a></h1>
+<h2 id="location-and-design">Location and Design<a class="headerlink" href="#location-and-design" title="Permanent link">&para;</a></h2>
+<p>The system prompt system has been <strong>modernized with a centralized, modular approach</strong>. Instead of being hardcoded in agent files, prompts are now managed through a dedicated <code>prompts.py</code> module with configurable variations and domain specialization.</p>
+<h2 id="modern-modular-architecture">Modern Modular Architecture<a class="headerlink" href="#modern-modular-architecture" title="Permanent link">&para;</a></h2>
+<pre class="mermaid"><code>graph TD
+    A[prompts.py] --&gt; B[get_system_prompt\\(\\)]
+    C[LanduseConfig] --&gt; B
+    D[constants.py] --&gt; E[SCHEMA_INFO_TEMPLATE]
+    E --&gt; B
+
+    B --&gt; F[SYSTEM_PROMPT_BASE]
+    B --&gt; G[Analysis Style Variants]
+    B --&gt; H[Domain Focus Variants]
+    B --&gt; I[Map Generation Section]
+
+    F --&gt; J[Complete System Prompt]
+    G --&gt; J
+    H --&gt; J
+    I --&gt; J
+
+    J --&gt; K[LanduseAgent]
+
+    subgraph "Prompt Templates"
+        F
+        L[DETAILED_ANALYSIS_PROMPT]
+        M[EXECUTIVE_SUMMARY_PROMPT]
+        N[AGRICULTURAL_FOCUS_PROMPT]
+        O[CLIMATE_FOCUS_PROMPT]
+        P[URBAN_PLANNING_PROMPT]
+    end
+
+    subgraph "Configuration-Driven"
+        C
+        Q[analysis_style]
+        R[domain_focus]
+        S[include_maps]
+    end
+
+    L --&gt; G
+    M --&gt; G
+    N --&gt; H
+    O --&gt; H
+    P --&gt; H
+
+    Q --&gt; G
+    R --&gt; H
+    S --&gt; I</code></pre>
+<h2 id="modular-prompt-system">Modular Prompt System<a class="headerlink" href="#modular-prompt-system" title="Permanent link">&para;</a></h2>
+<h3 id="1-base-prompt-template-from-promptspy">1. <strong>Base Prompt Template</strong> (From prompts.py)<a class="headerlink" href="#1-base-prompt-template-from-promptspy" title="Permanent link">&para;</a></h3>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># From src/landuse/agents/prompts.py</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="n">SYSTEM_PROMPT_BASE</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;You are a land use analytics expert with access to the RPA Assessment database.</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="s2">The database contains projections for land use changes across US counties from 2012-2100 under different climate scenarios.</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="s2">KEY CONTEXT:</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="s2">- Land use categories: crop, pasture, forest, urban, rangeland</span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="s2">- Scenarios combine climate (RCP45/85) and socioeconomic (SSP1-5) pathways</span>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="s2">- Development is irreversible - once land becomes urban, it stays urban</span>
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="s2">DATABASE SCHEMA:</span>
+</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="si">{schema_info}</span><span class="s2">  # &lt;-- Injected from constants.py</span>
+</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>
+</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="s2">CRITICAL INSTRUCTION: ALWAYS EXECUTE ANALYTICAL QUERIES, NOT JUST DATA CHECKS!</span>
+</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>
+</span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="s2">When a user asks analytical questions like &quot;compare forest loss across scenarios&quot;, you MUST:</span>
+</span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="s2">1. Execute SQL queries that provide the actual comparison data</span>
+</span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a><span class="s2">2. Show numerical results, not just confirm data exists</span>
+</span><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a><span class="s2">3. Analyze the differences between scenarios</span>
+</span><span id="__span-0-20"><a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a><span class="s2">4. Provide specific insights based on the actual numbers</span>
+</span><span id="__span-0-21"><a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a>
+</span><span id="__span-0-22"><a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a><span class="s2">IMPORTANT - GEOGRAPHIC QUERIES:</span>
+</span><span id="__span-0-23"><a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a><span class="s2">When users mention states by name or abbreviation:</span>
+</span><span id="__span-0-24"><a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a><span class="s2">1. Use the lookup_state_info tool to resolve the correct state_code (FIPS code)</span>
+</span><span id="__span-0-25"><a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a><span class="s2">2. The tool will return the proper SQL condition (e.g., &quot;state_code = &#39;06&#39; -- California&quot;)</span>
+</span><span id="__span-0-26"><a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a><span class="s2">3. Use this in your WHERE clause</span>
+</span><span id="__span-0-27"><a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a><span class="s2">&quot;&quot;&quot;</span>
 </span></code></pre></div>
-<h2 id="system-prompt-structure">System Prompt Structure<a class="headerlink" href="#system-prompt-structure" title="Permanent link">&para;</a></h2>
-<h3 id="1-base-prompt-hardcoded-in-method">1. <strong>Base Prompt</strong> (Hardcoded in method)<a class="headerlink" href="#1-base-prompt-hardcoded-in-method" title="Permanent link">&para;</a></h3>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="sd">&quot;&quot;&quot;You are a specialized Landuse Data Analyst AI that converts natural language questions into DuckDB SQL queries.</span>
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
-</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="sd">DATABASE SCHEMA:</span>
-</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="sd">{self.schema_info}  # &lt;-- Injected from constants.py</span>
-</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>
-</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="sd">INSTRUCTIONS:</span>
-</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="sd">1. Convert natural language questions to appropriate SQL queries</span>
-</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="sd">2. Use the star schema joins to get meaningful results</span>
-</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="sd">3. Focus on relevant metrics (acres, transitions, geographic patterns)</span>
-</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="sd">4. Add meaningful ORDER BY clauses</span>
-</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="sd">5. Include appropriate LIMIT clauses</span>
-</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="sd">6. Explain the business meaning of results</span>
-</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>
-</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a><span class="sd">DEFAULT ASSUMPTIONS (when user doesn&#39;t specify):</span>
-</span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a><span class="sd">- Scenarios: Average across all scenarios (typical outcome)</span>
-</span><span id="__span-1-16"><a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a><span class="sd">- Time Periods: Full range 2012-2100</span>
-</span><span id="__span-1-17"><a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a><span class="sd">- Geographic Scope: All states/counties</span>
-</span><span id="__span-1-18"><a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a><span class="sd">- Transition Type: Focus on &#39;change&#39; transitions</span>
-</span><span id="__span-1-19"><a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a>
-</span><span id="__span-1-20"><a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a><span class="sd">ALWAYS CLEARLY STATE YOUR ASSUMPTIONS in the response.</span>
-</span><span id="__span-1-21"><a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a>
-</span><span id="__span-1-22"><a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a><span class="sd">COMMON STATE CODES:</span>
-</span><span id="__span-1-23"><a id="__codelineno-1-23" name="__codelineno-1-23" href="#__codelineno-1-23"></a><span class="sd">- Texas: &#39;48&#39;, California: &#39;06&#39;, New York: &#39;36&#39;, Florida: &#39;12&#39;</span>
-</span><span id="__span-1-24"><a id="__codelineno-1-24" name="__codelineno-1-24" href="#__codelineno-1-24"></a>
-</span><span id="__span-1-25"><a id="__codelineno-1-25" name="__codelineno-1-25" href="#__codelineno-1-25"></a><span class="sd">QUERY PATTERNS:</span>
-</span><span id="__span-1-26"><a id="__codelineno-1-26" name="__codelineno-1-26" href="#__codelineno-1-26"></a><span class="sd">- &quot;Agricultural land loss&quot; → Agriculture → non-Agriculture transitions</span>
-</span><span id="__span-1-27"><a id="__codelineno-1-27" name="__codelineno-1-27" href="#__codelineno-1-27"></a><span class="sd">- &quot;Forest loss&quot; → Forest → non-Forest transitions</span>
-</span><span id="__span-1-28"><a id="__codelineno-1-28" name="__codelineno-1-28" href="#__codelineno-1-28"></a><span class="sd">- &quot;Urbanization&quot; → Any → Urban transitions&quot;&quot;&quot;</span>
+<h3 id="2-analysis-style-variations">2. <strong>Analysis Style Variations</strong><a class="headerlink" href="#2-analysis-style-variations" title="Permanent link">&para;</a></h3>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># Detailed analysis mode</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="n">DETAILED_ANALYSIS_PROMPT</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="s2">DETAILED ANALYSIS MODE:</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="s2">When providing results:</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="s2">1. Include summary statistics (mean, median, std dev)</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="s2">2. Identify outliers and anomalies</span>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="s2">3. Suggest statistical significance where relevant</span>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="s2">4. Provide confidence intervals if applicable</span>
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="s2">5. Compare results to historical baselines&quot;&quot;&quot;</span>
+</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>
+</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="c1"># Executive summary mode</span>
+</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="n">EXECUTIVE_SUMMARY_PROMPT</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="s2">EXECUTIVE SUMMARY MODE:</span>
+</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a><span class="s2">When providing results:</span>
+</span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a><span class="s2">1. Lead with the key finding in one sentence</span>
+</span><span id="__span-1-16"><a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a><span class="s2">2. Use user-friendly language (avoid technical jargon)</span>
+</span><span id="__span-1-17"><a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a><span class="s2">3. Focus on implications rather than raw numbers</span>
+</span><span id="__span-1-18"><a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a><span class="s2">4. Provide actionable insights</span>
+</span><span id="__span-1-19"><a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a><span class="s2">5. Keep responses concise (3-5 key points max)</span>
+</span><span id="__span-1-20"><a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a><span class="s2">6. Use the create_map tool when appropriate&quot;&quot;&quot;</span>
 </span></code></pre></div>
-<h3 id="2-dynamic-schema-section">2. <strong>Dynamic Schema Section</strong><a class="headerlink" href="#2-dynamic-schema-section" title="Permanent link">&para;</a></h3>
-<ul>
-<li><code>{self.schema_info}</code> is populated from <code>SCHEMA_INFO_TEMPLATE</code> in constants.py</li>
-<li>Contains the full database schema description</li>
-<li>Updated with actual table counts during initialization</li>
-</ul>
-<h3 id="3-optional-map-section-conditional">3. <strong>Optional Map Section</strong> (Conditional)<a class="headerlink" href="#3-optional-map-section-conditional" title="Permanent link">&para;</a></h3>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="k">if</span> <span class="n">include_maps</span><span class="p">:</span>
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>    <span class="n">base_prompt</span> <span class="o">+=</span> <span class="s2">&quot;&quot;&quot;</span>
-</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>
-</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="s2">MAP GENERATION:</span>
-</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="s2">When results include geographic data (state_code), consider creating choropleth maps to visualize patterns.</span>
-</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="s2">Use the create_choropleth_map tool when appropriate.&quot;&quot;&quot;</span>
+<h3 id="3-domain-focus-specializations">3. <strong>Domain Focus Specializations</strong><a class="headerlink" href="#3-domain-focus-specializations" title="Permanent link">&para;</a></h3>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># Agricultural analysis focus</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="n">AGRICULTURAL_FOCUS_PROMPT</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="s2">AGRICULTURAL ANALYSIS FOCUS:</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="s2">You are particularly focused on agricultural land use:</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="s2">1. Pay special attention to Crop and Pasture transitions</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="s2">2. Highlight food security implications</span>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="s2">3. Consider agricultural productivity impacts</span>
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="s2">4. Note irrigation and water resource connections</span>
+</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="s2">5. Flag significant agricultural land losses (&gt;10%)&quot;&quot;&quot;</span>
+</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>
+</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="c1"># Climate scenario focus</span>
+</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="n">CLIMATE_FOCUS_PROMPT</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+</span><span id="__span-2-13"><a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="s2">CLIMATE SCENARIO FOCUS:</span>
+</span><span id="__span-2-14"><a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a><span class="s2">You are analyzing climate impacts on land use:</span>
+</span><span id="__span-2-15"><a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a><span class="s2">1. Always compare RCP4.5 vs RCP8.5 scenarios</span>
+</span><span id="__span-2-16"><a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a><span class="s2">2. Highlight differences between SSP pathways</span>
+</span><span id="__span-2-17"><a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a><span class="s2">3. Emphasize climate-driven transitions</span>
+</span><span id="__span-2-18"><a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a><span class="s2">4. Note temperature and precipitation influences</span>
+</span><span id="__span-2-19"><a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a><span class="s2">5. Project long-term trends (2050, 2070, 2100)&quot;&quot;&quot;</span>
 </span></code></pre></div>
-<h2 id="how-its-used">How It's Used<a class="headerlink" href="#how-its-used" title="Permanent link">&para;</a></h2>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># In _agent_node method:</span>
-</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="k">def</span><span class="w"> </span><span class="nf">_agent_node</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">LanduseAgentState</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>    <span class="c1"># Get system prompt with current state</span>
-</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>    <span class="n">system_prompt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_system_prompt</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;include_maps&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">))</span>
-</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>
-</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>    <span class="c1"># Use it with the LLM</span>
-</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>    <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">llm</span><span class="o">.</span><span class="n">bind_tools</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tools</span><span class="p">)</span><span class="o">.</span><span class="n">invoke</span><span class="p">([</span>
-</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>        <span class="p">{</span><span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;system&quot;</span><span class="p">,</span> <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="n">system_prompt</span><span class="p">},</span>
-</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>        <span class="o">*</span><span class="n">messages</span>
-</span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>    <span class="p">])</span>
+<h3 id="4-optional-features-configuration-driven">4. <strong>Optional Features</strong> (Configuration-Driven)<a class="headerlink" href="#4-optional-features-configuration-driven" title="Permanent link">&para;</a></h3>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># Map generation (when enabled)</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="n">MAP_GENERATION_PROMPT</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="s2">MAP GENERATION:</span>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="s2">When results include geographic data (state_code), consider creating choropleth maps to visualize patterns.</span>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="s2">Use the create_choropleth_map tool when appropriate.</span>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="s2">Use the create_map tool when appropriate.&quot;&quot;&quot;</span>
 </span></code></pre></div>
-<h2 id="why-this-design">Why This Design?<a class="headerlink" href="#why-this-design" title="Permanent link">&para;</a></h2>
-<h3 id="advantages">Advantages:<a class="headerlink" href="#advantages" title="Permanent link">&para;</a></h3>
+<h2 id="configuration-driven-prompt-assembly">Configuration-Driven Prompt Assembly<a class="headerlink" href="#configuration-driven-prompt-assembly" title="Permanent link">&para;</a></h2>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="c1"># In landuse_agent.py initialization:</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">landuse.agents.prompts</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_system_prompt</span>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="c1"># Agent assembles prompt based on configuration</span>
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="bp">self</span><span class="o">.</span><span class="n">system_prompt</span> <span class="o">=</span> <span class="n">get_system_prompt</span><span class="p">(</span>
+</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>    <span class="n">include_maps</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">enable_map_generation</span><span class="p">,</span>
+</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>    <span class="n">analysis_style</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">analysis_style</span><span class="p">,</span>  <span class="c1"># &quot;standard&quot;, &quot;detailed&quot;, &quot;executive&quot;</span>
+</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>    <span class="n">domain_focus</span><span class="o">=</span><span class="kc">None</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">domain_focus</span> <span class="o">==</span> <span class="s1">&#39;none&#39;</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">domain_focus</span><span class="p">,</span>
+</span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>    <span class="n">schema_info</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">schema</span>
+</span><span id="__span-4-10"><a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a><span class="p">)</span>
+</span><span id="__span-4-11"><a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a>
+</span><span id="__span-4-12"><a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a><span class="c1"># Function signature from prompts.py:</span>
+</span><span id="__span-4-13"><a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a><span class="k">def</span><span class="w"> </span><span class="nf">get_system_prompt</span><span class="p">(</span>
+</span><span id="__span-4-14"><a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a>    <span class="n">include_maps</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+</span><span id="__span-4-15"><a id="__codelineno-4-15" name="__codelineno-4-15" href="#__codelineno-4-15"></a>    <span class="n">analysis_style</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;standard&quot;</span><span class="p">,</span>
+</span><span id="__span-4-16"><a id="__codelineno-4-16" name="__codelineno-4-16" href="#__codelineno-4-16"></a>    <span class="n">domain_focus</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="__span-4-17"><a id="__codelineno-4-17" name="__codelineno-4-17" href="#__codelineno-4-17"></a>    <span class="n">schema_info</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+</span><span id="__span-4-18"><a id="__codelineno-4-18" name="__codelineno-4-18" href="#__codelineno-4-18"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span><span id="__span-4-19"><a id="__codelineno-4-19" name="__codelineno-4-19" href="#__codelineno-4-19"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate a system prompt with the specified configuration.&quot;&quot;&quot;</span>
+</span><span id="__span-4-20"><a id="__codelineno-4-20" name="__codelineno-4-20" href="#__codelineno-4-20"></a>    <span class="n">prompt</span> <span class="o">=</span> <span class="n">SYSTEM_PROMPT_BASE</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">schema_info</span><span class="o">=</span><span class="n">schema_info</span><span class="p">)</span>
+</span><span id="__span-4-21"><a id="__codelineno-4-21" name="__codelineno-4-21" href="#__codelineno-4-21"></a>
+</span><span id="__span-4-22"><a id="__codelineno-4-22" name="__codelineno-4-22" href="#__codelineno-4-22"></a>    <span class="c1"># Add analysis style modifications</span>
+</span><span id="__span-4-23"><a id="__codelineno-4-23" name="__codelineno-4-23" href="#__codelineno-4-23"></a>    <span class="k">if</span> <span class="n">analysis_style</span> <span class="o">==</span> <span class="s2">&quot;detailed&quot;</span><span class="p">:</span>
+</span><span id="__span-4-24"><a id="__codelineno-4-24" name="__codelineno-4-24" href="#__codelineno-4-24"></a>        <span class="n">prompt</span> <span class="o">+=</span> <span class="n">DETAILED_ANALYSIS_PROMPT</span>
+</span><span id="__span-4-25"><a id="__codelineno-4-25" name="__codelineno-4-25" href="#__codelineno-4-25"></a>    <span class="k">elif</span> <span class="n">analysis_style</span> <span class="o">==</span> <span class="s2">&quot;executive&quot;</span><span class="p">:</span>
+</span><span id="__span-4-26"><a id="__codelineno-4-26" name="__codelineno-4-26" href="#__codelineno-4-26"></a>        <span class="n">prompt</span> <span class="o">+=</span> <span class="n">EXECUTIVE_SUMMARY_PROMPT</span>
+</span><span id="__span-4-27"><a id="__codelineno-4-27" name="__codelineno-4-27" href="#__codelineno-4-27"></a>
+</span><span id="__span-4-28"><a id="__codelineno-4-28" name="__codelineno-4-28" href="#__codelineno-4-28"></a>    <span class="c1"># Add domain focus if specified</span>
+</span><span id="__span-4-29"><a id="__codelineno-4-29" name="__codelineno-4-29" href="#__codelineno-4-29"></a>    <span class="k">if</span> <span class="n">domain_focus</span> <span class="o">==</span> <span class="s2">&quot;agricultural&quot;</span><span class="p">:</span>
+</span><span id="__span-4-30"><a id="__codelineno-4-30" name="__codelineno-4-30" href="#__codelineno-4-30"></a>        <span class="n">prompt</span> <span class="o">+=</span> <span class="n">AGRICULTURAL_FOCUS_PROMPT</span>
+</span><span id="__span-4-31"><a id="__codelineno-4-31" name="__codelineno-4-31" href="#__codelineno-4-31"></a>    <span class="k">elif</span> <span class="n">domain_focus</span> <span class="o">==</span> <span class="s2">&quot;climate&quot;</span><span class="p">:</span>
+</span><span id="__span-4-32"><a id="__codelineno-4-32" name="__codelineno-4-32" href="#__codelineno-4-32"></a>        <span class="n">prompt</span> <span class="o">+=</span> <span class="n">CLIMATE_FOCUS_PROMPT</span>
+</span><span id="__span-4-33"><a id="__codelineno-4-33" name="__codelineno-4-33" href="#__codelineno-4-33"></a>    <span class="k">elif</span> <span class="n">domain_focus</span> <span class="o">==</span> <span class="s2">&quot;urban&quot;</span><span class="p">:</span>
+</span><span id="__span-4-34"><a id="__codelineno-4-34" name="__codelineno-4-34" href="#__codelineno-4-34"></a>        <span class="n">prompt</span> <span class="o">+=</span> <span class="n">URBAN_PLANNING_PROMPT</span>
+</span><span id="__span-4-35"><a id="__codelineno-4-35" name="__codelineno-4-35" href="#__codelineno-4-35"></a>
+</span><span id="__span-4-36"><a id="__codelineno-4-36" name="__codelineno-4-36" href="#__codelineno-4-36"></a>    <span class="c1"># Add map generation if enabled</span>
+</span><span id="__span-4-37"><a id="__codelineno-4-37" name="__codelineno-4-37" href="#__codelineno-4-37"></a>    <span class="k">if</span> <span class="n">include_maps</span><span class="p">:</span>
+</span><span id="__span-4-38"><a id="__codelineno-4-38" name="__codelineno-4-38" href="#__codelineno-4-38"></a>        <span class="n">prompt</span> <span class="o">+=</span> <span class="n">MAP_GENERATION_PROMPT</span>
+</span><span id="__span-4-39"><a id="__codelineno-4-39" name="__codelineno-4-39" href="#__codelineno-4-39"></a>
+</span><span id="__span-4-40"><a id="__codelineno-4-40" name="__codelineno-4-40" href="#__codelineno-4-40"></a>    <span class="k">return</span> <span class="n">prompt</span>
+</span></code></pre></div>
+<h2 id="benefits-of-modular-design">Benefits of Modular Design<a class="headerlink" href="#benefits-of-modular-design" title="Permanent link">&para;</a></h2>
+<h3 id="configuration-advantages">Configuration Advantages<a class="headerlink" href="#configuration-advantages" title="Permanent link">&para;</a></h3>
 <ol>
-<li><strong>Dynamic Generation</strong>: Can adjust based on agent configuration</li>
-<li><strong>Incorporates Live Data</strong>: Uses actual schema info with table counts</li>
-<li><strong>Conditional Features</strong>: Adds map instructions only when needed</li>
-<li><strong>Single Source</strong>: No separate prompt file to maintain</li>
+<li><strong>Flexible Specialization</strong>: Easy domain-specific customization</li>
+<li><strong>Environment-Driven</strong>: Behavior changes via configuration</li>
+<li><strong>Reusability</strong>: Shared prompt components across use cases</li>
+<li><strong>Maintainability</strong>: Centralized prompt management</li>
 </ol>
-<h3 id="disadvantages">Disadvantages:<a class="headerlink" href="#disadvantages" title="Permanent link">&para;</a></h3>
+<h3 id="development-benefits">Development Benefits<a class="headerlink" href="#development-benefits" title="Permanent link">&para;</a></h3>
 <ol>
-<li><strong>Harder to Find</strong>: Not immediately obvious where prompt lives</li>
-<li><strong>Mixed with Code</strong>: Business logic mixed with implementation</li>
-<li><strong>Harder to Version</strong>: Can't track prompt changes separately</li>
+<li><strong>Version Control</strong>: Clear prompt evolution tracking</li>
+<li><strong>Testing</strong>: Isolated prompt testing and validation</li>
+<li><strong>Documentation</strong>: Self-documenting prompt variations</li>
+<li><strong>Extensibility</strong>: Easy addition of new specializations</li>
 </ol>
-<h2 id="relationship-to-constants">Relationship to Constants<a class="headerlink" href="#relationship-to-constants" title="Permanent link">&para;</a></h2>
-<p>The system prompt pulls from constants.py:
-- <strong>SCHEMA_INFO_TEMPLATE</strong> → Becomes <code>{self.schema_info}</code>
-- <strong>DEFAULT_ASSUMPTIONS</strong> → Referenced but hardcoded in prompt
-- <strong>STATE_NAMES</strong> → Sample codes hardcoded in prompt</p>
-<h2 id="customization-options">Customization Options<a class="headerlink" href="#customization-options" title="Permanent link">&para;</a></h2>
-<p>To modify the system prompt:</p>
+<h3 id="production-advantages">Production Advantages<a class="headerlink" href="#production-advantages" title="Permanent link">&para;</a></h3>
 <ol>
-<li><strong>Edit the method directly</strong> in <code>agent.py</code></li>
-<li><strong>Override in a subclass</strong>:
-   <div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="k">class</span><span class="w"> </span><span class="nc">CustomAgent</span><span class="p">(</span><span class="n">LanduseAgent</span><span class="p">):</span>
-</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">_get_system_prompt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">include_maps</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>        <span class="k">return</span> <span class="s2">&quot;Your custom prompt here&quot;</span>
-</span></code></pre></div></li>
-<li><strong>Make it configurable</strong> (not currently implemented):
-   <div class="language-python highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1"># Could add to constants.py:</span>
-</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="n">SYSTEM_PROMPT_TEMPLATE</span> <span class="o">=</span> <span class="s2">&quot;...&quot;</span>
-</span></code></pre></div></li>
+<li><strong>Consistency</strong>: Standardized prompt patterns</li>
+<li><strong>Performance</strong>: Pre-compiled prompt templates</li>
+<li><strong>Monitoring</strong>: Configuration-aware prompt selection</li>
+<li><strong>Debugging</strong>: Clear prompt composition visibility</li>
 </ol>
+<h2 id="integration-with-configuration-system">Integration with Configuration System<a class="headerlink" href="#integration-with-configuration-system" title="Permanent link">&para;</a></h2>
+<h3 id="schema-integration">Schema Integration<a class="headerlink" href="#schema-integration" title="Permanent link">&para;</a></h3>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1"># constants.py provides comprehensive schema documentation</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="n">SCHEMA_INFO_TEMPLATE</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="s2"># RPA Land Use Transitions Database Schema</span>
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="s2">## Overview</span>
+</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="s2">This database contains USDA Forest Service 2020 RPA Assessment...</span>
+</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="s2">## RPA Scenarios Quick Reference</span>
+</span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="s2">- **LM (RCP4.5-SSP1)**: Lower warming, moderate growth...</span>
+</span><span id="__span-5-8"><a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="s2">&quot;&quot;&quot;</span>
+</span><span id="__span-5-9"><a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>
+</span><span id="__span-5-10"><a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a><span class="c1"># Injected into all prompt variations</span>
+</span><span id="__span-5-11"><a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a><span class="n">prompt</span> <span class="o">=</span> <span class="n">SYSTEM_PROMPT_BASE</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">schema_info</span><span class="o">=</span><span class="n">SCHEMA_INFO_TEMPLATE</span><span class="p">)</span>
+</span></code></pre></div>
+<h3 id="configuration-mapping">Configuration Mapping<a class="headerlink" href="#configuration-mapping" title="Permanent link">&para;</a></h3>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="c1"># LanduseConfig drives prompt selection</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="nd">@dataclass</span>
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="k">class</span><span class="w"> </span><span class="nc">LanduseConfig</span><span class="p">:</span>
+</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>    <span class="n">analysis_style</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;standard&quot;</span>  <span class="c1"># → prompt variation</span>
+</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>    <span class="n">domain_focus</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;none&quot;</span>        <span class="c1"># → domain specialization</span>
+</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>    <span class="n">enable_map_generation</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span> <span class="c1"># → feature inclusion</span>
+</span><span id="__span-6-7"><a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>
+</span><span id="__span-6-8"><a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a><span class="c1"># Automatic prompt assembly</span>
+</span><span id="__span-6-9"><a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a><span class="n">system_prompt</span> <span class="o">=</span> <span class="n">get_system_prompt</span><span class="p">(</span>
+</span><span id="__span-6-10"><a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a>    <span class="n">analysis_style</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">analysis_style</span><span class="p">,</span>
+</span><span id="__span-6-11"><a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a>    <span class="n">domain_focus</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">domain_focus</span><span class="p">,</span>
+</span><span id="__span-6-12"><a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a>    <span class="n">include_maps</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">enable_map_generation</span><span class="p">,</span>
+</span><span id="__span-6-13"><a id="__codelineno-6-13" name="__codelineno-6-13" href="#__codelineno-6-13"></a>    <span class="n">schema_info</span><span class="o">=</span><span class="n">SCHEMA_INFO_TEMPLATE</span>
+</span><span id="__span-6-14"><a id="__codelineno-6-14" name="__codelineno-6-14" href="#__codelineno-6-14"></a><span class="p">)</span>
+</span></code></pre></div>
+<h3 id="environment-variable-control">Environment Variable Control<a class="headerlink" href="#environment-variable-control" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="c1"># Prompt behavior via environment</span>
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="nb">export</span><span class="w"> </span><span class="nv">LANDUSE_ANALYSIS_STYLE</span><span class="o">=</span>detailed
+</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="nb">export</span><span class="w"> </span><span class="nv">LANDUSE_DOMAIN_FOCUS</span><span class="o">=</span>agricultural
+</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="nb">export</span><span class="w"> </span><span class="nv">LANDUSE_ENABLE_MAPS</span><span class="o">=</span><span class="nb">true</span>
+</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>
+</span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="c1"># Results in specialized agricultural analyst with detailed analysis and maps</span>
+</span></code></pre></div>
+<h2 id="customization-and-extension-patterns">Customization and Extension Patterns<a class="headerlink" href="#customization-and-extension-patterns" title="Permanent link">&para;</a></h2>
+<h3 id="1-pre-built-variations-recommended">1. Pre-Built Variations (Recommended)<a class="headerlink" href="#1-pre-built-variations-recommended" title="Permanent link">&para;</a></h3>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="c1"># Use PromptVariations class for common patterns</span>
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">landuse.agents.prompts</span><span class="w"> </span><span class="kn">import</span> <span class="n">PromptVariations</span>
+</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>
+</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="c1"># Research analyst configuration</span>
+</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="n">research_prompt</span> <span class="o">=</span> <span class="n">PromptVariations</span><span class="o">.</span><span class="n">research_analyst</span><span class="p">(</span><span class="n">schema_info</span><span class="p">)</span>
+</span><span id="__span-8-6"><a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>
+</span><span id="__span-8-7"><a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a><span class="c1"># Policy maker configuration  </span>
+</span><span id="__span-8-8"><a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a><span class="n">policy_prompt</span> <span class="o">=</span> <span class="n">PromptVariations</span><span class="o">.</span><span class="n">policy_maker</span><span class="p">(</span><span class="n">schema_info</span><span class="p">)</span>
+</span><span id="__span-8-9"><a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a>
+</span><span id="__span-8-10"><a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a><span class="c1"># Agricultural analyst configuration</span>
+</span><span id="__span-8-11"><a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a><span class="n">agricultural_prompt</span> <span class="o">=</span> <span class="n">PromptVariations</span><span class="o">.</span><span class="n">agricultural_analyst</span><span class="p">(</span><span class="n">schema_info</span><span class="p">)</span>
+</span></code></pre></div>
+<h3 id="2-custom-prompt-creation">2. Custom Prompt Creation<a class="headerlink" href="#2-custom-prompt-creation" title="Permanent link">&para;</a></h3>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="c1"># Create fully custom prompts for specialized use cases</span>
+</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">landuse.agents.prompts</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_custom_prompt</span>
+</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>
+</span><span id="__span-9-4"><a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="n">custom_prompt</span> <span class="o">=</span> <span class="n">create_custom_prompt</span><span class="p">(</span>
+</span><span id="__span-9-5"><a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>    <span class="n">expertise_area</span><span class="o">=</span><span class="s2">&quot;water resource management&quot;</span><span class="p">,</span>
+</span><span id="__span-9-6"><a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>    <span class="n">expertise_description</span><span class="o">=</span><span class="s2">&quot;You understand connections between land use and water resources...&quot;</span><span class="p">,</span>
+</span><span id="__span-9-7"><a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a>    <span class="n">analysis_approach</span><span class="o">=</span><span class="s2">&quot;1. Consider watershed boundaries</span><span class="se">\n</span><span class="s2">2. Analyze impervious surface changes...&quot;</span><span class="p">,</span>
+</span><span id="__span-9-8"><a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a>    <span class="n">response_guidelines</span><span class="o">=</span><span class="s2">&quot;1. Always mention water quality implications</span><span class="se">\n</span><span class="s2">2. Note stormwater management needs...&quot;</span><span class="p">,</span>
+</span><span id="__span-9-9"><a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a>    <span class="n">schema_info</span><span class="o">=</span><span class="n">schema_info</span>
+</span><span id="__span-9-10"><a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a><span class="p">)</span>
+</span></code></pre></div>
+<h3 id="3-configuration-based-customization">3. Configuration-Based Customization<a class="headerlink" href="#3-configuration-based-customization" title="Permanent link">&para;</a></h3>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="c1"># Environment-driven customization</span>
+</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="n">config</span> <span class="o">=</span> <span class="n">LanduseConfig</span><span class="p">(</span>
+</span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>    <span class="n">analysis_style</span><span class="o">=</span><span class="s2">&quot;executive&quot;</span><span class="p">,</span>        <span class="c1"># Concise, actionable insights</span>
+</span><span id="__span-10-4"><a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>    <span class="n">domain_focus</span><span class="o">=</span><span class="s2">&quot;climate&quot;</span><span class="p">,</span>           <span class="c1"># Climate scenario emphasis</span>
+</span><span id="__span-10-5"><a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>    <span class="n">enable_map_generation</span><span class="o">=</span><span class="kc">True</span>        <span class="c1"># Include visualization instructions</span>
+</span><span id="__span-10-6"><a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a><span class="p">)</span>
+</span><span id="__span-10-7"><a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a>
+</span><span id="__span-10-8"><a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a><span class="c1"># Results in climate-focused executive summary agent with maps</span>
+</span><span id="__span-10-9"><a id="__codelineno-10-9" name="__codelineno-10-9" href="#__codelineno-10-9"></a><span class="n">agent</span> <span class="o">=</span> <span class="n">LanduseAgent</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+</span></code></pre></div>
+<h3 id="4-adding-new-specializations">4. Adding New Specializations<a class="headerlink" href="#4-adding-new-specializations" title="Permanent link">&para;</a></h3>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="c1"># Extend prompts.py with new domain focus</span>
+</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="n">WATER_RESOURCES_PROMPT</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+</span><span id="__span-11-3"><a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="s2">WATER RESOURCES FOCUS:</span>
+</span><span id="__span-11-4"><a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="s2">You are analyzing land use impacts on water resources:</span>
+</span><span id="__span-11-5"><a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a><span class="s2">1. Consider watershed boundaries and drainage patterns</span>
+</span><span id="__span-11-6"><a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a><span class="s2">2. Analyze impervious surface changes (urban expansion)</span>
+</span><span id="__span-11-7"><a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a><span class="s2">3. Note agricultural irrigation implications</span>
+</span><span id="__span-11-8"><a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a><span class="s2">4. Highlight stormwater management needs</span>
+</span><span id="__span-11-9"><a id="__codelineno-11-9" name="__codelineno-11-9" href="#__codelineno-11-9"></a><span class="s2">5. Connect land use to water quality impacts</span>
+</span><span id="__span-11-10"><a id="__codelineno-11-10" name="__codelineno-11-10" href="#__codelineno-11-10"></a><span class="s2">&quot;&quot;&quot;</span>
+</span><span id="__span-11-11"><a id="__codelineno-11-11" name="__codelineno-11-11" href="#__codelineno-11-11"></a>
+</span><span id="__span-11-12"><a id="__codelineno-11-12" name="__codelineno-11-12" href="#__codelineno-11-12"></a><span class="c1"># Add to get_system_prompt() function</span>
+</span><span id="__span-11-13"><a id="__codelineno-11-13" name="__codelineno-11-13" href="#__codelineno-11-13"></a><span class="k">if</span> <span class="n">domain_focus</span> <span class="o">==</span> <span class="s2">&quot;water_resources&quot;</span><span class="p">:</span>
+</span><span id="__span-11-14"><a id="__codelineno-11-14" name="__codelineno-11-14" href="#__codelineno-11-14"></a>    <span class="n">prompt</span> <span class="o">+=</span> <span class="n">WATER_RESOURCES_PROMPT</span>
+</span></code></pre></div>
 <h2 id="summary">Summary<a class="headerlink" href="#summary" title="Permanent link">&para;</a></h2>
-<p>The system prompt is:
-- <strong>Stored</strong>: In the <code>_get_system_prompt()</code> method in <code>agent.py</code>
-- <strong>Type</strong>: Dynamically generated string
-- <strong>Location</strong>: Lines 391-429 of <code>agent.py</code>
-- <strong>Composition</strong>: Base template + dynamic schema + optional features
-- <strong>Not</strong>: In a separate file or constants.py</p>
-<p>This design keeps the prompt close to where it's used but makes it less discoverable and harder to maintain separately from the code.</p>
+<p>The modern system prompt architecture provides:</p>
+<h3 id="location-and-structure">Location and Structure<a class="headerlink" href="#location-and-structure" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Primary Module</strong>: <code>src/landuse/agents/prompts.py</code> (centralized prompt management)</li>
+<li><strong>Configuration Integration</strong>: <code>LanduseConfig</code> drives prompt selection</li>
+<li><strong>Schema Integration</strong>: <code>constants.py</code> provides domain knowledge</li>
+<li><strong>Agent Integration</strong>: <code>landuse_agent.py</code> assembles configured prompt</li>
+</ul>
+<h3 id="key-components">Key Components<a class="headerlink" href="#key-components" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Base Template</strong>: Core RPA analysis instructions</li>
+<li><strong>Analysis Styles</strong>: Standard, detailed, executive variations</li>
+<li><strong>Domain Focus</strong>: Agricultural, climate, urban specializations</li>
+<li><strong>Feature Sections</strong>: Map generation, knowledge base integration</li>
+<li><strong>Pre-built Combinations</strong>: Research analyst, policy maker, etc.</li>
+</ol>
+<h3 id="configuration-flow">Configuration Flow<a class="headerlink" href="#configuration-flow" title="Permanent link">&para;</a></h3>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>Environment Variables → LanduseConfig → get_system_prompt() → Agent
+</span></code></pre></div>
+<h3 id="benefits-over-legacy-approach">Benefits Over Legacy Approach<a class="headerlink" href="#benefits-over-legacy-approach" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Discoverability</strong>: Clear module organization</li>
+<li><strong>Maintainability</strong>: Separated from business logic</li>
+<li><strong>Flexibility</strong>: Configuration-driven behavior</li>
+<li><strong>Extensibility</strong>: Easy addition of new specializations</li>
+<li><strong>Testing</strong>: Isolated prompt validation</li>
+<li><strong>Documentation</strong>: Self-documenting variations</li>
+</ul>
+<p>This architecture enables both simple usage (<code>LanduseAgent()</code> with defaults) and sophisticated domain specialization while maintaining clear separation of concerns and production reliability.</p>
 
 
 
