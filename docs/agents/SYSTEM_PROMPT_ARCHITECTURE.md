@@ -345,3 +345,22 @@ Environment Variables → LanduseConfig → get_system_prompt() → Agent
 - **Documentation**: Self-documenting variations
 
 This architecture enables both simple usage (`LanduseAgent()` with defaults) and sophisticated domain specialization while maintaining clear separation of concerns and production reliability.
+
+## Related Documentation
+
+### 🏠 **Agent System Hub**
+- **[Agent System Overview](overview.md)** - Complete guide to the agent system with navigation to all sections
+
+### 🔧 **Core Architecture**
+- **[Agent Architecture](README.md)** - Complete system overview and implementation guide
+- **[Configuration](CONSTANTS_ARCHITECTURE.md)** - How constants and configuration work together
+- **[Tool System](TOOL_SYSTEM_ARCHITECTURE.md)** - Tool composition and factory patterns
+- **[Memory & State](MEMORY_STATE_MANAGEMENT.md)** - LangGraph state management
+
+### 🎯 **Prompt Customization**
+- **[Advanced Configuration](ADVANCED_CONFIGURATION.md)** - Environment-based prompt configuration
+- **[Integration & Extension](INTEGRATION_EXTENSION.md)** - Domain-specific agent specialization
+
+### 📚 **API Reference**
+- **[Main Agent API](../api/agent.md)** - LanduseAgent class documentation
+- **[Query Capabilities](../api/landuse-query-agent.md)** - Natural language processing features

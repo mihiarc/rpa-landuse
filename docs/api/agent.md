@@ -499,8 +499,29 @@ custom_prompt = create_custom_prompt(
 6. **Error Recovery**: Agent provides helpful suggestions when queries fail
 7. **Performance**: Agent automatically optimizes queries with appropriate limits
 
-## Next Steps
+## Related Documentation
 
-- See [Query Examples](../queries/examples.md) for more patterns
-- Review [Converters API](converters.md) for data processing
-- Check [Tools Reference](tools.md) for detailed tool documentation
+### 🏠 **Agent System**
+- **[Agent System Overview](../agents/overview.md)** - Complete guide to the agent system
+- **[Agent Architecture](../agents/README.md)** - Detailed architecture and implementation guide
+- **[System Prompts](../agents/SYSTEM_PROMPT_ARCHITECTURE.md)** - How prompts work and customize
+- **[Configuration](../agents/CONSTANTS_ARCHITECTURE.md)** - How constants connect to agents
+
+### 🔧 **Advanced Topics**
+- **[Tool System](../agents/TOOL_SYSTEM_ARCHITECTURE.md)** - Tool composition and factory patterns
+- **[Memory & State](../agents/MEMORY_STATE_MANAGEMENT.md)** - LangGraph state management
+- **[Error Handling](../agents/ERROR_HANDLING_RESILIENCE.md)** - Production reliability patterns
+- **[Performance](../agents/PERFORMANCE_MONITORING.md)** - Optimization and monitoring
+- **[Integration](../agents/INTEGRATION_EXTENSION.md)** - Embedding agents in applications
+- **[Advanced Configuration](../agents/ADVANCED_CONFIGURATION.md)** - Production deployment
+
+### 📚 **Other API References**
+- **[Query Capabilities](landuse-query-agent.md)** - Natural language processing features
+- **[LangGraph Integration](langgraph-agent.md)** - Graph-based workflows
+- **[Tools Reference](tools.md)** - Detailed tool documentation
+- **[Converters API](converters.md)** - Data processing
+
+### 🎯 **Usage Examples**
+- **[Query Examples](../queries/examples.md)** - Real-world query patterns
+- **[Quick Start Guide](../getting-started/quickstart.md)** - Get up and running quickly
+- **[Configuration Guide](../getting-started/configuration.md)** - Basic setup and configuration
