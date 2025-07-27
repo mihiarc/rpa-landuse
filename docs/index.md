@@ -2,22 +2,6 @@
 
 Welcome to the RPA Land Use Analytics documentation! This AI-powered analytics tool enables natural language exploration of USDA Forest Service 2020 Resources Planning Act (RPA) Assessment land use projections.
 
-<div style="text-align: center; margin: 2em 0;">
-<pre style="display: inline-block; text-align: left; font-family: monospace; color: #2E7D32;">
-    ____  ____  ___       __                   __   __  __         
-   / __ \/ __ \/   |     / /   ____ _____  ____/ /  / / / /_______  
-  / /_/ / /_/ / /| |    / /   / __ `/ __ \/ __  /  / / / / ___/ _ \ 
- / _, _/ ____/ ___ |   / /___/ /_/ / / / / /_/ /  / /_/ (__  )  __/ 
-/_/ |_/_/   /_/  |_|  /_____/\__,_/_/ /_/\__,_/   \____/____/\___/  
-                    ___                __      __  _          
-                   /   |  ____  ____ _/ /_  __/ /_(_)_________
-                  / /| | / __ \/ __ `/ / / / / __/ / ___/ ___/
-                 / ___ |/ / / / /_/ / / /_/ / /_/ / /__(__  ) 
-                /_/  |_/_/ /_/\__,_/_/\__, /\__/_/\___/____/  
-                                     /____/                    
-</pre>
-</div>
-
 ## 🌲 What is RPA Land Use Analytics?
 
 RPA Land Use Analytics transforms the USDA Forest Service's 2020 Resources Planning Act Assessment data into actionable insights through:

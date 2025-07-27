@@ -40,19 +40,19 @@ nav:
   - Home: index.md
   - RPA Assessment:
     - Overview: rpa/overview.md
-    - RPA Scenarios: RPA_SCENARIOS.md
-    - Land Use Methodology: LAND_USE_METHODOLOGY.md
+    - RPA Scenarios: rpa/scenarios.md
+    - Land Use Methodology: rpa/methodology.md
     - Climate Models: rpa/climate-models.md
   - Getting Started:
     - Installation: getting-started/installation.md
     - Quick Start: getting-started/quickstart.md
     - Configuration: getting-started/configuration.md
-    - FAQ: faq.md
-    - Troubleshooting: troubleshooting.md
-    - GitHub Pages Setup: GITHUB_PAGES_SETUP.md
+    - FAQ: getting-started/faq.md
+    - Troubleshooting: getting-started/troubleshooting.md
+    - GitHub Pages Setup: getting-started/github-pages-setup.md
     - Streamlit Issues:
-      - Duplicate IDs: troubleshooting/streamlit-duplicate-ids.md
-      - Fragments Guide: troubleshooting/streamlit-fragments.md
+      - Duplicate IDs: getting-started/streamlit-issues/duplicate-ids.md
+      - Fragments Guide: getting-started/streamlit-issues/fragments-guide.md
   - Natural Language Queries:
     - Overview: queries/overview.md
     - Basic Queries: queries/basic-queries.md
@@ -97,14 +97,16 @@ nav:
   - Development:
     - Architecture: development/architecture.md
     - Contributing: development/contributing.md
-    - Testing Guide: TESTING.md
-    - Testing Implementation: development/testing.md
+    - Testing Guide: development/testing-guide.md
+    - Testing Implementation: development/testing-implementation.md
     - CI/CD Pipeline: development/ci-cd-pipeline.md
     - Retry Logic: development/retry-logic.md
-    - Branding Strategy: development/BRANDING_STRATEGY.md
+    - Branding Strategy: development/branding-strategy.md
     - Modern DuckDB Tools: development/modern-duckdb-tools.md
     - Pydantic Models: development/pydantic-models.md
-    - Security Policy: SECURITY.md
+    - Security Policy: development/security-policy.md
+    - DuckDB Optimization: development/duckdb-optimization.md
+    - Streamlit Fragments: development/streamlit-fragments.md
 
 strict: false
 
