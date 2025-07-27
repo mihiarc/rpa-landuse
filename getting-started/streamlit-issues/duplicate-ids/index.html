@@ -12,24 +12,28 @@
         <meta name="author" content="RPA Analytics Team">
       
       
-        <link rel="canonical" href="https://mihiarc.github.io/rpa-landuse/CLAUDE.local/">
+        <link rel="canonical" href="https://mihiarc.github.io/rpa-landuse/getting-started/streamlit-issues/duplicate-ids/">
       
       
+        <link rel="prev" href="../../github-pages-setup/">
       
       
-      <link rel="icon" href="../assets/images/favicon.png">
+        <link rel="next" href="../fragments-guide/">
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.16">
     
     
       
-        <title>CLAUDE.local - RPA Land Use Analytics</title>
+        <title>Duplicate IDs - RPA Land Use Analytics</title>
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.7e37652d.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.7e37652d.min.css">
       
         
-        <link rel="stylesheet" href="../assets/stylesheets/palette.06af60db.min.css">
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.06af60db.min.css">
       
       
 
@@ -48,9 +52,9 @@
       
     
     
-      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+      <link rel="stylesheet" href="../../../assets/_mkdocstrings.css">
     
-    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -76,7 +80,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#best-practices" class="md-skip">
+        <a href="#fixing-streamlit-duplicate-element-ids" class="md-skip">
           Skip to content
         </a>
       
@@ -90,7 +94,7 @@
 
 <header class="md-header" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href=".." title="RPA Land Use Analytics" class="md-header__button md-logo" aria-label="RPA Land Use Analytics" data-md-component="logo">
+    <a href="../../.." title="RPA Land Use Analytics" class="md-header__button md-logo" aria-label="RPA Land Use Analytics" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -110,7 +114,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              CLAUDE.local
+              Duplicate IDs
             
           </span>
         </div>
@@ -223,7 +227,7 @@
   
   
     <li class="md-tabs__item">
-      <a href=".." class="md-tabs__link">
+      <a href="../../.." class="md-tabs__link">
         
   
   
@@ -244,7 +248,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../rpa/overview/" class="md-tabs__link">
+        <a href="../../../rpa/overview/" class="md-tabs__link">
           
   
   
@@ -260,11 +264,13 @@
   
   
   
+    
+  
   
     
     
-      <li class="md-tabs__item">
-        <a href="../getting-started/installation/" class="md-tabs__link">
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../../installation/" class="md-tabs__link">
           
   
   
@@ -284,7 +290,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../queries/overview/" class="md-tabs__link">
+        <a href="../../../queries/overview/" class="md-tabs__link">
           
   
   
@@ -304,7 +310,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../agents/overview/" class="md-tabs__link">
+        <a href="../../../agents/overview/" class="md-tabs__link">
           
   
   
@@ -324,7 +330,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../data/database-overview/" class="md-tabs__link">
+        <a href="../../../data/database-overview/" class="md-tabs__link">
           
   
   
@@ -344,7 +350,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../api/converters/" class="md-tabs__link">
+        <a href="../../../api/converters/" class="md-tabs__link">
           
   
   
@@ -364,7 +370,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../examples/use-cases/" class="md-tabs__link">
+        <a href="../../../examples/use-cases/" class="md-tabs__link">
           
   
   
@@ -384,7 +390,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../development/architecture/" class="md-tabs__link">
+        <a href="../../../development/architecture/" class="md-tabs__link">
           
   
   
@@ -420,7 +426,7 @@
 
 <nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href=".." title="RPA Land Use Analytics" class="md-nav__button md-logo" aria-label="RPA Land Use Analytics" data-md-component="logo">
+    <a href="../../.." title="RPA Land Use Analytics" class="md-nav__button md-logo" aria-label="RPA Land Use Analytics" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -450,7 +456,7 @@
   
   
     <li class="md-nav__item">
-      <a href=".." class="md-nav__link">
+      <a href="../../.." class="md-nav__link">
         
   
   
@@ -515,7 +521,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../rpa/overview/" class="md-nav__link">
+      <a href="../../../rpa/overview/" class="md-nav__link">
         
   
   
@@ -538,7 +544,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../RPA_SCENARIOS/" class="md-nav__link">
+      <a href="../../../rpa/scenarios/" class="md-nav__link">
         
   
   
@@ -561,7 +567,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../LAND_USE_METHODOLOGY/" class="md-nav__link">
+      <a href="../../../rpa/methodology/" class="md-nav__link">
         
   
   
@@ -584,7 +590,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../rpa/climate-models/" class="md-nav__link">
+      <a href="../../../rpa/climate-models/" class="md-nav__link">
         
   
   
@@ -611,26 +617,31 @@
       
   
   
+    
   
   
+  
     
     
     
     
+      
+        
+        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
         
           
-          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
             
   
   
@@ -643,7 +654,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_3">
             <span class="md-nav__icon md-icon"></span>
             Getting Started
@@ -657,7 +668,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../getting-started/installation/" class="md-nav__link">
+      <a href="../../installation/" class="md-nav__link">
         
   
   
@@ -680,7 +691,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../getting-started/quickstart/" class="md-nav__link">
+      <a href="../../quickstart/" class="md-nav__link">
         
   
   
@@ -703,7 +714,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../getting-started/configuration/" class="md-nav__link">
+      <a href="../../configuration/" class="md-nav__link">
         
   
   
@@ -726,7 +737,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../faq/" class="md-nav__link">
+      <a href="../../faq/" class="md-nav__link">
         
   
   
@@ -749,7 +760,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../troubleshooting/" class="md-nav__link">
+      <a href="../../troubleshooting/" class="md-nav__link">
         
   
   
@@ -772,7 +783,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../GITHUB_PAGES_SETUP/" class="md-nav__link">
+      <a href="../../github-pages-setup/" class="md-nav__link">
         
   
   
@@ -792,26 +803,31 @@
                 
   
   
+    
   
   
+  
     
     
     
     
       
       
-        
-      
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_7" >
         
           
-          <label class="md-nav__link" for="__nav_3_7" id="__nav_3_7_label" tabindex="0">
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_7" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3_7" id="__nav_3_7_label" tabindex="">
             
   
   
@@ -824,7 +840,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_7_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_7_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_3_7">
             <span class="md-nav__icon md-icon"></span>
             Streamlit Issues
@@ -835,10 +851,32 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../troubleshooting/streamlit-duplicate-ids/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Duplicate IDs
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -849,6 +887,179 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#problem" class="md-nav__link">
+    <span class="md-ellipsis">
+      Problem
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#error-message" class="md-nav__link">
+    <span class="md-ellipsis">
+      Error Message
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#root-cause" class="md-nav__link">
+    <span class="md-ellipsis">
+      Root Cause
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Root Cause">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#duplicate-selectboxes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Duplicate Selectboxes
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#duplicate-number-inputs" class="md-nav__link">
+    <span class="md-ellipsis">
+      Duplicate Number Inputs
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#solution" class="md-nav__link">
+    <span class="md-ellipsis">
+      Solution
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Solution">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fixed-selectboxes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Fixed Selectboxes
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fixed-number-inputs" class="md-nav__link">
+    <span class="md-ellipsis">
+      Fixed Number Inputs
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#complete-key-mapping" class="md-nav__link">
+    <span class="md-ellipsis">
+      Complete Key Mapping
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#prevention" class="md-nav__link">
+    <span class="md-ellipsis">
+      Prevention
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Prevention">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-always-use-keys-for-repeated-widgets" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Always Use Keys for Repeated Widgets
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-use-descriptive-key-naming-convention" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Use Descriptive Key Naming Convention
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-check-for-duplicates-during-development" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Check for Duplicates During Development
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Testing
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#related-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      Related Issues
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -861,7 +1072,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../troubleshooting/streamlit-fragments/" class="md-nav__link">
+      <a href="../fragments-guide/" class="md-nav__link">
         
   
   
@@ -942,7 +1153,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../queries/overview/" class="md-nav__link">
+      <a href="../../../queries/overview/" class="md-nav__link">
         
   
   
@@ -965,7 +1176,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../queries/basic-queries/" class="md-nav__link">
+      <a href="../../../queries/basic-queries/" class="md-nav__link">
         
   
   
@@ -988,7 +1199,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../queries/advanced-queries/" class="md-nav__link">
+      <a href="../../../queries/advanced-queries/" class="md-nav__link">
         
   
   
@@ -1011,7 +1222,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../queries/examples/" class="md-nav__link">
+      <a href="../../../queries/examples/" class="md-nav__link">
         
   
   
@@ -1084,7 +1295,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../agents/overview/" class="md-nav__link">
+      <a href="../../../agents/overview/" class="md-nav__link">
         
   
   
@@ -1107,7 +1318,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../agents/" class="md-nav__link">
+      <a href="../../../agents/" class="md-nav__link">
         
   
   
@@ -1130,7 +1341,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../agents/SYSTEM_PROMPT_ARCHITECTURE/" class="md-nav__link">
+      <a href="../../../agents/SYSTEM_PROMPT_ARCHITECTURE/" class="md-nav__link">
         
   
   
@@ -1153,7 +1364,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../agents/CONSTANTS_ARCHITECTURE/" class="md-nav__link">
+      <a href="../../../agents/CONSTANTS_ARCHITECTURE/" class="md-nav__link">
         
   
   
@@ -1219,7 +1430,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../api/agent/" class="md-nav__link">
+      <a href="../../../api/agent/" class="md-nav__link">
         
   
   
@@ -1242,7 +1453,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../api/landuse-query-agent/" class="md-nav__link">
+      <a href="../../../api/landuse-query-agent/" class="md-nav__link">
         
   
   
@@ -1265,7 +1476,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../api/langgraph-agent/" class="md-nav__link">
+      <a href="../../../api/langgraph-agent/" class="md-nav__link">
         
   
   
@@ -1339,7 +1550,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../agents/TOOL_SYSTEM_ARCHITECTURE/" class="md-nav__link">
+      <a href="../../../agents/TOOL_SYSTEM_ARCHITECTURE/" class="md-nav__link">
         
   
   
@@ -1362,7 +1573,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../agents/MEMORY_STATE_MANAGEMENT/" class="md-nav__link">
+      <a href="../../../agents/MEMORY_STATE_MANAGEMENT/" class="md-nav__link">
         
   
   
@@ -1385,7 +1596,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../agents/ERROR_HANDLING_RESILIENCE/" class="md-nav__link">
+      <a href="../../../agents/ERROR_HANDLING_RESILIENCE/" class="md-nav__link">
         
   
   
@@ -1408,7 +1619,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../agents/PERFORMANCE_MONITORING/" class="md-nav__link">
+      <a href="../../../agents/PERFORMANCE_MONITORING/" class="md-nav__link">
         
   
   
@@ -1431,7 +1642,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../agents/INTEGRATION_EXTENSION/" class="md-nav__link">
+      <a href="../../../agents/INTEGRATION_EXTENSION/" class="md-nav__link">
         
   
   
@@ -1462,7 +1673,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../agents/ADVANCED_CONFIGURATION/" class="md-nav__link">
+      <a href="../../../agents/ADVANCED_CONFIGURATION/" class="md-nav__link">
         
   
   
@@ -1535,7 +1746,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../data/database-overview/" class="md-nav__link">
+      <a href="../../../data/database-overview/" class="md-nav__link">
         
   
   
@@ -1558,7 +1769,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../data/table-reference/" class="md-nav__link">
+      <a href="../../../data/table-reference/" class="md-nav__link">
         
   
   
@@ -1581,7 +1792,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../data/view-definitions/" class="md-nav__link">
+      <a href="../../../data/view-definitions/" class="md-nav__link">
         
   
   
@@ -1604,7 +1815,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../data/data-dictionary/" class="md-nav__link">
+      <a href="../../../data/data-dictionary/" class="md-nav__link">
         
   
   
@@ -1627,7 +1838,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../data/technical-specifications/" class="md-nav__link">
+      <a href="../../../data/technical-specifications/" class="md-nav__link">
         
   
   
@@ -1650,7 +1861,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../data/sources/" class="md-nav__link">
+      <a href="../../../data/sources/" class="md-nav__link">
         
   
   
@@ -1673,7 +1884,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../data/schema/" class="md-nav__link">
+      <a href="../../../data/schema/" class="md-nav__link">
         
   
   
@@ -1696,7 +1907,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../data/duckdb-schema/" class="md-nav__link">
+      <a href="../../../data/duckdb-schema/" class="md-nav__link">
         
   
   
@@ -1719,7 +1930,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../data/categories/" class="md-nav__link">
+      <a href="../../../data/categories/" class="md-nav__link">
         
   
   
@@ -1742,7 +1953,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../data/variable-descriptions/" class="md-nav__link">
+      <a href="../../../data/variable-descriptions/" class="md-nav__link">
         
   
   
@@ -1765,7 +1976,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../data/rpa-model-diagram/" class="md-nav__link">
+      <a href="../../../data/rpa-model-diagram/" class="md-nav__link">
         
   
   
@@ -1788,7 +1999,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../data/processing/" class="md-nav__link">
+      <a href="../../../data/processing/" class="md-nav__link">
         
   
   
@@ -1861,7 +2072,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../api/converters/" class="md-nav__link">
+      <a href="../../../api/converters/" class="md-nav__link">
         
   
   
@@ -1884,7 +2095,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../api/tools/" class="md-nav__link">
+      <a href="../../../api/tools/" class="md-nav__link">
         
   
   
@@ -1957,7 +2168,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../examples/use-cases/" class="md-nav__link">
+      <a href="../../../examples/use-cases/" class="md-nav__link">
         
   
   
@@ -1980,7 +2191,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../examples/workflows/" class="md-nav__link">
+      <a href="../../../examples/workflows/" class="md-nav__link">
         
   
   
@@ -2003,7 +2214,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../examples/notebooks/" class="md-nav__link">
+      <a href="../../../examples/notebooks/" class="md-nav__link">
         
   
   
@@ -2076,7 +2287,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../development/architecture/" class="md-nav__link">
+      <a href="../../../development/architecture/" class="md-nav__link">
         
   
   
@@ -2099,7 +2310,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../development/contributing/" class="md-nav__link">
+      <a href="../../../development/contributing/" class="md-nav__link">
         
   
   
@@ -2122,7 +2333,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../TESTING/" class="md-nav__link">
+      <a href="../../../development/testing-guide/" class="md-nav__link">
         
   
   
@@ -2145,7 +2356,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../development/testing/" class="md-nav__link">
+      <a href="../../../development/testing-implementation/" class="md-nav__link">
         
   
   
@@ -2168,7 +2379,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../development/ci-cd-pipeline/" class="md-nav__link">
+      <a href="../../../development/ci-cd-pipeline/" class="md-nav__link">
         
   
   
@@ -2191,7 +2402,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../development/retry-logic/" class="md-nav__link">
+      <a href="../../../development/retry-logic/" class="md-nav__link">
         
   
   
@@ -2214,7 +2425,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../development/BRANDING_STRATEGY/" class="md-nav__link">
+      <a href="../../../development/branding-strategy/" class="md-nav__link">
         
   
   
@@ -2237,7 +2448,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../development/modern-duckdb-tools/" class="md-nav__link">
+      <a href="../../../development/modern-duckdb-tools/" class="md-nav__link">
         
   
   
@@ -2260,7 +2471,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../development/pydantic-models/" class="md-nav__link">
+      <a href="../../../development/pydantic-models/" class="md-nav__link">
         
   
   
@@ -2283,12 +2494,58 @@
   
   
     <li class="md-nav__item">
-      <a href="../SECURITY/" class="md-nav__link">
+      <a href="../../../development/security-policy/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     Security Policy
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../development/duckdb-optimization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    DuckDB Optimization
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../development/streamlit-fragments/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Streamlit Fragments
     
   </span>
   
@@ -2325,12 +2582,242 @@
   
 
 
-  <h1>CLAUDE.local</h1>
-
-<h2 id="best-practices">Best Practices<a class="headerlink" href="#best-practices" title="Permanent link">&para;</a></h2>
+<h1 id="fixing-streamlit-duplicate-element-ids">Fixing Streamlit Duplicate Element IDs<a class="headerlink" href="#fixing-streamlit-duplicate-element-ids" title="Permanent link">&para;</a></h1>
+<h2 id="problem">Problem<a class="headerlink" href="#problem" title="Permanent link">&para;</a></h2>
+<p>Streamlit generates automatic IDs for widgets based on their type and parameters. When multiple widgets have the same type and parameters, they get identical IDs, causing a <code>StreamlitDuplicateElementId</code> error.</p>
+<h2 id="error-message">Error Message<a class="headerlink" href="#error-message" title="Permanent link">&para;</a></h2>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>StreamlitDuplicateElementId: There are multiple `selectbox` elements with the same auto-generated ID.
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>When this element is created, it is assigned an internal ID based on the element type and provided parameters.
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>Multiple elements with the same type and parameters will cause this error.
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>To fix this error, please pass a unique `key` argument to the selectbox element.
+</span></code></pre></div>
+<h2 id="root-cause">Root Cause<a class="headerlink" href="#root-cause" title="Permanent link">&para;</a></h2>
+<p>In the data extraction page (<code>pages/extraction.py</code>), multiple widgets had identical parameters:</p>
+<h3 id="duplicate-selectboxes">Duplicate Selectboxes<a class="headerlink" href="#duplicate-selectboxes" title="Permanent link">&para;</a></h3>
 <ul>
-<li>Refer to the langchain documentation before every task.</li>
+<li>Multiple "Export format:" selectboxes with same options <code>["CSV", "Excel", "JSON", "Parquet"]</code></li>
+<li>These appeared in different sections (templates, custom, bulk) but had identical parameters</li>
 </ul>
+<h3 id="duplicate-number-inputs">Duplicate Number Inputs<a class="headerlink" href="#duplicate-number-inputs" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Multiple "Preview rows:" number inputs with same min/max/value/step parameters</li>
+<li>Multiple "Export limit:" number inputs with same parameters</li>
+</ul>
+<h2 id="solution">Solution<a class="headerlink" href="#solution" title="Permanent link">&para;</a></h2>
+<p>Add unique <code>key</code> parameters to each widget to force different IDs:</p>
+<h3 id="fixed-selectboxes">Fixed Selectboxes<a class="headerlink" href="#fixed-selectboxes" title="Permanent link">&para;</a></h3>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># Template section</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="n">export_format</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">selectbox</span><span class="p">(</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>    <span class="s2">&quot;Export format:&quot;</span><span class="p">,</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>    <span class="p">[</span><span class="s2">&quot;CSV&quot;</span><span class="p">,</span> <span class="s2">&quot;Excel&quot;</span><span class="p">,</span> <span class="s2">&quot;JSON&quot;</span><span class="p">,</span> <span class="s2">&quot;Parquet&quot;</span><span class="p">],</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>    <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Choose the file format for your export&quot;</span><span class="p">,</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>    <span class="n">key</span><span class="o">=</span><span class="s2">&quot;template_export_format&quot;</span>  <span class="c1"># ✅ Unique key</span>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="p">)</span>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="c1"># Custom section</span>
+</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="n">export_format</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">selectbox</span><span class="p">(</span>
+</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>    <span class="s2">&quot;Export format:&quot;</span><span class="p">,</span>
+</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>    <span class="p">[</span><span class="s2">&quot;CSV&quot;</span><span class="p">,</span> <span class="s2">&quot;Excel&quot;</span><span class="p">,</span> <span class="s2">&quot;JSON&quot;</span><span class="p">,</span> <span class="s2">&quot;Parquet&quot;</span><span class="p">],</span>
+</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>    <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Choose the file format for your export&quot;</span><span class="p">,</span>
+</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>    <span class="n">key</span><span class="o">=</span><span class="s2">&quot;custom_export_format&quot;</span>  <span class="c1"># ✅ Different key</span>
+</span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a><span class="p">)</span>
+</span><span id="__span-1-16"><a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>
+</span><span id="__span-1-17"><a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a><span class="c1"># Bulk section</span>
+</span><span id="__span-1-18"><a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a><span class="n">export_format</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">selectbox</span><span class="p">(</span>
+</span><span id="__span-1-19"><a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a>    <span class="s2">&quot;Export format:&quot;</span><span class="p">,</span>
+</span><span id="__span-1-20"><a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a>    <span class="p">[</span><span class="s2">&quot;CSV (ZIP)&quot;</span><span class="p">,</span> <span class="s2">&quot;Excel&quot;</span><span class="p">,</span> <span class="s2">&quot;Parquet (ZIP)&quot;</span><span class="p">],</span>
+</span><span id="__span-1-21"><a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a>    <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Choose the format for bulk export&quot;</span><span class="p">,</span>
+</span><span id="__span-1-22"><a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a>    <span class="n">key</span><span class="o">=</span><span class="s2">&quot;bulk_export_format&quot;</span>  <span class="c1"># ✅ Different key</span>
+</span><span id="__span-1-23"><a id="__codelineno-1-23" name="__codelineno-1-23" href="#__codelineno-1-23"></a><span class="p">)</span>
+</span></code></pre></div>
+<h3 id="fixed-number-inputs">Fixed Number Inputs<a class="headerlink" href="#fixed-number-inputs" title="Permanent link">&para;</a></h3>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># Template section</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="n">preview_rows</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">number_input</span><span class="p">(</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>    <span class="s2">&quot;Preview rows:&quot;</span><span class="p">,</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>    <span class="n">min_value</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>    <span class="n">max_value</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>    <span class="n">value</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>    <span class="n">step</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>    <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Number of rows to preview&quot;</span><span class="p">,</span>
+</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>    <span class="n">key</span><span class="o">=</span><span class="s2">&quot;template_preview_rows&quot;</span>  <span class="c1"># ✅ Unique key</span>
+</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="p">)</span>
+</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>
+</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="c1"># Custom section</span>
+</span><span id="__span-2-13"><a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="n">preview_limit</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">number_input</span><span class="p">(</span>
+</span><span id="__span-2-14"><a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a>    <span class="s2">&quot;Preview rows:&quot;</span><span class="p">,</span>
+</span><span id="__span-2-15"><a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a>    <span class="n">min_value</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+</span><span id="__span-2-16"><a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a>    <span class="n">max_value</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
+</span><span id="__span-2-17"><a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a>    <span class="n">value</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+</span><span id="__span-2-18"><a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a>    <span class="n">step</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+</span><span id="__span-2-19"><a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a>    <span class="n">key</span><span class="o">=</span><span class="s2">&quot;custom_preview_rows&quot;</span>  <span class="c1"># ✅ Different key</span>
+</span><span id="__span-2-20"><a id="__codelineno-2-20" name="__codelineno-2-20" href="#__codelineno-2-20"></a><span class="p">)</span>
+</span></code></pre></div>
+<h2 id="complete-key-mapping">Complete Key Mapping<a class="headerlink" href="#complete-key-mapping" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Widget Type</th>
+<th>Location</th>
+<th>Key</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>selectbox</td>
+<td>Templates</td>
+<td><code>template_selector</code></td>
+<td>Template selection</td>
+</tr>
+<tr>
+<td>selectbox</td>
+<td>Templates</td>
+<td><code>template_export_format</code></td>
+<td>Export format for templates</td>
+</tr>
+<tr>
+<td>selectbox</td>
+<td>Custom</td>
+<td><code>custom_extract_type</code></td>
+<td>Custom extraction type</td>
+</tr>
+<tr>
+<td>selectbox</td>
+<td>Custom</td>
+<td><code>custom_transition_type</code></td>
+<td>Transition type filter</td>
+</tr>
+<tr>
+<td>selectbox</td>
+<td>Custom</td>
+<td><code>custom_export_format</code></td>
+<td>Export format for custom</td>
+</tr>
+<tr>
+<td>selectbox</td>
+<td>Bulk</td>
+<td><code>bulk_extract_type</code></td>
+<td>Bulk extraction type</td>
+</tr>
+<tr>
+<td>selectbox</td>
+<td>Bulk</td>
+<td><code>bulk_export_format</code></td>
+<td>Export format for bulk</td>
+</tr>
+<tr>
+<td>number_input</td>
+<td>Templates</td>
+<td><code>template_preview_rows</code></td>
+<td>Preview rows for templates</td>
+</tr>
+<tr>
+<td>number_input</td>
+<td>Templates</td>
+<td><code>template_export_limit</code></td>
+<td>Export limit for templates</td>
+</tr>
+<tr>
+<td>number_input</td>
+<td>Custom</td>
+<td><code>custom_preview_rows</code></td>
+<td>Preview rows for custom</td>
+</tr>
+<tr>
+<td>number_input</td>
+<td>Custom</td>
+<td><code>custom_export_limit</code></td>
+<td>Export limit for custom</td>
+</tr>
+<tr>
+<td>number_input</td>
+<td>Bulk</td>
+<td><code>bulk_row_limit</code></td>
+<td>Row limit for bulk</td>
+</tr>
+<tr>
+<td>button</td>
+<td>Templates</td>
+<td><code>template_preview_data</code></td>
+<td>Preview data button</td>
+</tr>
+<tr>
+<td>button</td>
+<td>Templates</td>
+<td><code>template_export_data</code></td>
+<td>Export data button</td>
+</tr>
+<tr>
+<td>button</td>
+<td>Custom</td>
+<td><code>custom_preview_query</code></td>
+<td>Preview query button</td>
+</tr>
+<tr>
+<td>button</td>
+<td>Custom</td>
+<td><code>custom_preview_data</code></td>
+<td>Preview data button</td>
+</tr>
+<tr>
+<td>button</td>
+<td>Custom</td>
+<td><code>custom_export_data</code></td>
+<td>Export data button</td>
+</tr>
+<tr>
+<td>button</td>
+<td>Bulk</td>
+<td><code>bulk_generate_export</code></td>
+<td>Generate bulk export button</td>
+</tr>
+</tbody>
+</table>
+<h2 id="prevention">Prevention<a class="headerlink" href="#prevention" title="Permanent link">&para;</a></h2>
+<p>To avoid this issue in the future:</p>
+<h3 id="1-always-use-keys-for-repeated-widgets">1. Always Use Keys for Repeated Widgets<a class="headerlink" href="#1-always-use-keys-for-repeated-widgets" title="Permanent link">&para;</a></h3>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># ❌ Bad: Same parameters, no keys</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="n">st</span><span class="o">.</span><span class="n">selectbox</span><span class="p">(</span><span class="s2">&quot;Format:&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;CSV&quot;</span><span class="p">,</span> <span class="s2">&quot;JSON&quot;</span><span class="p">])</span>  <span class="c1"># Section 1</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="n">st</span><span class="o">.</span><span class="n">selectbox</span><span class="p">(</span><span class="s2">&quot;Format:&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;CSV&quot;</span><span class="p">,</span> <span class="s2">&quot;JSON&quot;</span><span class="p">])</span>  <span class="c1"># Section 2 - DUPLICATE!</span>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="c1"># ✅ Good: Same parameters, unique keys</span>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="n">st</span><span class="o">.</span><span class="n">selectbox</span><span class="p">(</span><span class="s2">&quot;Format:&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;CSV&quot;</span><span class="p">,</span> <span class="s2">&quot;JSON&quot;</span><span class="p">],</span> <span class="n">key</span><span class="o">=</span><span class="s2">&quot;section1_format&quot;</span><span class="p">)</span>
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="n">st</span><span class="o">.</span><span class="n">selectbox</span><span class="p">(</span><span class="s2">&quot;Format:&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;CSV&quot;</span><span class="p">,</span> <span class="s2">&quot;JSON&quot;</span><span class="p">],</span> <span class="n">key</span><span class="o">=</span><span class="s2">&quot;section2_format&quot;</span><span class="p">)</span>
+</span></code></pre></div>
+<h3 id="2-use-descriptive-key-naming-convention">2. Use Descriptive Key Naming Convention<a class="headerlink" href="#2-use-descriptive-key-naming-convention" title="Permanent link">&para;</a></h3>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="c1"># Pattern: {section}_{widget_purpose}</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="n">key</span><span class="o">=</span><span class="s2">&quot;template_export_format&quot;</span>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="n">key</span><span class="o">=</span><span class="s2">&quot;custom_preview_rows&quot;</span>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="n">key</span><span class="o">=</span><span class="s2">&quot;bulk_row_limit&quot;</span>
+</span></code></pre></div>
+<h3 id="3-check-for-duplicates-during-development">3. Check for Duplicates During Development<a class="headerlink" href="#3-check-for-duplicates-during-development" title="Permanent link">&para;</a></h3>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1"># Use this pattern to identify potential duplicates</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="n">widgets_to_check</span> <span class="o">=</span> <span class="p">[</span>
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>    <span class="s2">&quot;selectbox&quot;</span><span class="p">,</span> <span class="s2">&quot;multiselect&quot;</span><span class="p">,</span> <span class="s2">&quot;text_input&quot;</span><span class="p">,</span> 
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>    <span class="s2">&quot;number_input&quot;</span><span class="p">,</span> <span class="s2">&quot;checkbox&quot;</span><span class="p">,</span> <span class="s2">&quot;radio&quot;</span><span class="p">,</span> <span class="s2">&quot;slider&quot;</span>
+</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="p">]</span>
+</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>
+</span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="c1"># Add keys proactively when creating similar widgets</span>
+</span></code></pre></div>
+<h2 id="testing">Testing<a class="headerlink" href="#testing" title="Permanent link">&para;</a></h2>
+<p>After adding keys, verify the fix:</p>
+<ol>
+<li><strong>Import Test</strong>: Check that the page imports without errors</li>
+<li><strong>Runtime Test</strong>: Navigate through all tabs and interact with widgets</li>
+<li><strong>State Test</strong>: Ensure widget states don't interfere with each other</li>
+</ol>
+<h2 id="related-issues">Related Issues<a class="headerlink" href="#related-issues" title="Permanent link">&para;</a></h2>
+<p>This pattern can affect any Streamlit widget that appears multiple times with identical parameters:
+- <code>st.selectbox</code>
+- <code>st.multiselect</code>
+- <code>st.text_input</code>
+- <code>st.number_input</code>
+- <code>st.checkbox</code>
+- <code>st.radio</code>
+- <code>st.slider</code>
+- <code>st.button</code></p>
+<p>Always provide unique <code>key</code> parameters when using repeated widgets across different sections of your app.</p>
 
 
 
@@ -2417,10 +2904,10 @@
     
     
       
-      <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tabs", "navigation.sections", "navigation.path", "navigation.top", "search.suggest", "search.highlight", "content.tabs.link", "content.code.annotation", "content.code.copy", "toc.integrate"], "search": "../assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"base": "../../..", "features": ["navigation.tabs", "navigation.sections", "navigation.path", "navigation.top", "search.suggest", "search.highlight", "content.tabs.link", "content.code.annotation", "content.code.copy", "toc.integrate"], "search": "../../../assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../assets/javascripts/bundle.50899def.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.50899def.min.js"></script>
       
     
   </body>

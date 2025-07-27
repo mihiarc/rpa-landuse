@@ -12,24 +12,28 @@
         <meta name="author" content="RPA Analytics Team">
       
       
-        <link rel="canonical" href="https://mihiarc.github.io/rpa-landuse/KNOWLEDGE_BASE_INTEGRATION/">
+        <link rel="canonical" href="https://mihiarc.github.io/rpa-landuse/development/security-policy/">
       
       
+        <link rel="prev" href="../pydantic-models/">
       
       
-      <link rel="icon" href="../assets/images/favicon.png">
+        <link rel="next" href="../duckdb-optimization/">
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.16">
     
     
       
-        <title>Knowledge Base Integration Guide - RPA Land Use Analytics</title>
+        <title>Security Policy - RPA Land Use Analytics</title>
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.7e37652d.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.7e37652d.min.css">
       
         
-        <link rel="stylesheet" href="../assets/stylesheets/palette.06af60db.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
       
       
 
@@ -48,9 +52,9 @@
       
     
     
-      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
     
-    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -76,7 +80,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#knowledge-base-integration-guide" class="md-skip">
+        <a href="#security-guide" class="md-skip">
           Skip to content
         </a>
       
@@ -90,7 +94,7 @@
 
 <header class="md-header" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href=".." title="RPA Land Use Analytics" class="md-header__button md-logo" aria-label="RPA Land Use Analytics" data-md-component="logo">
+    <a href="../.." title="RPA Land Use Analytics" class="md-header__button md-logo" aria-label="RPA Land Use Analytics" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -110,7 +114,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Knowledge Base Integration Guide
+              Security Policy
             
           </span>
         </div>
@@ -223,7 +227,7 @@
   
   
     <li class="md-tabs__item">
-      <a href=".." class="md-tabs__link">
+      <a href="../.." class="md-tabs__link">
         
   
   
@@ -244,7 +248,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../rpa/overview/" class="md-tabs__link">
+        <a href="../../rpa/overview/" class="md-tabs__link">
           
   
   
@@ -264,7 +268,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../getting-started/installation/" class="md-tabs__link">
+        <a href="../../getting-started/installation/" class="md-tabs__link">
           
   
   
@@ -284,7 +288,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../queries/overview/" class="md-tabs__link">
+        <a href="../../queries/overview/" class="md-tabs__link">
           
   
   
@@ -304,7 +308,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../agents/overview/" class="md-tabs__link">
+        <a href="../../agents/overview/" class="md-tabs__link">
           
   
   
@@ -324,7 +328,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../data/database-overview/" class="md-tabs__link">
+        <a href="../../data/database-overview/" class="md-tabs__link">
           
   
   
@@ -344,7 +348,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../api/converters/" class="md-tabs__link">
+        <a href="../../api/converters/" class="md-tabs__link">
           
   
   
@@ -364,7 +368,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../examples/use-cases/" class="md-tabs__link">
+        <a href="../../examples/use-cases/" class="md-tabs__link">
           
   
   
@@ -380,11 +384,13 @@
   
   
   
+    
+  
   
     
     
-      <li class="md-tabs__item">
-        <a href="../development/architecture/" class="md-tabs__link">
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../architecture/" class="md-tabs__link">
           
   
   
@@ -420,7 +426,7 @@
 
 <nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href=".." title="RPA Land Use Analytics" class="md-nav__button md-logo" aria-label="RPA Land Use Analytics" data-md-component="logo">
+    <a href="../.." title="RPA Land Use Analytics" class="md-nav__button md-logo" aria-label="RPA Land Use Analytics" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -450,7 +456,7 @@
   
   
     <li class="md-nav__item">
-      <a href=".." class="md-nav__link">
+      <a href="../.." class="md-nav__link">
         
   
   
@@ -515,7 +521,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../rpa/overview/" class="md-nav__link">
+      <a href="../../rpa/overview/" class="md-nav__link">
         
   
   
@@ -538,7 +544,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../RPA_SCENARIOS/" class="md-nav__link">
+      <a href="../../rpa/scenarios/" class="md-nav__link">
         
   
   
@@ -561,7 +567,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../LAND_USE_METHODOLOGY/" class="md-nav__link">
+      <a href="../../rpa/methodology/" class="md-nav__link">
         
   
   
@@ -584,7 +590,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../rpa/climate-models/" class="md-nav__link">
+      <a href="../../rpa/climate-models/" class="md-nav__link">
         
   
   
@@ -657,7 +663,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../getting-started/installation/" class="md-nav__link">
+      <a href="../../getting-started/installation/" class="md-nav__link">
         
   
   
@@ -680,7 +686,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../getting-started/quickstart/" class="md-nav__link">
+      <a href="../../getting-started/quickstart/" class="md-nav__link">
         
   
   
@@ -703,7 +709,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../getting-started/configuration/" class="md-nav__link">
+      <a href="../../getting-started/configuration/" class="md-nav__link">
         
   
   
@@ -726,7 +732,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../faq/" class="md-nav__link">
+      <a href="../../getting-started/faq/" class="md-nav__link">
         
   
   
@@ -749,7 +755,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../troubleshooting/" class="md-nav__link">
+      <a href="../../getting-started/troubleshooting/" class="md-nav__link">
         
   
   
@@ -772,7 +778,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../GITHUB_PAGES_SETUP/" class="md-nav__link">
+      <a href="../../getting-started/github-pages-setup/" class="md-nav__link">
         
   
   
@@ -838,7 +844,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../troubleshooting/streamlit-duplicate-ids/" class="md-nav__link">
+      <a href="../../getting-started/streamlit-issues/duplicate-ids/" class="md-nav__link">
         
   
   
@@ -861,7 +867,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../troubleshooting/streamlit-fragments/" class="md-nav__link">
+      <a href="../../getting-started/streamlit-issues/fragments-guide/" class="md-nav__link">
         
   
   
@@ -942,7 +948,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../queries/overview/" class="md-nav__link">
+      <a href="../../queries/overview/" class="md-nav__link">
         
   
   
@@ -965,7 +971,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../queries/basic-queries/" class="md-nav__link">
+      <a href="../../queries/basic-queries/" class="md-nav__link">
         
   
   
@@ -988,7 +994,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../queries/advanced-queries/" class="md-nav__link">
+      <a href="../../queries/advanced-queries/" class="md-nav__link">
         
   
   
@@ -1011,7 +1017,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../queries/examples/" class="md-nav__link">
+      <a href="../../queries/examples/" class="md-nav__link">
         
   
   
@@ -1084,7 +1090,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../agents/overview/" class="md-nav__link">
+      <a href="../../agents/overview/" class="md-nav__link">
         
   
   
@@ -1107,7 +1113,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../agents/" class="md-nav__link">
+      <a href="../../agents/" class="md-nav__link">
         
   
   
@@ -1130,7 +1136,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../agents/SYSTEM_PROMPT_ARCHITECTURE/" class="md-nav__link">
+      <a href="../../agents/SYSTEM_PROMPT_ARCHITECTURE/" class="md-nav__link">
         
   
   
@@ -1153,7 +1159,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../agents/CONSTANTS_ARCHITECTURE/" class="md-nav__link">
+      <a href="../../agents/CONSTANTS_ARCHITECTURE/" class="md-nav__link">
         
   
   
@@ -1219,7 +1225,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../api/agent/" class="md-nav__link">
+      <a href="../../api/agent/" class="md-nav__link">
         
   
   
@@ -1242,7 +1248,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../api/landuse-query-agent/" class="md-nav__link">
+      <a href="../../api/landuse-query-agent/" class="md-nav__link">
         
   
   
@@ -1265,7 +1271,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../api/langgraph-agent/" class="md-nav__link">
+      <a href="../../api/langgraph-agent/" class="md-nav__link">
         
   
   
@@ -1339,7 +1345,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../agents/TOOL_SYSTEM_ARCHITECTURE/" class="md-nav__link">
+      <a href="../../agents/TOOL_SYSTEM_ARCHITECTURE/" class="md-nav__link">
         
   
   
@@ -1362,7 +1368,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../agents/MEMORY_STATE_MANAGEMENT/" class="md-nav__link">
+      <a href="../../agents/MEMORY_STATE_MANAGEMENT/" class="md-nav__link">
         
   
   
@@ -1385,7 +1391,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../agents/ERROR_HANDLING_RESILIENCE/" class="md-nav__link">
+      <a href="../../agents/ERROR_HANDLING_RESILIENCE/" class="md-nav__link">
         
   
   
@@ -1408,7 +1414,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../agents/PERFORMANCE_MONITORING/" class="md-nav__link">
+      <a href="../../agents/PERFORMANCE_MONITORING/" class="md-nav__link">
         
   
   
@@ -1431,7 +1437,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../agents/INTEGRATION_EXTENSION/" class="md-nav__link">
+      <a href="../../agents/INTEGRATION_EXTENSION/" class="md-nav__link">
         
   
   
@@ -1462,7 +1468,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../agents/ADVANCED_CONFIGURATION/" class="md-nav__link">
+      <a href="../../agents/ADVANCED_CONFIGURATION/" class="md-nav__link">
         
   
   
@@ -1535,7 +1541,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../data/database-overview/" class="md-nav__link">
+      <a href="../../data/database-overview/" class="md-nav__link">
         
   
   
@@ -1558,7 +1564,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../data/table-reference/" class="md-nav__link">
+      <a href="../../data/table-reference/" class="md-nav__link">
         
   
   
@@ -1581,7 +1587,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../data/view-definitions/" class="md-nav__link">
+      <a href="../../data/view-definitions/" class="md-nav__link">
         
   
   
@@ -1604,7 +1610,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../data/data-dictionary/" class="md-nav__link">
+      <a href="../../data/data-dictionary/" class="md-nav__link">
         
   
   
@@ -1627,7 +1633,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../data/technical-specifications/" class="md-nav__link">
+      <a href="../../data/technical-specifications/" class="md-nav__link">
         
   
   
@@ -1650,7 +1656,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../data/sources/" class="md-nav__link">
+      <a href="../../data/sources/" class="md-nav__link">
         
   
   
@@ -1673,7 +1679,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../data/schema/" class="md-nav__link">
+      <a href="../../data/schema/" class="md-nav__link">
         
   
   
@@ -1696,7 +1702,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../data/duckdb-schema/" class="md-nav__link">
+      <a href="../../data/duckdb-schema/" class="md-nav__link">
         
   
   
@@ -1719,7 +1725,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../data/categories/" class="md-nav__link">
+      <a href="../../data/categories/" class="md-nav__link">
         
   
   
@@ -1742,7 +1748,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../data/variable-descriptions/" class="md-nav__link">
+      <a href="../../data/variable-descriptions/" class="md-nav__link">
         
   
   
@@ -1765,7 +1771,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../data/rpa-model-diagram/" class="md-nav__link">
+      <a href="../../data/rpa-model-diagram/" class="md-nav__link">
         
   
   
@@ -1788,7 +1794,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../data/processing/" class="md-nav__link">
+      <a href="../../data/processing/" class="md-nav__link">
         
   
   
@@ -1861,7 +1867,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../api/converters/" class="md-nav__link">
+      <a href="../../api/converters/" class="md-nav__link">
         
   
   
@@ -1884,7 +1890,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../api/tools/" class="md-nav__link">
+      <a href="../../api/tools/" class="md-nav__link">
         
   
   
@@ -1957,7 +1963,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../examples/use-cases/" class="md-nav__link">
+      <a href="../../examples/use-cases/" class="md-nav__link">
         
   
   
@@ -1980,7 +1986,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../examples/workflows/" class="md-nav__link">
+      <a href="../../examples/workflows/" class="md-nav__link">
         
   
   
@@ -2003,7 +2009,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../examples/notebooks/" class="md-nav__link">
+      <a href="../../examples/notebooks/" class="md-nav__link">
         
   
   
@@ -2030,26 +2036,31 @@
       
   
   
+    
   
   
+  
     
     
     
     
+      
+        
+        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" checked>
         
           
-          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="">
             
   
   
@@ -2062,7 +2073,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_9">
             <span class="md-nav__icon md-icon"></span>
             Development
@@ -2076,7 +2087,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../development/architecture/" class="md-nav__link">
+      <a href="../architecture/" class="md-nav__link">
         
   
   
@@ -2099,7 +2110,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../development/contributing/" class="md-nav__link">
+      <a href="../contributing/" class="md-nav__link">
         
   
   
@@ -2122,7 +2133,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../TESTING/" class="md-nav__link">
+      <a href="../testing-guide/" class="md-nav__link">
         
   
   
@@ -2145,7 +2156,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../development/testing/" class="md-nav__link">
+      <a href="../testing-implementation/" class="md-nav__link">
         
   
   
@@ -2168,7 +2179,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../development/ci-cd-pipeline/" class="md-nav__link">
+      <a href="../ci-cd-pipeline/" class="md-nav__link">
         
   
   
@@ -2191,7 +2202,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../development/retry-logic/" class="md-nav__link">
+      <a href="../retry-logic/" class="md-nav__link">
         
   
   
@@ -2214,7 +2225,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../development/BRANDING_STRATEGY/" class="md-nav__link">
+      <a href="../branding-strategy/" class="md-nav__link">
         
   
   
@@ -2237,7 +2248,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../development/modern-duckdb-tools/" class="md-nav__link">
+      <a href="../modern-duckdb-tools/" class="md-nav__link">
         
   
   
@@ -2260,7 +2271,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../development/pydantic-models/" class="md-nav__link">
+      <a href="../pydantic-models/" class="md-nav__link">
         
   
   
@@ -2280,15 +2291,325 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../SECURITY/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Security Policy
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
   <span class="md-ellipsis">
     Security Policy
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      Overview
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#security-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      Security Features
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Security Features">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-sql-injection-prevention" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. SQL Injection Prevention
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-input-validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Input Validation
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-api-key-security" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. API Key Security
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-rate-limiting" class="md-nav__link">
+    <span class="md-ellipsis">
+      4. Rate Limiting
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-database-security" class="md-nav__link">
+    <span class="md-ellipsis">
+      5. Database Security
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-logging-and-auditing" class="md-nav__link">
+    <span class="md-ellipsis">
+      6. Logging and Auditing
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configuration
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#environment-variables" class="md-nav__link">
+    <span class="md-ellipsis">
+      Environment Variables
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#file-permissions" class="md-nav__link">
+    <span class="md-ellipsis">
+      File Permissions
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      Usage
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Usage">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#running-the-secure-agent" class="md-nav__link">
+    <span class="md-ellipsis">
+      Running the Secure Agent
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#security-features-in-action" class="md-nav__link">
+    <span class="md-ellipsis">
+      Security Features in Action
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#best-practices-for-users" class="md-nav__link">
+    <span class="md-ellipsis">
+      Best Practices for Users
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#security-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      Security Architecture
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#logging" class="md-nav__link">
+    <span class="md-ellipsis">
+      Logging
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      Troubleshooting
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#common-security-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      Common Security Issues
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#getting-help" class="md-nav__link">
+    <span class="md-ellipsis">
+      Getting Help
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#updates-and-maintenance" class="md-nav__link">
+    <span class="md-ellipsis">
+      Updates and Maintenance
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#compliance" class="md-nav__link">
+    <span class="md-ellipsis">
+      Compliance
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../duckdb-optimization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    DuckDB Optimization
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../streamlit-fragments/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Streamlit Fragments
     
   </span>
   
@@ -2325,140 +2646,197 @@
   
 
 
-<h1 id="knowledge-base-integration-guide">Knowledge Base Integration Guide<a class="headerlink" href="#knowledge-base-integration-guide" title="Permanent link">&para;</a></h1>
-<p>This guide explains how to use the vector store knowledge base feature to enhance the RPA Land Use Analytics agent with domain knowledge from markdown documentation.</p>
+<h1 id="security-guide">Security Guide<a class="headerlink" href="#security-guide" title="Permanent link">&para;</a></h1>
+<p>This document outlines the security features and best practices implemented in the Langchain Landuse Analysis System.</p>
 <h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
-<p>The knowledge base integration allows the agent to search through RPA Assessment documentation using semantic search, combining structured data queries with contextual information from official documents.</p>
-<h2 id="features">Features<a class="headerlink" href="#features" title="Permanent link">&para;</a></h2>
+<p>The system implements multiple layers of security to protect against common vulnerabilities and ensure safe operation when processing natural language queries and database operations.</p>
+<h2 id="security-features">Security Features<a class="headerlink" href="#security-features" title="Permanent link">&para;</a></h2>
+<h3 id="1-sql-injection-prevention">1. SQL Injection Prevention<a class="headerlink" href="#1-sql-injection-prevention" title="Permanent link">&para;</a></h3>
+<p>All user-generated queries are validated before execution:</p>
 <ul>
-<li><strong>Semantic Search</strong>: Uses OpenAI embeddings to find relevant documentation based on meaning</li>
-<li><strong>Automatic Indexing</strong>: Processes markdown files and creates searchable chunks</li>
-<li><strong>Persistent Storage</strong>: Uses Chroma vector database for efficient retrieval</li>
-<li><strong>Seamless Integration</strong>: Works with the existing LangGraph agent architecture</li>
-<li><strong>No Technical Debt</strong>: Implemented as a configurable feature in the existing agent</li>
+<li><strong>Query Validation</strong>: Only SELECT statements are allowed</li>
+<li><strong>Keyword Blocking</strong>: Dangerous SQL keywords (DROP, DELETE, etc.) are blocked</li>
+<li><strong>Comment Stripping</strong>: SQL comments are removed to prevent comment-based attacks</li>
+<li><strong>Single Statement Enforcement</strong>: Multiple SQL statements are not allowed</li>
+</ul>
+<p>Example of blocked queries:
+<div class="language-sql highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1">-- These will be rejected:</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="k">DROP</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">dim_scenario</span><span class="p">;</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">users</span><span class="p">;</span><span class="w"> </span><span class="k">DELETE</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">users</span><span class="p">;</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">users</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="k">OR</span><span class="w"> </span><span class="s1">&#39;1&#39;</span><span class="o">=</span><span class="s1">&#39;1&#39;</span><span class="c1">--</span>
+</span></code></pre></div></p>
+<h3 id="2-input-validation">2. Input Validation<a class="headerlink" href="#2-input-validation" title="Permanent link">&para;</a></h3>
+<p>All user inputs are validated and sanitized:</p>
+<ul>
+<li><strong>File Path Validation</strong>: Prevents directory traversal attacks</li>
+<li><strong>Identifier Sanitization</strong>: Database identifiers are validated against safe patterns</li>
+<li><strong>Parameter Validation</strong>: Query parameters are type-checked and range-validated</li>
+</ul>
+<h3 id="3-api-key-security">3. API Key Security<a class="headerlink" href="#3-api-key-security" title="Permanent link">&para;</a></h3>
+<p>API keys are handled securely throughout the system:</p>
+<ul>
+<li><strong>Secure Storage</strong>: Keys stored in <code>.env</code> files (gitignored)</li>
+<li><strong>Format Validation</strong>: Keys are validated against expected patterns</li>
+<li><strong>Masking</strong>: Keys are masked in logs and UI output</li>
+<li><strong>No Hardcoding</strong>: Code is scanned to prevent hardcoded secrets</li>
+</ul>
+<h3 id="4-rate-limiting">4. Rate Limiting<a class="headerlink" href="#4-rate-limiting" title="Permanent link">&para;</a></h3>
+<p>Protection against API abuse:</p>
+<ul>
+<li><strong>Default Limit</strong>: 60 queries per minute per user</li>
+<li><strong>Configurable</strong>: Limits can be adjusted based on needs</li>
+<li><strong>Graceful Handling</strong>: Clear error messages with retry information</li>
+</ul>
+<h3 id="5-database-security">5. Database Security<a class="headerlink" href="#5-database-security" title="Permanent link">&para;</a></h3>
+<p>Database access is restricted and monitored:</p>
+<ul>
+<li><strong>Read-Only Access</strong>: Agents connect with read-only permissions</li>
+<li><strong>Query Limits</strong>: Automatic LIMIT clauses prevent data exfiltration</li>
+<li><strong>Connection Security</strong>: Connections are properly closed after use</li>
+</ul>
+<h3 id="6-logging-and-auditing">6. Logging and Auditing<a class="headerlink" href="#6-logging-and-auditing" title="Permanent link">&para;</a></h3>
+<p>Comprehensive security logging:</p>
+<ul>
+<li><strong>Query Logging</strong>: All queries are logged with status</li>
+<li><strong>Access Logging</strong>: Resource access attempts are tracked</li>
+<li><strong>Security Events</strong>: Failed validations and rate limits are logged</li>
+<li><strong>No Sensitive Data</strong>: Logs exclude full API keys and query results</li>
 </ul>
 <h2 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link">&para;</a></h2>
-<p>Enable the knowledge base by setting environment variables in your <code>.env</code> file:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># Enable knowledge base feature</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="nv">LANDUSE_ENABLE_KNOWLEDGE_BASE</span><span class="o">=</span><span class="nb">true</span>
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="c1"># Optional: customize paths (defaults shown)</span>
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="nv">LANDUSE_KNOWLEDGE_BASE_PATH</span><span class="o">=</span>src/landuse/docs
-</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="nv">LANDUSE_CHROMA_PERSIST_DIR</span><span class="o">=</span>data/chroma_db
+<h3 id="environment-variables">Environment Variables<a class="headerlink" href="#environment-variables" title="Permanent link">&para;</a></h3>
+<p>Create a <code>config/.env</code> file with:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># Required (at least one)</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="nv">OPENAI_API_KEY</span><span class="o">=</span>sk-...
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="nv">ANTHROPIC_API_KEY</span><span class="o">=</span>sk-ant-...
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="c1"># Security Settings</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="nv">DEFAULT_QUERY_LIMIT</span><span class="o">=</span><span class="m">1000</span><span class="w">    </span><span class="c1"># Max rows returned</span>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="nv">LOG_LEVEL</span><span class="o">=</span>INFO<span class="w">              </span><span class="c1"># Logging verbosity</span>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="nv">ENABLE_LOGGING</span><span class="o">=</span><span class="nb">true</span><span class="w">         </span><span class="c1"># Enable security logging</span>
+</span></code></pre></div>
+<h3 id="file-permissions">File Permissions<a class="headerlink" href="#file-permissions" title="Permanent link">&para;</a></h3>
+<p>On Unix-like systems, ensure proper file permissions:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>chmod<span class="w"> </span><span class="m">600</span><span class="w"> </span>config/.env<span class="w">       </span><span class="c1"># Only owner can read/write</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>chmod<span class="w"> </span><span class="m">755</span><span class="w"> </span>scripts/*.py<span class="w">      </span><span class="c1"># Scripts are executable</span>
 </span></code></pre></div>
 <h2 id="usage">Usage<a class="headerlink" href="#usage" title="Permanent link">&para;</a></h2>
-<h3 id="command-line">Command Line<a class="headerlink" href="#command-line" title="Permanent link">&para;</a></h3>
-<p>When the knowledge base is enabled, the agent automatically gains access to a documentation search tool:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># Run the agent with knowledge base enabled</span>
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="nv">LANDUSE_ENABLE_KNOWLEDGE_BASE</span><span class="o">=</span><span class="nb">true</span><span class="w"> </span>uv<span class="w"> </span>run<span class="w"> </span>rpa-analytics
-</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>
-</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="c1"># Or set it in your .env file and run normally</span>
-</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>uv<span class="w"> </span>run<span class="w"> </span>rpa-analytics
+<h3 id="running-the-secure-agent">Running the Secure Agent<a class="headerlink" href="#running-the-secure-agent" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># Run the secure setup wizard first</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>setup_secure_agents.py
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="c1"># Then run the secure agent</span>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/agents/secure_landuse_query_agent.py
 </span></code></pre></div>
-<h3 id="python-api">Python API<a class="headerlink" href="#python-api" title="Permanent link">&para;</a></h3>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">landuse.agents.landuse_agent</span><span class="w"> </span><span class="kn">import</span> <span class="n">LanduseAgent</span>
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">landuse.config.landuse_config</span><span class="w"> </span><span class="kn">import</span> <span class="n">LanduseConfig</span>
-</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>
-</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="c1"># Create config with knowledge base enabled</span>
-</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="n">config</span> <span class="o">=</span> <span class="n">LanduseConfig</span><span class="p">(</span><span class="n">enable_knowledge_base</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>
-</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="c1"># Initialize agent</span>
-</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="k">with</span> <span class="n">LanduseAgent</span><span class="p">(</span><span class="n">config</span><span class="p">)</span> <span class="k">as</span> <span class="n">agent</span><span class="p">:</span>
-</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>    <span class="c1"># Query combining documentation and data</span>
-</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>    <span class="n">response</span> <span class="o">=</span> <span class="n">agent</span><span class="o">.</span><span class="n">query</span><span class="p">(</span>
-</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>        <span class="s2">&quot;What does the RPA Assessment say about forest loss? &quot;</span>
-</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>        <span class="s2">&quot;Also show me actual data for forest transitions.&quot;</span>
-</span><span id="__span-2-13"><a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a>    <span class="p">)</span>
-</span><span id="__span-2-14"><a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
-</span></code></pre></div>
-<h3 id="streamlit-app">Streamlit App<a class="headerlink" href="#streamlit-app" title="Permanent link">&para;</a></h3>
-<p>The knowledge base is automatically available in the Streamlit app when enabled:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="nv">LANDUSE_ENABLE_KNOWLEDGE_BASE</span><span class="o">=</span><span class="nb">true</span><span class="w"> </span>uv<span class="w"> </span>run<span class="w"> </span>streamlit<span class="w"> </span>run<span class="w"> </span>landuse_app.py
-</span></code></pre></div>
-<h2 id="example-queries">Example Queries<a class="headerlink" href="#example-queries" title="Permanent link">&para;</a></h2>
-<p>The knowledge base enables new types of queries that combine documentation context with data analysis:</p>
-<h3 id="documentation-only-queries">Documentation-Only Queries<a class="headerlink" href="#documentation-only-queries" title="Permanent link">&para;</a></h3>
-<ul>
-<li>"What are the key findings from the RPA Assessment about land development threats?"</li>
-<li>"What climate scenarios does the RPA Assessment use?"</li>
-<li>"Explain the wildland-urban interface according to the RPA documentation"</li>
-</ul>
-<h3 id="combined-documentation-and-data-queries">Combined Documentation and Data Queries<a class="headerlink" href="#combined-documentation-and-data-queries" title="Permanent link">&para;</a></h3>
-<ul>
-<li>"What does the RPA Assessment say about drought projections? Show me rangeland data for western states."</li>
-<li>"According to the RPA documentation, which regions face the most forest loss? Show me the actual data."</li>
-<li>"Explain the RPA's methodology for land use projections and show me an example from the database."</li>
-</ul>
-<h2 id="how-it-works">How It Works<a class="headerlink" href="#how-it-works" title="Permanent link">&para;</a></h2>
+<h3 id="security-features-in-action">Security Features in Action<a class="headerlink" href="#security-features-in-action" title="Permanent link">&para;</a></h3>
+<p>When you run the secure agent, you'll see:</p>
 <ol>
-<li><strong>Document Loading</strong>: The <code>RPAKnowledgeBase</code> class loads markdown files from <code>src/landuse/docs/</code></li>
-<li><strong>Text Splitting</strong>: Documents are split into chunks while preserving context</li>
-<li><strong>Embedding Generation</strong>: Each chunk is converted to a vector embedding using OpenAI</li>
-<li><strong>Vector Storage</strong>: Embeddings are stored in Chroma for fast similarity search</li>
-<li><strong>Tool Integration</strong>: A retriever tool is added to the agent's toolset</li>
-<li><strong>Query Processing</strong>: The agent can now search documentation when answering questions</li>
+<li><strong>API Key Validation</strong>: Keys are validated on startup</li>
+<li><strong>Query Validation</strong>: Each query is checked before execution</li>
+<li><strong>Rate Limiting</strong>: Prevents excessive API usage</li>
+<li><strong>Audit Logging</strong>: All actions are logged</li>
 </ol>
-<h2 id="architecture">Architecture<a class="headerlink" href="#architecture" title="Permanent link">&para;</a></h2>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>LanduseAgent
-</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>├── Standard Tools
-</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>│   ├── execute_landuse_query
-</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>│   ├── analyze_landuse_results
-</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>│   └── explore_landuse_schema
-</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>└── Knowledge Base Tool (when enabled)
-</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>    └── search_rpa_documentation
-</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>        └── RPAKnowledgeBase
-</span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>            ├── Document Loader
-</span><span id="__span-4-10"><a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a>            ├── Text Splitter
-</span><span id="__span-4-11"><a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a>            ├── Embeddings (OpenAI)
-</span><span id="__span-4-12"><a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a>            └── Vector Store (Chroma)
+<h2 id="best-practices-for-users">Best Practices for Users<a class="headerlink" href="#best-practices-for-users" title="Permanent link">&para;</a></h2>
+<ol>
+<li><strong>Protect Your API Keys</strong></li>
+<li>Never share your <code>.env</code> file</li>
+<li>Don't commit API keys to version control</li>
+<li>
+<p>Rotate keys regularly</p>
+</li>
+<li>
+<p><strong>Use Appropriate Queries</strong></p>
+</li>
+<li>Stick to analytical queries</li>
+<li>Avoid trying to modify data</li>
+<li>
+<p>Report any security issues</p>
+</li>
+<li>
+<p><strong>Monitor Usage</strong></p>
+</li>
+<li>Check logs regularly</li>
+<li>Watch for unusual patterns</li>
+<li>Stay within rate limits</li>
+</ol>
+<h2 id="security-architecture">Security Architecture<a class="headerlink" href="#security-architecture" title="Permanent link">&para;</a></h2>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>┌─────────────────┐
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>│   User Input    │
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>└────────┬────────┘
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>         │
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>    ┌────▼────┐
+</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>    │Validation│  ← Rate Limiting
+</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>    └────┬────┘     Input Sanitization
+</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>         │          SQL Validation
+</span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>    ┌────▼────┐
+</span><span id="__span-4-10"><a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a>    │  Agent  │  ← Secure Config
+</span><span id="__span-4-11"><a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a>    └────┬────┘     API Key Validation
+</span><span id="__span-4-12"><a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a>         │
+</span><span id="__span-4-13"><a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a>    ┌────▼────┐
+</span><span id="__span-4-14"><a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a>    │ Database │  ← Read-Only Access
+</span><span id="__span-4-15"><a id="__codelineno-4-15" name="__codelineno-4-15" href="#__codelineno-4-15"></a>    └─────────┘     Query Limits
 </span></code></pre></div>
-<h2 id="performance-considerations">Performance Considerations<a class="headerlink" href="#performance-considerations" title="Permanent link">&para;</a></h2>
+<h2 id="logging">Logging<a class="headerlink" href="#logging" title="Permanent link">&para;</a></h2>
+<p>Security logs are stored in <code>logs/security.log</code> and include:</p>
 <ul>
-<li><strong>Initial Setup</strong>: First run will process all documents and create embeddings (one-time cost)</li>
-<li><strong>Subsequent Runs</strong>: Vector store is persisted to disk for fast loading</li>
-<li><strong>Query Performance</strong>: Semantic search typically returns results in &lt;1 second</li>
-<li><strong>Storage</strong>: Vector database requires ~50-100MB depending on document volume</li>
+<li>Query attempts (successful and blocked)</li>
+<li>Rate limit violations</li>
+<li>Invalid input attempts</li>
+<li>Configuration errors</li>
 </ul>
+<p>Example log entry:
+<div class="language-text highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>2024-01-15 10:23:45 - security - INFO - Query attempt - User: user123, Status: success, Error: None
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>2024-01-15 10:24:12 - security - WARNING - Blocked query from user123: DROP TABLE...
+</span></code></pre></div></p>
 <h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">&para;</a></h2>
-<h3 id="knowledge-base-not-loading">Knowledge Base Not Loading<a class="headerlink" href="#knowledge-base-not-loading" title="Permanent link">&para;</a></h3>
-<ul>
-<li>Check that <code>OPENAI_API_KEY</code> is set (required for embeddings)</li>
-<li>Verify markdown documents exist in <code>src/landuse/docs/</code></li>
-<li>Ensure write permissions for <code>data/chroma_db/</code> directory</li>
-</ul>
-<h3 id="slow-initial-loading">Slow Initial Loading<a class="headerlink" href="#slow-initial-loading" title="Permanent link">&para;</a></h3>
-<ul>
-<li>First run processes all documents; subsequent runs load from disk</li>
-<li>Use <code>force_rebuild=True</code> to recreate the vector store if needed</li>
-</ul>
-<h3 id="search-not-finding-expected-results">Search Not Finding Expected Results<a class="headerlink" href="#search-not-finding-expected-results" title="Permanent link">&para;</a></h3>
-<ul>
-<li>The knowledge base uses semantic search, not keyword matching</li>
-<li>Try rephrasing queries to be more specific</li>
-<li>Check that relevant content exists in the markdown files</li>
-</ul>
-<h2 id="adding-new-documentation">Adding New Documentation<a class="headerlink" href="#adding-new-documentation" title="Permanent link">&para;</a></h2>
-<p>To add new documentation to the knowledge base:</p>
+<h3 id="common-security-issues">Common Security Issues<a class="headerlink" href="#common-security-issues" title="Permanent link">&para;</a></h3>
 <ol>
-<li>Add markdown files to <code>src/landuse/docs/</code></li>
-<li>Delete the existing vector store: <code>rm -rf data/chroma_db/</code></li>
-<li>Run the agent - it will automatically rebuild the index</li>
+<li><strong>"Invalid API key format"</strong></li>
+<li>Ensure your API key matches the expected pattern</li>
+<li>OpenAI: <code>sk-</code> followed by 48 characters</li>
+<li>
+<p>Anthropic: <code>sk-ant-</code> followed by 95 characters</p>
+</li>
+<li>
+<p><strong>"Rate limit exceeded"</strong></p>
+</li>
+<li>Wait for the specified retry time</li>
+<li>
+<p>Consider upgrading limits if needed frequently</p>
+</li>
+<li>
+<p><strong>"Query validation failed"</strong></p>
+</li>
+<li>Ensure you're only using SELECT statements</li>
+<li>Remove any data modification keywords</li>
+<li>Check for SQL injection patterns</li>
 </ol>
-<h2 id="dependencies">Dependencies<a class="headerlink" href="#dependencies" title="Permanent link">&para;</a></h2>
-<p>The knowledge base feature requires additional packages:
-- <code>chromadb</code>: Vector database for storing embeddings
-- <code>unstructured</code>: Document parsing and processing
-- <code>markdown</code>: Markdown file support</p>
-<p>These are installed automatically when you run <code>uv sync</code>.</p>
-<h2 id="future-enhancements">Future Enhancements<a class="headerlink" href="#future-enhancements" title="Permanent link">&para;</a></h2>
-<p>Potential improvements for the knowledge base:</p>
+<h3 id="getting-help">Getting Help<a class="headerlink" href="#getting-help" title="Permanent link">&para;</a></h3>
+<p>If you encounter security issues:</p>
 <ol>
-<li><strong>Multiple Document Sources</strong>: Support for PDFs, Word docs, etc.</li>
-<li><strong>Dynamic Updates</strong>: Add new documents without rebuilding</li>
-<li><strong>Query Optimization</strong>: Fine-tune retrieval parameters</li>
-<li><strong>Caching</strong>: Cache frequently accessed documentation chunks</li>
-<li><strong>Multi-Modal Search</strong>: Support for tables, charts, and images</li>
+<li>Check the security logs</li>
+<li>Review this documentation</li>
+<li>Report issues (without including sensitive data)</li>
 </ol>
+<h2 id="updates-and-maintenance">Updates and Maintenance<a class="headerlink" href="#updates-and-maintenance" title="Permanent link">&para;</a></h2>
+<p>Keep your security features up to date:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="c1"># Update dependencies</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>uv<span class="w"> </span>sync
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>
+</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="c1"># Re-run security setup</span>
+</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>setup_secure_agents.py
+</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>
+</span><span id="__span-6-7"><a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="c1"># Test security features</span>
+</span><span id="__span-6-8"><a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/utilities/security.py
+</span></code></pre></div>
+<h2 id="compliance">Compliance<a class="headerlink" href="#compliance" title="Permanent link">&para;</a></h2>
+<p>This system implements security best practices aligned with:</p>
+<ul>
+<li>OWASP Top 10 recommendations</li>
+<li>SQL injection prevention guidelines</li>
+<li>API security best practices</li>
+<li>Data protection principles</li>
+</ul>
+<p>Remember: Security is a shared responsibility. Always follow best practices and report any concerns.</p>
 
 
 
@@ -2545,10 +2923,10 @@
     
     
       
-      <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tabs", "navigation.sections", "navigation.path", "navigation.top", "search.suggest", "search.highlight", "content.tabs.link", "content.code.annotation", "content.code.copy", "toc.integrate"], "search": "../assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.path", "navigation.top", "search.suggest", "search.highlight", "content.tabs.link", "content.code.annotation", "content.code.copy", "toc.integrate"], "search": "../../assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../assets/javascripts/bundle.50899def.min.js"></script>
+      <script src="../../assets/javascripts/bundle.50899def.min.js"></script>
       
     
   </body>
