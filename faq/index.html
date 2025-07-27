@@ -15,7 +15,7 @@
         <link rel="canonical" href="https://mihiarc.github.io/rpa-landuse/faq/">
       
       
-        <link rel="prev" href="../performance/streamlit-fragments/">
+        <link rel="prev" href="../getting-started/configuration/">
       
       
         <link rel="next" href="../troubleshooting/">
@@ -264,10 +264,12 @@
   
   
   
+    
+  
   
     
     
-      <li class="md-tabs__item">
+      <li class="md-tabs__item md-tabs__item--active">
         <a href="../getting-started/installation/" class="md-tabs__link">
           
   
@@ -348,7 +350,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../api/agent/" class="md-tabs__link">
+        <a href="../api/converters/" class="md-tabs__link">
           
   
   
@@ -393,68 +395,6 @@
   
   
   Development
-
-        </a>
-      </li>
-    
-  
-
-      
-        
-  
-  
-  
-  
-    
-    
-      <li class="md-tabs__item">
-        <a href="../performance/duckdb-copy-optimization/" class="md-tabs__link">
-          
-  
-  
-  Performance
-
-        </a>
-      </li>
-    
-  
-
-      
-        
-  
-  
-  
-    
-  
-  
-    
-    
-      <li class="md-tabs__item md-tabs__item--active">
-        <a href="./" class="md-tabs__link">
-          
-  
-  
-  Help
-
-        </a>
-      </li>
-    
-  
-
-      
-        
-  
-  
-  
-  
-    
-    
-      <li class="md-tabs__item">
-        <a href="../SECURITY/" class="md-tabs__link">
-          
-  
-  
-  Project Info
 
         </a>
       </li>
@@ -677,26 +617,31 @@
       
   
   
+    
   
   
+  
     
     
     
     
+      
+        
+        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
         
           
-          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
             
   
   
@@ -709,7 +654,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_3">
             <span class="md-nav__icon md-icon"></span>
             Getting Started
@@ -780,6 +725,718 @@
   
 
       </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    FAQ
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    FAQ
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#general-questions" class="md-nav__link">
+    <span class="md-ellipsis">
+      General Questions
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="General Questions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-is-this-project" class="md-nav__link">
+    <span class="md-ellipsis">
+      What is this project?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-data-does-it-analyze" class="md-nav__link">
+    <span class="md-ellipsis">
+      What data does it analyze?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#do-i-need-to-know-sql" class="md-nav__link">
+    <span class="md-ellipsis">
+      Do I need to know SQL?
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#setup-questions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Setup Questions
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Setup Questions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-are-the-system-requirements" class="md-nav__link">
+    <span class="md-ellipsis">
+      What are the system requirements?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-do-i-get-an-openai-api-key" class="md-nav__link">
+    <span class="md-ellipsis">
+      How do I get an OpenAI API key?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#which-openai-model-should-i-use" class="md-nav__link">
+    <span class="md-ellipsis">
+      Which OpenAI model should I use?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#can-i-use-it-offline" class="md-nav__link">
+    <span class="md-ellipsis">
+      Can I use it offline?
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#data-questions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Data Questions
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Data Questions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-do-the-land-use-categories-mean" class="md-nav__link">
+    <span class="md-ellipsis">
+      What do the land use categories mean?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#whats-the-difference-between-the-tables" class="md-nav__link">
+    <span class="md-ellipsis">
+      What's the difference between the tables?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-scenarios-are-available" class="md-nav__link">
+    <span class="md-ellipsis">
+      What scenarios are available?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#why-are-areas-in-1000-acres" class="md-nav__link">
+    <span class="md-ellipsis">
+      Why are areas in "1000 acres"?
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#usage-questions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Usage Questions
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Usage Questions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#how-do-i-start-a-query" class="md-nav__link">
+    <span class="md-ellipsis">
+      How do I start a query?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#can-i-export-results" class="md-nav__link">
+    <span class="md-ellipsis">
+      Can I export results?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-do-i-query-specific-years" class="md-nav__link">
+    <span class="md-ellipsis">
+      How do I query specific years?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#can-i-compare-scenarios" class="md-nav__link">
+    <span class="md-ellipsis">
+      Can I compare scenarios?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-do-i-focus-on-specific-counties" class="md-nav__link">
+    <span class="md-ellipsis">
+      How do I focus on specific counties?
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#technical-questions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Technical Questions
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Technical Questions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#how-does-the-natural-language-processing-work" class="md-nav__link">
+    <span class="md-ellipsis">
+      How does the natural language processing work?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#can-i-see-the-generated-sql" class="md-nav__link">
+    <span class="md-ellipsis">
+      Can I see the generated SQL?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-accurate-is-the-sql-generation" class="md-nav__link">
+    <span class="md-ellipsis">
+      How accurate is the SQL generation?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#can-i-write-sql-directly" class="md-nav__link">
+    <span class="md-ellipsis">
+      Can I write SQL directly?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#is-the-data-real-time" class="md-nav__link">
+    <span class="md-ellipsis">
+      Is the data real-time?
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#performance-questions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Performance Questions
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Performance Questions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#why-is-my-query-slow" class="md-nav__link">
+    <span class="md-ellipsis">
+      Why is my query slow?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-can-i-make-queries-faster" class="md-nav__link">
+    <span class="md-ellipsis">
+      How can I make queries faster?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#whats-the-maximum-file-size-i-can-process" class="md-nav__link">
+    <span class="md-ellipsis">
+      What's the maximum file size I can process?
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting-questions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Troubleshooting Questions
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting Questions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#why-does-it-say-database-not-found" class="md-nav__link">
+    <span class="md-ellipsis">
+      Why does it say "Database not found"?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#why-am-i-getting-api-key-errors" class="md-nav__link">
+    <span class="md-ellipsis">
+      Why am I getting API key errors?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#can-i-use-a-different-llm-provider" class="md-nav__link">
+    <span class="md-ellipsis">
+      Can I use a different LLM provider?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-do-i-update-the-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      How do I update the data?
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#advanced-questions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Advanced Questions
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Advanced Questions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#can-i-add-custom-tools" class="md-nav__link">
+    <span class="md-ellipsis">
+      Can I add custom tools?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#can-i-modify-the-land-use-categories" class="md-nav__link">
+    <span class="md-ellipsis">
+      Can I modify the land use categories?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#can-i-integrate-this-with-other-systems" class="md-nav__link">
+    <span class="md-ellipsis">
+      Can I integrate this with other systems?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#can-i-use-my-own-projections" class="md-nav__link">
+    <span class="md-ellipsis">
+      Can I use my own projections?
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#best-practices-questions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Best Practices Questions
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Best Practices Questions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-makes-a-good-query" class="md-nav__link">
+    <span class="md-ellipsis">
+      What makes a good query?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-should-i-explore-the-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      How should I explore the data?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#when-should-i-use-each-table" class="md-nav__link">
+    <span class="md-ellipsis">
+      When should I use each table?
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#getting-more-help" class="md-nav__link">
+    <span class="md-ellipsis">
+      Getting More Help
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Getting More Help">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#where-can-i-find-more-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      Where can I find more examples?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-do-i-report-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      How do I report issues?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#can-i-contribute" class="md-nav__link">
+    <span class="md-ellipsis">
+      Can I contribute?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#where-can-i-learn-more" class="md-nav__link">
+    <span class="md-ellipsis">
+      Where can I learn more?
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Troubleshooting
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../GITHUB_PAGES_SETUP/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    GitHub Pages Setup
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_7" id="__nav_3_7_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    Streamlit Issues
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_7">
+            <span class="md-nav__icon md-icon"></span>
+            Streamlit Issues
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../troubleshooting/streamlit-duplicate-ids/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Duplicate IDs
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../troubleshooting/streamlit-fragments/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Fragments Guide
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
     </li>
   
 
@@ -1761,52 +2418,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../api/agent/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Main Agent
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../api/landuse-query-agent/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Query Capabilities
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../api/converters/" class="md-nav__link">
         
   
@@ -2068,12 +2679,35 @@
   
   
     <li class="md-nav__item">
+      <a href="../TESTING/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Testing Guide
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../development/testing/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Testing
+    Testing Implementation
     
   </span>
   
@@ -2199,865 +2833,6 @@
 
               
             
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-    
-      
-      
-  
-  
-  
-  
-    
-    
-    
-    
-      
-      
-        
-      
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10" >
-        
-          
-          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="0">
-            
-  
-  
-  <span class="md-ellipsis">
-    Performance
-    
-  </span>
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_10">
-            <span class="md-nav__icon md-icon"></span>
-            Performance
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../performance/duckdb-copy-optimization/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    DuckDB Optimization
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../performance/streamlit-fragments/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Streamlit Fragments
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-    
-      
-      
-  
-  
-    
-  
-  
-  
-    
-    
-    
-    
-      
-        
-        
-      
-      
-        
-      
-    
-    
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
-      
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_11" checked>
-        
-          
-          <label class="md-nav__link" for="__nav_11" id="__nav_11_label" tabindex="">
-            
-  
-  
-  <span class="md-ellipsis">
-    Help
-    
-  </span>
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_11_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_11">
-            <span class="md-nav__icon md-icon"></span>
-            Help
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-    
-  
-  
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    FAQ
-    
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
-        
-  
-  
-  <span class="md-ellipsis">
-    FAQ
-    
-  </span>
-  
-
-      </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#general-questions" class="md-nav__link">
-    <span class="md-ellipsis">
-      General Questions
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="General Questions">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#what-is-this-project" class="md-nav__link">
-    <span class="md-ellipsis">
-      What is this project?
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#what-data-does-it-analyze" class="md-nav__link">
-    <span class="md-ellipsis">
-      What data does it analyze?
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#do-i-need-to-know-sql" class="md-nav__link">
-    <span class="md-ellipsis">
-      Do I need to know SQL?
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#setup-questions" class="md-nav__link">
-    <span class="md-ellipsis">
-      Setup Questions
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Setup Questions">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#what-are-the-system-requirements" class="md-nav__link">
-    <span class="md-ellipsis">
-      What are the system requirements?
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#how-do-i-get-an-openai-api-key" class="md-nav__link">
-    <span class="md-ellipsis">
-      How do I get an OpenAI API key?
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#which-openai-model-should-i-use" class="md-nav__link">
-    <span class="md-ellipsis">
-      Which OpenAI model should I use?
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#can-i-use-it-offline" class="md-nav__link">
-    <span class="md-ellipsis">
-      Can I use it offline?
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#data-questions" class="md-nav__link">
-    <span class="md-ellipsis">
-      Data Questions
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Data Questions">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#what-do-the-land-use-categories-mean" class="md-nav__link">
-    <span class="md-ellipsis">
-      What do the land use categories mean?
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#whats-the-difference-between-the-tables" class="md-nav__link">
-    <span class="md-ellipsis">
-      What's the difference between the tables?
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#what-scenarios-are-available" class="md-nav__link">
-    <span class="md-ellipsis">
-      What scenarios are available?
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#why-are-areas-in-1000-acres" class="md-nav__link">
-    <span class="md-ellipsis">
-      Why are areas in "1000 acres"?
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#usage-questions" class="md-nav__link">
-    <span class="md-ellipsis">
-      Usage Questions
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Usage Questions">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#how-do-i-start-a-query" class="md-nav__link">
-    <span class="md-ellipsis">
-      How do I start a query?
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#can-i-export-results" class="md-nav__link">
-    <span class="md-ellipsis">
-      Can I export results?
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#how-do-i-query-specific-years" class="md-nav__link">
-    <span class="md-ellipsis">
-      How do I query specific years?
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#can-i-compare-scenarios" class="md-nav__link">
-    <span class="md-ellipsis">
-      Can I compare scenarios?
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#how-do-i-focus-on-specific-counties" class="md-nav__link">
-    <span class="md-ellipsis">
-      How do I focus on specific counties?
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#technical-questions" class="md-nav__link">
-    <span class="md-ellipsis">
-      Technical Questions
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Technical Questions">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#how-does-the-natural-language-processing-work" class="md-nav__link">
-    <span class="md-ellipsis">
-      How does the natural language processing work?
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#can-i-see-the-generated-sql" class="md-nav__link">
-    <span class="md-ellipsis">
-      Can I see the generated SQL?
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#how-accurate-is-the-sql-generation" class="md-nav__link">
-    <span class="md-ellipsis">
-      How accurate is the SQL generation?
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#can-i-write-sql-directly" class="md-nav__link">
-    <span class="md-ellipsis">
-      Can I write SQL directly?
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#is-the-data-real-time" class="md-nav__link">
-    <span class="md-ellipsis">
-      Is the data real-time?
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#performance-questions" class="md-nav__link">
-    <span class="md-ellipsis">
-      Performance Questions
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Performance Questions">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#why-is-my-query-slow" class="md-nav__link">
-    <span class="md-ellipsis">
-      Why is my query slow?
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#how-can-i-make-queries-faster" class="md-nav__link">
-    <span class="md-ellipsis">
-      How can I make queries faster?
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#whats-the-maximum-file-size-i-can-process" class="md-nav__link">
-    <span class="md-ellipsis">
-      What's the maximum file size I can process?
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#troubleshooting-questions" class="md-nav__link">
-    <span class="md-ellipsis">
-      Troubleshooting Questions
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Troubleshooting Questions">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#why-does-it-say-database-not-found" class="md-nav__link">
-    <span class="md-ellipsis">
-      Why does it say "Database not found"?
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#why-am-i-getting-api-key-errors" class="md-nav__link">
-    <span class="md-ellipsis">
-      Why am I getting API key errors?
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#can-i-use-a-different-llm-provider" class="md-nav__link">
-    <span class="md-ellipsis">
-      Can I use a different LLM provider?
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#how-do-i-update-the-data" class="md-nav__link">
-    <span class="md-ellipsis">
-      How do I update the data?
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#advanced-questions" class="md-nav__link">
-    <span class="md-ellipsis">
-      Advanced Questions
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Advanced Questions">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#can-i-add-custom-tools" class="md-nav__link">
-    <span class="md-ellipsis">
-      Can I add custom tools?
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#can-i-modify-the-land-use-categories" class="md-nav__link">
-    <span class="md-ellipsis">
-      Can I modify the land use categories?
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#can-i-integrate-this-with-other-systems" class="md-nav__link">
-    <span class="md-ellipsis">
-      Can I integrate this with other systems?
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#can-i-use-my-own-projections" class="md-nav__link">
-    <span class="md-ellipsis">
-      Can I use my own projections?
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#best-practices-questions" class="md-nav__link">
-    <span class="md-ellipsis">
-      Best Practices Questions
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Best Practices Questions">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#what-makes-a-good-query" class="md-nav__link">
-    <span class="md-ellipsis">
-      What makes a good query?
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#how-should-i-explore-the-data" class="md-nav__link">
-    <span class="md-ellipsis">
-      How should I explore the data?
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#when-should-i-use-each-table" class="md-nav__link">
-    <span class="md-ellipsis">
-      When should I use each table?
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#getting-more-help" class="md-nav__link">
-    <span class="md-ellipsis">
-      Getting More Help
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Getting More Help">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#where-can-i-find-more-examples" class="md-nav__link">
-    <span class="md-ellipsis">
-      Where can I find more examples?
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#how-do-i-report-issues" class="md-nav__link">
-    <span class="md-ellipsis">
-      How do I report issues?
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#can-i-contribute" class="md-nav__link">
-    <span class="md-ellipsis">
-      Can I contribute?
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#where-can-i-learn-more" class="md-nav__link">
-    <span class="md-ellipsis">
-      Where can I learn more?
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../troubleshooting/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Troubleshooting
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../GITHUB_PAGES_SETUP/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    GitHub Pages Setup
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../troubleshooting/streamlit-duplicate-ids/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Streamlit Duplicate IDs
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../troubleshooting/streamlit-fragments/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Streamlit Fragments Guide
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-    
-      
-      
-  
-  
-  
-  
-    
-    
-    
-    
-      
-      
-        
-      
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_12" >
-        
-          
-          <label class="md-nav__link" for="__nav_12" id="__nav_12_label" tabindex="0">
-            
-  
-  
-  <span class="md-ellipsis">
-    Project Info
-    
-  </span>
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_12_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_12">
-            <span class="md-nav__icon md-icon"></span>
-            Project Info
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
               
                 
   
@@ -3071,52 +2846,6 @@
   
   <span class="md-ellipsis">
     Security Policy
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../TESTING/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Testing Guide
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../CLAUDE.local/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Local Configuration
     
   </span>
   
