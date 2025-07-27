@@ -47,6 +47,12 @@ nav:
     - Installation: getting-started/installation.md
     - Quick Start: getting-started/quickstart.md
     - Configuration: getting-started/configuration.md
+    - FAQ: faq.md
+    - Troubleshooting: troubleshooting.md
+    - GitHub Pages Setup: GITHUB_PAGES_SETUP.md
+    - Streamlit Issues:
+      - Duplicate IDs: troubleshooting/streamlit-duplicate-ids.md
+      - Fragments Guide: troubleshooting/streamlit-fragments.md
   - Natural Language Queries:
     - Overview: queries/overview.md
     - Basic Queries: queries/basic-queries.md
@@ -82,8 +88,6 @@ nav:
     - RPA Model Diagram: data/rpa-model-diagram.md
     - Data Processing: data/processing.md
   - API Reference:
-    - LanduseAgent API: api/agent.md
-    - Natural Language Queries: api/landuse-query-agent.md
     - Data Converters: api/converters.md
     - Tools & Utilities: api/tools.md
   - Examples:
@@ -93,25 +97,14 @@ nav:
   - Development:
     - Architecture: development/architecture.md
     - Contributing: development/contributing.md
-    - Testing: development/testing.md
+    - Testing Guide: TESTING.md
+    - Testing Implementation: development/testing.md
     - CI/CD Pipeline: development/ci-cd-pipeline.md
     - Retry Logic: development/retry-logic.md
     - Branding Strategy: development/BRANDING_STRATEGY.md
     - Modern DuckDB Tools: development/modern-duckdb-tools.md
     - Pydantic Models: development/pydantic-models.md
-  - Performance:
-    - DuckDB Optimization: performance/duckdb-copy-optimization.md
-    - Streamlit Fragments: performance/streamlit-fragments.md
-  - Help:
-    - FAQ: faq.md
-    - Troubleshooting: troubleshooting.md
-    - GitHub Pages Setup: GITHUB_PAGES_SETUP.md
-    - Streamlit Duplicate IDs: troubleshooting/streamlit-duplicate-ids.md
-    - Streamlit Fragments Guide: troubleshooting/streamlit-fragments.md
-  - Project Info:
     - Security Policy: SECURITY.md
-    - Testing Guide: TESTING.md
-    - Local Configuration: CLAUDE.local.md
 
 strict: false
 
