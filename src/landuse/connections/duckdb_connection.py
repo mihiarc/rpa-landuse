@@ -30,7 +30,9 @@ import duckdb
 import pandas as pd
 from pydantic import BaseModel, Field
 
+from ..exceptions import ConnectionError, DatabaseError, wrap_exception
 from ..models import QueryResult, SQLQuery
+from ..security.database_security import DatabaseSecurity
 from ..utils.retry_decorators import database_retry, network_retry
 
 
@@ -123,7 +125,13 @@ class DuckDBConnection(BaseConnection[duckdb.DuckDBPyConnection]):
 
         Returns:
             pd.DataFrame: Query results
+            
+        Raises:
+            ValueError: If query fails security validation
         """
+        # Validate query security before execution
+        DatabaseSecurity.validate_query_safety(query)
+        
         @cache_data(ttl=ttl)
         def _query(query: str, **kwargs) -> pd.DataFrame:
             cursor = self.cursor()
@@ -149,10 +157,16 @@ class DuckDBConnection(BaseConnection[duckdb.DuckDBPyConnection]):
 
         Returns:
             QueryResult: Query results with metadata
+            
+        Raises:
+            ValueError: If query fails security validation
         """
         import time
 
         try:
+            # Validate query security before execution
+            DatabaseSecurity.validate_query_safety(query)
+            
             # Validate SQL query
             sql_obj = SQLQuery(sql=query)
 
@@ -175,11 +189,19 @@ class DuckDBConnection(BaseConnection[duckdb.DuckDBPyConnection]):
                 error=f"SQL validation error: {str(e)}",
                 query=query
             )
-        except Exception as e:
-            # Other errors
+        except (duckdb.Error, duckdb.CatalogException, duckdb.SyntaxException) as e:
+            # Database-specific errors
             return QueryResult(
                 success=False,
-                error=str(e),
+                error=f"Database error: {str(e)}",
+                query=query
+            )
+        except Exception as e:
+            # Wrap other unexpected errors
+            wrapped_error = wrap_exception(e, "Query execution")
+            return QueryResult(
+                success=False,
+                error=str(wrapped_error),
                 query=query
             )
 
@@ -212,6 +234,9 @@ class DuckDBConnection(BaseConnection[duckdb.DuckDBPyConnection]):
         Returns:
             pd.DataFrame: Table schema information
         """
+        # Validate table name using security allowlist
+        DatabaseSecurity.validate_table_name(table_name)
+        
         query = f"DESCRIBE {table_name}"
         return self.query(query, ttl=ttl)
 
@@ -244,11 +269,10 @@ class DuckDBConnection(BaseConnection[duckdb.DuckDBPyConnection]):
         Returns:
             int: Number of rows in the table
         """
-        # Validate table name to prevent SQL injection
-        if not table_name.replace('_', '').isalnum():
-            raise ValueError(f"Invalid table name: {table_name}")
+        # Validate table name using security allowlist
+        DatabaseSecurity.validate_table_name(table_name)
 
-        # Safe: table_name is validated above
+        # Safe: table_name is validated using allowlist
         query = f"SELECT COUNT(*) as count FROM {table_name}"
         result = self.query(query, ttl=ttl)
         return result['count'].iloc[0]

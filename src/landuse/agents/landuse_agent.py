@@ -1,166 +1,87 @@
-"""Consolidated landuse agent with modern LangGraph architecture."""
+"""Refactored landuse agent with modern architecture and separated concerns."""
 
-import os
 import time
-from typing import Any, Optional, TypedDict
+from typing import Any, Optional
 
-import duckdb
-from langchain_anthropic import ChatAnthropic
 from langchain_core.language_models import BaseChatModel
 from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, ToolMessage
 from langchain_core.tools import BaseTool
-from langchain_openai import ChatOpenAI
-from langgraph.checkpoint.memory import MemorySaver
-from langgraph.graph import END, StateGraph
-from langgraph.prebuilt import ToolNode
+from langgraph.graph import StateGraph
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 
-from landuse.agents.formatting import clean_sql_query, format_query_results
+from landuse.agents.conversation_manager import ConversationManager
+from landuse.agents.database_manager import DatabaseManager
+from landuse.agents.graph_builder import GraphBuilder
+from landuse.agents.llm_manager import LLMManager
 from landuse.agents.prompts import get_system_prompt
+from landuse.agents.query_executor import QueryExecutor
+from landuse.agents.state import AgentState
 from landuse.config.landuse_config import LanduseConfig
+from landuse.exceptions import GraphExecutionError, LanduseError, ToolExecutionError, wrap_exception
 from landuse.tools.common_tools import create_analysis_tool, create_execute_query_tool, create_schema_tool
 from landuse.tools.state_lookup_tool import create_state_lookup_tool
-from landuse.utils.retry_decorators import database_retry
-
-
-class AgentState(TypedDict):
-    """State definition for the landuse agent
-    ."""
-    messages: list[BaseMessage]
-    context: dict[str, Any]
-    iteration_count: int
-    max_iterations: int
 
 
 class LanduseAgent:
     """
-    Modern landuse agent implementation with:
-    - Memory-first architecture
-    - Graph-based workflow
-    - Subgraph support for complex queries
-    - Human-in-the-loop capability
-    - Event-driven execution
-    - Integrated LLM and database management
+    Refactored landuse agent with separated concerns and modern architecture.
+    
+    Uses dependency injection and follows Single Responsibility Principle by delegating
+    specific responsibilities to specialized manager classes:
+    - LLMManager: Handles LLM creation and configuration
+    - DatabaseManager: Manages database connections and schema
+    - ConversationManager: Handles conversation history
+    - QueryExecutor: Executes SQL queries with error handling
+    - GraphBuilder: Constructs LangGraph workflows
     """
 
     def __init__(self, config: Optional[LanduseConfig] = None):
-        """Initialize the landuse agent with configuration."""
+        """Initialize the landuse agent with configuration using dependency injection."""
         self.config = config or LanduseConfig()
         self.console = Console()
-        self.llm = self._create_llm()
-        self.db_connection = self._create_db_connection()
-        self.schema = self._get_schema()
-        self.knowledge_base = None
         
-        # Initialize conversation history for simple mode
-        self.conversation_history = []  # Store (role, content) tuples
-        self.max_history_length = 20  # Keep last N messages
+        # Initialize component managers
+        self.llm_manager = LLMManager(self.config, self.console)
+        self.database_manager = DatabaseManager(self.config, self.console)
+        self.conversation_manager = ConversationManager(
+            max_history_length=20, 
+            console=self.console
+        )
+        
+        # Create core components
+        self.llm = self.llm_manager.create_llm()
+        self.db_connection = self.database_manager.get_connection()
+        self.schema = self.database_manager.get_schema()
+        
+        # Initialize query executor
+        self.query_executor = QueryExecutor(self.config, self.db_connection, self.console)
         
         # Initialize knowledge base if enabled
+        self.knowledge_base = None
         if self.config.enable_knowledge_base:
             self._initialize_knowledge_base()
         
+        # Create tools and system prompt
         self.tools = self._create_tools()
-        self.graph = None
-        self.memory = MemorySaver()  # Memory-first architecture (2025 best practice)
-        
-        # Use centralized prompts system with configuration
         self.system_prompt = get_system_prompt(
             include_maps=self.config.enable_map_generation,
             analysis_style=self.config.analysis_style,
             domain_focus=None if self.config.domain_focus == 'none' else self.config.domain_focus,
             schema_info=self.schema
         )
+        
+        # Initialize graph builder
+        self.graph_builder = GraphBuilder(
+            self.config,
+            self.llm,
+            self.tools,
+            self.system_prompt,
+            self.console
+        )
+        self.graph = None
 
-    def _create_llm(self) -> BaseChatModel:
-        """Create LLM instance based on configuration (factory pattern)."""
-        model_name = self.config.model_name
-
-        # Mask API keys for logging
-        def mask_key(key: Optional[str]) -> str:
-            if not key:
-                return "NOT_SET"
-            return f"{key[:8]}...{key[-4:]}" if len(key) > 12 else "***"
-
-        self.console.print(f"[blue]Initializing LLM: {model_name}[/blue]")
-
-        if "claude" in model_name.lower():
-            api_key = os.getenv('ANTHROPIC_API_KEY')
-            self.console.print(f"[dim]Using Anthropic API key: {mask_key(api_key)}[/dim]")
-            if not api_key:
-                raise ValueError("ANTHROPIC_API_KEY environment variable is required for Claude models")
-
-            return ChatAnthropic(
-                model=model_name,
-                anthropic_api_key=api_key,
-                temperature=self.config.temperature,
-                max_tokens=self.config.max_tokens,
-            )
-        else:
-            api_key = os.getenv('OPENAI_API_KEY')
-            self.console.print(f"[dim]Using OpenAI API key: {mask_key(api_key)}[/dim]")
-            if not api_key:
-                raise ValueError("OPENAI_API_KEY environment variable is required for OpenAI models")
-
-            return ChatOpenAI(
-                model=model_name,
-                openai_api_key=api_key,
-                temperature=self.config.temperature,
-                max_tokens=self.config.max_tokens,
-            )
-
-    def _create_db_connection(self) -> duckdb.DuckDBPyConnection:
-        """Create direct database connection."""
-        return duckdb.connect(database=self.config.db_path, read_only=True)
-
-    @database_retry(max_attempts=3)
-    def _get_schema(self) -> str:
-        """Get the database schema with retry logic."""
-        conn = self.db_connection
-
-        # Get table count for validation
-        table_count_query = """
-        SELECT COUNT(*) as table_count
-        FROM information_schema.tables
-        WHERE table_schema = 'main'
-        """
-        result = conn.execute(table_count_query).fetchone()
-        table_count = result[0] if result else 0
-
-        if table_count == 0:
-            raise ValueError(f"No tables found in database at {self.config.db_path}")
-
-        self.console.print(f"[green]✓ Found {table_count} tables in database[/green]")
-
-        # Get schema information
-        schema_query = """
-        SELECT
-            table_name,
-            column_name,
-            data_type,
-            is_nullable
-        FROM information_schema.columns
-        WHERE table_schema = 'main'
-        ORDER BY table_name, ordinal_position
-        """
-
-        result = conn.execute(schema_query).fetchall()
-
-        # Format schema as string
-        schema_lines = ["Database Schema:"]
-        current_table = None
-
-        for row in result:
-            table_name, column_name, data_type, is_nullable = row
-            if table_name != current_table:
-                schema_lines.append(f"\nTable: {table_name}")
-                current_table = table_name
-            nullable = "" if is_nullable == "YES" else " NOT NULL"
-            schema_lines.append(f"  - {column_name}: {data_type}{nullable}")
-
-        return "\n".join(schema_lines)
 
     def _initialize_knowledge_base(self):
         """Initialize the knowledge base if enabled."""
@@ -174,8 +95,13 @@ class LanduseAgent:
             )
             self.knowledge_base.initialize()
             self.console.print("[green]✓ Knowledge base ready[/green]")
+        except (ImportError, ModuleNotFoundError) as e:
+            self.console.print(f"[red]Warning: Knowledge base dependencies not available: {str(e)}[/red]")
+            self.console.print("[yellow]Continuing without knowledge base...[/yellow]")
+            self.knowledge_base = None
         except Exception as e:
-            self.console.print(f"[red]Warning: Failed to initialize knowledge base: {str(e)}[/red]")
+            wrapped_error = wrap_exception(e, "Knowledge base initialization")
+            self.console.print(f"[red]Warning: Failed to initialize knowledge base: {str(wrapped_error)}[/red]")
             self.console.print("[yellow]Continuing without knowledge base...[/yellow]")
             self.knowledge_base = None
 
@@ -195,257 +121,21 @@ class LanduseAgent:
                 tools.append(retriever_tool)
                 self.console.print("[green]✓ Added RPA documentation retriever tool[/green]")
             except Exception as e:
-                self.console.print(f"[red]Warning: Failed to create retriever tool: {str(e)}[/red]")
+                wrapped_error = wrap_exception(e, "Retriever tool creation")
+                self.console.print(f"[red]Warning: Failed to create retriever tool: {str(wrapped_error)}[/red]")
         
         return tools
 
-    def _build_graph(self) -> StateGraph:
-        """Build the LangGraph state graph."""
-        # Create the graph
-        workflow = StateGraph(AgentState)
-
-        # Add nodes
-        workflow.add_node("agent", self._agent_node)
-        workflow.add_node("tools", ToolNode(self.tools))
-        workflow.add_node("analyzer", self._analyzer_node)
-        workflow.add_node("human_review", self._human_review_node)
-
-        # Set entry point
-        workflow.set_entry_point("agent")
-
-        # Add conditional edges
-        workflow.add_conditional_edges(
-            "agent",
-            self._should_continue,
-            {
-                "tools": "tools",
-                "analyzer": "analyzer",
-                "human_review": "human_review",
-                "end": END
-            }
-        )
-
-        # Add edges from tools back to agent
-        workflow.add_edge("tools", "agent")
-        workflow.add_edge("analyzer", "agent")
-        workflow.add_edge("human_review", "agent")
-
-        # Compile with memory if enabled
-        if self.config.enable_memory:
-            return workflow.compile(checkpointer=self.memory)
-        else:
-            return workflow.compile()
-
-    def _agent_node(self, state: AgentState) -> dict[str, Any]:
-        """Main agent node that decides next action."""
-        messages = state["messages"]
-
-        # Ensure we have proper message types
-        if not messages:
-            messages = []
-        
-        # Add system prompt as first message if needed
-        has_system = any(
-            isinstance(m, (HumanMessage, AIMessage)) and 
-            self.system_prompt[:50] in str(m.content) 
-            for m in messages[:1]
-        )
-        
-        if not has_system:
-            messages = [HumanMessage(content=self.system_prompt)] + messages
-
-        # Get LLM response with tools bound
-        response = self.llm.bind_tools(self.tools).invoke(messages)
-
-        # Update state with new message
-        return {
-            "messages": messages + [response],
-            "iteration_count": state.get("iteration_count", 0) + 1
-        }
-
-    def _analyzer_node(self, state: AgentState) -> dict[str, Any]:
-        """Analyzer node for providing insights on query results."""
-        messages = state["messages"]
-
-        # Extract recent query results
-        recent_results = self._extract_recent_results(messages)
-
-        if recent_results:
-            # Create analysis prompt
-            analysis_prompt = f"""Based on these query results, provide key insights:
-
-Results: {recent_results}
-
-Focus on:
-1. Key trends or patterns
-2. Implications for land use planning
-3. Comparison with historical patterns
-4. Recommendations or areas for further investigation
-"""
-
-            # Get analysis
-            analysis = self.llm.invoke([
-                {"role": "system", "content": "You are a land use science expert."},
-                {"role": "user", "content": analysis_prompt}
-            ])
-
-            return {"messages": messages + [analysis]}
-
-        return {"messages": messages}
-
-    def _human_review_node(self, state: AgentState) -> dict[str, Any]:
-        """Human-in-the-loop node for complex queries."""
-        # In production, this would integrate with a UI
-        # For now, we'll auto-approve
-        self.console.print("[yellow]Human review requested (auto-approved)[/yellow]")
-        return {"messages": state["messages"]}
-
-    def _should_continue(self, state: AgentState) -> str:
-        """Decide next step in the workflow."""
-        messages = state["messages"]
-        last_message = messages[-1]
-
-        # Check iteration limit
-        if state.get("iteration_count", 0) >= self.config.max_iterations:
-            return "end"
-
-        # Check if tools were called
-        if hasattr(last_message, "tool_calls") and last_message.tool_calls:
-            return "tools"
-
-        # Check if analysis is needed
-        if self._needs_analysis(messages):
-            return "analyzer"
-
-        # Check if human review is needed (for sensitive queries)
-        if self._needs_human_review(messages):
-            return "human_review"
-
-        # Otherwise, we're done
-        return "end"
-
-    def _needs_analysis(self, messages: list[BaseMessage]) -> bool:
-        """Determine if results need analysis."""
-        # Check if recent messages contain query results
-        for msg in messages[-3:]:
-            if isinstance(msg, AIMessage) and "SELECT" in str(msg.content).upper():
-                return True
-        return False
-
-    def _needs_human_review(self, messages: list[BaseMessage]) -> bool:
-        """Determine if human review is needed."""
-        # Check for sensitive operations
-        sensitive_keywords = ["DELETE", "UPDATE", "DROP", "TRUNCATE"]
-        last_message = str(messages[-1].content).upper()
-
-        return any(keyword in last_message for keyword in sensitive_keywords)
-
-    def _extract_recent_results(self, messages: list[BaseMessage]) -> Optional[str]:
-        """Extract recent query results from messages."""
-        for msg in reversed(messages[-5:]):
-            content = str(msg.content)
-            if "rows returned" in content or "│" in content:
-                return content
-        return None
     
-    def _update_conversation_history(self, question: str, response: str) -> None:
-        """Update conversation history with new question and response."""
-        # Add user question
-        self.conversation_history.append(("user", question))
-        # Add assistant response
-        self.conversation_history.append(("assistant", response))
-        
-        # Trim history if it gets too long (keep last N messages)
-        if len(self.conversation_history) > self.max_history_length:
-            # Keep only the last max_history_length messages
-            self.conversation_history = self.conversation_history[-self.max_history_length:]
-
-    def _execute_query(self, query: str) -> dict[str, Any]:
-        """Execute a SQL query with standard error handling and formatting."""
-        cleaned_query = clean_sql_query(query)
-        
-        if self.config.debug:
-            print(f"\nDEBUG _execute_query: Executing SQL query")
-            print(f"DEBUG _execute_query: Query: {cleaned_query}")
-
-        try:
-            conn = self.db_connection
-
-            # Add row limit if not present
-            if "limit" not in cleaned_query.lower():
-                cleaned_query = f"{cleaned_query.rstrip(';')} LIMIT {self.config.max_query_rows}"
-
-            result = conn.execute(cleaned_query).fetchall()
-            columns = [desc[0] for desc in conn.description] if conn.description else []
-            
-            if self.config.debug:
-                print(f"DEBUG _execute_query: Result row count: {len(result)}")
-                print(f"DEBUG _execute_query: Columns: {columns}")
-                if result and len(result) > 0:
-                    print(f"DEBUG _execute_query: First row: {result[0]}")
-                else:
-                    print("DEBUG _execute_query: No rows returned")
-
-            # Convert to DataFrame for formatting
-            import pandas as pd
-            df = pd.DataFrame(result, columns=columns)
-            
-            # Format results - format_query_results expects (DataFrame, sql_query)
-            formatted_results = format_query_results(df, cleaned_query)
-
-            return {
-                "success": True,
-                "query": cleaned_query,
-                "results": result,
-                "columns": columns,
-                "formatted": formatted_results,
-                "row_count": len(result)
-            }
-
-        except Exception as e:
-            error_msg = str(e)
-            suggestion = self._get_error_suggestion(error_msg)
-            
-            if self.config.debug:
-                print(f"DEBUG _execute_query: SQL Error: {error_msg}")
-                print(f"DEBUG _execute_query: Suggestion: {suggestion}")
-                import traceback
-                traceback.print_exc()
-
-            return {
-                "success": False,
-                "query": cleaned_query,
-                "error": error_msg,
-                "suggestion": suggestion
-            }
-
-    def _get_error_suggestion(self, error_msg: str) -> str:
-        """Get helpful suggestions for common SQL errors."""
-        error_lower = error_msg.lower()
-
-        if "no such column" in error_lower or "could not find column" in error_lower:
-            return "Check column names in the schema. Use exact column names from the database schema."
-        elif "no such table" in error_lower:
-            return "Check table names. Available tables: fact_landuse_transitions, dim_scenario, dim_geography, dim_landuse, dim_time"
-        elif "syntax error" in error_lower:
-            return "Check SQL syntax. Common issues: missing commas, unclosed quotes, invalid keywords."
-        elif "ambiguous column" in error_lower:
-            return "Specify table name for columns used in joins (e.g., fact.year instead of just year)"
-        else:
-            return "Check the query syntax and ensure all table/column names match the schema exactly."
 
     def simple_query(self, question: str) -> str:
         """Execute a query using simple direct LLM interaction without LangGraph state management."""
         try:
-            # Build conversation with history
+            # Build conversation with history using conversation manager
             messages = [HumanMessage(content=self.system_prompt)]
             
-            # Add conversation history
-            for role, content in self.conversation_history:
-                if role == "user":
-                    messages.append(HumanMessage(content=content))
-                elif role == "assistant":
-                    messages.append(AIMessage(content=content))
+            # Add conversation history from manager
+            messages.extend(self.conversation_manager.get_conversation_messages())
             
             # Add current question
             messages.append(HumanMessage(content=question))
@@ -518,8 +208,14 @@ Focus on:
                                     analysis_results.append(str(tool_result))
                                     
                                 break
+                            except ToolExecutionError as e:
+                                error_msg = f"Tool execution error: {str(e)}"
+                                if self.config.debug:
+                                    print(f"DEBUG: Tool execution error: {error_msg}")
+                                tool_result = error_msg
                             except Exception as e:
-                                error_msg = f"Tool error: {str(e)}"
+                                wrapped_error = wrap_exception(e, f"Tool '{tool_name}' execution")
+                                error_msg = f"Tool error: {str(wrapped_error)}"
                                 if self.config.debug:
                                     print(f"DEBUG: Tool error: {error_msg}")
                                     import traceback
@@ -600,8 +296,8 @@ Focus on:
                 if not final_content.strip():
                     final_content = "I executed the query but couldn't generate a formatted response. The query completed successfully but may have returned no results."
             
-            # Update conversation history
-            self._update_conversation_history(question, final_content)
+            # Update conversation history using manager
+            self.conversation_manager.add_conversation(question, final_content)
             
             # Return clean final content without any special formatting
             if self.config.debug:
@@ -611,28 +307,30 @@ Focus on:
                 
             return final_content
             
-        except Exception as e:
-            error_msg = f"Error processing query: {str(e)}"
+        except (LanduseError, ToolExecutionError) as e:
+            error_msg = f"Query processing error: {str(e)}"
             # Still update history even on error
-            self._update_conversation_history(question, error_msg)
+            self.conversation_manager.add_conversation(question, error_msg)
+            return error_msg
+        except Exception as e:
+            wrapped_error = wrap_exception(e, "Simple query processing")
+            error_msg = f"Unexpected error: {str(wrapped_error)}"
+            # Still update history even on error
+            self.conversation_manager.add_conversation(question, error_msg)
             return error_msg
 
     def _graph_query(self, question: str, thread_id: Optional[str] = None) -> str:
         """Execute a query using the LangGraph workflow."""
         try:
-            # Build graph if not already built
+            # Build graph if not already built using graph builder
             if not self.graph:
-                self.graph = self._build_graph()
+                self.graph = self.graph_builder.build_graph()
             
             # Prepare initial state with conversation history
             initial_messages = [HumanMessage(content=self.system_prompt)]
             
-            # Add conversation history to context
-            for role, content in self.conversation_history:
-                if role == "user":
-                    initial_messages.append(HumanMessage(content=content))
-                elif role == "assistant":
-                    initial_messages.append(AIMessage(content=content))
+            # Add conversation history from manager
+            initial_messages.extend(self.conversation_manager.get_conversation_messages())
             
             # Add current question
             initial_messages.append(HumanMessage(content=question))
@@ -672,25 +370,33 @@ Focus on:
                                     text_parts.append(item)
                             if text_parts:
                                 final_response = ' '.join(text_parts)
-                                self._update_conversation_history(question, final_response)
+                                self.conversation_manager.add_conversation(question, final_response)
                                 return final_response
                         elif content:
                             final_response = str(content)
-                            self._update_conversation_history(question, final_response)
+                            self.conversation_manager.add_conversation(question, final_response)
                             return final_response
             
             default_response = "I couldn't generate a proper response. Please try rephrasing your question."
-            self._update_conversation_history(question, default_response)
+            self.conversation_manager.add_conversation(question, default_response)
             return default_response
             
+        except GraphExecutionError as e:
+            error_msg = f"Graph execution error: {str(e)}"
+            if self.config.debug:
+                self.console.print(f"[red]DEBUG: {error_msg}[/red]")
+            error_response = f"I encountered a workflow error: {str(e)}"
+            self.conversation_manager.add_conversation(question, error_response)
+            return error_response
         except Exception as e:
-            error_msg = f"Error in graph execution: {str(e)}"
+            wrapped_error = wrap_exception(e, "Graph query execution")
+            error_msg = f"Unexpected error in graph execution: {str(wrapped_error)}"
             if self.config.debug:
                 import traceback
                 self.console.print(f"[red]DEBUG: {error_msg}[/red]")
                 self.console.print(f"[red]{traceback.format_exc()}[/red]")
-            error_response = f"I encountered an error while processing your query: {str(e)}"
-            self._update_conversation_history(question, error_response)
+            error_response = f"I encountered an unexpected error: {str(wrapped_error)}"
+            self.conversation_manager.add_conversation(question, error_response)
             return error_response
 
     def query(self, question: str, use_graph: bool = False, thread_id: Optional[str] = None) -> str:
@@ -723,7 +429,7 @@ Focus on:
             Streaming response chunks
         """
         if not self.graph:
-            self.graph = self._build_graph()
+            self.graph = self.graph_builder.build_graph()
 
         # Prepare initial state
         initial_state = {
@@ -744,8 +450,11 @@ Focus on:
         try:
             for chunk in self.graph.stream(initial_state, config=config):
                 yield chunk
+        except GraphExecutionError as e:
+            yield {"error": f"Graph streaming error: {str(e)}"}
         except Exception as e:
-            yield {"error": f"Streaming error: {str(e)}"}
+            wrapped_error = wrap_exception(e, "Streaming query")
+            yield {"error": f"Streaming error: {str(wrapped_error)}"}
 
     def create_subgraph(self, name: str, specialized_tools: list[BaseTool]) -> StateGraph:
         """
@@ -760,18 +469,7 @@ Focus on:
         Returns:
             Compiled subgraph
         """
-        subgraph = StateGraph(AgentState)
-
-        # Add specialized nodes
-        subgraph.add_node("specialized_agent", self._agent_node)
-        subgraph.add_node("specialized_tools", ToolNode(specialized_tools))
-
-        # Set up flow
-        subgraph.set_entry_point("specialized_agent")
-        subgraph.add_edge("specialized_agent", "specialized_tools")
-        subgraph.add_edge("specialized_tools", END)
-
-        return subgraph.compile()
+        return self.graph_builder.create_subgraph(name, specialized_tools)
 
     def create_map_subgraph(self) -> StateGraph:
         """
@@ -815,8 +513,7 @@ Focus on:
     
     def clear_history(self) -> None:
         """Clear conversation history."""
-        self.conversation_history = []
-        self.console.print("[yellow]Conversation history cleared.[/yellow]")
+        self.conversation_manager.clear_history()
     
     def chat(self) -> None:
         """Interactive chat interface for the agent."""
@@ -854,8 +551,11 @@ Focus on:
                 
             except KeyboardInterrupt:
                 self.console.print("\n[yellow]Interrupted. Type 'exit' to quit.[/yellow]")
+            except (LanduseError, ToolExecutionError, GraphExecutionError) as e:
+                self.console.print(f"\n[red]Agent Error: {str(e)}[/red]")
             except Exception as e:
-                self.console.print(f"\n[red]Error: {str(e)}[/red]")
+                wrapped_error = wrap_exception(e, "Chat interaction")
+                self.console.print(f"\n[red]Unexpected Error: {str(wrapped_error)}[/red]")
     
     def _show_help(self) -> None:
         """Show help information with example queries."""
@@ -888,8 +588,9 @@ Focus on:
         
     def __exit__(self, exc_type, exc_val, exc_tb):
         """Context manager exit - clean up resources."""
-        if hasattr(self, 'db_connection') and self.db_connection:
-            self.db_connection.close()
+        # Clean up database connection using manager
+        if hasattr(self, 'database_manager'):
+            self.database_manager.close()
         # Knowledge base (Chroma) will persist automatically
 
 

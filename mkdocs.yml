@@ -38,62 +38,36 @@ repo_name: rpa-landuse-analytics
 
 nav:
   - Home: index.md
-  - RPA Assessment:
-    - Overview: rpa/overview.md
-    - RPA Scenarios: rpa/scenarios.md
-    - Land Use Methodology: rpa/methodology.md
-    - Climate Models: rpa/climate-models.md
   - Getting Started:
-    - Installation: getting-started/installation.md
-    - Quick Start: getting-started/quickstart.md
-    - Configuration: getting-started/configuration.md
+    - Complete Setup Guide: getting-started/complete-setup.md
     - FAQ: getting-started/faq.md
     - Troubleshooting: getting-started/troubleshooting.md
-    - GitHub Pages Setup: getting-started/github-pages-setup.md
     - Streamlit Issues:
       - Duplicate IDs: getting-started/streamlit-issues/duplicate-ids.md
       - Fragments Guide: getting-started/streamlit-issues/fragments-guide.md
+  - RPA Assessment:
+    - Complete Assessment Reference: rpa/rpa-assessment-complete.md
   - Natural Language Queries:
-    - Overview: queries/overview.md
-    - Basic Queries: queries/basic-queries.md
-    - Advanced Queries: queries/advanced-queries.md
-    - Query Examples: queries/examples.md
+    - Complete Query Guide: queries/complete-guide.md
   - Agent System:
-    - Overview: agents/overview.md
-    - Architecture: agents/README.md
-    - System Prompts: agents/SYSTEM_PROMPT_ARCHITECTURE.md
-    - Configuration: agents/CONSTANTS_ARCHITECTURE.md
+    - Complete Agent Guide: agents/complete-guide.md
     - API Reference:
       - Main Agent: api/agent.md
       - Query Capabilities: api/landuse-query-agent.md
       - LangGraph Integration: api/langgraph-agent.md
-    - Advanced Topics:
-      - Tool System: agents/TOOL_SYSTEM_ARCHITECTURE.md
-      - Memory & State: agents/MEMORY_STATE_MANAGEMENT.md
-      - Error Handling: agents/ERROR_HANDLING_RESILIENCE.md
-      - Performance: agents/PERFORMANCE_MONITORING.md
-      - Integration: agents/INTEGRATION_EXTENSION.md
-    - Advanced Configuration: agents/ADVANCED_CONFIGURATION.md
-  - Data & Schemas:
-    - Database Overview: data/database-overview.md
-    - Table Reference: data/table-reference.md
-    - View Definitions: data/view-definitions.md
+  - Data & Database:
+    - Complete Database Reference: data/complete-reference.md
     - Data Dictionary: data/data-dictionary.md
-    - Technical Specifications: data/technical-specifications.md
     - Data Sources: data/sources.md
-    - Database Schema: data/schema.md
-    - DuckDB Schema: data/duckdb-schema.md
     - Land Use Categories: data/categories.md
     - Variable Descriptions: data/variable-descriptions.md
     - RPA Model Diagram: data/rpa-model-diagram.md
     - Data Processing: data/processing.md
+  - Examples & Use Cases:
+    - Complete Examples Guide: examples/complete-examples.md
   - API Reference:
     - Data Converters: api/converters.md
     - Tools & Utilities: api/tools.md
-  - Examples:
-    - Use Cases: examples/use-cases.md
-    - Sample Workflows: examples/workflows.md
-    - Jupyter Notebooks: examples/notebooks.md
   - Development:
     - Architecture: development/architecture.md
     - Contributing: development/contributing.md
