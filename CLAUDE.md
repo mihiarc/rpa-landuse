@@ -172,28 +172,220 @@ The projections are based on an econometric model with these characteristics:
 
 For detailed methodology, see `docs/LAND_USE_METHODOLOGY.md`
 
-## Environment Configuration
+## Modern Infrastructure & Core Architecture
 
-Create `config/.env` with:
+### Core Architecture Components (`src/landuse/core/`)
+
+**Unified Configuration System** (`app_config.py`):
+- **Pydantic-Based Validation**: Type-safe configuration with comprehensive validation
+- **Component-Specific Sections**: Organized into database, llm, agent, security, logging, and features
+- **Environment Variable Integration**: Native support for LANDUSE_ prefixed env vars with nested delimiters
+- **Configuration Inheritance**: Supports configuration overrides and environment-specific settings
+- **Backward Compatibility**: Seamless conversion to/from legacy LanduseConfig format
+
+```python
+from landuse.core.app_config import AppConfig
+
+# Unified configuration with validation
+config = AppConfig()
+print(f"Database: {config.database.path}")
+print(f"LLM Model: {config.llm.model_name}")
+print(f"Max Iterations: {config.agent.max_iterations}")
 ```
-# Required
-OPENAI_API_KEY=your_api_key
 
-# Optional (defaults shown)
+**Dependency Injection Container** (`container.py`):
+- **Singleton Pattern**: Thread-safe singleton services with proper lifecycle management
+- **Auto-Resolution**: Automatic resolution of common interfaces (DatabaseInterface, LLMInterface, etc.)
+- **Factory Registration**: Support for complex object creation with custom factories
+- **Configuration Injection**: Automatic configuration injection throughout the application
+- **Resource Management**: Proper cleanup and resource disposal
+
+```python
+from landuse.core.container import DependencyContainer
+from landuse.core.interfaces import DatabaseInterface
+
+# Create and configure DI container
+container = DependencyContainer(config)
+container.register_singleton(DatabaseInterface, DatabaseManager)
+
+# Resolve services automatically
+db_service = container.resolve(DatabaseInterface)
+```
+
+**Abstract Interfaces** (`interfaces.py`):
+- **Clean Dependency Boundaries**: Abstract interfaces for all major components
+- **Testing Support**: Easy mocking and testing with clear interface contracts
+- **Loose Coupling**: Components depend on abstractions, not concrete implementations
+- **Interface Types**: DatabaseInterface, LLMInterface, ConversationInterface, CacheInterface, LoggerInterface, MetricsInterface
+
+### Infrastructure Layer (`src/landuse/infrastructure/`)
+
+**Thread-Safe Caching** (`cache.py`):
+- **InMemoryCache**: High-performance in-memory cache with TTL and LRU eviction
+- **Thread Safety**: All operations are thread-safe with RLock protection
+- **TTL Support**: Configurable time-to-live for automatic cache expiration
+- **LRU Eviction**: Least Recently Used eviction when max size is reached
+- **Statistics**: Built-in cache statistics and health monitoring
+
+```python
+from landuse.infrastructure import InMemoryCache
+
+# Create cache with TTL and size limits
+cache = InMemoryCache(default_ttl=300, max_size=1000)
+cache.set('query_results', data, ttl=600)
+cached_data = cache.get('query_results')
+print(f"Cache stats: {cache.stats()}")
+```
+
+**Structured Logging** (`logging.py`):
+- **JSON Logging**: Structured JSON logs for production environments
+- **Rich Console Output**: Beautiful console logging for development with Rich integration
+- **Specialized Loggers**: Separate loggers for security events and performance metrics
+- **Performance Logging**: Automatic performance event tracking with timing
+- **Security Logging**: Dedicated security event logging with context
+
+```python
+from landuse.infrastructure import StructuredLogger
+from landuse.core.app_config import LoggingConfig
+
+# Create structured logger
+logger_config = LoggingConfig(level='INFO', log_file='logs/app.log')
+logger = StructuredLogger(logger_config)
+
+# Log different event types
+logger.info("Application started", component="main")
+logger.security_event("login_attempt", "User authentication", user_id="123")
+logger.performance_event("database_query", 0.45, query_type="select")
+```
+
+**Metrics Collection** (`metrics.py`):
+- **InMemoryMetrics**: Counter, gauge, and timer metrics with tag-based filtering
+- **Thread Safety**: All metric operations are thread-safe
+- **Tag-Based Filtering**: Rich tagging system for metric aggregation and filtering
+- **Retention Management**: Automatic cleanup of old metrics based on retention policies
+- **Statistics**: Built-in statistical analysis (min, max, mean, count, total)
+
+```python
+from landuse.infrastructure import InMemoryMetrics
+
+# Create metrics collector
+metrics = InMemoryMetrics(retention_seconds=3600)
+
+# Record different metric types
+metrics.increment_counter('api_calls', {'endpoint': '/query', 'status': 'success'})
+metrics.record_gauge('active_connections', 15, {'pool': 'database'})
+metrics.record_timer('query_duration', 0.234, {'type': 'select'})
+
+# Get statistics
+stats = metrics.get_timer_stats('query_duration')
+print(f"Query stats: {stats}")
+```
+
+**Performance Monitoring** (`performance.py`):
+- **PerformanceMonitor**: Decorator-based performance tracking with automatic metrics
+- **Specialized Decorators**: Database and LLM operation decorators with domain-specific metrics
+- **Context Managers**: Timing context managers for code block measurement
+- **Exception Tracking**: Automatic exception tracking in performance metrics
+- **Integration**: Seamless integration with logging and metrics systems
+
+```python
+from landuse.infrastructure import PerformanceMonitor, create_performance_decorator
+
+# Create performance monitor with logging and metrics
+perf_monitor = create_performance_decorator(logger, metrics)
+
+# Use as decorator
+@perf_monitor.time_execution('critical_operation', tags={'component': 'agent'})
+def important_function():
+    # Function implementation
+    pass
+
+# Use as context manager
+with perf_monitor.time_context('batch_processing', {'batch_size': 100}):
+    # Process batch
+    pass
+```
+
+## Configuration System
+
+### Modern AppConfig System (2025)
+The application now uses a unified Pydantic-based configuration system with component-specific sections and environment variable integration.
+
+#### Environment Variables
+Create `config/.env` with LANDUSE_ prefixed variables:
+```bash
+# Required API Keys
+OPENAI_API_KEY=your_openai_key
 ANTHROPIC_API_KEY=your_anthropic_key  # For Claude models
-LANDUSE_MODEL=gpt-4o-mini            # or claude-3-haiku-20240307
-TEMPERATURE=0.1
-MAX_TOKENS=4000
 
-# Query Execution Limits (optional, defaults shown)
-LANDUSE_MAX_ITERATIONS=5        # Max tool calls before stopping
-LANDUSE_MAX_EXECUTION_TIME=120  # Max seconds for query execution
-LANDUSE_MAX_QUERY_ROWS=1000     # Max rows returned by queries
-LANDUSE_DEFAULT_DISPLAY_LIMIT=50 # Default rows to display
+# LLM Configuration (LANDUSE_LLM__ prefix)
+LANDUSE_LLM__MODEL_NAME=gpt-4o-mini        # or claude-3-5-sonnet-20241022
+LANDUSE_LLM__TEMPERATURE=0.1
+LANDUSE_LLM__MAX_TOKENS=4000
 
-# Rate Limiting (optional, defaults shown)
-LANDUSE_RATE_LIMIT_CALLS=60     # Max calls per time window
-LANDUSE_RATE_LIMIT_WINDOW=60    # Time window in seconds
+# Agent Configuration (LANDUSE_AGENT__ prefix)
+LANDUSE_AGENT__MAX_ITERATIONS=8            # Max tool calls before stopping
+LANDUSE_AGENT__MAX_EXECUTION_TIME=120      # Max seconds for query execution
+LANDUSE_AGENT__MAX_QUERY_ROWS=1000         # Max rows returned by queries
+LANDUSE_AGENT__DEFAULT_DISPLAY_LIMIT=50    # Default rows to display
+LANDUSE_AGENT__ENABLE_MEMORY=true          # Enable conversation memory
+LANDUSE_AGENT__CONVERSATION_HISTORY_LIMIT=20  # Max conversation messages
+
+# Database Configuration (LANDUSE_DATABASE__ prefix)
+LANDUSE_DATABASE__PATH=data/processed/landuse_analytics.duckdb
+LANDUSE_DATABASE__MAX_CONNECTIONS=10       # Connection pool size
+LANDUSE_DATABASE__CACHE_TTL=3600          # Query cache TTL in seconds
+
+# Security Configuration (LANDUSE_SECURITY__ prefix)
+LANDUSE_SECURITY__ENABLE_SQL_VALIDATION=true
+LANDUSE_SECURITY__STRICT_TABLE_VALIDATION=true
+LANDUSE_SECURITY__RATE_LIMIT_CALLS=60      # Max calls per time window
+LANDUSE_SECURITY__RATE_LIMIT_WINDOW=60     # Time window in seconds
+
+# Logging Configuration (LANDUSE_LOGGING__ prefix)
+LANDUSE_LOGGING__LEVEL=INFO                # DEBUG, INFO, WARNING, ERROR, CRITICAL
+LANDUSE_LOGGING__LOG_FILE=logs/landuse.log # File path (None for console only)
+LANDUSE_LOGGING__ENABLE_PERFORMANCE_LOGGING=false
+
+# Feature Toggles (LANDUSE_FEATURES__ prefix)
+LANDUSE_FEATURES__ENABLE_MAP_GENERATION=true
+LANDUSE_FEATURES__ENABLE_CONVERSATION_MEMORY=true
+LANDUSE_FEATURES__MAP_OUTPUT_DIR=maps/agent_generated
+```
+
+#### Programmatic Configuration
+```python
+from landuse.core.app_config import AppConfig
+
+# Load from environment variables
+config = AppConfig()
+
+# Or create with overrides
+config = AppConfig.from_env(
+    llm__model_name='claude-3-5-sonnet-20241022',
+    agent__max_iterations=12,
+    logging__level='DEBUG'
+)
+
+# Access component-specific settings
+print(f"Using model: {config.llm.model_name}")
+print(f"Database: {config.database.path}")
+print(f"Max iterations: {config.agent.max_iterations}")
+```
+
+### Legacy Configuration Support
+The system maintains backward compatibility with the original LanduseConfig for existing code:
+
+```python
+from landuse.config.landuse_config import LanduseConfig
+
+# Legacy configuration still works
+legacy_config = LanduseConfig()
+
+# All manager classes support both config types
+from landuse.agents.database_manager import DatabaseManager
+db_manager = DatabaseManager(config)        # New AppConfig
+db_manager = DatabaseManager(legacy_config) # Legacy config
 ```
 
 ## Pydantic v2 Data Models
@@ -227,42 +419,134 @@ LANDUSE_RATE_LIMIT_WINDOW=60    # Time window in seconds
 
 ## Development Patterns
 
-### Refactored Agent Architecture (2025)
-The landuse agent now uses modern modular architecture with dependency injection:
+### Modern Architecture Development (2025)
+
+#### Unified Configuration Pattern
+Use the new AppConfig system for type-safe, validated configuration:
 
 ```python
-# Agent initialization with component managers
-from landuse.agents.landuse_agent import LanduseAgent
-from landuse.config.landuse_config import LanduseConfig
+from landuse.core.app_config import AppConfig
+from landuse.core.container import DependencyContainer
 
-# Clean dependency injection pattern
-config = LanduseConfig()
-with LanduseAgent(config) as agent:
-    response = agent.query("Which scenarios show the most agricultural land loss?")
+# Create unified configuration
+config = AppConfig()
+
+# Set up dependency injection
+container = DependencyContainer(config)
+container.register_instance(AppConfig, config)
+
+# Use throughout application
+print(f"Using {config.llm.model_name} with {config.agent.max_iterations} max iterations")
 ```
 
-### Component-Based Development
-Working with individual managers for focused functionality:
+#### Agent Architecture with Modern Components
+The landuse agent now uses modular architecture with dependency injection:
 
 ```python
-# Direct component usage for specialized tasks
+# Modern agent initialization
+from landuse.agents.landuse_agent import LanduseAgent
+from landuse.core.app_config import AppConfig
+
+# Clean dependency injection pattern with new config
+config = AppConfig()
+with LanduseAgent(config) as agent:
+    response = agent.query("Which scenarios show the most agricultural land loss?")
+
+# Or use legacy config (backward compatible)
+from landuse.config.landuse_config import LanduseConfig
+legacy_config = LanduseConfig()
+with LanduseAgent(legacy_config) as agent:
+    response = agent.query("Compare forest loss between scenarios")
+```
+
+#### Component-Based Development with Modern Architecture
+Working with individual managers using the new infrastructure:
+
+```python
+# Direct component usage with AppConfig
+from landuse.core.app_config import AppConfig
 from landuse.agents.llm_manager import LLMManager
 from landuse.agents.database_manager import DatabaseManager
 from landuse.agents.conversation_manager import ConversationManager
+from landuse.infrastructure import InMemoryCache, InMemoryMetrics, StructuredLogger
 
-# LLM management
+# Create unified configuration
+config = AppConfig()
+
+# Set up infrastructure components
+cache = InMemoryCache(max_size=1000, default_ttl=3600)
+metrics = InMemoryMetrics(retention_seconds=7200)
+logger = StructuredLogger(config.logging)
+
+# LLM management with performance monitoring
 llm_manager = LLMManager(config)
-llm = llm_manager.create_llm()  # Factory pattern
+llm = llm_manager.create_llm()  # Factory pattern with performance tracking
 
-# Database operations
+# Database operations with caching and monitoring
 with DatabaseManager(config) as db_manager:
     connection = db_manager.get_connection()
-    schema = db_manager.get_schema()
+    schema = db_manager.get_schema()  # Automatically performance monitored
 
-# Conversation handling with sliding window memory
-conversation = ConversationManager(max_history_length=20)
+# Conversation handling with configurable sliding window
+conversation = ConversationManager(config)  # Uses config.agent.conversation_history_limit
 conversation.add_conversation("question", "response")
 messages = conversation.get_conversation_messages()
+
+# Access metrics and cache
+cache.set('schema', schema, ttl=1800)
+query_stats = metrics.get_timer_stats('database.get_schema.duration')
+```
+
+#### Dependency Injection Pattern
+Use dependency injection for clean, testable code:
+
+```python
+from landuse.core.container import DependencyContainer
+from landuse.core.interfaces import DatabaseInterface, LLMInterface, CacheInterface
+
+# Set up dependency injection container
+container = DependencyContainer(config)
+
+# Register services
+container.register_singleton(DatabaseInterface, DatabaseManager)
+container.register_singleton(LLMInterface, LLMManager) 
+container.register_instance(CacheInterface, cache)
+
+# Resolve services automatically
+db_service = container.resolve(DatabaseInterface)
+llm_service = container.resolve(LLMInterface)
+cache_service = container.resolve(CacheInterface)
+
+# Services are properly configured and ready to use
+schema = db_service.get_schema()
+model = llm_service.create_llm()
+cache_service.set('model_info', {'name': model.__class__.__name__})
+```
+
+#### Performance Monitoring Integration
+Integrate performance monitoring throughout your application:
+
+```python
+from landuse.infrastructure.performance import create_performance_decorator, time_database_operation
+
+# Create performance monitor with infrastructure
+perf_monitor = create_performance_decorator(logger, metrics)
+
+# Use decorators for automatic performance tracking
+@perf_monitor.time_execution('custom_analysis', tags={'type': 'landuse'})
+def analyze_land_use_patterns(data):
+    # Analysis logic with automatic timing
+    return processed_data
+
+# Use specialized decorators for database operations
+@time_database_operation('complex_query')
+def execute_complex_query(connection, query):
+    return connection.execute(query).fetchall()
+
+# Context manager for ad-hoc timing
+with perf_monitor.time_context('data_processing', {'batch_size': 1000}):
+    # Process large dataset
+    results = process_large_dataset(data)
 ```
 
 ### Security-First Development
@@ -317,22 +601,80 @@ agent.query("Show me urbanization patterns in California")
 - Apply filters early for performance
 - All queries automatically validated for security
 
-### Testing Patterns
-The modular architecture enables comprehensive testing:
+### Testing Patterns with Modern Architecture
+The new modular architecture with dependency injection enables comprehensive testing:
 
 ```python
-# Unit testing with mocked components
-def test_query_executor():
-    mock_connection = Mock(spec=duckdb.DuckDBPyConnection)
-    mock_config = Mock(spec=LanduseConfig)
-    executor = QueryExecutor(mock_config, mock_connection)
+# Unit testing with dependency injection and mocking
+from unittest.mock import Mock
+from landuse.core.app_config import AppConfig
+from landuse.core.container import DependencyContainer
+from landuse.core.interfaces import DatabaseInterface, LLMInterface
+from landuse.agents.query_executor import QueryExecutor
+
+def test_query_executor_with_di():
+    # Create test configuration
+    config = AppConfig()
     
-# Integration testing with real components
-def test_agent_integration():
-    config = LanduseConfig()
-    with LanduseAgent(config) as agent:
-        result = agent.query("test query")
-        assert result is not None
+    # Set up DI container with mocked dependencies
+    container = DependencyContainer(config)
+    mock_db = Mock(spec=DatabaseInterface)
+    container.register_instance(DatabaseInterface, mock_db)
+    
+    # Test with clean dependencies
+    db_service = container.resolve(DatabaseInterface)
+    assert db_service is mock_db
+
+# Integration testing with real infrastructure components
+def test_full_stack_integration():
+    from landuse.infrastructure import InMemoryCache, InMemoryMetrics
+    
+    config = AppConfig()
+    cache = InMemoryCache(max_size=100)
+    metrics = InMemoryMetrics()
+    
+    # Test infrastructure integration
+    cache.set('test_key', 'test_value')
+    metrics.increment_counter('test_counter')
+    
+    assert cache.get('test_key') == 'test_value'
+    assert metrics.get_counter_total('test_counter') == 1.0
+
+# Performance monitoring testing
+def test_performance_monitoring():
+    from landuse.infrastructure.performance import PerformanceMonitor
+    from landuse.infrastructure import InMemoryMetrics, StructuredLogger
+    
+    config = AppConfig()
+    metrics = InMemoryMetrics()
+    logger = StructuredLogger(config.logging)
+    perf_monitor = PerformanceMonitor(logger, metrics)
+    
+    @perf_monitor.time_execution('test_operation')
+    def test_function():
+        return "success"
+    
+    result = test_function()
+    assert result == "success"
+    
+    # Check metrics were recorded
+    timer_stats = metrics.get_timer_stats('test_operation.duration')
+    assert timer_stats['count'] == 1
+
+# Agent testing with both config types
+def test_agent_backward_compatibility():
+    from landuse.agents.landuse_agent import LanduseAgent
+    from landuse.config.landuse_config import LanduseConfig
+    
+    # Test with new AppConfig
+    app_config = AppConfig()
+    with LanduseAgent(app_config) as agent:
+        assert agent is not None
+    
+    # Test with legacy config (backward compatibility)
+    legacy_config = LanduseConfig()
+    with LanduseAgent(legacy_config) as agent:
+        assert agent is not None
 ```
 
 ## Testing Approach
@@ -510,6 +852,20 @@ Key packages (managed via `uv`):
   - `InMemoryMetrics`: Counter, gauge, and timer metrics with tag-based filtering
 - **Configuration Migration**: Seamless conversion between AppConfig and legacy formats
 - **Interface Abstractions**: Clean dependency boundaries with abstract interfaces for all major components
+
+### Performance Monitoring & Observability (2025)
+- **Decorator-Based Performance Tracking**: Automatic timing and metrics collection for critical operations
+- **Specialized Operation Decorators**: Database and LLM operation decorators with domain-specific metrics
+- **Context Manager Timing**: Ad-hoc timing support for code blocks and batch operations
+- **Exception Tracking**: Automatic exception tracking in performance metrics with error categorization
+- **Infrastructure Integration**: Seamless integration with structured logging and metrics collection
+- **Performance Components**:
+  - `PerformanceMonitor`: Central performance tracking with decorator and context manager support
+  - `@time_database_operation`: Specialized decorator for database operations with row count tracking
+  - `@time_llm_operation`: LLM-specific decorator with token usage tracking
+  - Thread-safe metrics collection with tag-based filtering and aggregation
+- **Real-Time Observability**: Live performance metrics with statistical analysis (min, max, mean, count)
+- **Production Ready**: Performance monitoring with configurable retention and automatic cleanup
 
 ### Modern Infrastructure Enhancements
 - **Pydantic v2 Models**: Type-safe data structures with validation for all components
