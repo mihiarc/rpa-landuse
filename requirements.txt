@@ -103,7 +103,7 @@ jsonschema-specifications==2025.4.1
     # via jsonschema
 kiwisolver==1.4.8
     # via matplotlib
-langchain==0.3.26
+langchain==0.3.27
     # via
     #   rpa-landuse-analytics (pyproject.toml)
     #   langchain-community
