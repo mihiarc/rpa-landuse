@@ -176,7 +176,7 @@ numpy==2.3.1
     #   pyogrio
     #   shapely
     #   streamlit
-openai==1.93.1
+openai==1.97.1
     # via langchain-openai
 openpyxl==3.1.5
     # via rpa-landuse-analytics (pyproject.toml)
