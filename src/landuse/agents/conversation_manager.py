@@ -1,13 +1,17 @@
 """Conversation history management extracted from monolithic agent class."""
 
 from collections import deque
-from typing import List, Tuple
+from typing import List, Optional, Tuple, Union
 
 from langchain_core.messages import AIMessage, BaseMessage, HumanMessage
 from rich.console import Console
 
+from landuse.config.landuse_config import LanduseConfig
+from landuse.core.app_config import AppConfig
+from landuse.core.interfaces import ConversationInterface
 
-class ConversationManager:
+
+class ConversationManager(ConversationInterface):
     """
     Manages conversation history and message handling.
     
@@ -15,19 +19,36 @@ class ConversationManager:
     Implements sliding window memory management to prevent unlimited memory growth.
     """
 
-    def __init__(self, max_history_length: int = 20, console: Console = None):
+    def __init__(
+        self, 
+        config: Optional[Union[LanduseConfig, AppConfig]] = None,
+        max_history_length: Optional[int] = None, 
+        console: Optional[Console] = None
+    ):
         """
         Initialize conversation manager.
         
         Args:
-            max_history_length: Maximum number of messages to keep in history
+            config: Configuration object (AppConfig or legacy LanduseConfig)
+            max_history_length: Maximum number of messages to keep in history (overrides config)
             console: Rich console for logging (optional)
         """
-        self.max_history_length = max_history_length
+        # Handle configuration
+        if isinstance(config, AppConfig):
+            self.app_config = config
+            self.max_history_length = max_history_length or config.agent.conversation_history_limit
+        elif isinstance(config, LanduseConfig):
+            self.app_config = None
+            # Legacy config doesn't have conversation settings, use default
+            self.max_history_length = max_history_length or 20
+        else:
+            self.app_config = None
+            self.max_history_length = max_history_length or 20
+        
         self.console = console or Console()
         
         # Use deque for efficient sliding window operations
-        self._conversation_history: deque = deque(maxlen=max_history_length)
+        self._conversation_history: deque = deque(maxlen=self.max_history_length)
 
     def add_conversation(self, question: str, response: str) -> None:
         """

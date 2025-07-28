@@ -1,7 +1,7 @@
 """LLM management functionality extracted from monolithic agent class."""
 
 import os
-from typing import Optional
+from typing import Optional, Union
 
 from langchain_anthropic import ChatAnthropic
 from langchain_core.language_models import BaseChatModel
@@ -9,22 +9,62 @@ from langchain_openai import ChatOpenAI
 from rich.console import Console
 
 from landuse.config.landuse_config import LanduseConfig
+from landuse.core.app_config import AppConfig, LLMConfig
+from landuse.core.interfaces import LLMInterface
 from landuse.exceptions import APIKeyError, LLMError
+from landuse.infrastructure.performance import time_llm_operation
 
 
-class LLMManager:
+class LLMManager(LLMInterface):
     """
     Manages LLM creation and configuration.
     
     Extracted from the monolithic LanduseAgent class to follow Single Responsibility Principle.
     Handles model selection, API key validation, and LLM instantiation.
+    Implements LLMInterface for dependency injection compatibility.
     """
 
-    def __init__(self, config: Optional[LanduseConfig] = None, console: Optional[Console] = None):
+    def __init__(self, config: Optional[Union[LanduseConfig, AppConfig]] = None, console: Optional[Console] = None):
         """Initialize LLM manager with configuration."""
-        self.config = config or LanduseConfig()
+        if isinstance(config, AppConfig):
+            # Use new AppConfig
+            self.app_config = config
+            self.config = self._convert_to_legacy_config(config)
+        else:
+            # Use legacy LanduseConfig
+            self.config = config or LanduseConfig()
+            self.app_config = None
         self.console = console or Console()
 
+    def _convert_to_legacy_config(self, app_config: AppConfig) -> LanduseConfig:
+        """Convert AppConfig to legacy LanduseConfig for backward compatibility."""
+        # Create legacy config bypassing validation for now
+        from landuse.config.landuse_config import LanduseConfig
+        
+        # Create instance without validation to avoid API key issues during conversion
+        legacy_config = object.__new__(LanduseConfig)
+        
+        # Map database settings
+        legacy_config.db_path = app_config.database.path
+        
+        # Map LLM settings 
+        legacy_config.model = app_config.llm.model_name  # Note: model_name in AppConfig vs model in legacy
+        legacy_config.temperature = app_config.llm.temperature
+        legacy_config.max_tokens = app_config.llm.max_tokens
+        
+        # Map agent execution settings
+        legacy_config.max_iterations = app_config.agent.max_iterations
+        legacy_config.max_execution_time = app_config.agent.max_execution_time
+        legacy_config.max_query_rows = app_config.agent.max_query_rows
+        legacy_config.default_display_limit = app_config.agent.default_display_limit
+        
+        # Map debugging settings
+        legacy_config.debug = app_config.logging.level == 'DEBUG'
+        legacy_config.enable_memory = app_config.agent.enable_memory
+        
+        return legacy_config
+
+    @time_llm_operation("create_llm", track_tokens=False)
     def create_llm(self) -> BaseChatModel:
         """
         Create LLM instance based on configuration using factory pattern.
@@ -35,7 +75,7 @@ class LLMManager:
         Raises:
             ValueError: If required API keys are missing
         """
-        model_name = self.config.model_name
+        model_name = self.config.model
         
         self.console.print(f"[blue]Initializing LLM: {model_name}[/blue]")
 
@@ -87,3 +127,16 @@ class LLMManager:
         if not api_key:
             return "NOT_SET"
         return f"{api_key[:8]}...{api_key[-4:]}" if len(api_key) > 12 else "***"
+
+    def get_model_name(self) -> str:
+        """Get the current model name."""
+        return self.config.model
+
+    def validate_api_key(self) -> bool:
+        """Validate API key is available and valid."""
+        model_name = self.config.model
+        
+        if "claude" in model_name.lower():
+            return os.getenv('ANTHROPIC_API_KEY') is not None
+        else:
+            return os.getenv('OPENAI_API_KEY') is not None

@@ -494,6 +494,23 @@ Key packages (managed via `uv`):
 - **Backward Compatibility**: Maintained all existing public APIs while improving internal architecture
 - **Production Quality**: Achieved A+ architecture rating (92/100) and B+ security rating (83/100)
 
+### Configuration Centralization & Dependency Injection (2025)
+- **Unified AppConfig System**: Replaced scattered configuration with single Pydantic-based AppConfig
+- **Component-Specific Sections**: Organized configuration into database, llm, agent, security, logging, and features sections
+- **Environment Variable Integration**: Native support for LANDUSE_ prefixed env vars with nested delimiters
+- **Backward Compatibility**: All manager classes support both new AppConfig and legacy LanduseConfig
+- **Dependency Injection Container**: 
+  - Singleton pattern with thread-safety for shared resources
+  - Auto-resolution of common interfaces (DatabaseInterface, LLMInterface, etc.)
+  - Factory registration for complex object creation
+  - Configuration injection throughout the application
+- **Infrastructure Components**:
+  - `InMemoryCache`: Thread-safe caching with TTL and LRU eviction
+  - `StructuredLogger`: JSON logging with security and performance event tracking
+  - `InMemoryMetrics`: Counter, gauge, and timer metrics with tag-based filtering
+- **Configuration Migration**: Seamless conversion between AppConfig and legacy formats
+- **Interface Abstractions**: Clean dependency boundaries with abstract interfaces for all major components
+
 ### Modern Infrastructure Enhancements
 - **Pydantic v2 Models**: Type-safe data structures with validation for all components
 - **DuckDB COPY Optimization**: 5-10x performance improvement using bulk loading with Parquet

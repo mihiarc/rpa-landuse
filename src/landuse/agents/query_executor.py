@@ -1,6 +1,6 @@
 """Query execution functionality extracted from monolithic agent class."""
 
-from typing import Any, Dict
+from typing import Any, Dict, Optional, Union
 
 import duckdb
 import pandas as pd
@@ -8,7 +8,9 @@ from rich.console import Console
 
 from landuse.agents.formatting import clean_sql_query, format_query_results
 from landuse.config.landuse_config import LanduseConfig
+from landuse.core.app_config import AppConfig
 from landuse.exceptions import DatabaseError, QueryValidationError, wrap_exception
+from landuse.infrastructure.performance import time_database_operation
 from landuse.security.database_security import DatabaseSecurity
 
 
@@ -20,19 +22,31 @@ class QueryExecutor:
     Provides standardized query execution with error handling and result formatting.
     """
 
-    def __init__(self, config: LanduseConfig, db_connection: duckdb.DuckDBPyConnection, console: Console = None):
+    def __init__(
+        self, 
+        config: Union[LanduseConfig, AppConfig], 
+        db_connection: duckdb.DuckDBPyConnection, 
+        console: Optional[Console] = None
+    ):
         """
         Initialize query executor.
         
         Args:
-            config: Configuration object
+            config: Configuration object (AppConfig or legacy LanduseConfig)
             db_connection: Database connection
             console: Rich console for logging (optional)
         """
-        self.config = config
+        if isinstance(config, AppConfig):
+            self.app_config = config
+            self.config = self._convert_to_legacy_config(config)
+        else:
+            self.config = config
+            self.app_config = None
+            
         self.db_connection = db_connection
         self.console = console or Console()
 
+    @time_database_operation("execute_query_with_formatting")
     def execute_query(self, query: str) -> Dict[str, Any]:
         """
         Execute a SQL query with standard error handling and formatting.
@@ -148,3 +162,31 @@ class QueryExecutor:
             return "Specify table name for columns used in joins (e.g., fact.year instead of just year)"
         else:
             return "Check the query syntax and ensure all table/column names match the schema exactly."
+
+    def _convert_to_legacy_config(self, app_config: AppConfig) -> LanduseConfig:
+        """Convert AppConfig to legacy LanduseConfig for backward compatibility."""
+        # Create legacy config bypassing validation for now
+        from landuse.config.landuse_config import LanduseConfig
+        
+        # Create instance without validation to avoid API key issues during conversion
+        legacy_config = object.__new__(LanduseConfig)
+        
+        # Map database settings
+        legacy_config.db_path = app_config.database.path
+        
+        # Map LLM settings 
+        legacy_config.model = app_config.llm.model_name  # Note: model_name in AppConfig vs model in legacy
+        legacy_config.temperature = app_config.llm.temperature
+        legacy_config.max_tokens = app_config.llm.max_tokens
+        
+        # Map agent execution settings
+        legacy_config.max_iterations = app_config.agent.max_iterations
+        legacy_config.max_execution_time = app_config.agent.max_execution_time
+        legacy_config.max_query_rows = app_config.agent.max_query_rows
+        legacy_config.default_display_limit = app_config.agent.default_display_limit
+        
+        # Map debugging settings
+        legacy_config.debug = app_config.logging.level == 'DEBUG'
+        legacy_config.enable_memory = app_config.agent.enable_memory
+        
+        return legacy_config
