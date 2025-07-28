@@ -1,0 +1,4360 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="AI-powered analytics tool for USDA Forest Service RPA Assessment land use data">
+      
+      
+        <meta name="author" content="RPA Analytics Team">
+      
+      
+        <link rel="canonical" href="https://mihiarc.github.io/rpa-landuse/rpa/rpa-assessment-complete/">
+      
+      
+        <link rel="prev" href="../../getting-started/streamlit-issues/fragments-guide/">
+      
+      
+        <link rel="next" href="../../queries/complete-guide/">
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.16">
+    
+    
+      
+        <title>Complete Assessment Reference - RPA Land Use Analytics</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.7e37652d.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="green" data-md-color-accent="light-green">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#complete-rpa-assessment-reference" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="RPA Land Use Analytics" class="md-header__button md-logo" aria-label="RPA Land Use Analytics" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            RPA Land Use Analytics
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Complete Assessment Reference
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="green" data-md-color-accent="light-green"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="green" data-md-color-accent="light-green"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/mihiarc/rpa-landuse" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.0.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path fill="currentColor" d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    rpa-landuse-analytics
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../getting-started/complete-setup/" class="md-tabs__link">
+          
+  
+  
+  Getting Started
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="./" class="md-tabs__link">
+          
+  
+  
+  RPA Assessment
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../queries/complete-guide/" class="md-tabs__link">
+          
+  
+  
+  Natural Language Queries
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../agents/complete-guide/" class="md-tabs__link">
+          
+  
+  
+  Agent System
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../data/complete-reference/" class="md-tabs__link">
+          
+  
+  
+  Data & Database
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../examples/complete-examples/" class="md-tabs__link">
+          
+  
+  
+  Examples & Use Cases
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../api/converters/" class="md-tabs__link">
+          
+  
+  
+  API Reference
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../development/architecture/" class="md-tabs__link">
+          
+  
+  
+  Development
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="RPA Land Use Analytics" class="md-nav__button md-logo" aria-label="RPA Land Use Analytics" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    RPA Land Use Analytics
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/mihiarc/rpa-landuse" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.0.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path fill="currentColor" d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    rpa-landuse-analytics
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Getting Started
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            Getting Started
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/complete-setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Complete Setup Guide
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/faq/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    FAQ
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Troubleshooting
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_4" id="__nav_2_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Streamlit Issues
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_4">
+            <span class="md-nav__icon md-icon"></span>
+            Streamlit Issues
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/streamlit-issues/duplicate-ids/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Duplicate IDs
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/streamlit-issues/fragments-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Fragments Guide
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    RPA Assessment
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            RPA Assessment
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Complete Assessment Reference
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    Complete Assessment Reference
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#table-of-contents" class="md-nav__link">
+    <span class="md-ellipsis">
+      Table of Contents
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rpa-assessment-overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      RPA Assessment Overview
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="RPA Assessment Overview">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#about-the-2020-resources-planning-act-assessment" class="md-nav__link">
+    <span class="md-ellipsis">
+      About the 2020 Resources Planning Act Assessment
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#assessment-scope-and-coverage" class="md-nav__link">
+    <span class="md-ellipsis">
+      Assessment Scope and Coverage
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Assessment Scope and Coverage">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#geographic-coverage" class="md-nav__link">
+    <span class="md-ellipsis">
+      Geographic Coverage
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#temporal-coverage" class="md-nav__link">
+    <span class="md-ellipsis">
+      Temporal Coverage
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#land-use-categories" class="md-nav__link">
+    <span class="md-ellipsis">
+      Land Use Categories
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#integrated-scenario-framework" class="md-nav__link">
+    <span class="md-ellipsis">
+      Integrated Scenario Framework
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#key-data-sources" class="md-nav__link">
+    <span class="md-ellipsis">
+      Key Data Sources
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Key Data Sources">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#primary-data-sources" class="md-nav__link">
+    <span class="md-ellipsis">
+      Primary Data Sources
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#model-outputs" class="md-nav__link">
+    <span class="md-ellipsis">
+      Model Outputs
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#land-use-change-methodology" class="md-nav__link">
+    <span class="md-ellipsis">
+      Land Use Change Methodology
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Land Use Change Methodology">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#econometric-model-foundation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Econometric Model Foundation
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Econometric Model Foundation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#core-model-characteristics" class="md-nav__link">
+    <span class="md-ellipsis">
+      Core Model Characteristics
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fundamental-model-assumptions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Fundamental Model Assumptions
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Fundamental Model Assumptions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-development-irreversibility" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Development Irreversibility
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-private-land-focus" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Private Land Focus
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-historical-calibration" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Historical Calibration
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-policy-neutrality" class="md-nav__link">
+    <span class="md-ellipsis">
+      4. Policy Neutrality
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#historical-context-and-calibration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Historical Context and Calibration
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Historical Context and Calibration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#development-trends-over-time" class="md-nav__link">
+    <span class="md-ellipsis">
+      Development Trends Over Time
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#observed-transition-patterns-2001-2012" class="md-nav__link">
+    <span class="md-ellipsis">
+      Observed Transition Patterns (2001-2012)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#projection-methodology" class="md-nav__link">
+    <span class="md-ellipsis">
+      Projection Methodology
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Projection Methodology">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#econometric-model-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      Econometric Model Structure
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#climate-integration-process" class="md-nav__link">
+    <span class="md-ellipsis">
+      Climate Integration Process
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#socioeconomic-driver-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Socioeconomic Driver Integration
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#key-national-projections-2020-2100" class="md-nav__link">
+    <span class="md-ellipsis">
+      Key National Projections (2020-2100)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Key National Projections (2020-2100)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#developed-land-expansion" class="md-nav__link">
+    <span class="md-ellipsis">
+      Developed Land Expansion
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#forest-land-changes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Forest Land Changes
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#agricultural-land-dynamics" class="md-nav__link">
+    <span class="md-ellipsis">
+      Agricultural Land Dynamics
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#regional-development-patterns" class="md-nav__link">
+    <span class="md-ellipsis">
+      Regional Development Patterns
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Regional Development Patterns">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#highest-development-pressure-regions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Highest Development Pressure Regions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#forest-loss-concentration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Forest Loss Concentration
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scenario-specific-impacts" class="md-nav__link">
+    <span class="md-ellipsis">
+      Scenario-Specific Impacts
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Scenario-Specific Impacts">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#climate-pathway-effects-rcp-45-vs-rcp-85" class="md-nav__link">
+    <span class="md-ellipsis">
+      Climate Pathway Effects (RCP 4.5 vs RCP 8.5)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#socioeconomic-pathway-effects" class="md-nav__link">
+    <span class="md-ellipsis">
+      Socioeconomic Pathway Effects
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#climate-models-and-projections" class="md-nav__link">
+    <span class="md-ellipsis">
+      Climate Models and Projections
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Climate Models and Projections">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#overview-of-climate-model-selection" class="md-nav__link">
+    <span class="md-ellipsis">
+      Overview of Climate Model Selection
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-five-core-climate-models" class="md-nav__link">
+    <span class="md-ellipsis">
+      The Five Core Climate Models
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="The Five Core Climate Models">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cnrm_cm5-wet-climate-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      CNRM_CM5 - "Wet" Climate Model
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hadgem2_es365-hot-climate-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      HadGEM2_ES365 - "Hot" Climate Model
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ipsl_cm5a_mr-dry-climate-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      IPSL_CM5A_MR - "Dry" Climate Model
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mri_cgcm3-least-warm-climate-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      MRI_CGCM3 - "Least Warm" Climate Model
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#noresm1_m-middle-climate-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      NorESM1_M - "Middle" Climate Model
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#climate-model-selection-rationale" class="md-nav__link">
+    <span class="md-ellipsis">
+      Climate Model Selection Rationale
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Climate Model Selection Rationale">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#scientific-criteria" class="md-nav__link">
+    <span class="md-ellipsis">
+      Scientific Criteria
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#model-ensemble-benefits" class="md-nav__link">
+    <span class="md-ellipsis">
+      Model Ensemble Benefits
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#climate-pathways-representative-concentration-pathways" class="md-nav__link">
+    <span class="md-ellipsis">
+      Climate Pathways (Representative Concentration Pathways)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Climate Pathways (Representative Concentration Pathways)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#rcp45-lower-emissions-pathway" class="md-nav__link">
+    <span class="md-ellipsis">
+      RCP4.5 - Lower Emissions Pathway
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rcp85-higher-emissions-pathway" class="md-nav__link">
+    <span class="md-ellipsis">
+      RCP8.5 - Higher Emissions Pathway
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#using-climate-models-in-rpa-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      Using Climate Models in RPA Analysis
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Using Climate Models in RPA Analysis">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#comparative-analysis-strategies" class="md-nav__link">
+    <span class="md-ellipsis">
+      Comparative Analysis Strategies
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#interpreting-climate-model-results" class="md-nav__link">
+    <span class="md-ellipsis">
+      Interpreting Climate Model Results
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#technical-implementation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Technical Implementation
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Technical Implementation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#downscaling-and-bias-correction" class="md-nav__link">
+    <span class="md-ellipsis">
+      Downscaling and Bias Correction
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#validation-and-quality-control" class="md-nav__link">
+    <span class="md-ellipsis">
+      Validation and Quality Control
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#integrated-scenarios-framework" class="md-nav__link">
+    <span class="md-ellipsis">
+      Integrated Scenarios Framework
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Integrated Scenarios Framework">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#overview-of-the-four-rpa-scenarios" class="md-nav__link">
+    <span class="md-ellipsis">
+      Overview of the Four RPA Scenarios
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Overview of the Four RPA Scenarios">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#quick-reference-the-four-core-scenarios" class="md-nav__link">
+    <span class="md-ellipsis">
+      Quick Reference: The Four Core Scenarios
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#detailed-scenario-descriptions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Detailed Scenario Descriptions
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Detailed Scenario Descriptions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#scenario-lm-lower-warming-moderate-us-growth-rcp-45-ssp1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Scenario LM: Lower Warming-Moderate U.S. Growth (RCP 4.5-SSP1)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scenario-hl-high-warming-low-us-growth-rcp-85-ssp3" class="md-nav__link">
+    <span class="md-ellipsis">
+      Scenario HL: High Warming-Low U.S. Growth (RCP 8.5-SSP3)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scenario-hm-high-warming-moderate-us-growth-rcp-85-ssp2" class="md-nav__link">
+    <span class="md-ellipsis">
+      Scenario HM: High Warming-Moderate U.S. Growth (RCP 8.5-SSP2)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scenario-hh-high-warming-high-us-growth-rcp-85-ssp5" class="md-nav__link">
+    <span class="md-ellipsis">
+      Scenario HH: High Warming-High U.S. Growth (RCP 8.5-SSP5)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#understanding-rcps-and-ssps-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Understanding RCPs and SSPs Integration
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Understanding RCPs and SSPs Integration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#representative-concentration-pathways-rcps" class="md-nav__link">
+    <span class="md-ellipsis">
+      Representative Concentration Pathways (RCPs)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#shared-socioeconomic-pathways-ssps" class="md-nav__link">
+    <span class="md-ellipsis">
+      Shared Socioeconomic Pathways (SSPs)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#climate-model-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Climate Model Integration
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Climate Model Integration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#example-climate-scenario-combinations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example Climate-Scenario Combinations
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#land-use-implications-by-scenario" class="md-nav__link">
+    <span class="md-ellipsis">
+      Land Use Implications by Scenario
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Land Use Implications by Scenario">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#development-pressure-ranking" class="md-nav__link">
+    <span class="md-ellipsis">
+      Development Pressure Ranking
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#agricultural-land-dynamics_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Agricultural Land Dynamics
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#forest-conservation-outcomes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Forest Conservation Outcomes
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#using-scenarios-in-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      Using Scenarios in Analysis
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Using Scenarios in Analysis">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#time-horizon-considerations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Time Horizon Considerations
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#analysis-best-practices" class="md-nav__link">
+    <span class="md-ellipsis">
+      Analysis Best Practices
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#common-analysis-patterns" class="md-nav__link">
+    <span class="md-ellipsis">
+      Common Analysis Patterns
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Common Analysis Patterns">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#for-climate-impact-studies" class="md-nav__link">
+    <span class="md-ellipsis">
+      For Climate Impact Studies
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#for-socioeconomic-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      For Socioeconomic Analysis
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#for-integrated-assessment" class="md-nav__link">
+    <span class="md-ellipsis">
+      For Integrated Assessment
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#data-structure-and-usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      Data Structure and Usage
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Data Structure and Usage">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#database-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      Database Architecture
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Database Architecture">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fact-table-fact_landuse_transitions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Fact Table: fact_landuse_transitions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dimension-tables" class="md-nav__link">
+    <span class="md-ellipsis">
+      Dimension Tables
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pre-built-views-for-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      Pre-built Views for Analysis
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scenario-naming-convention-in-database" class="md-nav__link">
+    <span class="md-ellipsis">
+      Scenario Naming Convention in Database
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Scenario Naming Convention in Database">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#format-climatemodel_rcp_sspssp" class="md-nav__link">
+    <span class="md-ellipsis">
+      Format: {ClimateModel}_{RCP}_ssp{SSP}
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#climate-model-components" class="md-nav__link">
+    <span class="md-ellipsis">
+      Climate Model Components
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rcp-components" class="md-nav__link">
+    <span class="md-ellipsis">
+      RCP Components
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ssp-components" class="md-nav__link">
+    <span class="md-ellipsis">
+      SSP Components
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#data-analysis-patterns" class="md-nav__link">
+    <span class="md-ellipsis">
+      Data Analysis Patterns
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Data Analysis Patterns">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#common-aggregation-strategies" class="md-nav__link">
+    <span class="md-ellipsis">
+      Common Aggregation Strategies
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#key-analysis-considerations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Key Analysis Considerations
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#important-analysis-guidelines" class="md-nav__link">
+    <span class="md-ellipsis">
+      Important Analysis Guidelines
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Important Analysis Guidelines">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#when-analyzing-rpa-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      When Analyzing RPA Data
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#common-query-patterns-for-natural-language-interface" class="md-nav__link">
+    <span class="md-ellipsis">
+      Common Query Patterns for Natural Language Interface
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#data-quality-and-validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Data Quality and Validation
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Data Quality and Validation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#built-in-data-checks" class="md-nav__link">
+    <span class="md-ellipsis">
+      Built-in Data Checks
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#analysis-guidelines" class="md-nav__link">
+    <span class="md-ellipsis">
+      Analysis Guidelines
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Analysis Guidelines">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#choosing-appropriate-analysis-approaches" class="md-nav__link">
+    <span class="md-ellipsis">
+      Choosing Appropriate Analysis Approaches
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Choosing Appropriate Analysis Approaches">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#for-climate-impact-studies_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      For Climate Impact Studies
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#for-socioeconomic-impact-studies" class="md-nav__link">
+    <span class="md-ellipsis">
+      For Socioeconomic Impact Studies
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#for-integrated-assessment_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      For Integrated Assessment
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#best-practices-for-temporal-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      Best Practices for Temporal Analysis
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Best Practices for Temporal Analysis">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#understanding-scenario-divergence-over-time" class="md-nav__link">
+    <span class="md-ellipsis">
+      Understanding Scenario Divergence Over Time
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#recommended-temporal-analysis-approaches" class="md-nav__link">
+    <span class="md-ellipsis">
+      Recommended Temporal Analysis Approaches
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#geographic-analysis-guidelines" class="md-nav__link">
+    <span class="md-ellipsis">
+      Geographic Analysis Guidelines
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Geographic Analysis Guidelines">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#multi-scale-analysis-strategies" class="md-nav__link">
+    <span class="md-ellipsis">
+      Multi-Scale Analysis Strategies
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#regional-considerations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Regional Considerations
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#validation-and-quality-assurance" class="md-nav__link">
+    <span class="md-ellipsis">
+      Validation and Quality Assurance
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Validation and Quality Assurance">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#recommended-validation-checks" class="md-nav__link">
+    <span class="md-ellipsis">
+      Recommended Validation Checks
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#interpreting-results" class="md-nav__link">
+    <span class="md-ellipsis">
+      Interpreting Results
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#integration-with-rpa-land-use-analytics-tools" class="md-nav__link">
+    <span class="md-ellipsis">
+      Integration with RPA Land Use Analytics Tools
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Integration with RPA Land Use Analytics Tools">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#using-natural-language-queries" class="md-nav__link">
+    <span class="md-ellipsis">
+      Using Natural Language Queries
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#integration-with-analysis-workflows" class="md-nav__link">
+    <span class="md-ellipsis">
+      Integration with Analysis Workflows
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#references-and-further-reading" class="md-nav__link">
+    <span class="md-ellipsis">
+      References and Further Reading
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="References and Further Reading">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#official-rpa-assessment-resources" class="md-nav__link">
+    <span class="md-ellipsis">
+      Official RPA Assessment Resources
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#online-resources" class="md-nav__link">
+    <span class="md-ellipsis">
+      Online Resources
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#related-documentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Related Documentation
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Related Documentation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#within-rpa-land-use-analytics-system" class="md-nav__link">
+    <span class="md-ellipsis">
+      Within RPA Land Use Analytics System
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cross-references" class="md-nav__link">
+    <span class="md-ellipsis">
+      Cross-References
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#see-also" class="md-nav__link">
+    <span class="md-ellipsis">
+      See Also
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="See Also">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#related-documentation_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Related Documentation
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#quick-navigation-by-application" class="md-nav__link">
+    <span class="md-ellipsis">
+      Quick Navigation by Application
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Natural Language Queries
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Natural Language Queries
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../queries/complete-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Complete Query Guide
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Agent System
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Agent System
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../agents/complete-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Complete Agent Guide
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_5_2" id="__nav_5_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    API Reference
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_2">
+            <span class="md-nav__icon md-icon"></span>
+            API Reference
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/agent/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Main Agent
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/landuse-query-agent/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Query Capabilities
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/langgraph-agent/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    LangGraph Integration
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Data & Database
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            Data & Database
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../data/complete-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Complete Database Reference
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../data/data-dictionary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Data Dictionary
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../data/sources/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Data Sources
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../data/categories/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Land Use Categories
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../data/variable-descriptions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Variable Descriptions
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../data/rpa-model-diagram/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    RPA Model Diagram
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../data/processing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Data Processing
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Examples & Use Cases
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            Examples & Use Cases
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/complete-examples/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Complete Examples Guide
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    API Reference
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            API Reference
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/converters/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Data Converters
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/tools/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Tools & Utilities
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Development
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            Development
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development/architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Architecture
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development/contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Contributing
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development/testing-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Testing Guide
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development/testing-implementation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Testing Implementation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development/ci-cd-pipeline/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    CI/CD Pipeline
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development/retry-logic/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Retry Logic
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development/branding-strategy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Branding Strategy
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development/modern-duckdb-tools/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Modern DuckDB Tools
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development/pydantic-models/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Pydantic Models
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development/security-policy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Security Policy
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development/duckdb-optimization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    DuckDB Optimization
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development/streamlit-fragments/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Streamlit Fragments
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="complete-rpa-assessment-reference">Complete RPA Assessment Reference<a class="headerlink" href="#complete-rpa-assessment-reference" title="Permanent link">&para;</a></h1>
+<p>Welcome to the comprehensive guide for understanding the USDA Forest Service's 2020 Resources Planning Act (RPA) Assessment. This guide provides complete documentation of the methodology, scenarios, climate models, and data structure that underlies the RPA land use projections from 2020 to 2100.</p>
+<h2 id="table-of-contents">Table of Contents<a class="headerlink" href="#table-of-contents" title="Permanent link">&para;</a></h2>
+<ol>
+<li><a href="#rpa-assessment-overview">RPA Assessment Overview</a></li>
+<li><a href="#land-use-change-methodology">Land Use Change Methodology</a></li>
+<li><a href="#climate-models-and-projections">Climate Models and Projections</a></li>
+<li><a href="#integrated-scenarios-framework">Integrated Scenarios Framework</a></li>
+<li><a href="#data-structure-and-usage">Data Structure and Usage</a></li>
+<li><a href="#analysis-guidelines">Analysis Guidelines</a></li>
+</ol>
+<h2 id="rpa-assessment-overview">RPA Assessment Overview<a class="headerlink" href="#rpa-assessment-overview" title="Permanent link">&para;</a></h2>
+<h3 id="about-the-2020-resources-planning-act-assessment">About the 2020 Resources Planning Act Assessment<a class="headerlink" href="#about-the-2020-resources-planning-act-assessment" title="Permanent link">&para;</a></h3>
+<p>The USDA Forest Service's 2020 Resources Planning Act (RPA) Assessment provides comprehensive projections of land use change across the United States through 2100. This assessment is mandated by the Forest and Rangeland Renewable Resources Planning Act of 1974, which requires periodic evaluations of the Nation's renewable resources.</p>
+<h3 id="assessment-scope-and-coverage">Assessment Scope and Coverage<a class="headerlink" href="#assessment-scope-and-coverage" title="Permanent link">&para;</a></h3>
+<h4 id="geographic-coverage">Geographic Coverage<a class="headerlink" href="#geographic-coverage" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>3,075 US counties</strong> - Complete coverage of the conterminous United States</li>
+<li><strong>County-level resolution</strong> - Maintains local geographic detail for analysis</li>
+<li><strong>Private land focus</strong> - Public lands are assumed to remain static</li>
+</ul>
+<h4 id="temporal-coverage">Temporal Coverage<a class="headerlink" href="#temporal-coverage" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Base period</strong>: 2012-2020 (calibration period)</li>
+<li><strong>Projection periods</strong>: 2020-2030, 2030-2040, 2040-2050, 2050-2070, 2070-2090, 2090-2100</li>
+<li><strong>Total timespan</strong>: Nearly 90 years of land use evolution</li>
+</ul>
+<h4 id="land-use-categories">Land Use Categories<a class="headerlink" href="#land-use-categories" title="Permanent link">&para;</a></h4>
+<p>The assessment tracks <strong>5 major land use categories</strong>:</p>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Land Use</th>
+<th>Category</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>cr</strong></td>
+<td>Crop</td>
+<td>Agriculture</td>
+<td>Agricultural cropland for food, feed, and fiber</td>
+</tr>
+<tr>
+<td><strong>ps</strong></td>
+<td>Pasture</td>
+<td>Agriculture</td>
+<td>Livestock grazing land and hay production</td>
+</tr>
+<tr>
+<td><strong>fr</strong></td>
+<td>Forest</td>
+<td>Natural</td>
+<td>Forested areas including timberland and woodland</td>
+</tr>
+<tr>
+<td><strong>ur</strong></td>
+<td>Urban</td>
+<td>Developed</td>
+<td>Built and developed areas including residential, commercial, and infrastructure</td>
+</tr>
+<tr>
+<td><strong>rg</strong></td>
+<td>Rangeland</td>
+<td>Natural</td>
+<td>Natural grasslands and shrublands</td>
+</tr>
+</tbody>
+</table>
+<h3 id="integrated-scenario-framework">Integrated Scenario Framework<a class="headerlink" href="#integrated-scenario-framework" title="Permanent link">&para;</a></h3>
+<p>The assessment employs <strong>20 integrated climate-socioeconomic scenarios</strong> to capture uncertainty:</p>
+<ul>
+<li><strong>4 scenario combinations</strong> (LM, HL, HM, HH) representing different development pathways</li>
+<li><strong>5 climate models</strong> representing diverse precipitation and temperature patterns</li>
+<li><strong>2 climate pathways</strong> (RCP4.5 lower emissions, RCP8.5 higher emissions)</li>
+<li><strong>4 socioeconomic pathways</strong> (SSP1, SSP2, SSP3, SSP5) representing different growth patterns</li>
+</ul>
+<h3 id="key-data-sources">Key Data Sources<a class="headerlink" href="#key-data-sources" title="Permanent link">&para;</a></h3>
+<h4 id="primary-data-sources">Primary Data Sources<a class="headerlink" href="#primary-data-sources" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>National Resources Inventory (NRI)</strong> - Historical land use observations from 2001-2012</li>
+<li><strong>Global Climate Models</strong> - Temperature and precipitation projections from 5 selected GCMs</li>
+<li><strong>Socioeconomic Projections</strong> - Population and economic growth scenarios from SSPs</li>
+<li><strong>Geographic Data</strong> - County boundaries and land ownership patterns</li>
+</ul>
+<h4 id="model-outputs">Model Outputs<a class="headerlink" href="#model-outputs" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Transition matrices</strong> - Detailed acre-by-acre changes between land use categories</li>
+<li><strong>Scenario variations</strong> - Results for all 20 integrated climate-socioeconomic scenarios</li>
+<li><strong>Temporal resolution</strong> - Decadal projections enabling trend analysis</li>
+<li><strong>Spatial detail</strong> - County-level granularity for local and regional analysis</li>
+</ul>
+<h2 id="land-use-change-methodology">Land Use Change Methodology<a class="headerlink" href="#land-use-change-methodology" title="Permanent link">&para;</a></h2>
+<h3 id="econometric-model-foundation">Econometric Model Foundation<a class="headerlink" href="#econometric-model-foundation" title="Permanent link">&para;</a></h3>
+<p>The RPA land use projections are based on a sophisticated econometric model that projects county-level land use transitions from 2020 to 2100. The model represents a significant advance in land use change modeling, incorporating climate, socioeconomic, and historical factors.</p>
+<h4 id="core-model-characteristics">Core Model Characteristics<a class="headerlink" href="#core-model-characteristics" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Spatial Resolution</strong>: County-level analysis for 3,075 counties in the conterminous United States</li>
+<li><strong>Temporal Coverage</strong>: Decadal projections from 2020 to 2100</li>
+<li><strong>Land Ownership Focus</strong>: Private land only (public lands assumed static)</li>
+<li><strong>Scenario Integration</strong>: 20 integrated climate-socioeconomic futures</li>
+<li><strong>Policy Approach</strong>: Policy-neutral projections based on historical relationships</li>
+</ul>
+<h3 id="fundamental-model-assumptions">Fundamental Model Assumptions<a class="headerlink" href="#fundamental-model-assumptions" title="Permanent link">&para;</a></h3>
+<h4 id="1-development-irreversibility">1. Development Irreversibility<a class="headerlink" href="#1-development-irreversibility" title="Permanent link">&para;</a></h4>
+<p><strong>Key Principle</strong>: Once land converts to developed (urban) use, it does not revert to other uses.</p>
+<p><strong>Rationale</strong>: Based on observed patterns where urban development represents a permanent change in land use. This reflects the high cost and practical difficulty of converting developed areas back to agricultural or natural uses.</p>
+<p><strong>Implications</strong>: 
+- Urban areas can only increase or remain stable over time
+- All urbanization comes from conversion of agricultural or natural lands
+- Development pressure is a one-way driver of land use change</p>
+<h4 id="2-private-land-focus">2. Private Land Focus<a class="headerlink" href="#2-private-land-focus" title="Permanent link">&para;</a></h4>
+<p><strong>Key Principle</strong>: All land use transitions occur on privately owned land.</p>
+<p><strong>Rationale</strong>: Public lands (federal, state, local) are managed under different objectives and constraints, making them less responsive to market-driven land use pressures.</p>
+<p><strong>Implications</strong>:
+- Model excludes approximately 30% of total U.S. land area
+- Focus on lands most subject to economic development pressures
+- Results represent the subset of land where transitions are most likely</p>
+<h4 id="3-historical-calibration">3. Historical Calibration<a class="headerlink" href="#3-historical-calibration" title="Permanent link">&para;</a></h4>
+<p><strong>Key Principle</strong>: Model calibrated using observed transitions from 2001-2012 National Resources Inventory data.</p>
+<p><strong>Rationale</strong>: Past land use change patterns provide the best available evidence for understanding drivers and rates of future change.</p>
+<p><strong>Implications</strong>:
+- Future transitions follow historically observed relationships
+- Model captures regional variations in transition propensities
+- Assumes basic economic and social drivers remain consistent</p>
+<h4 id="4-policy-neutrality">4. Policy Neutrality<a class="headerlink" href="#4-policy-neutrality" title="Permanent link">&para;</a></h4>
+<p><strong>Key Principle</strong>: No assumptions about future conservation policies or land use regulations.</p>
+<p><strong>Rationale</strong>: Policy-neutral projections provide a baseline against which policy alternatives can be evaluated.</p>
+<p><strong>Implications</strong>:
+- Results show market-driven outcomes without policy intervention
+- Useful for assessing potential policy impacts
+- May overestimate conversion pressures where policies provide protection</p>
+<h3 id="historical-context-and-calibration">Historical Context and Calibration<a class="headerlink" href="#historical-context-and-calibration" title="Permanent link">&para;</a></h3>
+<h4 id="development-trends-over-time">Development Trends Over Time<a class="headerlink" href="#development-trends-over-time" title="Permanent link">&para;</a></h4>
+<p>The model calibration period (2001-2012) captured important trends:</p>
+<ul>
+<li><strong>1980s baseline</strong>: ~1.2 million acres per year converted to developed uses</li>
+<li><strong>1990s expansion</strong>: Peak development around 1992-1997 at ~2.0 million acres per year</li>
+<li><strong>2000s moderation</strong>: Declining development rates reflected in model calibration</li>
+<li><strong>Post-recession patterns</strong>: Model captures more moderate growth expectations</li>
+</ul>
+<h4 id="observed-transition-patterns-2001-2012">Observed Transition Patterns (2001-2012)<a class="headerlink" href="#observed-transition-patterns-2001-2012" title="Permanent link">&para;</a></h4>
+<p><strong>Most Active Transitions</strong>:
+- <strong>Crop ↔ Pasture</strong>: Frequent conversions representing agricultural land management decisions
+- <strong>Forest → Urban</strong>: Primary pathway for urbanization and development
+- <strong>Agricultural → Urban</strong>: Secondary pathway, especially near existing developed areas</p>
+<p><strong>Regional Variations</strong>:
+- <strong>South</strong>: Highest absolute forest-to-urban conversion
+- <strong>West</strong>: Rangeland-to-urban conversions in arid regions<br />
+- <strong>Midwest</strong>: Agricultural-to-urban conversions near metropolitan areas
+- <strong>Northeast</strong>: Forest-to-urban in suburban expansion areas</p>
+<h3 id="projection-methodology">Projection Methodology<a class="headerlink" href="#projection-methodology" title="Permanent link">&para;</a></h3>
+<h4 id="econometric-model-structure">Econometric Model Structure<a class="headerlink" href="#econometric-model-structure" title="Permanent link">&para;</a></h4>
+<p><strong>1. Transition Probability Modeling</strong>
+The model calculates the probability of each land use transition based on:
+- <strong>Historical transition rates</strong> by county and land use type
+- <strong>Climate variables</strong> (temperature and precipitation changes)
+- <strong>Socioeconomic factors</strong> (population growth, economic development)
+- <strong>Land quality indicators</strong> (soil productivity, terrain characteristics)
+- <strong>Spatial factors</strong> (proximity to existing development, transportation access)</p>
+<p><strong>2. Constraint Application</strong>
+Physical and logical constraints ensure realistic projections:
+- <strong>Area conservation</strong>: Total county land area remains constant
+- <strong>Development irreversibility</strong>: Urban land cannot convert to other uses
+- <strong>Transition realism</strong>: Changes follow observed historical patterns
+- <strong>Capacity limits</strong>: Maximum feasible transition rates based on historical data</p>
+<p><strong>3. Temporal Projection Process</strong>
+For each time period (decade), the model:
+1. Calculates transition probabilities based on projected conditions
+2. Applies constraints to ensure realistic outcomes
+3. Generates land use areas for each category
+4. Feeds results forward as initial conditions for next period</p>
+<h4 id="climate-integration-process">Climate Integration Process<a class="headerlink" href="#climate-integration-process" title="Permanent link">&para;</a></h4>
+<p><strong>Temperature Effects</strong>:
+- Higher temperatures can reduce agricultural productivity
+- Extreme heat may limit development attractiveness in some regions
+- Temperature stress affects forest growth and survival</p>
+<p><strong>Precipitation Effects</strong>:
+- Drought conditions increase pressure for agricultural land conversion
+- Excessive precipitation can limit development in flood-prone areas
+- Water availability affects regional growth patterns</p>
+<p><strong>Regional Climate Impacts</strong>:
+Different climate models project varying regional effects:
+- <strong>Southwest</strong>: Increased drought stress on agriculture and forests
+- <strong>Southeast</strong>: Higher temperature stress on all land uses
+- <strong>Great Plains</strong>: Variable precipitation affects agricultural viability
+- <strong>Pacific Northwest</strong>: Temperature increases affect forest composition</p>
+<h4 id="socioeconomic-driver-integration">Socioeconomic Driver Integration<a class="headerlink" href="#socioeconomic-driver-integration" title="Permanent link">&para;</a></h4>
+<p><strong>Population Growth Effects</strong>:
+- Higher population creates demand for housing and urban services
+- Regional population shifts drive spatial patterns of development
+- Demographic changes affect agricultural labor availability</p>
+<p><strong>Economic Growth Effects</strong>:
+- GDP growth increases demand for commercial and industrial land
+- Economic prosperity enables development in previously marginal areas
+- Income growth affects housing preferences and suburban expansion</p>
+<p><strong>Technology and Development Patterns</strong>:
+- Different SSP scenarios assume different development technologies
+- Infrastructure investments affect development feasibility
+- Transportation patterns influence spatial development</p>
+<h3 id="key-national-projections-2020-2100">Key National Projections (2020-2100)<a class="headerlink" href="#key-national-projections-2020-2100" title="Permanent link">&para;</a></h3>
+<h4 id="developed-land-expansion">Developed Land Expansion<a class="headerlink" href="#developed-land-expansion" title="Permanent link">&para;</a></h4>
+<p><strong>Range Across Scenarios</strong>: +41.3 to +57.0 million acres (2020-2070)
+- <strong>Scenario HL</strong> (Low Growth): +41.3 million acres - most conservative expansion
+- <strong>Scenario HH</strong> (High Growth): +57.0 million acres - maximum development pressure
+- <strong>Rate of Change</strong>: 0.8 to 1.1 million acres per year nationally</p>
+<h4 id="forest-land-changes">Forest Land Changes<a class="headerlink" href="#forest-land-changes" title="Permanent link">&para;</a></h4>
+<p><strong>Range Across Scenarios</strong>: -7.6 to -15.0 million acres (2020-2070)
+- <strong>Primary Driver</strong>: ~46% of new developed land comes from forest conversion
+- <strong>Regional Concentration</strong>: Largest losses in South and Pacific Coast regions
+- <strong>Conservation Potential</strong>: Scenario LM shows smallest forest losses</p>
+<h4 id="agricultural-land-dynamics">Agricultural Land Dynamics<a class="headerlink" href="#agricultural-land-dynamics" title="Permanent link">&para;</a></h4>
+<p><strong>Variable Outcomes by Scenario</strong>:
+- <strong>Crop vs. Pasture</strong>: Significant shifts between cropping systems
+- <strong>Regional Specialization</strong>: Some areas intensify agriculture, others convert
+- <strong>Climate Sensitivity</strong>: Drought and temperature stress drive conversions</p>
+<h3 id="regional-development-patterns">Regional Development Patterns<a class="headerlink" href="#regional-development-patterns" title="Permanent link">&para;</a></h3>
+<h4 id="highest-development-pressure-regions">Highest Development Pressure Regions<a class="headerlink" href="#highest-development-pressure-regions" title="Permanent link">&para;</a></h4>
+<p><strong>1. South Region</strong>: 18.4-25.0 million acres of new development
+- States: Texas, Florida, North Carolina, Georgia, Virginia
+- Drivers: Population growth, economic expansion, favorable climate</p>
+<p><strong>2. North Region</strong>: 10.6-14.0 million acres of new development<br />
+- States: Ohio, Michigan, Pennsylvania, New York, Illinois
+- Drivers: Urban expansion around major metropolitan areas</p>
+<p><strong>3. Rocky Mountain Region</strong>: 6.4-8.9 million acres of new development
+- States: Colorado, Utah, Idaho, Montana, Wyoming
+- Drivers: Amenity migration, energy development, population growth</p>
+<p><strong>4. Pacific Coast Region</strong>: 5.9-9.9 million acres of new development
+- States: California, Oregon, Washington
+- Drivers: Continued urbanization, economic growth, climate migration</p>
+<h4 id="forest-loss-concentration">Forest Loss Concentration<a class="headerlink" href="#forest-loss-concentration" title="Permanent link">&para;</a></h4>
+<p><strong>Largest Losses</strong>: South Region (4.6-9.2 million acres)
+- High development pressure combined with extensive private forests
+- Conversion for both urban development and agricultural expansion</p>
+<p><strong>Moderate Losses</strong>: Pacific Coast and North regions
+- Urban expansion pressures on forested suburban areas
+- Climate stress contributing to conversion decisions</p>
+<p><strong>Smallest Losses</strong>: Rocky Mountain Region
+- Lower development pressure and more public land</p>
+<h3 id="scenario-specific-impacts">Scenario-Specific Impacts<a class="headerlink" href="#scenario-specific-impacts" title="Permanent link">&para;</a></h3>
+<h4 id="climate-pathway-effects-rcp-45-vs-rcp-85">Climate Pathway Effects (RCP 4.5 vs RCP 8.5)<a class="headerlink" href="#climate-pathway-effects-rcp-45-vs-rcp-85" title="Permanent link">&para;</a></h4>
+<p><strong>Higher Warming (RCP 8.5) Results</strong>:
+- <strong>2.4% less developed land expansion</strong> - Climate stress reduces development attractiveness
+- <strong>1.2 million acres more forest retention</strong> - Reduced conversion pressure
+- <strong>Regional variations</strong> - Stronger effects in already hot/dry regions</p>
+<h4 id="socioeconomic-pathway-effects">Socioeconomic Pathway Effects<a class="headerlink" href="#socioeconomic-pathway-effects" title="Permanent link">&para;</a></h4>
+<p><strong>Higher Growth (SSP5 vs SSP3) Results</strong>:
+- <strong>9.4% more developed land expansion</strong> - Economic pressure drives conversion
+- <strong>3.5 million acres less forest</strong> - Development pressure overcomes conservation
+- <strong>Accelerated urbanization</strong> - Faster rates of land use change</p>
+<h2 id="climate-models-and-projections">Climate Models and Projections<a class="headerlink" href="#climate-models-and-projections" title="Permanent link">&para;</a></h2>
+<h3 id="overview-of-climate-model-selection">Overview of Climate Model Selection<a class="headerlink" href="#overview-of-climate-model-selection" title="Permanent link">&para;</a></h3>
+<p>The 2020 RPA Assessment uses 5 carefully selected Global Climate Models (GCMs) to capture the range of possible future climate conditions across the United States. These models were chosen through a rigorous selection process to represent different combinations of temperature and precipitation patterns while ensuring good performance across U.S. regions.</p>
+<h3 id="the-five-core-climate-models">The Five Core Climate Models<a class="headerlink" href="#the-five-core-climate-models" title="Permanent link">&para;</a></h3>
+<h4 id="cnrm_cm5-wet-climate-model">CNRM_CM5 - "Wet" Climate Model<a class="headerlink" href="#cnrm_cm5-wet-climate-model" title="Permanent link">&para;</a></h4>
+<p><strong>Full Name</strong>: Centre National de Recherches Météorologiques Climate Model 5
+- <strong>Origin</strong>: Météo-France, Centre National de Recherches Météorologiques, France
+- <strong>Key Characteristic</strong>: Projects increased precipitation across most of the United States
+- <strong>Temperature Pattern</strong>: Moderate warming trajectory with regional variations
+- <strong>Precipitation Pattern</strong>: Above-average precipitation in most regions
+- <strong>Best Used For</strong>: 
+  - Analyzing scenarios with higher water availability
+  - Assessing land use under reduced drought stress
+  - Evaluating agricultural productivity under favorable moisture conditions</p>
+<h4 id="hadgem2_es365-hot-climate-model">HadGEM2_ES365 - "Hot" Climate Model<a class="headerlink" href="#hadgem2_es365-hot-climate-model" title="Permanent link">&para;</a></h4>
+<p><strong>Full Name</strong>: Hadley Centre Global Environmental Model 2 - Earth System (365-day calendar)
+- <strong>Origin</strong>: Met Office Hadley Centre, United Kingdom
+- <strong>Key Characteristic</strong>: Represents the upper bound of temperature increases
+- <strong>Temperature Pattern</strong>: Highest warming projections among the five models
+- <strong>Precipitation Pattern</strong>: Variable, with some regions experiencing reduced precipitation
+- <strong>Best Used For</strong>:
+  - Stress-testing land use systems under extreme heat scenarios
+  - Analyzing agricultural vulnerability to temperature extremes
+  - Assessing maximum development pressure under climate stress</p>
+<h4 id="ipsl_cm5a_mr-dry-climate-model">IPSL_CM5A_MR - "Dry" Climate Model<a class="headerlink" href="#ipsl_cm5a_mr-dry-climate-model" title="Permanent link">&para;</a></h4>
+<p><strong>Full Name</strong>: Institut Pierre Simon Laplace Climate Model 5A - Medium Resolution
+- <strong>Origin</strong>: Institut Pierre Simon Laplace, France
+- <strong>Key Characteristic</strong>: Projects reduced precipitation in many U.S. regions
+- <strong>Temperature Pattern</strong>: Moderate to high warming with regional variations
+- <strong>Precipitation Pattern</strong>: Below-average precipitation, increased drought risk
+- <strong>Best Used For</strong>:
+  - Analyzing drought and water scarcity impacts on land use
+  - Assessing agricultural stress and potential abandonment
+  - Evaluating forest vulnerability to moisture stress</p>
+<h4 id="mri_cgcm3-least-warm-climate-model">MRI_CGCM3 - "Least Warm" Climate Model<a class="headerlink" href="#mri_cgcm3-least-warm-climate-model" title="Permanent link">&para;</a></h4>
+<p><strong>Full Name</strong>: Meteorological Research Institute Coupled Global Climate Model 3
+- <strong>Origin</strong>: Meteorological Research Institute, Japan
+- <strong>Key Characteristic</strong>: Most conservative temperature projections
+- <strong>Temperature Pattern</strong>: Lower bound of warming among the five models
+- <strong>Precipitation Pattern</strong>: Moderate changes with regional variations
+- <strong>Best Used For</strong>:
+  - Best-case climate scenarios and conservative projections
+  - Minimum climate stress assessments
+  - Baseline comparisons for climate impact analysis</p>
+<h4 id="noresm1_m-middle-climate-model">NorESM1_M - "Middle" Climate Model<a class="headerlink" href="#noresm1_m-middle-climate-model" title="Permanent link">&para;</a></h4>
+<p><strong>Full Name</strong>: Norwegian Earth System Model 1 - Medium Resolution
+- <strong>Origin</strong>: Norwegian Climate Centre, Norway
+- <strong>Key Characteristic</strong>: Represents central tendency of climate projections
+- <strong>Temperature Pattern</strong>: Median warming and precipitation changes
+- <strong>Precipitation Pattern</strong>: Balanced regional increases and decreases
+- <strong>Best Used For</strong>:
+  - Most likely/average climate outcomes
+  - Central estimates for planning purposes
+  - Balanced projections across regions</p>
+<h3 id="climate-model-selection-rationale">Climate Model Selection Rationale<a class="headerlink" href="#climate-model-selection-rationale" title="Permanent link">&para;</a></h3>
+<h4 id="scientific-criteria">Scientific Criteria<a class="headerlink" href="#scientific-criteria" title="Permanent link">&para;</a></h4>
+<p>The RPA Assessment team selected these models based on:</p>
+<p><strong>1. Uncertainty Representation</strong>
+- <strong>Temperature range</strong>: From conservative (Least Warm) to extreme (Hot)
+- <strong>Precipitation range</strong>: From dry conditions (Dry) to wet conditions (Wet)
+- <strong>Central tendency</strong>: Middle model represents most likely outcomes</p>
+<p><strong>2. Geographic Performance</strong>
+- Models evaluated for accuracy across U.S. climate regions
+- Regional biases corrected through statistical downscaling
+- Performance validated against historical observations</p>
+<p><strong>3. Complementary Characteristics</strong>
+- Each model captures different aspects of climate uncertainty
+- Combined ensemble provides comprehensive range of possibilities
+- Models selected to avoid redundancy while maximizing coverage</p>
+<h4 id="model-ensemble-benefits">Model Ensemble Benefits<a class="headerlink" href="#model-ensemble-benefits" title="Permanent link">&para;</a></h4>
+<p>Using five diverse climate models provides:
+- <strong>Robust uncertainty quantification</strong> - Full range of plausible climate futures
+- <strong>Regional specificity</strong> - Different models perform better in different regions
+- <strong>Extreme scenario coverage</strong> - Both optimistic and pessimistic climate futures
+- <strong>Policy-relevant ranges</strong> - Bounded estimates for decision-making</p>
+<h3 id="climate-pathways-representative-concentration-pathways">Climate Pathways (Representative Concentration Pathways)<a class="headerlink" href="#climate-pathways-representative-concentration-pathways" title="Permanent link">&para;</a></h3>
+<p>Each climate model runs under two Representative Concentration Pathways (RCPs) representing different greenhouse gas emission trajectories:</p>
+<h4 id="rcp45-lower-emissions-pathway">RCP4.5 - Lower Emissions Pathway<a class="headerlink" href="#rcp45-lower-emissions-pathway" title="Permanent link">&para;</a></h4>
+<p><strong>Emission Trajectory</strong>: Emissions peak around 2040, then decline
+- <strong>Global warming</strong>: Approximately 2.5°C increase by 2100
+- <strong>Policy assumptions</strong>: Significant global emissions reductions implemented
+- <strong>Radiative forcing</strong>: Moderate forcing scenario with stabilization
+- <strong>Climate outcomes</strong>: More optimistic climate future with managed warming
+- <strong>Land use implications</strong>: Reduced climate stress on agriculture and forests</p>
+<h4 id="rcp85-higher-emissions-pathway">RCP8.5 - Higher Emissions Pathway<a class="headerlink" href="#rcp85-higher-emissions-pathway" title="Permanent link">&para;</a></h4>
+<p><strong>Emission Trajectory</strong>: Continued high emissions growth through 2100
+- <strong>Global warming</strong>: Approximately 4.5°C increase by 2100
+- <strong>Policy assumptions</strong>: Limited climate action, continued fossil fuel dependence
+- <strong>Radiative forcing</strong>: High forcing scenario with continued acceleration
+- <strong>Climate outcomes</strong>: More pessimistic climate future with severe warming
+- <strong>Land use implications</strong>: Increased climate stress, potential land abandonment</p>
+<h3 id="using-climate-models-in-rpa-analysis">Using Climate Models in RPA Analysis<a class="headerlink" href="#using-climate-models-in-rpa-analysis" title="Permanent link">&para;</a></h3>
+<h4 id="comparative-analysis-strategies">Comparative Analysis Strategies<a class="headerlink" href="#comparative-analysis-strategies" title="Permanent link">&para;</a></h4>
+<p><strong>1. Cross-Model Comparisons</strong>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>&quot;Compare forest loss between the wet and dry climate models&quot;
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>&quot;Which climate model shows the most agricultural stress?&quot;
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>&quot;Show urban expansion differences across all five climate models&quot;
+</span></code></pre></div></p>
+<p><strong>2. Extreme Scenario Analysis</strong>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>&quot;Contrast outcomes between the hot and least warm models&quot;
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>&quot;Show maximum climate impact using the dry-hot combination&quot;
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>&quot;What&#39;s the best-case scenario using the wet-least warm combination?&quot;
+</span></code></pre></div></p>
+<p><strong>3. Central Tendency Analysis</strong>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>&quot;Use the middle climate model for typical projections&quot;
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>&quot;Show average outcomes across all climate models&quot;
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>&quot;What does the middle model suggest for forest conservation?&quot;
+</span></code></pre></div></p>
+<h4 id="interpreting-climate-model-results">Interpreting Climate Model Results<a class="headerlink" href="#interpreting-climate-model-results" title="Permanent link">&para;</a></h4>
+<p><strong>Wet Model Results</strong> suggest:
+- Impacts under increased precipitation and water availability
+- Reduced drought stress on agriculture and forests
+- Potential for increased agricultural productivity
+- Lower wildfire risk in many regions</p>
+<p><strong>Dry Model Results</strong> indicate:
+- Drought stress responses and water scarcity impacts
+- Agricultural vulnerability and potential abandonment
+- Increased pressure for land use conversion
+- Higher wildfire risk and forest stress</p>
+<p><strong>Hot Model Results</strong> show:
+- Maximum temperature stress on all land use systems
+- Agricultural heat stress and reduced productivity
+- Urban heat island effects limiting development appeal
+- Forest mortality and composition changes</p>
+<p><strong>Least Warm Model Results</strong> provide:
+- Conservative estimates with minimal climate stress
+- Best-case agricultural and forest outcomes
+- Reduced pressure for climate-driven land conversion
+- Baseline for comparing climate impacts</p>
+<p><strong>Middle Model Results</strong> offer:
+- Balanced projections representing most likely outcomes
+- Central estimates for planning and policy analysis
+- Moderate climate stress across land use systems
+- Representative outcomes for typical conditions</p>
+<h3 id="technical-implementation">Technical Implementation<a class="headerlink" href="#technical-implementation" title="Permanent link">&para;</a></h3>
+<h4 id="downscaling-and-bias-correction">Downscaling and Bias Correction<a class="headerlink" href="#downscaling-and-bias-correction" title="Permanent link">&para;</a></h4>
+<p><strong>Spatial Downscaling</strong>: Global climate model outputs downscaled to county-level resolution using:
+- Statistical downscaling methods
+- Regional climate model integration<br />
+- Topographic and local climate factor adjustment</p>
+<p><strong>Bias Correction</strong>: Model outputs adjusted for:
+- Historical bias relative to observations
+- Regional systematic errors
+- Seasonal and temporal bias patterns</p>
+<h4 id="validation-and-quality-control">Validation and Quality Control<a class="headerlink" href="#validation-and-quality-control" title="Permanent link">&para;</a></h4>
+<p><strong>Historical Validation</strong>: Models validated against:
+- 20<sup>th</sup> century temperature and precipitation observations
+- Regional climate patterns and variability
+- Extreme event frequency and intensity</p>
+<p><strong>Cross-Model Consistency</strong>: Ensemble checked for:
+- Reasonable spread across models
+- Consistent regional patterns
+- Physical plausibility of projections</p>
+<h2 id="integrated-scenarios-framework">Integrated Scenarios Framework<a class="headerlink" href="#integrated-scenarios-framework" title="Permanent link">&para;</a></h2>
+<h3 id="overview-of-the-four-rpa-scenarios">Overview of the Four RPA Scenarios<a class="headerlink" href="#overview-of-the-four-rpa-scenarios" title="Permanent link">&para;</a></h3>
+<p>The 2020 RPA Assessment employs four integrated scenarios that combine climate pathways (RCPs) with socioeconomic pathways (SSPs) to explore alternative futures and provide a comprehensive framework for evaluating natural resource outcomes through 2100.</p>
+<h4 id="quick-reference-the-four-core-scenarios">Quick Reference: The Four Core Scenarios<a class="headerlink" href="#quick-reference-the-four-core-scenarios" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Full Name</th>
+<th>Climate</th>
+<th>Socioeconomic</th>
+<th>Development Theme</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>LM</strong></td>
+<td>Lower warming-Moderate growth</td>
+<td>RCP 4.5</td>
+<td>SSP1</td>
+<td>"Taking the Green Road"</td>
+</tr>
+<tr>
+<td><strong>HL</strong></td>
+<td>High warming-Low growth</td>
+<td>RCP 8.5</td>
+<td>SSP3</td>
+<td>"A Rocky Road"</td>
+</tr>
+<tr>
+<td><strong>HM</strong></td>
+<td>High warming-Moderate growth</td>
+<td>RCP 8.5</td>
+<td>SSP2</td>
+<td>"Middle of the Road"</td>
+</tr>
+<tr>
+<td><strong>HH</strong></td>
+<td>High warming-High growth</td>
+<td>RCP 8.5</td>
+<td>SSP5</td>
+<td>"Taking the Highway"</td>
+</tr>
+</tbody>
+</table>
+<h3 id="detailed-scenario-descriptions">Detailed Scenario Descriptions<a class="headerlink" href="#detailed-scenario-descriptions" title="Permanent link">&para;</a></h3>
+<h4 id="scenario-lm-lower-warming-moderate-us-growth-rcp-45-ssp1">Scenario LM: Lower Warming-Moderate U.S. Growth (RCP 4.5-SSP1)<a class="headerlink" href="#scenario-lm-lower-warming-moderate-us-growth-rcp-45-ssp1" title="Permanent link">&para;</a></h4>
+<p><strong>Development Theme</strong>: "Taking the Green Road"</p>
+<p><strong>Climate Characteristics</strong>:
+- <strong>Emission pathway</strong>: Lower emissions with peak around 2040
+- <strong>Global warming</strong>: Moderate warming (~2.5°C by 2100)
+- <strong>Policy context</strong>: Strong international cooperation on climate action
+- <strong>Environmental impacts</strong>: Managed climate change with adaptation measures</p>
+<p><strong>Socioeconomic Characteristics</strong>:
+- <strong>U.S. Economic Growth</strong>: 3.0X GDP expansion by 2070
+- <strong>U.S. Population Growth</strong>: 1.5X increase to ~470 million by 2070
+- <strong>Development pattern</strong>: Sustainable development prioritized
+- <strong>Technology focus</strong>: Renewable energy transition and efficiency
+- <strong>International relations</strong>: Strong global cooperation and coordination</p>
+<p><strong>Key Features</strong>:
+- Environmental protection prioritized in development decisions
+- Sustainable intensification of agriculture
+- Green infrastructure and smart growth policies
+- Reduced material consumption per capita
+- Strong institutions and environmental governance</p>
+<p><strong>Land Use Implications</strong>:
+- Moderate development pressure with environmental constraints
+- Sustainable agricultural practices and productivity improvements
+- Forest conservation prioritized
+- Compact urban development patterns</p>
+<h4 id="scenario-hl-high-warming-low-us-growth-rcp-85-ssp3">Scenario HL: High Warming-Low U.S. Growth (RCP 8.5-SSP3)<a class="headerlink" href="#scenario-hl-high-warming-low-us-growth-rcp-85-ssp3" title="Permanent link">&para;</a></h4>
+<p><strong>Development Theme</strong>: "A Rocky Road"</p>
+<p><strong>Climate Characteristics</strong>:
+- <strong>Emission pathway</strong>: High emissions with continued growth
+- <strong>Global warming</strong>: Significant warming (~4.5°C by 2100)
+- <strong>Policy context</strong>: Limited international cooperation, regional conflicts
+- <strong>Environmental impacts</strong>: Severe climate impacts with limited adaptation</p>
+<p><strong>Socioeconomic Characteristics</strong>:
+- <strong>U.S. Economic Growth</strong>: 1.9X GDP expansion by 2070 (slowest growth)
+- <strong>U.S. Population Growth</strong>: 1.0X (essentially no net growth, ~330 million by 2070)
+- <strong>Development pattern</strong>: Nationalism and regional rivalry
+- <strong>Technology focus</strong>: Slow technological progress and adoption
+- <strong>International relations</strong>: Trade barriers and security concerns</p>
+<p><strong>Key Features</strong>:
+- Material-intensive consumption patterns
+- Slow economic development and technological progress
+- Resource competition and security concerns
+- Adaptation challenges due to limited cooperation
+- Unequal development with significant disparities</p>
+<p><strong>Land Use Implications</strong>:
+- Lowest development pressure due to slow growth
+- Agricultural stress from climate impacts
+- Limited conservation resources
+- Regional conflicts over land and water resources</p>
+<h4 id="scenario-hm-high-warming-moderate-us-growth-rcp-85-ssp2">Scenario HM: High Warming-Moderate U.S. Growth (RCP 8.5-SSP2)<a class="headerlink" href="#scenario-hm-high-warming-moderate-us-growth-rcp-85-ssp2" title="Permanent link">&para;</a></h4>
+<p><strong>Development Theme</strong>: "Middle of the Road"</p>
+<p><strong>Climate Characteristics</strong>:
+- <strong>Emission pathway</strong>: High emissions with continued growth
+- <strong>Global warming</strong>: Significant warming (~4.5°C by 2100)
+- <strong>Policy context</strong>: Slow progress on climate action
+- <strong>Environmental impacts</strong>: Substantial climate impacts with moderate adaptation</p>
+<p><strong>Socioeconomic Characteristics</strong>:
+- <strong>U.S. Economic Growth</strong>: 2.8X GDP expansion by 2070
+- <strong>U.S. Population Growth</strong>: 1.4X increase to ~450 million by 2070
+- <strong>Development pattern</strong>: Historical trends continue
+- <strong>Technology focus</strong>: Moderate technological advancement
+- <strong>International relations</strong>: Mixed cooperation and competition</p>
+<p><strong>Key Features</strong>:
+- Uneven development across regions and sectors
+- Moderate progress on sustainability goals
+- Mixed technological adoption and innovation
+- Some environmental improvements, some degradation
+- Persistent inequality and development challenges</p>
+<p><strong>Land Use Implications</strong>:
+- Moderate development pressure
+- Mixed agricultural and forest outcomes
+- Uneven conservation efforts
+- Regional variation in land use stress</p>
+<h4 id="scenario-hh-high-warming-high-us-growth-rcp-85-ssp5">Scenario HH: High Warming-High U.S. Growth (RCP 8.5-SSP5)<a class="headerlink" href="#scenario-hh-high-warming-high-us-growth-rcp-85-ssp5" title="Permanent link">&para;</a></h4>
+<p><strong>Development Theme</strong>: "Taking the Highway"</p>
+<p><strong>Climate Characteristics</strong>:
+- <strong>Emission pathway</strong>: High emissions with fossil fuel dependence
+- <strong>Global warming</strong>: Significant warming (~4.5°C by 2100)
+- <strong>Policy context</strong>: Technology-focused but continued high emissions
+- <strong>Environmental impacts</strong>: Severe climate impacts with technological solutions</p>
+<p><strong>Socioeconomic Characteristics</strong>:
+- <strong>U.S. Economic Growth</strong>: 4.7X GDP expansion by 2070 (highest growth)
+- <strong>U.S. Population Growth</strong>: 1.9X increase to ~580 million by 2070
+- <strong>Development pattern</strong>: Rapid development and urbanization
+- <strong>Technology focus</strong>: High technology adoption and innovation
+- <strong>International relations</strong>: Globalization with convergence</p>
+<p><strong>Key Features</strong>:
+- Rapid economic growth and technological development
+- High energy demand and fossil fuel consumption
+- Lifestyle convergence and high consumption
+- Urban living and technological solutions
+- Energy-intensive adaptation to climate change</p>
+<p><strong>Land Use Implications</strong>:
+- Highest development pressure
+- Maximum urban expansion
+- Agricultural intensification and efficiency
+- Technology-driven land management
+- Highest competition for land resources</p>
+<h3 id="understanding-rcps-and-ssps-integration">Understanding RCPs and SSPs Integration<a class="headerlink" href="#understanding-rcps-and-ssps-integration" title="Permanent link">&para;</a></h3>
+<h4 id="representative-concentration-pathways-rcps">Representative Concentration Pathways (RCPs)<a class="headerlink" href="#representative-concentration-pathways-rcps" title="Permanent link">&para;</a></h4>
+<p><strong>RCP 4.5 - Lower Emissions Pathway</strong>:
+- <strong>Radiative forcing</strong>: Medium forcing scenario
+- <strong>Emission trajectory</strong>: Peak emissions around 2040, then decline
+- <strong>Policy assumptions</strong>: Implementation of climate policies globally
+- <strong>Temperature outcome</strong>: ~2.5°C global warming by 2100
+- <strong>Used in</strong>: Scenario LM only</p>
+<p><strong>RCP 8.5 - Higher Emissions Pathway</strong>:
+- <strong>Radiative forcing</strong>: High forcing scenario
+- <strong>Emission trajectory</strong>: Continued high emissions growth through 2100
+- <strong>Policy assumptions</strong>: Limited climate action globally
+- <strong>Temperature outcome</strong>: ~4.5°C global warming by 2100<br />
+- <strong>Used in</strong>: Scenarios HL, HM, and HH</p>
+<h4 id="shared-socioeconomic-pathways-ssps">Shared Socioeconomic Pathways (SSPs)<a class="headerlink" href="#shared-socioeconomic-pathways-ssps" title="Permanent link">&para;</a></h4>
+<p><strong>SSP1 - Sustainability Path</strong>:
+- <strong>Theme</strong>: Strong international cooperation and environmental focus
+- <strong>Development</strong>: Sustainable development and green growth
+- <strong>Population</strong>: Lower population growth and demographic transition
+- <strong>Used in</strong>: Scenario LM</p>
+<p><strong>SSP2 - Middle of the Road Path</strong>:
+- <strong>Theme</strong>: Uneven progress and mixed development patterns
+- <strong>Development</strong>: Historical trends continue with slow progress
+- <strong>Population</strong>: Moderate demographic and economic trends
+- <strong>Used in</strong>: Scenario HM</p>
+<p><strong>SSP3 - Regional Rivalry Path</strong>:
+- <strong>Theme</strong>: Nationalism, security concerns, and regional competition
+- <strong>Development</strong>: Slow economic growth and material-intensive consumption
+- <strong>Population</strong>: High population growth in some regions, slow economic development
+- <strong>Used in</strong>: Scenario HL</p>
+<p><strong>SSP5 - Fossil-fueled Development Path</strong>:
+- <strong>Theme</strong>: Rapid economic growth with high energy use
+- <strong>Development</strong>: Technological solutions and convergence
+- <strong>Population</strong>: Lower population growth but high consumption
+- <strong>Used in</strong>: Scenario HH</p>
+<h3 id="climate-model-integration">Climate Model Integration<a class="headerlink" href="#climate-model-integration" title="Permanent link">&para;</a></h3>
+<p>Each scenario is implemented with all five climate models (Wet, Hot, Dry, Least Warm, Middle), creating the full matrix of <strong>20 total projections</strong>:</p>
+<ul>
+<li><strong>5 climate models</strong> × <strong>4 scenarios</strong> = <strong>20 integrated projections</strong></li>
+<li>Each projection represents a unique combination of climate and socioeconomic futures</li>
+<li>Full ensemble captures range of climate-socioeconomic interactions</li>
+</ul>
+<h4 id="example-climate-scenario-combinations">Example Climate-Scenario Combinations<a class="headerlink" href="#example-climate-scenario-combinations" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>LM-Wet</strong>: Sustainable development with increased precipitation</li>
+<li><strong>HH-Hot</strong>: High growth development under extreme warming</li>
+<li><strong>HL-Dry</strong>: Low growth with drought stress</li>
+<li><strong>HM-Middle</strong>: Moderate development under typical climate change</li>
+</ul>
+<h3 id="land-use-implications-by-scenario">Land Use Implications by Scenario<a class="headerlink" href="#land-use-implications-by-scenario" title="Permanent link">&para;</a></h3>
+<h4 id="development-pressure-ranking">Development Pressure Ranking<a class="headerlink" href="#development-pressure-ranking" title="Permanent link">&para;</a></h4>
+<p><strong>1. Highest Pressure - Scenario HH</strong> (High Growth):
+- Maximum population and economic growth
+- Highest demand for urban and infrastructure development
+- Greatest competition for land resources
+- Technology-enabled development in marginal areas</p>
+<p><strong>2. Moderate Pressure - Scenarios LM and HM</strong>:
+- <strong>LM</strong>: Sustainable development approaches moderate pressure
+- <strong>HM</strong>: Historical trend continuation with moderate growth
+- Balanced development with some environmental consideration</p>
+<p><strong>3. Lowest Pressure - Scenario HL</strong> (Low Growth):
+- Slow economic growth limits development demand
+- Regional conflicts constrain large-scale development
+- Limited resources for major land conversion projects
+- Climate stress without adaptation resources</p>
+<h4 id="agricultural-land-dynamics_1">Agricultural Land Dynamics<a class="headerlink" href="#agricultural-land-dynamics_1" title="Permanent link">&para;</a></h4>
+<p><strong>Most Severe Agricultural Pressure</strong>:
+- <strong>Scenario HH</strong>: High development pressure competes with agriculture
+- <strong>Climate stress</strong>: All RCP 8.5 scenarios face significant agricultural challenges
+- <strong>Technology response</strong>: HH assumes technological solutions to agricultural stress</p>
+<p><strong>Moderate Agricultural Outcomes</strong>:
+- <strong>Scenario LM</strong>: Sustainable intensification maintains agricultural productivity
+- <strong>Scenario HM</strong>: Mixed outcomes with some regions improving, others declining</p>
+<p><strong>Challenging Agricultural Conditions</strong>:
+- <strong>Scenario HL</strong>: Climate stress without adequate adaptation resources
+- Limited technological and economic capacity for agricultural adaptation</p>
+<h4 id="forest-conservation-outcomes">Forest Conservation Outcomes<a class="headerlink" href="#forest-conservation-outcomes" title="Permanent link">&para;</a></h4>
+<p><strong>Best Forest Conservation</strong>:
+- <strong>Scenario LM</strong>: Environmental priorities and sustainable development
+- Lower development pressure combined with conservation focus
+- Climate change impacts managed through adaptation</p>
+<p><strong>Variable Forest Outcomes</strong>:
+- <strong>Scenarios HL and HM</strong>: Depend heavily on regional factors and climate model
+- HL: Low pressure but limited conservation resources
+- HM: Moderate pressure with mixed conservation efforts</p>
+<p><strong>Highest Forest Pressure</strong>:
+- <strong>Scenario HH</strong>: Maximum development pressure on forest lands
+- High population and economic growth drive conversion
+- Technology may enable development in previously protected areas</p>
+<h3 id="using-scenarios-in-analysis">Using Scenarios in Analysis<a class="headerlink" href="#using-scenarios-in-analysis" title="Permanent link">&para;</a></h3>
+<h4 id="time-horizon-considerations">Time Horizon Considerations<a class="headerlink" href="#time-horizon-considerations" title="Permanent link">&para;</a></h4>
+<p><strong>Near-term (2020-2030)</strong>:
+- <strong>Limited divergence</strong>: All scenarios show similar patterns
+- <strong>Initial conditions dominate</strong>: Historical trends continue
+- <strong>Policy lag effects</strong>: New policies haven't yet influenced outcomes</p>
+<p><strong>Mid-term (2030-2050)</strong>:
+- <strong>Increasing differentiation</strong>: Scenario effects become apparent
+- <strong>Climate impacts emerge</strong>: Regional climate differences become significant
+- <strong>Development patterns diverge</strong>: Different growth trajectories evident</p>
+<p><strong>Long-term (2050-2100)</strong>:
+- <strong>Maximum scenario divergence</strong>: Full range of uncertainty apparent
+- <strong>Cumulative impacts</strong>: Long-term trends dominate outcomes
+- <strong>System interactions</strong>: Complex feedbacks between climate and development</p>
+<h4 id="analysis-best-practices">Analysis Best Practices<a class="headerlink" href="#analysis-best-practices" title="Permanent link">&para;</a></h4>
+<p><strong>1. Always Specify Scenario Context</strong>
+- Include scenario name (LM, HL, HM, HH) in all presentations
+- Specify climate model when relevant (e.g., "HH-Hot", "LM-Wet")
+- Provide scenario context for non-technical audiences</p>
+<p><strong>2. Use Appropriate Scenario Comparisons</strong>
+- <strong>Climate impact studies</strong>: Compare RCP 4.5 (LM) vs RCP 8.5 (HL, HM, HH)
+- <strong>Socioeconomic analysis</strong>: Compare high growth (HH) vs low growth (HL)
+- <strong>Uncertainty assessment</strong>: Present all four scenarios</p>
+<p><strong>3. Consider Averaging Strategies</strong>
+- <strong>General trends</strong>: Average across all scenarios for overall patterns
+- <strong>Robust findings</strong>: Identify results consistent across scenarios
+- <strong>Uncertainty ranges</strong>: Present minimum and maximum across scenarios</p>
+<p><strong>4. Scenario-Specific Applications</strong>
+- <strong>Planning applications</strong>: Use scenario most relevant to planning context
+- <strong>Risk assessment</strong>: Focus on challenging scenarios (HL, HH under extreme climate)
+- <strong>Opportunity assessment</strong>: Highlight beneficial scenarios (LM under favorable climate)</p>
+<h3 id="common-analysis-patterns">Common Analysis Patterns<a class="headerlink" href="#common-analysis-patterns" title="Permanent link">&para;</a></h3>
+<h4 id="for-climate-impact-studies">For Climate Impact Studies<a class="headerlink" href="#for-climate-impact-studies" title="Permanent link">&para;</a></h4>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>&quot;Compare RCP 4.5 vs RCP 8.5 scenarios across all socioeconomic pathways&quot;
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>&quot;Show climate model sensitivity within the HH scenario&quot;
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>&quot;Assess forest vulnerability under the Hot-Dry climate combination&quot;
+</span></code></pre></div>
+<h4 id="for-socioeconomic-analysis">For Socioeconomic Analysis<a class="headerlink" href="#for-socioeconomic-analysis" title="Permanent link">&para;</a></h4>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>&quot;Compare high growth (HH) vs low growth (HL) under the same climate conditions&quot;
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>&quot;Show development pressure differences between sustainability (LM) and rivalry (HL) scenarios&quot;
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>&quot;Analyze agricultural outcomes under different economic growth patterns&quot;
+</span></code></pre></div>
+<h4 id="for-integrated-assessment">For Integrated Assessment<a class="headerlink" href="#for-integrated-assessment" title="Permanent link">&para;</a></h4>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>&quot;Present land use outcomes for all four scenarios to show full uncertainty range&quot;
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>&quot;Identify robust findings that appear across all scenarios&quot;
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>&quot;Highlight scenario-dependent outcomes that require adaptive management&quot;
+</span></code></pre></div>
+<h2 id="data-structure-and-usage">Data Structure and Usage<a class="headerlink" href="#data-structure-and-usage" title="Permanent link">&para;</a></h2>
+<h3 id="database-architecture">Database Architecture<a class="headerlink" href="#database-architecture" title="Permanent link">&para;</a></h3>
+<p>The RPA land use data is stored in a modern DuckDB database using a <strong>star schema design</strong> optimized for analytical queries and natural language processing.</p>
+<h4 id="fact-table-fact_landuse_transitions">Fact Table: <code>fact_landuse_transitions</code><a class="headerlink" href="#fact-table-fact_landuse_transitions" title="Permanent link">&para;</a></h4>
+<p><strong>Purpose</strong>: Core table containing all land use transition records
+<strong>Records</strong>: 5.4+ million transition records
+<strong>Structure</strong>: Each record represents a specific transition for a unique combination of:</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>scenario_id</code></td>
+<td>INTEGER</td>
+<td>Links to scenario dimension table</td>
+</tr>
+<tr>
+<td><code>time_id</code></td>
+<td>INTEGER</td>
+<td>Links to time period dimension table</td>
+</tr>
+<tr>
+<td><code>geography_id</code></td>
+<td>INTEGER</td>
+<td>Links to county geography dimension table</td>
+</tr>
+<tr>
+<td><code>from_landuse_id</code></td>
+<td>INTEGER</td>
+<td>Source land use type</td>
+</tr>
+<tr>
+<td><code>to_landuse_id</code></td>
+<td>INTEGER</td>
+<td>Destination land use type</td>
+</tr>
+<tr>
+<td><code>acres</code></td>
+<td>REAL</td>
+<td>Area (in acres) undergoing this transition</td>
+</tr>
+</tbody>
+</table>
+<h4 id="dimension-tables">Dimension Tables<a class="headerlink" href="#dimension-tables" title="Permanent link">&para;</a></h4>
+<p><strong><code>dim_scenario</code></strong> - Scenario definitions (20 records)
+- Scenario names, descriptions, RCP/SSP combinations
+- Climate model information and scenario themes</p>
+<p><strong><code>dim_geography</code></strong> - County information (3,075 records)<br />
+- County names, FIPS codes, state information
+- Geographic metadata and regional classifications</p>
+<p><strong><code>dim_landuse</code></strong> - Land use categories (5 records)
+- Land use codes, names, descriptions, and categories
+- Hierarchical groupings (Agricultural, Natural, Developed)</p>
+<p><strong><code>dim_time</code></strong> - Time periods (6 records)
+- Time period definitions and year ranges
+- Start/end years for each projection period</p>
+<h4 id="pre-built-views-for-analysis">Pre-built Views for Analysis<a class="headerlink" href="#pre-built-views-for-analysis" title="Permanent link">&para;</a></h4>
+<p><strong><code>v_landuse_with_metadata</code></strong> - Complete denormalized view
+- Joins all dimension tables with fact table
+- Includes human-readable names for all dimensions
+- Primary view for most natural language queries</p>
+<p><strong><code>v_landuse_summary</code></strong> - Pre-aggregated summaries
+- Common aggregations by scenario, time, and geography
+- Optimized for dashboard and summary statistics</p>
+<p><strong><code>v_scenario_comparison</code></strong> - Cross-scenario analysis
+- Structured for comparing outcomes across scenarios
+- Includes variance and range calculations</p>
+<h3 id="scenario-naming-convention-in-database">Scenario Naming Convention in Database<a class="headerlink" href="#scenario-naming-convention-in-database" title="Permanent link">&para;</a></h3>
+<p>The database uses a systematic naming convention for the 20 scenarios:</p>
+<h4 id="format-climatemodel_rcp_sspssp">Format: <code>{ClimateModel}_{RCP}_ssp{SSP}</code><a class="headerlink" href="#format-climatemodel_rcp_sspssp" title="Permanent link">&para;</a></h4>
+<p><strong>Examples</strong>:
+- <code>CNRM_CM5_rcp45_ssp1</code> - Wet climate, lower warming, sustainability path (LM scenario)
+- <code>HadGEM2_ES365_rcp85_ssp5</code> - Hot climate, higher warming, fossil-fueled development (HH scenario)
+- <code>IPSL_CM5A_MR_rcp85_ssp3</code> - Dry climate, higher warming, regional rivalry (HL scenario)</p>
+<h4 id="climate-model-components">Climate Model Components<a class="headerlink" href="#climate-model-components" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>CNRM_CM5</strong> - Wet climate projections</li>
+<li><strong>HadGEM2_ES365</strong> - Hot climate projections  </li>
+<li><strong>IPSL_CM5A_MR</strong> - Dry climate projections</li>
+<li><strong>MRI_CGCM3</strong> - Least warm climate projections</li>
+<li><strong>NorESM1_M</strong> - Middle climate projections</li>
+</ul>
+<h4 id="rcp-components">RCP Components<a class="headerlink" href="#rcp-components" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>rcp45</strong> - Lower emissions pathway (2.5°C warming)</li>
+<li><strong>rcp85</strong> - Higher emissions pathway (4.5°C warming)</li>
+</ul>
+<h4 id="ssp-components">SSP Components<a class="headerlink" href="#ssp-components" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>ssp1</strong> - Sustainability pathway (green growth)</li>
+<li><strong>ssp2</strong> - Middle of the road pathway (historical trends)</li>
+<li><strong>ssp3</strong> - Regional rivalry pathway (nationalism, slow growth)</li>
+<li><strong>ssp5</strong> - Fossil-fueled development pathway (rapid growth)</li>
+</ul>
+<h3 id="data-analysis-patterns">Data Analysis Patterns<a class="headerlink" href="#data-analysis-patterns" title="Permanent link">&para;</a></h3>
+<h4 id="common-aggregation-strategies">Common Aggregation Strategies<a class="headerlink" href="#common-aggregation-strategies" title="Permanent link">&para;</a></h4>
+<p><strong>By Scenario</strong> - Compare climate/socioeconomic pathways:
+<div class="language-sql highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="k">SELECT</span><span class="w"> </span><span class="n">scenario_name</span><span class="p">,</span><span class="w"> </span><span class="k">SUM</span><span class="p">(</span><span class="n">acres</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">total_forest_loss</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="k">FROM</span><span class="w"> </span><span class="n">v_landuse_with_metadata</span><span class="w">  </span>
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="k">WHERE</span><span class="w"> </span><span class="n">from_landuse_name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;Forest&#39;</span><span class="w"> </span><span class="k">AND</span><span class="w"> </span><span class="n">to_landuse_name</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="s1">&#39;Forest&#39;</span>
+</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="k">GROUP</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">scenario_name</span><span class="p">;</span>
+</span></code></pre></div></p>
+<p><strong>By Time Period</strong> - Track temporal trends:
+<div class="language-sql highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="k">SELECT</span><span class="w"> </span><span class="n">time_period</span><span class="p">,</span><span class="w"> </span><span class="k">SUM</span><span class="p">(</span><span class="n">acres</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">urban_expansion</span><span class="w">  </span>
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="k">FROM</span><span class="w"> </span><span class="n">v_landuse_with_metadata</span>
+</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="k">WHERE</span><span class="w"> </span><span class="n">to_landuse_name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;Urban&#39;</span><span class="w"> </span>
+</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="k">GROUP</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">time_period</span><span class="w"> </span><span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">time_period</span><span class="p">;</span>
+</span></code></pre></div></p>
+<p><strong>By Geography</strong> - State or regional patterns:
+<div class="language-sql highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="k">SELECT</span><span class="w"> </span><span class="n">state_name</span><span class="p">,</span><span class="w"> </span><span class="k">AVG</span><span class="p">(</span><span class="n">acres</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">avg_agricultural_loss</span>
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="k">FROM</span><span class="w"> </span><span class="n">v_landuse_with_metadata</span>
+</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="k">WHERE</span><span class="w"> </span><span class="n">from_landuse_category</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;Agriculture&#39;</span><span class="w"> </span><span class="k">AND</span><span class="w"> </span><span class="n">to_landuse_category</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="s1">&#39;Agriculture&#39;</span>
+</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="k">GROUP</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">state_name</span><span class="p">;</span>
+</span></code></pre></div></p>
+<p><strong>By Transition Type</strong> - Focus on specific conversions:
+<div class="language-sql highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="k">SELECT</span><span class="w"> </span><span class="n">from_landuse_name</span><span class="p">,</span><span class="w"> </span><span class="n">to_landuse_name</span><span class="p">,</span><span class="w"> </span><span class="k">SUM</span><span class="p">(</span><span class="n">acres</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">total_conversion</span>
+</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="k">FROM</span><span class="w"> </span><span class="n">v_landuse_with_metadata</span>
+</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="k">WHERE</span><span class="w"> </span><span class="n">from_landuse_name</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">to_landuse_name</span><span class="w">  </span><span class="c1">-- Actual transitions only</span>
+</span><span id="__span-9-4"><a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="k">GROUP</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">from_landuse_name</span><span class="p">,</span><span class="w"> </span><span class="n">to_landuse_name</span>
+</span><span id="__span-9-5"><a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">total_conversion</span><span class="w"> </span><span class="k">DESC</span><span class="p">;</span>
+</span></code></pre></div></p>
+<h4 id="key-analysis-considerations">Key Analysis Considerations<a class="headerlink" href="#key-analysis-considerations" title="Permanent link">&para;</a></h4>
+<p><strong>1. Transition vs. Same Records</strong>
+- <strong>Transition records</strong>: <code>from_landuse_id != to_landuse_id</code> (actual land use changes)
+- <strong>Same records</strong>: <code>from_landuse_id = to_landuse_id</code> (land remaining in same use)
+- <strong>Focus on transitions</strong> for most change analyses</p>
+<p><strong>2. Scenario Averaging</strong>
+When not comparing scenarios specifically:
+<div class="language-sql highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="c1">-- Average across all scenarios for general trends</span>
+</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="k">SELECT</span><span class="w"> </span><span class="n">geography_name</span><span class="p">,</span><span class="w"> </span><span class="k">AVG</span><span class="p">(</span><span class="n">acres</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">avg_forest_loss</span>
+</span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="k">FROM</span><span class="w"> </span><span class="n">v_landuse_with_metadata</span><span class="w">  </span>
+</span><span id="__span-10-4"><a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="k">WHERE</span><span class="w"> </span><span class="n">from_landuse_name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;Forest&#39;</span><span class="w"> </span><span class="k">AND</span><span class="w"> </span><span class="n">to_landuse_name</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="s1">&#39;Forest&#39;</span>
+</span><span id="__span-10-5"><a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a><span class="k">GROUP</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">geography_name</span><span class="p">;</span>
+</span></code></pre></div></p>
+<p><strong>3. Scale Considerations</strong>
+- <strong>National patterns</strong> may obscure important regional variations
+- <strong>County-level detail</strong> provides local specificity but can be noisy
+- <strong>State/regional aggregation</strong> often provides appropriate balance</p>
+<h3 id="important-analysis-guidelines">Important Analysis Guidelines<a class="headerlink" href="#important-analysis-guidelines" title="Permanent link">&para;</a></h3>
+<h4 id="when-analyzing-rpa-data">When Analyzing RPA Data<a class="headerlink" href="#when-analyzing-rpa-data" title="Permanent link">&para;</a></h4>
+<p><strong>1. Default to Appropriate Averages</strong>
+- When not specifically comparing scenarios, average across relevant scenarios
+- Consider whether climate model variation or socioeconomic variation is of interest
+- Use all 20 scenarios for maximum uncertainty assessment</p>
+<p><strong>2. Focus on Meaningful Changes</strong>
+- Use transition records (<code>from_landuse_id != to_landuse_id</code>) for change analysis
+- Same-to-same records useful for understanding land use stability
+- Consider both absolute changes (acres) and relative changes (percentages)</p>
+<p><strong>3. Understand Temporal Patterns</strong>
+- Early periods (2020-2030) show less scenario divergence
+- Later periods (2070-2100) show maximum scenario effects
+- Cumulative changes often more meaningful than period-by-period changes</p>
+<p><strong>4. Remember Model Constraints</strong>
+- Development is irreversible in projections
+- Only private land undergoes transitions
+- Historical relationships assumed to continue</p>
+<h4 id="common-query-patterns-for-natural-language-interface">Common Query Patterns for Natural Language Interface<a class="headerlink" href="#common-query-patterns-for-natural-language-interface" title="Permanent link">&para;</a></h4>
+<p><strong>Exploring Available Data</strong>:
+<div class="language-text highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>&quot;What scenarios are available in the database?&quot;
+</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>&quot;Show me the land use categories and their descriptions&quot;
+</span><span id="__span-11-3"><a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>&quot;Which time periods does the data cover?&quot;
+</span></code></pre></div></p>
+<p><strong>Basic Transition Analysis</strong>:
+<div class="language-text highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>&quot;Show forest to urban transitions by scenario&quot;
+</span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>&quot;What land uses convert to agricultural land?&quot;
+</span><span id="__span-12-3"><a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>&quot;Calculate total urban expansion across all scenarios&quot;
+</span></code></pre></div></p>
+<p><strong>Scenario Comparisons</strong>:
+<div class="language-text highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>&quot;Compare agricultural land loss between high growth and low growth scenarios&quot;
+</span><span id="__span-13-2"><a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>&quot;Show forest conservation differences between RCP 4.5 and RCP 8.5&quot;
+</span><span id="__span-13-3"><a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>&quot;Which scenario preserves the most natural land?&quot;
+</span></code></pre></div></p>
+<p><strong>Geographic Analysis</strong>:
+<div class="language-text highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>&quot;Show urban expansion by state&quot;
+</span><span id="__span-14-2"><a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>&quot;Which counties have the most forest loss?&quot;
+</span><span id="__span-14-3"><a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>&quot;Compare land use changes between regions&quot;
+</span></code></pre></div></p>
+<p><strong>Temporal Analysis</strong>:
+<div class="language-text highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>&quot;Track forest area changes over time&quot;
+</span><span id="__span-15-2"><a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>&quot;When does urban area expansion peak?&quot;
+</span><span id="__span-15-3"><a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a>&quot;Show agricultural trends by decade&quot;
+</span></code></pre></div></p>
+<h3 id="data-quality-and-validation">Data Quality and Validation<a class="headerlink" href="#data-quality-and-validation" title="Permanent link">&para;</a></h3>
+<h4 id="built-in-data-checks">Built-in Data Checks<a class="headerlink" href="#built-in-data-checks" title="Permanent link">&para;</a></h4>
+<p>The database includes several validation mechanisms:</p>
+<p><strong>Area Conservation</strong>: Total county area remains constant across time periods
+<div class="language-sql highlight"><pre><span></span><code><span id="__span-16-1"><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="c1">-- Verify area conservation by county and time</span>
+</span><span id="__span-16-2"><a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a><span class="k">SELECT</span><span class="w"> </span><span class="n">geography_id</span><span class="p">,</span><span class="w"> </span><span class="n">time_id</span><span class="p">,</span><span class="w"> </span><span class="k">SUM</span><span class="p">(</span><span class="n">acres</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">total_area</span>
+</span><span id="__span-16-3"><a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a><span class="k">FROM</span><span class="w"> </span><span class="n">fact_landuse_transitions</span><span class="w">  </span>
+</span><span id="__span-16-4"><a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a><span class="k">GROUP</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">geography_id</span><span class="p">,</span><span class="w"> </span><span class="n">time_id</span><span class="p">;</span>
+</span></code></pre></div></p>
+<p><strong>Transition Completeness</strong>: All land accounted for in transitions
+<div class="language-sql highlight"><pre><span></span><code><span id="__span-17-1"><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="c1">-- Check that from_landuse totals match to_landuse totals</span>
+</span><span id="__span-17-2"><a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a><span class="k">SELECT</span><span class="w"> </span><span class="n">time_id</span><span class="p">,</span><span class="w"> </span><span class="n">scenario_id</span><span class="p">,</span>
+</span><span id="__span-17-3"><a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a><span class="w">       </span><span class="k">SUM</span><span class="p">(</span><span class="k">CASE</span><span class="w"> </span><span class="k">WHEN</span><span class="w"> </span><span class="n">from_landuse_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="k">THEN</span><span class="w"> </span><span class="n">acres</span><span class="w"> </span><span class="k">ELSE</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="k">END</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">from_crop</span><span class="p">,</span>
+</span><span id="__span-17-4"><a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a><span class="w">       </span><span class="k">SUM</span><span class="p">(</span><span class="k">CASE</span><span class="w"> </span><span class="k">WHEN</span><span class="w"> </span><span class="n">to_landuse_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="k">THEN</span><span class="w"> </span><span class="n">acres</span><span class="w"> </span><span class="k">ELSE</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="k">END</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">to_crop</span>
+</span><span id="__span-17-5"><a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a><span class="k">FROM</span><span class="w"> </span><span class="n">fact_landuse_transitions</span>
+</span><span id="__span-17-6"><a id="__codelineno-17-6" name="__codelineno-17-6" href="#__codelineno-17-6"></a><span class="k">GROUP</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">time_id</span><span class="p">,</span><span class="w"> </span><span class="n">scenario_id</span><span class="p">;</span>
+</span></code></pre></div></p>
+<p><strong>Scenario Consistency</strong>: All scenarios include same geographic and temporal coverage
+<div class="language-sql highlight"><pre><span></span><code><span id="__span-18-1"><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="c1">-- Verify consistent coverage across scenarios  </span>
+</span><span id="__span-18-2"><a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a><span class="k">SELECT</span><span class="w"> </span><span class="n">scenario_id</span><span class="p">,</span><span class="w"> </span><span class="k">COUNT</span><span class="p">(</span><span class="k">DISTINCT</span><span class="w"> </span><span class="n">geography_id</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">counties</span><span class="p">,</span>
+</span><span id="__span-18-3"><a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a><span class="w">       </span><span class="k">COUNT</span><span class="p">(</span><span class="k">DISTINCT</span><span class="w"> </span><span class="n">time_id</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">time_periods</span>
+</span><span id="__span-18-4"><a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a><span class="k">FROM</span><span class="w"> </span><span class="n">fact_landuse_transitions</span>
+</span><span id="__span-18-5"><a id="__codelineno-18-5" name="__codelineno-18-5" href="#__codelineno-18-5"></a><span class="k">GROUP</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">scenario_id</span><span class="p">;</span>
+</span></code></pre></div></p>
+<h2 id="analysis-guidelines">Analysis Guidelines<a class="headerlink" href="#analysis-guidelines" title="Permanent link">&para;</a></h2>
+<h3 id="choosing-appropriate-analysis-approaches">Choosing Appropriate Analysis Approaches<a class="headerlink" href="#choosing-appropriate-analysis-approaches" title="Permanent link">&para;</a></h3>
+<h4 id="for-climate-impact-studies_1">For Climate Impact Studies<a class="headerlink" href="#for-climate-impact-studies_1" title="Permanent link">&para;</a></h4>
+<p><strong>Recommended Approach</strong>: Compare RCP 4.5 vs RCP 8.5 across relevant socioeconomic contexts
+<div class="language-text highlight"><pre><span></span><code><span id="__span-19-1"><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a>&quot;Compare forest loss between RCP 4.5 and RCP 8.5 scenarios&quot;
+</span><span id="__span-19-2"><a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a>&quot;Show agricultural vulnerability under high warming (RCP 8.5) scenarios&quot;
+</span><span id="__span-19-3"><a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a>&quot;Assess urban development under different climate pathways&quot;
+</span></code></pre></div></p>
+<p><strong>Climate Model Sensitivity</strong>: Use all five climate models to capture uncertainty
+<div class="language-text highlight"><pre><span></span><code><span id="__span-20-1"><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a>&quot;Show forest loss under wet vs dry climate conditions&quot;
+</span><span id="__span-20-2"><a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a>&quot;Compare agricultural outcomes across all five climate models&quot;
+</span><span id="__span-20-3"><a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a>&quot;Identify regions most sensitive to climate model choice&quot;
+</span></code></pre></div></p>
+<h4 id="for-socioeconomic-impact-studies">For Socioeconomic Impact Studies<a class="headerlink" href="#for-socioeconomic-impact-studies" title="Permanent link">&para;</a></h4>
+<p><strong>Growth Scenario Comparisons</strong>: Focus on SSP differences
+<div class="language-text highlight"><pre><span></span><code><span id="__span-21-1"><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a>&quot;Compare land use outcomes between high growth (SSP5) and low growth (SSP3)&quot;
+</span><span id="__span-21-2"><a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a>&quot;Show development pressure differences between sustainability (SSP1) and fossil-fueled (SSP5) paths&quot;
+</span><span id="__span-21-3"><a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a>&quot;Analyze agricultural intensification under different economic scenarios&quot;
+</span></code></pre></div></p>
+<p><strong>Population and Economic Drivers</strong>:
+<div class="language-text highlight"><pre><span></span><code><span id="__span-22-1"><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a>&quot;Which scenario shows highest urban expansion?&quot;
+</span><span id="__span-22-2"><a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a>&quot;Compare agricultural land pressure under different demographic scenarios&quot;
+</span><span id="__span-22-3"><a id="__codelineno-22-3" name="__codelineno-22-3" href="#__codelineno-22-3"></a>&quot;Show relationship between economic growth and forest conversion&quot;
+</span></code></pre></div></p>
+<h4 id="for-integrated-assessment_1">For Integrated Assessment<a class="headerlink" href="#for-integrated-assessment_1" title="Permanent link">&para;</a></h4>
+<p><strong>Full Uncertainty Assessment</strong>: Present all scenarios to show complete range
+<div class="language-text highlight"><pre><span></span><code><span id="__span-23-1"><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a>&quot;Show land use outcomes for all four scenarios to demonstrate uncertainty&quot;
+</span><span id="__span-23-2"><a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a>&quot;Present minimum and maximum forest loss across all scenarios&quot;
+</span><span id="__span-23-3"><a id="__codelineno-23-3" name="__codelineno-23-3" href="#__codelineno-23-3"></a>&quot;Identify robust findings that appear regardless of scenario choice&quot;
+</span></code></pre></div></p>
+<p><strong>Policy-Relevant Analysis</strong>: Focus on scenario contrasts relevant to policy decisions
+<div class="language-text highlight"><pre><span></span><code><span id="__span-24-1"><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a>&quot;Compare outcomes under current trends (HM) vs sustainable development (LM)&quot;
+</span><span id="__span-24-2"><a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a>&quot;Show benefits of international cooperation (LM) vs regional rivalry (HL)&quot;
+</span><span id="__span-24-3"><a id="__codelineno-24-3" name="__codelineno-24-3" href="#__codelineno-24-3"></a>&quot;Assess land use outcomes under different climate policy effectiveness&quot;
+</span></code></pre></div></p>
+<h3 id="best-practices-for-temporal-analysis">Best Practices for Temporal Analysis<a class="headerlink" href="#best-practices-for-temporal-analysis" title="Permanent link">&para;</a></h3>
+<h4 id="understanding-scenario-divergence-over-time">Understanding Scenario Divergence Over Time<a class="headerlink" href="#understanding-scenario-divergence-over-time" title="Permanent link">&para;</a></h4>
+<p><strong>Near-term (2020-2030)</strong>: 
+- <strong>Limited scenario effects</strong> - All scenarios show similar patterns
+- <strong>Historical momentum</strong> - Past trends dominate near-term outcomes
+- <strong>Useful for</strong>: Short-term planning and policy implementation</p>
+<p><strong>Mid-term (2030-2050)</strong>:
+- <strong>Moderate divergence</strong> - Scenario effects become apparent<br />
+- <strong>Policy impacts emerge</strong> - Different pathways start to show effects
+- <strong>Useful for</strong>: Strategic planning and infrastructure decisions</p>
+<p><strong>Long-term (2050-2100)</strong>:
+- <strong>Maximum divergence</strong> - Full scenario uncertainty apparent
+- <strong>Cumulative impacts</strong> - Long-term trends dominate outcomes
+- <strong>Useful for</strong>: Long-range planning and climate adaptation</p>
+<h4 id="recommended-temporal-analysis-approaches">Recommended Temporal Analysis Approaches<a class="headerlink" href="#recommended-temporal-analysis-approaches" title="Permanent link">&para;</a></h4>
+<p><strong>Trend Analysis</strong>:
+<div class="language-text highlight"><pre><span></span><code><span id="__span-25-1"><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a>&quot;Show forest area trends over time by scenario&quot;
+</span><span id="__span-25-2"><a id="__codelineno-25-2" name="__codelineno-25-2" href="#__codelineno-25-2"></a>&quot;When do scenarios begin to diverge significantly?&quot;
+</span><span id="__span-25-3"><a id="__codelineno-25-3" name="__codelineno-25-3" href="#__codelineno-25-3"></a>&quot;Track cumulative urban expansion through 2100&quot;
+</span></code></pre></div></p>
+<p><strong>Rate of Change Analysis</strong>:
+<div class="language-text highlight"><pre><span></span><code><span id="__span-26-1"><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a>&quot;Compare rates of agricultural land loss across decades&quot;
+</span><span id="__span-26-2"><a id="__codelineno-26-2" name="__codelineno-26-2" href="#__codelineno-26-2"></a>&quot;Show acceleration or deceleration of urban expansion&quot;
+</span><span id="__span-26-3"><a id="__codelineno-26-3" name="__codelineno-26-3" href="#__codelineno-26-3"></a>&quot;Identify periods of most rapid land use change&quot;
+</span></code></pre></div></p>
+<p><strong>Threshold Analysis</strong>:
+<div class="language-text highlight"><pre><span></span><code><span id="__span-27-1"><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a>&quot;When does urban area exceed 20% in major metropolitan counties?&quot;
+</span><span id="__span-27-2"><a id="__codelineno-27-2" name="__codelineno-27-2" href="#__codelineno-27-2"></a>&quot;Identify when forest cover drops below critical thresholds&quot;
+</span><span id="__span-27-3"><a id="__codelineno-27-3" name="__codelineno-27-3" href="#__codelineno-27-3"></a>&quot;Show when agricultural land loss reaches concerning levels&quot;
+</span></code></pre></div></p>
+<h3 id="geographic-analysis-guidelines">Geographic Analysis Guidelines<a class="headerlink" href="#geographic-analysis-guidelines" title="Permanent link">&para;</a></h3>
+<h4 id="multi-scale-analysis-strategies">Multi-Scale Analysis Strategies<a class="headerlink" href="#multi-scale-analysis-strategies" title="Permanent link">&para;</a></h4>
+<p><strong>National Level</strong>: For broad policy questions and overall trends
+<div class="language-text highlight"><pre><span></span><code><span id="__span-28-1"><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a>&quot;Show total U.S. land use changes by scenario&quot;
+</span><span id="__span-28-2"><a id="__codelineno-28-2" name="__codelineno-28-2" href="#__codelineno-28-2"></a>&quot;Compare national forest conservation across scenarios&quot;
+</span><span id="__span-28-3"><a id="__codelineno-28-3" name="__codelineno-28-3" href="#__codelineno-28-3"></a>&quot;Calculate total agricultural land at risk&quot;
+</span></code></pre></div></p>
+<p><strong>Regional Level</strong>: For understanding geographic patterns and climate interactions
+<div class="language-text highlight"><pre><span></span><code><span id="__span-29-1"><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a>&quot;Compare land use changes between South and Northeast regions&quot;
+</span><span id="__span-29-2"><a id="__codelineno-29-2" name="__codelineno-29-2" href="#__codelineno-29-2"></a>&quot;Show regional differences in development pressure&quot;
+</span><span id="__span-29-3"><a id="__codelineno-29-3" name="__codelineno-29-3" href="#__codelineno-29-3"></a>&quot;Analyze climate impacts by major geographic regions&quot;
+</span></code></pre></div></p>
+<p><strong>State Level</strong>: For state policy and planning applications
+<div class="language-text highlight"><pre><span></span><code><span id="__span-30-1"><a id="__codelineno-30-1" name="__codelineno-30-1" href="#__codelineno-30-1"></a>&quot;Rank states by forest loss across scenarios&quot;
+</span><span id="__span-30-2"><a id="__codelineno-30-2" name="__codelineno-30-2" href="#__codelineno-30-2"></a>&quot;Show agricultural land changes by state&quot;
+</span><span id="__span-30-3"><a id="__codelineno-30-3" name="__codelineno-30-3" href="#__codelineno-30-3"></a>&quot;Compare development pressure in Western states&quot;
+</span></code></pre></div></p>
+<p><strong>County Level</strong>: For local analysis and detailed spatial patterns
+<div class="language-text highlight"><pre><span></span><code><span id="__span-31-1"><a id="__codelineno-31-1" name="__codelineno-31-1" href="#__codelineno-31-1"></a>&quot;Identify counties with highest urban expansion&quot;
+</span><span id="__span-31-2"><a id="__codelineno-31-2" name="__codelineno-31-2" href="#__codelineno-31-2"></a>&quot;Show forest loss hotspots at county level&quot;
+</span><span id="__span-31-3"><a id="__codelineno-31-3" name="__codelineno-31-3" href="#__codelineno-31-3"></a>&quot;Find counties with unusual land use transition patterns&quot;
+</span></code></pre></div></p>
+<h4 id="regional-considerations">Regional Considerations<a class="headerlink" href="#regional-considerations" title="Permanent link">&para;</a></h4>
+<p><strong>South Region</strong>: 
+- Highest development pressure
+- Most forest-to-urban conversion
+- Climate stress on agriculture</p>
+<p><strong>West Region</strong>:
+- Water availability constraints
+- Rangeland-to-urban transitions
+- Climate model sensitivity</p>
+<p><strong>Midwest Region</strong>:
+- Agricultural transitions dominate
+- Urban expansion around metros
+- Less forest conversion</p>
+<p><strong>Northeast Region</strong>:
+- Moderate development pressure
+- Forest-to-urban in suburban areas
+- Climate adaptation challenges</p>
+<h3 id="validation-and-quality-assurance">Validation and Quality Assurance<a class="headerlink" href="#validation-and-quality-assurance" title="Permanent link">&para;</a></h3>
+<h4 id="recommended-validation-checks">Recommended Validation Checks<a class="headerlink" href="#recommended-validation-checks" title="Permanent link">&para;</a></h4>
+<p><strong>Data Consistency Checks</strong>:
+<div class="language-text highlight"><pre><span></span><code><span id="__span-32-1"><a id="__codelineno-32-1" name="__codelineno-32-1" href="#__codelineno-32-1"></a>&quot;Verify that total county area remains constant over time&quot;
+</span><span id="__span-32-2"><a id="__codelineno-32-2" name="__codelineno-32-2" href="#__codelineno-32-2"></a>&quot;Check that land use transitions balance (from totals = to totals)&quot;
+</span><span id="__span-32-3"><a id="__codelineno-32-3" name="__codelineno-32-3" href="#__codelineno-32-3"></a>&quot;Confirm all scenarios have complete geographic coverage&quot;
+</span></code></pre></div></p>
+<p><strong>Reasonableness Checks</strong>:
+<div class="language-text highlight"><pre><span></span><code><span id="__span-33-1"><a id="__codelineno-33-1" name="__codelineno-33-1" href="#__codelineno-33-1"></a>&quot;Identify any counties with unrealistic land use change rates&quot;
+</span><span id="__span-33-2"><a id="__codelineno-33-2" name="__codelineno-33-2" href="#__codelineno-33-2"></a>&quot;Check for negative land areas or impossible transitions&quot;
+</span><span id="__span-33-3"><a id="__codelineno-33-3" name="__codelineno-33-3" href="#__codelineno-33-3"></a>&quot;Verify that urban development is irreversible as assumed&quot;
+</span></code></pre></div></p>
+<p><strong>Comparative Validation</strong>:
+<div class="language-text highlight"><pre><span></span><code><span id="__span-34-1"><a id="__codelineno-34-1" name="__codelineno-34-1" href="#__codelineno-34-1"></a>&quot;Compare early projection periods (2020-2030) with recent trends&quot;
+</span><span id="__span-34-2"><a id="__codelineno-34-2" name="__codelineno-34-2" href="#__codelineno-34-2"></a>&quot;Check scenario outcomes against other national projections&quot;
+</span><span id="__span-34-3"><a id="__codelineno-34-3" name="__codelineno-34-3" href="#__codelineno-34-3"></a>&quot;Validate regional patterns against known development pressures&quot;
+</span></code></pre></div></p>
+<h4 id="interpreting-results">Interpreting Results<a class="headerlink" href="#interpreting-results" title="Permanent link">&para;</a></h4>
+<p><strong>Understanding Model Limitations</strong>:
+- <strong>Private land only</strong>: Results exclude ~30% of total U.S. land area
+- <strong>Policy neutral</strong>: No future conservation policies assumed
+- <strong>County resolution</strong>: Sub-county patterns not captured
+- <strong>Historical basis</strong>: Assumes past relationships continue</p>
+<p><strong>Appropriate Uses</strong>:
+- ✅ Scenario comparison and uncertainty assessment
+- ✅ Regional and temporal trend analysis<br />
+- ✅ Policy baseline for conservation planning
+- ✅ Climate impact assessment</p>
+<p><strong>Inappropriate Uses</strong>:
+- ❌ Precise predictions for specific locations
+- ❌ Short-term forecasting (use other models)
+- ❌ Public land management planning
+- ❌ Policy prescriptions without additional analysis</p>
+<h3 id="integration-with-rpa-land-use-analytics-tools">Integration with RPA Land Use Analytics Tools<a class="headerlink" href="#integration-with-rpa-land-use-analytics-tools" title="Permanent link">&para;</a></h3>
+<h4 id="using-natural-language-queries">Using Natural Language Queries<a class="headerlink" href="#using-natural-language-queries" title="Permanent link">&para;</a></h4>
+<p>The RPA Land Use Analytics system provides natural language access to this data through:</p>
+<p><strong>Conversational Interface</strong>: Ask questions in plain English
+<div class="language-text highlight"><pre><span></span><code><span id="__span-35-1"><a id="__codelineno-35-1" name="__codelineno-35-1" href="#__codelineno-35-1"></a>&quot;Which scenarios show the most agricultural land loss?&quot;
+</span><span id="__span-35-2"><a id="__codelineno-35-2" name="__codelineno-35-2" href="#__codelineno-35-2"></a>&quot;Compare forest conservation between climate pathways&quot;
+</span><span id="__span-35-3"><a id="__codelineno-35-3" name="__codelineno-35-3" href="#__codelineno-35-3"></a>&quot;Show me urbanization patterns in California counties&quot;
+</span></code></pre></div></p>
+<p><strong>Agent Capabilities</strong>: The system automatically:
+- Selects appropriate scenarios for your question
+- Handles temporal aggregations correctly
+- Provides business insights and interpretation
+- Generates visualizations when helpful</p>
+<p><strong>Best Practices for Queries</strong>:
+- Be specific about scenarios, time periods, and geographic scope
+- Ask follow-up questions to explore interesting findings
+- Request explanations when results are unexpected
+- Use the agent's memory to build complex multi-step analyses</p>
+<h4 id="integration-with-analysis-workflows">Integration with Analysis Workflows<a class="headerlink" href="#integration-with-analysis-workflows" title="Permanent link">&para;</a></h4>
+<p><strong>Dashboard Applications</strong>: Use for summary statistics and KPI monitoring
+<strong>Research Projects</strong>: Extract data for detailed academic analysis
+<strong>Policy Analysis</strong>: Generate scenarios for policy impact assessment
+<strong>Planning Applications</strong>: Inform long-range regional and state planning</p>
+<h2 id="references-and-further-reading">References and Further Reading<a class="headerlink" href="#references-and-further-reading" title="Permanent link">&para;</a></h2>
+<h3 id="official-rpa-assessment-resources">Official RPA Assessment Resources<a class="headerlink" href="#official-rpa-assessment-resources" title="Permanent link">&para;</a></h3>
+<ul>
+<li>
+<p><strong>Primary Report</strong>: U.S. Department of Agriculture, Forest Service. 2023. Future of America's Forest and Rangelands: Forest Service 2020 Resources Planning Act Assessment. Gen. Tech. Rep. WO-102. Washington, DC.</p>
+</li>
+<li>
+<p><strong>Land Use Projections</strong>: Mihiar, C.J.; Lewis, D.J.; Coulston, J.W. 2023. Land use projections for the 2020 RPA Assessment. <a href="https://doi.org/10.2737/RDS-2023-0026">https://doi.org/10.2737/RDS-2023-0026</a></p>
+</li>
+<li>
+<p><strong>Scenarios Documentation</strong>: O'Dea, C.B.; Langner, L.L.; Joyce, L.A.; Prestemon, J.P.; Wear, D.N. 2023. Future Scenarios. Chapter 3 in: Future of America's Forest and Rangelands: Forest Service 2020 Resources Planning Act Assessment. <a href="https://doi.org/10.2737/WO-GTR-102-Chap3">https://doi.org/10.2737/WO-GTR-102-Chap3</a></p>
+</li>
+</ul>
+<h3 id="online-resources">Online Resources<a class="headerlink" href="#online-resources" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Official RPA Website</strong>: <a href="https://www.fs.usda.gov/research/rpa">https://www.fs.usda.gov/research/rpa</a></li>
+<li><strong>2020 RPA Assessment Report</strong>: <a href="https://www.fs.usda.gov/research/rpa/assessment">https://www.fs.usda.gov/research/rpa/assessment</a>  </li>
+<li><strong>Technical Documentation</strong>: <a href="https://www.fs.usda.gov/research/rpa/docs">https://www.fs.usda.gov/research/rpa/docs</a></li>
+</ul>
+<h3 id="related-documentation">Related Documentation<a class="headerlink" href="#related-documentation" title="Permanent link">&para;</a></h3>
+<h4 id="within-rpa-land-use-analytics-system">Within RPA Land Use Analytics System<a class="headerlink" href="#within-rpa-land-use-analytics-system" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong><a href="../../agents/complete-guide/">Complete Agent System Guide</a></strong> - Natural language agent configuration and capabilities</li>
+<li><strong><a href="../../data/complete-reference/">Complete Database Reference</a></strong> - Detailed database schema and technical specifications</li>
+<li><strong><a href="../../queries/complete-guide/">Complete Query Guide</a></strong> - Natural language query patterns and examples</li>
+<li><strong><a href="../../getting-started/complete-setup/">Complete Setup Guide</a></strong> - Installation and configuration instructions</li>
+</ul>
+<h4 id="cross-references">Cross-References<a class="headerlink" href="#cross-references" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Methodology Details</strong>: See <a href="../../data/complete-reference/">Complete Database Reference</a> for technical implementation of RPA methodology</li>
+<li><strong>Query Examples</strong>: See <a href="../../queries/complete-guide/">Complete Query Guide</a> for examples of analyzing RPA scenarios</li>
+<li><strong>Agent Configuration</strong>: See <a href="../../agents/complete-guide/">Complete Agent System Guide</a> for customizing analysis approaches</li>
+<li><strong>System Architecture</strong>: See <a href="../../data/complete-reference/">Complete Database Reference</a> for database design and optimization</li>
+</ul>
+<p>The 2020 RPA Assessment represents a comprehensive, scientifically rigorous approach to projecting land use change across the United States. By understanding the methodology, scenarios, and data structure described in this guide, users can effectively leverage the RPA Land Use Analytics system to generate insights about future land use patterns and their implications for natural resource management.</p>
+<h2 id="see-also">See Also<a class="headerlink" href="#see-also" title="Permanent link">&para;</a></h2>
+<h3 id="related-documentation_1">Related Documentation<a class="headerlink" href="#related-documentation_1" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong><a href="../../examples/complete-examples/">Complete Examples Guide</a></strong> - Real-world use cases and workflows demonstrating RPA scenario analysis</li>
+<li><strong><a href="../../queries/complete-guide/">Complete Query Guide</a></strong> - Natural language query patterns for exploring RPA data and scenarios</li>
+<li><strong><a href="../../agents/complete-guide/">Complete Agent Guide</a></strong> - Agent configuration for RPA data analysis and interpretation</li>
+<li><strong><a href="../../data/complete-reference/">Complete Database Reference</a></strong> - Technical implementation of RPA methodology in the database schema</li>
+<li><strong><a href="../../getting-started/complete-setup/">Complete Setup Guide</a></strong> - Installation and configuration for accessing RPA data</li>
+</ul>
+<h3 id="quick-navigation-by-application">Quick Navigation by Application<a class="headerlink" href="#quick-navigation-by-application" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Policy Analysis</strong>: See <a href="../../examples/complete-examples/#policy-analysis-and-government-applications">Complete Examples Guide</a> for government use cases</li>
+<li><strong>Query Scenarios</strong>: Check <a href="../../queries/complete-guide/#scenario-comparison-queries">Complete Query Guide</a> for scenario analysis patterns</li>
+<li><strong>Conservation Planning</strong>: Reference <a href="../../examples/complete-examples/#conservation-planning-and-biodiversity">Complete Examples Guide</a> for conservation workflows</li>
+<li><strong>Data Structure</strong>: Learn about <a href="../../data/complete-reference/#star-schema-design">Database Schema</a> for technical understanding</li>
+<li><strong>Agent Setup</strong>: Follow <a href="../../agents/complete-guide/#configuration">Agent Configuration</a> for RPA-specific analysis</li>
+</ul>
+<blockquote>
+<p><strong>Consolidation Note</strong>: This guide consolidates information from overview.md, methodology.md, climate-models.md, and scenarios.md into a single comprehensive RPA Assessment reference. For the most current information about RPA methodology and scenarios, always refer to this complete guide rather than individual component files.</p>
+</blockquote>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      &copy; 2025 <a href="https://github.com/mihiarc/rpa-landuse"  target="_blank" rel="noopener">RPA Analytics Team</a> | Data source: USDA Forest Service 2020 RPA Assessment
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        <div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/mihiarc/rpa-landuse" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.0.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path fill="currentColor" d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://www.fs.usda.gov/research/rpa" target="_blank" rel="noopener" title="www.fs.usda.gov" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.0.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path fill="currentColor" d="M384 512H96c-53 0-96-43-96-96V96C0 43 43 0 96 0h304c26.5 0 48 21.5 48 48v288c0 20.9-13.4 38.7-32 45.3V448c17.7 0 32 14.3 32 32s-14.3 32-32 32zM96 384c-17.7 0-32 14.3-32 32s14.3 32 32 32h256v-64zm32-232c0 13.3 10.7 24 24 24h176c13.3 0 24-10.7 24-24s-10.7-24-24-24H152c-13.3 0-24 10.7-24 24m24 72c-13.3 0-24 10.7-24 24s10.7 24 24 24h176c13.3 0 24-10.7 24-24s-10.7-24-24-24z"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.path", "navigation.top", "search.suggest", "search.highlight", "content.tabs.link", "content.code.annotation", "content.code.copy", "toc.integrate"], "search": "../../assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.50899def.min.js"></script>
+      
+    
+  </body>
+</html>

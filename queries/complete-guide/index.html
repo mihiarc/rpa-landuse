@@ -1,0 +1,4689 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="AI-powered analytics tool for USDA Forest Service RPA Assessment land use data">
+      
+      
+        <meta name="author" content="RPA Analytics Team">
+      
+      
+        <link rel="canonical" href="https://mihiarc.github.io/rpa-landuse/queries/complete-guide/">
+      
+      
+        <link rel="prev" href="../../rpa/rpa-assessment-complete/">
+      
+      
+        <link rel="next" href="../../agents/complete-guide/">
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.16">
+    
+    
+      
+        <title>Complete Query Guide - RPA Land Use Analytics</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.7e37652d.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="green" data-md-color-accent="light-green">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#complete-natural-language-query-guide" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="RPA Land Use Analytics" class="md-header__button md-logo" aria-label="RPA Land Use Analytics" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            RPA Land Use Analytics
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Complete Query Guide
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="green" data-md-color-accent="light-green"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="green" data-md-color-accent="light-green"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/mihiarc/rpa-landuse" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.0.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path fill="currentColor" d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    rpa-landuse-analytics
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../getting-started/complete-setup/" class="md-tabs__link">
+          
+  
+  
+  Getting Started
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../rpa/rpa-assessment-complete/" class="md-tabs__link">
+          
+  
+  
+  RPA Assessment
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="./" class="md-tabs__link">
+          
+  
+  
+  Natural Language Queries
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../agents/complete-guide/" class="md-tabs__link">
+          
+  
+  
+  Agent System
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../data/complete-reference/" class="md-tabs__link">
+          
+  
+  
+  Data & Database
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../examples/complete-examples/" class="md-tabs__link">
+          
+  
+  
+  Examples & Use Cases
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../api/converters/" class="md-tabs__link">
+          
+  
+  
+  API Reference
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../development/architecture/" class="md-tabs__link">
+          
+  
+  
+  Development
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="RPA Land Use Analytics" class="md-nav__button md-logo" aria-label="RPA Land Use Analytics" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    RPA Land Use Analytics
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/mihiarc/rpa-landuse" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.0.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path fill="currentColor" d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    rpa-landuse-analytics
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Getting Started
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            Getting Started
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/complete-setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Complete Setup Guide
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/faq/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    FAQ
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Troubleshooting
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_4" id="__nav_2_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Streamlit Issues
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_4">
+            <span class="md-nav__icon md-icon"></span>
+            Streamlit Issues
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/streamlit-issues/duplicate-ids/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Duplicate IDs
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/streamlit-issues/fragments-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Fragments Guide
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    RPA Assessment
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            RPA Assessment
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../rpa/rpa-assessment-complete/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Complete Assessment Reference
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    Natural Language Queries
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Natural Language Queries
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Complete Query Guide
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    Complete Query Guide
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#table-of-contents" class="md-nav__link">
+    <span class="md-ellipsis">
+      Table of Contents
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-natural-language-queries-work" class="md-nav__link">
+    <span class="md-ellipsis">
+      How Natural Language Queries Work
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="How Natural Language Queries Work">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-processing-workflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      The Processing Workflow
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-complete-process" class="md-nav__link">
+    <span class="md-ellipsis">
+      The Complete Process
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#query-categories" class="md-nav__link">
+    <span class="md-ellipsis">
+      Query Categories
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Query Categories">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#exploratory-queries" class="md-nav__link">
+    <span class="md-ellipsis">
+      🔍 Exploratory Queries
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#analytical-queries" class="md-nav__link">
+    <span class="md-ellipsis">
+      📊 Analytical Queries
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#transition-queries" class="md-nav__link">
+    <span class="md-ellipsis">
+      🔄 Transition Queries
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#trend-queries" class="md-nav__link">
+    <span class="md-ellipsis">
+      📈 Trend Queries
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#geographic-queries" class="md-nav__link">
+    <span class="md-ellipsis">
+      🗺️ Geographic Queries
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#comparison-queries" class="md-nav__link">
+    <span class="md-ellipsis">
+      🔄 Comparison Queries
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#getting-started-with-basic-queries" class="md-nav__link">
+    <span class="md-ellipsis">
+      Getting Started with Basic Queries
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Getting Started with Basic Queries">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#exploring-the-database" class="md-nav__link">
+    <span class="md-ellipsis">
+      Exploring the Database
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Exploring the Database">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#list-tables" class="md-nav__link">
+    <span class="md-ellipsis">
+      List Tables
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#understand-table-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      Understand Table Structure
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#see-sample-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      See Sample Data
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#simple-filtering-queries" class="md-nav__link">
+    <span class="md-ellipsis">
+      Simple Filtering Queries
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Simple Filtering Queries">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#filter-by-scenario" class="md-nav__link">
+    <span class="md-ellipsis">
+      Filter by Scenario
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#filter-by-year" class="md-nav__link">
+    <span class="md-ellipsis">
+      Filter by Year
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#filter-by-location" class="md-nav__link">
+    <span class="md-ellipsis">
+      Filter by Location
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#filter-by-land-use-type" class="md-nav__link">
+    <span class="md-ellipsis">
+      Filter by Land Use Type
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#basic-aggregations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Basic Aggregations
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Basic Aggregations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#count-records" class="md-nav__link">
+    <span class="md-ellipsis">
+      Count Records
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sum-areas" class="md-nav__link">
+    <span class="md-ellipsis">
+      Sum Areas
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#group-by-queries" class="md-nav__link">
+    <span class="md-ellipsis">
+      Group By Queries
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#calculate-averages" class="md-nav__link">
+    <span class="md-ellipsis">
+      Calculate Averages
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#finding-unique-values" class="md-nav__link">
+    <span class="md-ellipsis">
+      Finding Unique Values
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Finding Unique Values">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#list-scenarios" class="md-nav__link">
+    <span class="md-ellipsis">
+      List Scenarios
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#list-land-use-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      List Land Use Types
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#list-years" class="md-nav__link">
+    <span class="md-ellipsis">
+      List Years
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#simple-transition-queries" class="md-nav__link">
+    <span class="md-ellipsis">
+      Simple Transition Queries
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Simple Transition Queries">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#specific-transitions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Specific Transitions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#all-transitions-from-a-type" class="md-nav__link">
+    <span class="md-ellipsis">
+      All Transitions From a Type
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#all-transitions-to-a-type" class="md-nav__link">
+    <span class="md-ellipsis">
+      All Transitions To a Type
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#basic-sorting" class="md-nav__link">
+    <span class="md-ellipsis">
+      Basic Sorting
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Basic Sorting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#order-by-area" class="md-nav__link">
+    <span class="md-ellipsis">
+      Order by Area
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#order-by-year" class="md-nav__link">
+    <span class="md-ellipsis">
+      Order by Year
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#top-n-results" class="md-nav__link">
+    <span class="md-ellipsis">
+      Top N Results
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#simple-comparisons" class="md-nav__link">
+    <span class="md-ellipsis">
+      Simple Comparisons
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Simple Comparisons">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#compare-two-values" class="md-nav__link">
+    <span class="md-ellipsis">
+      Compare Two Values
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#year-over-year-changes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Year-over-Year Changes
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scenario-differences" class="md-nav__link">
+    <span class="md-ellipsis">
+      Scenario Differences
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#working-with-results" class="md-nav__link">
+    <span class="md-ellipsis">
+      Working with Results
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Working with Results">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#export-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      Export Data
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#get-statistics" class="md-nav__link">
+    <span class="md-ellipsis">
+      Get Statistics
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#count-distinct-values" class="md-nav__link">
+    <span class="md-ellipsis">
+      Count Distinct Values
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#common-basic-query-patterns" class="md-nav__link">
+    <span class="md-ellipsis">
+      Common Basic Query Patterns
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Common Basic Query Patterns">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pattern-1-filter-aggregate" class="md-nav__link">
+    <span class="md-ellipsis">
+      Pattern 1: Filter + Aggregate
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pattern-2-find-specific-records" class="md-nav__link">
+    <span class="md-ellipsis">
+      Pattern 2: Find Specific Records
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pattern-3-compare-values" class="md-nav__link">
+    <span class="md-ellipsis">
+      Pattern 3: Compare Values
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#advanced-query-patterns" class="md-nav__link">
+    <span class="md-ellipsis">
+      Advanced Query Patterns
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Advanced Query Patterns">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#complex-filtering-and-conditions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Complex Filtering and Conditions
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Complex Filtering and Conditions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#multiple-conditions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Multiple Conditions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#conditional-logic" class="md-nav__link">
+    <span class="md-ellipsis">
+      Conditional Logic
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dynamic-thresholds" class="md-nav__link">
+    <span class="md-ellipsis">
+      Dynamic Thresholds
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#advanced-aggregations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Advanced Aggregations
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Advanced Aggregations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#window-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Window Functions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#percentages-and-ratios" class="md-nav__link">
+    <span class="md-ellipsis">
+      Percentages and Ratios
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#statistical-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      Statistical Analysis
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#time-series-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      Time Series Analysis
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Time Series Analysis">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#trend-detection" class="md-nav__link">
+    <span class="md-ellipsis">
+      Trend Detection
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#period-comparisons" class="md-nav__link">
+    <span class="md-ellipsis">
+      Period Comparisons
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decade-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      Decade Analysis
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#temporal-patterns" class="md-nav__link">
+    <span class="md-ellipsis">
+      Temporal Patterns
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cross-scenario-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      Cross-Scenario Analysis
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Cross-Scenario Analysis">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#scenario-divergence" class="md-nav__link">
+    <span class="md-ellipsis">
+      Scenario Divergence
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scenario-rankings" class="md-nav__link">
+    <span class="md-ellipsis">
+      Scenario Rankings
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#impact-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      Impact Analysis
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#geographic-patterns" class="md-nav__link">
+    <span class="md-ellipsis">
+      Geographic Patterns
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Geographic Patterns">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#regional-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      Regional Analysis
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#spatial-clustering" class="md-nav__link">
+    <span class="md-ellipsis">
+      Spatial Clustering
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hot-spot-detection" class="md-nav__link">
+    <span class="md-ellipsis">
+      Hot Spot Detection
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#complex-transitions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Complex Transitions
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Complex Transitions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#multi-step-transitions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Multi-Step Transitions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#transition-networks" class="md-nav__link">
+    <span class="md-ellipsis">
+      Transition Networks
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#circular-transitions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Circular Transitions
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#custom-metrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      Custom Metrics
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Custom Metrics">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sustainability-indices" class="md-nav__link">
+    <span class="md-ellipsis">
+      Sustainability Indices
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#change-intensity" class="md-nav__link">
+    <span class="md-ellipsis">
+      Change Intensity
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#composite-indicators" class="md-nav__link">
+    <span class="md-ellipsis">
+      Composite Indicators
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#data-mining-queries" class="md-nav__link">
+    <span class="md-ellipsis">
+      Data Mining Queries
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Data Mining Queries">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pattern-discovery" class="md-nav__link">
+    <span class="md-ellipsis">
+      Pattern Discovery
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#anomaly-detection" class="md-nav__link">
+    <span class="md-ellipsis">
+      Anomaly Detection
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#correlation-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      Correlation Analysis
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#optimization-queries" class="md-nav__link">
+    <span class="md-ellipsis">
+      Optimization Queries
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Optimization Queries">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#bestworst-case-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      Best/Worst Case Analysis
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#trade-off-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      Trade-off Analysis
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#efficiency-metrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      Efficiency Metrics
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#advanced-sql-patterns" class="md-nav__link">
+    <span class="md-ellipsis">
+      Advanced SQL Patterns
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Advanced SQL Patterns">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#common-table-expressions-ctes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Common Table Expressions (CTEs)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pivot-operations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Pivot Operations
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#recursive-queries" class="md-nav__link">
+    <span class="md-ellipsis">
+      Recursive Queries
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#real-world-query-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      Real-World Query Examples
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Real-World Query Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#urban-planning" class="md-nav__link">
+    <span class="md-ellipsis">
+      🏙️ Urban Planning
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🏙️ Urban Planning">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#urban-growth-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      Urban Growth Analysis
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#urban-density-trends" class="md-nav__link">
+    <span class="md-ellipsis">
+      Urban Density Trends
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sustainable-development" class="md-nav__link">
+    <span class="md-ellipsis">
+      Sustainable Development
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#agricultural-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      🌾 Agricultural Analysis
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🌾 Agricultural Analysis">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#crop-vs-pasture-dynamics" class="md-nav__link">
+    <span class="md-ellipsis">
+      Crop vs Pasture Dynamics
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#agricultural-pressure" class="md-nav__link">
+    <span class="md-ellipsis">
+      Agricultural Pressure
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#food-security-assessment" class="md-nav__link">
+    <span class="md-ellipsis">
+      Food Security Assessment
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#forest-conservation" class="md-nav__link">
+    <span class="md-ellipsis">
+      🌲 Forest Conservation
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🌲 Forest Conservation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#deforestation-hotspots" class="md-nav__link">
+    <span class="md-ellipsis">
+      Deforestation Hotspots
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#forest-recovery" class="md-nav__link">
+    <span class="md-ellipsis">
+      Forest Recovery
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#conservation-scenarios" class="md-nav__link">
+    <span class="md-ellipsis">
+      Conservation Scenarios
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scenario-comparisons" class="md-nav__link">
+    <span class="md-ellipsis">
+      📊 Scenario Comparisons
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📊 Scenario Comparisons">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#comprehensive-scenario-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      Comprehensive Scenario Analysis
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scenario-divergence_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Scenario Divergence
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#best-case-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      Best Case Analysis
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#trend-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      📈 Trend Analysis
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📈 Trend Analysis">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#acceleration-detection" class="md-nav__link">
+    <span class="md-ellipsis">
+      Acceleration Detection
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tipping-points" class="md-nav__link">
+    <span class="md-ellipsis">
+      Tipping Points
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#long-term-projections" class="md-nav__link">
+    <span class="md-ellipsis">
+      Long-term Projections
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#regional-patterns" class="md-nav__link">
+    <span class="md-ellipsis">
+      🗺️ Regional Patterns
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🗺️ Regional Patterns">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#state-level-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      State-Level Analysis
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#coastal-vs-inland" class="md-nav__link">
+    <span class="md-ellipsis">
+      Coastal vs Inland
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#metropolitan-influence" class="md-nav__link">
+    <span class="md-ellipsis">
+      Metropolitan Influence
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#transition-patterns" class="md-nav__link">
+    <span class="md-ellipsis">
+      🔄 Transition Patterns
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🔄 Transition Patterns">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#transition-matrix" class="md-nav__link">
+    <span class="md-ellipsis">
+      Transition Matrix
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#unusual-transitions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Unusual Transitions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#transition-chains" class="md-nav__link">
+    <span class="md-ellipsis">
+      Transition Chains
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#complex-analytical-queries" class="md-nav__link">
+    <span class="md-ellipsis">
+      💡 Complex Analytical Queries
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="💡 Complex Analytical Queries">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#multi-criteria-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      Multi-Criteria Analysis
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#composite-metrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      Composite Metrics
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#predictive-insights" class="md-nav__link">
+    <span class="md-ellipsis">
+      Predictive Insights
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reporting-queries" class="md-nav__link">
+    <span class="md-ellipsis">
+      📋 Reporting Queries
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📋 Reporting Queries">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#executive-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      Executive Summary
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#county-report-card" class="md-nav__link">
+    <span class="md-ellipsis">
+      County Report Card
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stakeholder-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      Stakeholder Analysis
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#data-quality-checks" class="md-nav__link">
+    <span class="md-ellipsis">
+      🛠️ Data Quality Checks
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🛠️ Data Quality Checks">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#validation-queries" class="md-nav__link">
+    <span class="md-ellipsis">
+      Validation Queries
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#consistency-checks" class="md-nav__link">
+    <span class="md-ellipsis">
+      Consistency Checks
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#outlier-detection" class="md-nav__link">
+    <span class="md-ellipsis">
+      Outlier Detection
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#export-and-visualization-prep" class="md-nav__link">
+    <span class="md-ellipsis">
+      📊 Export and Visualization Prep
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📊 Export and Visualization Prep">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#chart-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      Chart Data
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#geographic-export" class="md-nav__link">
+    <span class="md-ellipsis">
+      Geographic Export
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dashboard-metrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      Dashboard Metrics
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#query-optimization-and-best-practices" class="md-nav__link">
+    <span class="md-ellipsis">
+      Query Optimization and Best Practices
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Query Optimization and Best Practices">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#performance-optimization" class="md-nav__link">
+    <span class="md-ellipsis">
+      Performance Optimization
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Performance Optimization">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#query-hints" class="md-nav__link">
+    <span class="md-ellipsis">
+      Query Hints
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sampling-strategies" class="md-nav__link">
+    <span class="md-ellipsis">
+      Sampling Strategies
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#incremental-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      Incremental Analysis
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#integration-queries" class="md-nav__link">
+    <span class="md-ellipsis">
+      Integration Queries
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Integration Queries">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#multi-table-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      Multi-Table Analysis
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#view-utilization" class="md-nav__link">
+    <span class="md-ellipsis">
+      View Utilization
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#data-validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Data Validation
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#visualization-preparation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Visualization Preparation
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Visualization Preparation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#chart-ready-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      Chart-Ready Data
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#map-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      Map Data
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dashboard-metrics_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Dashboard Metrics
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#understanding-agent-responses" class="md-nav__link">
+    <span class="md-ellipsis">
+      Understanding Agent Responses
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Understanding Agent Responses">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sql-transparency" class="md-nav__link">
+    <span class="md-ellipsis">
+      SQL Transparency
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#result-interpretation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Result Interpretation
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#common-patterns" class="md-nav__link">
+    <span class="md-ellipsis">
+      Common Patterns
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Common Patterns">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#time-based-patterns" class="md-nav__link">
+    <span class="md-ellipsis">
+      Time-Based Patterns
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#aggregation-patterns" class="md-nav__link">
+    <span class="md-ellipsis">
+      Aggregation Patterns
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#filtering-patterns" class="md-nav__link">
+    <span class="md-ellipsis">
+      Filtering Patterns
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#advanced-techniques" class="md-nav__link">
+    <span class="md-ellipsis">
+      Advanced Techniques
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Advanced Techniques">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#multi-step-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      Multi-Step Analysis
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#conditional-queries" class="md-nav__link">
+    <span class="md-ellipsis">
+      Conditional Queries
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#custom-calculations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Custom Calculations
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting-and-tips" class="md-nav__link">
+    <span class="md-ellipsis">
+      Troubleshooting and Tips
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting and Tips">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#best-practices" class="md-nav__link">
+    <span class="md-ellipsis">
+      Best Practices
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Best Practices">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-be-specific" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Be Specific
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-include-context" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Include Context
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-specify-filters" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Specify Filters
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-request-format" class="md-nav__link">
+    <span class="md-ellipsis">
+      4. Request Format
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tips-for-success" class="md-nav__link">
+    <span class="md-ellipsis">
+      Tips for Success
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Tips for Success">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-start-simple" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Start Simple
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-use-natural-language" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Use Natural Language
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-ask-for-clarification" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Ask for Clarification
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-build-on-previous-queries" class="md-nav__link">
+    <span class="md-ellipsis">
+      4. Build on Previous Queries
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#best-practices-for-complex-queries" class="md-nav__link">
+    <span class="md-ellipsis">
+      Best Practices for Complex Queries
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#query-optimization-tips" class="md-nav__link">
+    <span class="md-ellipsis">
+      Query Optimization Tips
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#practice-exercises" class="md-nav__link">
+    <span class="md-ellipsis">
+      Practice Exercises
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#related-documentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Related Documentation
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Related Documentation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#quick-links" class="md-nav__link">
+    <span class="md-ellipsis">
+      Quick Links
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cross-references" class="md-nav__link">
+    <span class="md-ellipsis">
+      Cross-References
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#see-also" class="md-nav__link">
+    <span class="md-ellipsis">
+      See Also
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="See Also">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#related-documentation_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Related Documentation
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#quick-navigation-by-topic" class="md-nav__link">
+    <span class="md-ellipsis">
+      Quick Navigation by Topic
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Agent System
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Agent System
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../agents/complete-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Complete Agent Guide
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_5_2" id="__nav_5_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    API Reference
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_2">
+            <span class="md-nav__icon md-icon"></span>
+            API Reference
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/agent/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Main Agent
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/landuse-query-agent/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Query Capabilities
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/langgraph-agent/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    LangGraph Integration
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Data & Database
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            Data & Database
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../data/complete-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Complete Database Reference
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../data/data-dictionary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Data Dictionary
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../data/sources/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Data Sources
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../data/categories/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Land Use Categories
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../data/variable-descriptions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Variable Descriptions
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../data/rpa-model-diagram/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    RPA Model Diagram
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../data/processing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Data Processing
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Examples & Use Cases
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            Examples & Use Cases
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/complete-examples/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Complete Examples Guide
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    API Reference
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            API Reference
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/converters/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Data Converters
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/tools/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Tools & Utilities
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Development
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            Development
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development/architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Architecture
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development/contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Contributing
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development/testing-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Testing Guide
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development/testing-implementation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Testing Implementation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development/ci-cd-pipeline/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    CI/CD Pipeline
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development/retry-logic/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Retry Logic
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development/branding-strategy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Branding Strategy
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development/modern-duckdb-tools/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Modern DuckDB Tools
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development/pydantic-models/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Pydantic Models
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development/security-policy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Security Policy
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development/duckdb-optimization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    DuckDB Optimization
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development/streamlit-fragments/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Streamlit Fragments
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="complete-natural-language-query-guide">Complete Natural Language Query Guide<a class="headerlink" href="#complete-natural-language-query-guide" title="Permanent link">&para;</a></h1>
+<p>Welcome to the comprehensive guide for natural language querying in the RPA Land Use Analytics system. This guide covers everything from basic exploration to advanced analytical queries, providing you with the tools to extract meaningful insights from USDA Forest Service RPA Assessment data through conversational AI.</p>
+<h2 id="table-of-contents">Table of Contents<a class="headerlink" href="#table-of-contents" title="Permanent link">&para;</a></h2>
+<ol>
+<li><a href="#how-natural-language-queries-work">How Natural Language Queries Work</a></li>
+<li><a href="#getting-started-with-basic-queries">Getting Started with Basic Queries</a></li>
+<li><a href="#advanced-query-patterns">Advanced Query Patterns</a></li>
+<li><a href="#real-world-query-examples">Real-World Query Examples</a></li>
+<li><a href="#query-optimization-and-best-practices">Query Optimization and Best Practices</a></li>
+<li><a href="#troubleshooting-and-tips">Troubleshooting and Tips</a></li>
+</ol>
+<h2 id="how-natural-language-queries-work">How Natural Language Queries Work<a class="headerlink" href="#how-natural-language-queries-work" title="Permanent link">&para;</a></h2>
+<p>The power of this system lies in its ability to understand your questions in plain English and translate them into precise database queries. The LangGraph agent interprets natural language and provides comprehensive insights with full SQL transparency.</p>
+<h3 id="the-processing-workflow">The Processing Workflow<a class="headerlink" href="#the-processing-workflow" title="Permanent link">&para;</a></h3>
+<pre class="mermaid"><code>graph TD
+    A[Your Question] --&gt; B[LangGraph Agent]
+    B --&gt; C[Language Understanding]
+    C --&gt; D[SQL Generation]
+    D --&gt; E[Query Execution]
+    E --&gt; F[Result Formatting]
+    F --&gt; G[Natural Language Response]</code></pre>
+<h3 id="the-complete-process">The Complete Process<a class="headerlink" href="#the-complete-process" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Language Understanding</strong>: The agent analyzes your question to identify:</li>
+<li>What data you're looking for</li>
+<li>Which tables/fields are relevant</li>
+<li>What filters or conditions to apply</li>
+<li>
+<p>How to aggregate or sort results</p>
+</li>
+<li>
+<p><strong>SQL Generation</strong>: Your question is converted to optimized SQL:</p>
+</li>
+<li>Proper table and column selection</li>
+<li>JOIN operations when needed</li>
+<li>WHERE clauses for filtering</li>
+<li>GROUP BY for aggregations</li>
+<li>
+<p>ORDER BY for sorting</p>
+</li>
+<li>
+<p><strong>Intelligent Response</strong>: Results are formatted clearly with:</p>
+</li>
+<li>Summary of findings</li>
+<li>Formatted tables</li>
+<li>Relevant context</li>
+<li>Follow-up suggestions</li>
+</ol>
+<h3 id="query-categories">Query Categories<a class="headerlink" href="#query-categories" title="Permanent link">&para;</a></h3>
+<h4 id="exploratory-queries">🔍 Exploratory Queries<a class="headerlink" href="#exploratory-queries" title="Permanent link">&para;</a></h4>
+<p>Understand your data structure and contents:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>&quot;What tables are in the database?&quot;
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>&quot;Show me the columns in the landuse_transitions table&quot;
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>&quot;What are the unique scenarios in the data?&quot;
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>&quot;How many records are in each table?&quot;
+</span></code></pre></div>
+<h4 id="analytical-queries">📊 Analytical Queries<a class="headerlink" href="#analytical-queries" title="Permanent link">&para;</a></h4>
+<p>Perform calculations and analysis:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>&quot;What&#39;s the total forest area in 2050?&quot;
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>&quot;Calculate the average urban growth rate per decade&quot;
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>&quot;Show me the percentage of land that changes use vs stays the same&quot;
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>&quot;What&#39;s the correlation between urban growth and forest loss?&quot;
+</span></code></pre></div>
+<h4 id="transition-queries">🔄 Transition Queries<a class="headerlink" href="#transition-queries" title="Permanent link">&para;</a></h4>
+<p>Focus on land use changes:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>&quot;Show all transitions from forest to other land uses&quot;
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>&quot;Which land use has the most conversions to urban?&quot;
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>&quot;Find counties where cropland is converting to pasture&quot;
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>&quot;What are the top 10 most common land use transitions?&quot;
+</span></code></pre></div>
+<h4 id="trend-queries">📈 Trend Queries<a class="headerlink" href="#trend-queries" title="Permanent link">&para;</a></h4>
+<p>Analyze changes over time:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>&quot;How does cropland area change from 2020 to 2100?&quot;
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>&quot;Show me the decade with the most urban expansion&quot;
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>&quot;Plot forest area trends for all scenarios&quot;
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>&quot;When does agricultural land peak in the High Crop Demand scenario?&quot;
+</span></code></pre></div>
+<h4 id="geographic-queries">🗺️ Geographic Queries<a class="headerlink" href="#geographic-queries" title="Permanent link">&para;</a></h4>
+<p>Location-specific analysis:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>&quot;What are the land use changes in California counties?&quot;
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>&quot;Show me the top 20 counties by urban growth&quot;
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>&quot;Which FIPS codes have the most forest?&quot;
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>&quot;Compare land use between coastal and inland counties&quot;
+</span></code></pre></div>
+<h4 id="comparison-queries">🔄 Comparison Queries<a class="headerlink" href="#comparison-queries" title="Permanent link">&para;</a></h4>
+<p>Compare scenarios, time periods, or regions:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>&quot;Compare urban growth between Baseline and High Crop Demand&quot;
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>&quot;What&#39;s the difference in forest loss between 2020-2050 and 2050-2080?&quot;
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>&quot;Show scenario differences for agricultural land in 2100&quot;
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>&quot;Which scenario preserves the most natural land?&quot;
+</span></code></pre></div>
+<h2 id="getting-started-with-basic-queries">Getting Started with Basic Queries<a class="headerlink" href="#getting-started-with-basic-queries" title="Permanent link">&para;</a></h2>
+<h3 id="exploring-the-database">Exploring the Database<a class="headerlink" href="#exploring-the-database" title="Permanent link">&para;</a></h3>
+<h4 id="list-tables">List Tables<a class="headerlink" href="#list-tables" title="Permanent link">&para;</a></h4>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>You&gt; What tables are in the landuse_transitions database?
+</span></code></pre></div>
+<p><strong>Agent Response:</strong>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>Database: processed/landuse_analytics.duckdb
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>Tables:
+</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>  • fact_landuse_transitions: 5,400,000 rows
+</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>  • dim_scenario: 20 rows  
+</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>  • dim_geography: 3,075 rows
+</span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>  • dim_landuse: 5 rows
+</span><span id="__span-7-7"><a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a>  • dim_time: 6 rows
+</span></code></pre></div></p>
+<h4 id="understand-table-structure">Understand Table Structure<a class="headerlink" href="#understand-table-structure" title="Permanent link">&para;</a></h4>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>You&gt; Describe the schema of the fact_landuse_transitions table
+</span></code></pre></div>
+<p><strong>Agent Response:</strong>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>Table: fact_landuse_transitions
+</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>Rows: 5,400,000
+</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>
+</span><span id="__span-9-4"><a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>Schema:
+</span><span id="__span-9-5"><a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>  scenario_id (INTEGER) NOT NULL
+</span><span id="__span-9-6"><a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>  time_id (INTEGER) NOT NULL
+</span><span id="__span-9-7"><a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a>  geography_id (INTEGER) NOT NULL
+</span><span id="__span-9-8"><a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a>  from_landuse_id (INTEGER) NOT NULL
+</span><span id="__span-9-9"><a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a>  to_landuse_id (INTEGER) NOT NULL
+</span><span id="__span-9-10"><a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a>  acres (REAL)
+</span><span id="__span-9-11"><a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a>
+</span><span id="__span-9-12"><a id="__codelineno-9-12" name="__codelineno-9-12" href="#__codelineno-9-12"></a>Views Available:
+</span><span id="__span-9-13"><a id="__codelineno-9-13" name="__codelineno-9-13" href="#__codelineno-9-13"></a>  • v_landuse_with_metadata: Full denormalized view
+</span><span id="__span-9-14"><a id="__codelineno-9-14" name="__codelineno-9-14" href="#__codelineno-9-14"></a>  • v_landuse_summary: Pre-aggregated summaries
+</span><span id="__span-9-15"><a id="__codelineno-9-15" name="__codelineno-9-15" href="#__codelineno-9-15"></a>  • v_scenario_comparison: Cross-scenario analysis
+</span></code></pre></div></p>
+<h4 id="see-sample-data">See Sample Data<a class="headerlink" href="#see-sample-data" title="Permanent link">&para;</a></h4>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>You&gt; Show me 5 sample rows from the landuse transitions
+</span></code></pre></div>
+<h3 id="simple-filtering-queries">Simple Filtering Queries<a class="headerlink" href="#simple-filtering-queries" title="Permanent link">&para;</a></h3>
+<h4 id="filter-by-scenario">Filter by Scenario<a class="headerlink" href="#filter-by-scenario" title="Permanent link">&para;</a></h4>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>You&gt; Show me data from the Baseline scenario
+</span></code></pre></div>
+<p>The agent generates:
+<div class="language-sql highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">v_landuse_with_metadata</span><span class="w"> </span>
+</span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="k">WHERE</span><span class="w"> </span><span class="n">scenario_name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;Baseline&#39;</span><span class="w"> </span>
+</span><span id="__span-12-3"><a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a><span class="k">LIMIT</span><span class="w"> </span><span class="mi">10</span>
+</span></code></pre></div></p>
+<h4 id="filter-by-year">Filter by Year<a class="headerlink" href="#filter-by-year" title="Permanent link">&para;</a></h4>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>You&gt; What land use transitions happened in 2050?
+</span></code></pre></div>
+<h4 id="filter-by-location">Filter by Location<a class="headerlink" href="#filter-by-location" title="Permanent link">&para;</a></h4>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>You&gt; Show me land use changes in California
+</span></code></pre></div>
+<p>The agent knows California FIPS codes start with '06':
+<div class="language-sql highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">v_landuse_with_metadata</span><span class="w"> </span>
+</span><span id="__span-15-2"><a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a><span class="k">WHERE</span><span class="w"> </span><span class="n">state_fips</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;06&#39;</span>
+</span><span id="__span-15-3"><a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a><span class="k">LIMIT</span><span class="w"> </span><span class="mi">100</span>
+</span></code></pre></div></p>
+<h4 id="filter-by-land-use-type">Filter by Land Use Type<a class="headerlink" href="#filter-by-land-use-type" title="Permanent link">&para;</a></h4>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-16-1"><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>You&gt; Show me all transitions from forest
+</span></code></pre></div>
+<h3 id="basic-aggregations">Basic Aggregations<a class="headerlink" href="#basic-aggregations" title="Permanent link">&para;</a></h3>
+<h4 id="count-records">Count Records<a class="headerlink" href="#count-records" title="Permanent link">&para;</a></h4>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-17-1"><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>You&gt; How many land use transitions are in the database?
+</span></code></pre></div>
+<h4 id="sum-areas">Sum Areas<a class="headerlink" href="#sum-areas" title="Permanent link">&para;</a></h4>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-18-1"><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>You&gt; What&#39;s the total forest area in 2020?
+</span></code></pre></div>
+<p><strong>Generated SQL:</strong>
+<div class="language-sql highlight"><pre><span></span><code><span id="__span-19-1"><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="k">SELECT</span><span class="w"> </span><span class="k">SUM</span><span class="p">(</span><span class="n">acres</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">total_forest_acres</span>
+</span><span id="__span-19-2"><a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a><span class="k">FROM</span><span class="w"> </span><span class="n">v_landuse_with_metadata</span>
+</span><span id="__span-19-3"><a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a><span class="k">WHERE</span><span class="w"> </span><span class="n">from_landuse_name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;Forest&#39;</span><span class="w"> </span>
+</span><span id="__span-19-4"><a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a><span class="w">  </span><span class="k">AND</span><span class="w"> </span><span class="n">to_landuse_name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;Forest&#39;</span>
+</span><span id="__span-19-5"><a id="__codelineno-19-5" name="__codelineno-19-5" href="#__codelineno-19-5"></a><span class="w">  </span><span class="k">AND</span><span class="w"> </span><span class="k">year</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2020</span>
+</span></code></pre></div></p>
+<h4 id="group-by-queries">Group By Queries<a class="headerlink" href="#group-by-queries" title="Permanent link">&para;</a></h4>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-20-1"><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a>You&gt; Show me total area by land use type
+</span></code></pre></div>
+<h4 id="calculate-averages">Calculate Averages<a class="headerlink" href="#calculate-averages" title="Permanent link">&para;</a></h4>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-21-1"><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a>You&gt; What&#39;s the average urban area per county?
+</span></code></pre></div>
+<h3 id="finding-unique-values">Finding Unique Values<a class="headerlink" href="#finding-unique-values" title="Permanent link">&para;</a></h3>
+<h4 id="list-scenarios">List Scenarios<a class="headerlink" href="#list-scenarios" title="Permanent link">&para;</a></h4>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-22-1"><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a>You&gt; What scenarios are available in the data?
+</span></code></pre></div>
+<p><strong>Response:</strong>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-23-1"><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a>Available scenarios (20 total):
+</span><span id="__span-23-2"><a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a>- RCP45_SSP1_Ref: Reference case, lower emissions
+</span><span id="__span-23-3"><a id="__codelineno-23-3" name="__codelineno-23-3" href="#__codelineno-23-3"></a>- RCP45_SSP1_HighCropDemand: High crop demand, lower emissions
+</span><span id="__span-23-4"><a id="__codelineno-23-4" name="__codelineno-23-4" href="#__codelineno-23-4"></a>- RCP45_SSP1_HighForest: Forest preservation focus
+</span><span id="__span-23-5"><a id="__codelineno-23-5" name="__codelineno-23-5" href="#__codelineno-23-5"></a>- RCP85_SSP5_Ref: Reference case, higher emissions
+</span><span id="__span-23-6"><a id="__codelineno-23-6" name="__codelineno-23-6" href="#__codelineno-23-6"></a>- RCP85_SSP5_HighUrban: Urban expansion focus
+</span><span id="__span-23-7"><a id="__codelineno-23-7" name="__codelineno-23-7" href="#__codelineno-23-7"></a>...
+</span></code></pre></div></p>
+<h4 id="list-land-use-types">List Land Use Types<a class="headerlink" href="#list-land-use-types" title="Permanent link">&para;</a></h4>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-24-1"><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a>You&gt; What are all the land use categories?
+</span></code></pre></div>
+<p><strong>Response:</strong>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-25-1"><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a>Land Use Categories:
+</span><span id="__span-25-2"><a id="__codelineno-25-2" name="__codelineno-25-2" href="#__codelineno-25-2"></a>- Crop: Agricultural cropland
+</span><span id="__span-25-3"><a id="__codelineno-25-3" name="__codelineno-25-3" href="#__codelineno-25-3"></a>- Pasture: Livestock grazing land  
+</span><span id="__span-25-4"><a id="__codelineno-25-4" name="__codelineno-25-4" href="#__codelineno-25-4"></a>- Forest: Forested areas
+</span><span id="__span-25-5"><a id="__codelineno-25-5" name="__codelineno-25-5" href="#__codelineno-25-5"></a>- Urban: Developed/built areas
+</span><span id="__span-25-6"><a id="__codelineno-25-6" name="__codelineno-25-6" href="#__codelineno-25-6"></a>- Rangeland: Natural grasslands
+</span></code></pre></div></p>
+<h4 id="list-years">List Years<a class="headerlink" href="#list-years" title="Permanent link">&para;</a></h4>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-26-1"><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a>You&gt; What years does the data cover?
+</span></code></pre></div>
+<h3 id="simple-transition-queries">Simple Transition Queries<a class="headerlink" href="#simple-transition-queries" title="Permanent link">&para;</a></h3>
+<h4 id="specific-transitions">Specific Transitions<a class="headerlink" href="#specific-transitions" title="Permanent link">&para;</a></h4>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-27-1"><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a>You&gt; Show me forest to urban transitions
+</span></code></pre></div>
+<p><strong>Generated SQL:</strong>
+<div class="language-sql highlight"><pre><span></span><code><span id="__span-28-1"><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">v_landuse_with_metadata</span>
+</span><span id="__span-28-2"><a id="__codelineno-28-2" name="__codelineno-28-2" href="#__codelineno-28-2"></a><span class="k">WHERE</span><span class="w"> </span><span class="n">from_landuse_name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;Forest&#39;</span><span class="w"> </span>
+</span><span id="__span-28-3"><a id="__codelineno-28-3" name="__codelineno-28-3" href="#__codelineno-28-3"></a><span class="w">  </span><span class="k">AND</span><span class="w"> </span><span class="n">to_landuse_name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;Urban&#39;</span>
+</span><span id="__span-28-4"><a id="__codelineno-28-4" name="__codelineno-28-4" href="#__codelineno-28-4"></a><span class="k">LIMIT</span><span class="w"> </span><span class="mi">100</span>
+</span></code></pre></div></p>
+<h4 id="all-transitions-from-a-type">All Transitions From a Type<a class="headerlink" href="#all-transitions-from-a-type" title="Permanent link">&para;</a></h4>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-29-1"><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a>You&gt; What does cropland convert to?
+</span></code></pre></div>
+<h4 id="all-transitions-to-a-type">All Transitions To a Type<a class="headerlink" href="#all-transitions-to-a-type" title="Permanent link">&para;</a></h4>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-30-1"><a id="__codelineno-30-1" name="__codelineno-30-1" href="#__codelineno-30-1"></a>You&gt; What converts to urban land?
+</span></code></pre></div>
+<h3 id="basic-sorting">Basic Sorting<a class="headerlink" href="#basic-sorting" title="Permanent link">&para;</a></h3>
+<h4 id="order-by-area">Order by Area<a class="headerlink" href="#order-by-area" title="Permanent link">&para;</a></h4>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-31-1"><a id="__codelineno-31-1" name="__codelineno-31-1" href="#__codelineno-31-1"></a>You&gt; Show the largest land use transitions by area
+</span></code></pre></div>
+<h4 id="order-by-year">Order by Year<a class="headerlink" href="#order-by-year" title="Permanent link">&para;</a></h4>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-32-1"><a id="__codelineno-32-1" name="__codelineno-32-1" href="#__codelineno-32-1"></a>You&gt; Show forest area over time, sorted by year
+</span></code></pre></div>
+<h4 id="top-n-results">Top N Results<a class="headerlink" href="#top-n-results" title="Permanent link">&para;</a></h4>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-33-1"><a id="__codelineno-33-1" name="__codelineno-33-1" href="#__codelineno-33-1"></a>You&gt; What are the top 10 counties by total land area?
+</span></code></pre></div>
+<h3 id="simple-comparisons">Simple Comparisons<a class="headerlink" href="#simple-comparisons" title="Permanent link">&para;</a></h3>
+<h4 id="compare-two-values">Compare Two Values<a class="headerlink" href="#compare-two-values" title="Permanent link">&para;</a></h4>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-34-1"><a id="__codelineno-34-1" name="__codelineno-34-1" href="#__codelineno-34-1"></a>You&gt; Is there more forest or cropland in 2050?
+</span></code></pre></div>
+<h4 id="year-over-year-changes">Year-over-Year Changes<a class="headerlink" href="#year-over-year-changes" title="Permanent link">&para;</a></h4>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-35-1"><a id="__codelineno-35-1" name="__codelineno-35-1" href="#__codelineno-35-1"></a>You&gt; How much did urban area change from 2020 to 2030?
+</span></code></pre></div>
+<h4 id="scenario-differences">Scenario Differences<a class="headerlink" href="#scenario-differences" title="Permanent link">&para;</a></h4>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-36-1"><a id="__codelineno-36-1" name="__codelineno-36-1" href="#__codelineno-36-1"></a>You&gt; Compare forest area between Baseline and High Forest scenarios
+</span></code></pre></div>
+<h3 id="working-with-results">Working with Results<a class="headerlink" href="#working-with-results" title="Permanent link">&para;</a></h3>
+<h4 id="export-data">Export Data<a class="headerlink" href="#export-data" title="Permanent link">&para;</a></h4>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-37-1"><a id="__codelineno-37-1" name="__codelineno-37-1" href="#__codelineno-37-1"></a>You&gt; Export the forest transitions to a CSV file
+</span></code></pre></div>
+<h4 id="get-statistics">Get Statistics<a class="headerlink" href="#get-statistics" title="Permanent link">&para;</a></h4>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-38-1"><a id="__codelineno-38-1" name="__codelineno-38-1" href="#__codelineno-38-1"></a>You&gt; Show me statistics for the acres column
+</span></code></pre></div>
+<h4 id="count-distinct-values">Count Distinct Values<a class="headerlink" href="#count-distinct-values" title="Permanent link">&para;</a></h4>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-39-1"><a id="__codelineno-39-1" name="__codelineno-39-1" href="#__codelineno-39-1"></a>You&gt; How many unique counties are in the data?
+</span></code></pre></div>
+<h3 id="common-basic-query-patterns">Common Basic Query Patterns<a class="headerlink" href="#common-basic-query-patterns" title="Permanent link">&para;</a></h3>
+<h4 id="pattern-1-filter-aggregate">Pattern 1: Filter + Aggregate<a class="headerlink" href="#pattern-1-filter-aggregate" title="Permanent link">&para;</a></h4>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-40-1"><a id="__codelineno-40-1" name="__codelineno-40-1" href="#__codelineno-40-1"></a>&quot;Total [land use] area in [location] for [scenario]&quot;
+</span><span id="__span-40-2"><a id="__codelineno-40-2" name="__codelineno-40-2" href="#__codelineno-40-2"></a>&quot;Sum of [metric] where [condition]&quot;
+</span><span id="__span-40-3"><a id="__codelineno-40-3" name="__codelineno-40-3" href="#__codelineno-40-3"></a>&quot;Average [value] by [grouping]&quot;
+</span></code></pre></div>
+<h4 id="pattern-2-find-specific-records">Pattern 2: Find Specific Records<a class="headerlink" href="#pattern-2-find-specific-records" title="Permanent link">&para;</a></h4>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-41-1"><a id="__codelineno-41-1" name="__codelineno-41-1" href="#__codelineno-41-1"></a>&quot;Show me [land use] in [year]&quot;
+</span><span id="__span-41-2"><a id="__codelineno-41-2" name="__codelineno-41-2" href="#__codelineno-41-2"></a>&quot;List [top N] [items] by [metric]&quot;
+</span><span id="__span-41-3"><a id="__codelineno-41-3" name="__codelineno-41-3" href="#__codelineno-41-3"></a>&quot;Find all [transitions] from [type] to [type]&quot;
+</span></code></pre></div>
+<h4 id="pattern-3-compare-values">Pattern 3: Compare Values<a class="headerlink" href="#pattern-3-compare-values" title="Permanent link">&para;</a></h4>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-42-1"><a id="__codelineno-42-1" name="__codelineno-42-1" href="#__codelineno-42-1"></a>&quot;Compare [metric] between [A] and [B]&quot;
+</span><span id="__span-42-2"><a id="__codelineno-42-2" name="__codelineno-42-2" href="#__codelineno-42-2"></a>&quot;What&#39;s the difference in [value] from [time1] to [time2]&quot;
+</span><span id="__span-42-3"><a id="__codelineno-42-3" name="__codelineno-42-3" href="#__codelineno-42-3"></a>&quot;Which [item] has more [metric]?&quot;
+</span></code></pre></div>
+<h2 id="advanced-query-patterns">Advanced Query Patterns<a class="headerlink" href="#advanced-query-patterns" title="Permanent link">&para;</a></h2>
+<h3 id="complex-filtering-and-conditions">Complex Filtering and Conditions<a class="headerlink" href="#complex-filtering-and-conditions" title="Permanent link">&para;</a></h3>
+<h4 id="multiple-conditions">Multiple Conditions<a class="headerlink" href="#multiple-conditions" title="Permanent link">&para;</a></h4>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-43-1"><a id="__codelineno-43-1" name="__codelineno-43-1" href="#__codelineno-43-1"></a>You&gt; Show me counties where forest decreased by more than 20% AND urban increased by more than 50% between 2020 and 2050
+</span></code></pre></div>
+<p>The agent will create a complex query with:
+- Self-joins to compare different years
+- Percentage calculations
+- Multiple WHERE conditions</p>
+<h4 id="conditional-logic">Conditional Logic<a class="headerlink" href="#conditional-logic" title="Permanent link">&para;</a></h4>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-44-1"><a id="__codelineno-44-1" name="__codelineno-44-1" href="#__codelineno-44-1"></a>You&gt; Find transitions that only happen in certain scenarios but not in Baseline
+</span></code></pre></div>
+<p><strong>Generated approach:</strong>
+<div class="language-sql highlight"><pre><span></span><code><span id="__span-45-1"><a id="__codelineno-45-1" name="__codelineno-45-1" href="#__codelineno-45-1"></a><span class="k">WITH</span><span class="w"> </span><span class="n">baseline_transitions</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="p">(</span>
+</span><span id="__span-45-2"><a id="__codelineno-45-2" name="__codelineno-45-2" href="#__codelineno-45-2"></a><span class="w">  </span><span class="k">SELECT</span><span class="w"> </span><span class="k">DISTINCT</span><span class="w"> </span><span class="n">from_landuse_name</span><span class="p">,</span><span class="w"> </span><span class="n">to_landuse_name</span><span class="w"> </span>
+</span><span id="__span-45-3"><a id="__codelineno-45-3" name="__codelineno-45-3" href="#__codelineno-45-3"></a><span class="w">  </span><span class="k">FROM</span><span class="w"> </span><span class="n">v_landuse_with_metadata</span><span class="w"> </span>
+</span><span id="__span-45-4"><a id="__codelineno-45-4" name="__codelineno-45-4" href="#__codelineno-45-4"></a><span class="w">  </span><span class="k">WHERE</span><span class="w"> </span><span class="n">scenario_name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;RCP45_SSP1_Ref&#39;</span>
+</span><span id="__span-45-5"><a id="__codelineno-45-5" name="__codelineno-45-5" href="#__codelineno-45-5"></a><span class="p">),</span>
+</span><span id="__span-45-6"><a id="__codelineno-45-6" name="__codelineno-45-6" href="#__codelineno-45-6"></a><span class="n">other_transitions</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="p">(</span>
+</span><span id="__span-45-7"><a id="__codelineno-45-7" name="__codelineno-45-7" href="#__codelineno-45-7"></a><span class="w">  </span><span class="k">SELECT</span><span class="w"> </span><span class="k">DISTINCT</span><span class="w"> </span><span class="n">scenario_name</span><span class="p">,</span><span class="w"> </span><span class="n">from_landuse_name</span><span class="p">,</span><span class="w"> </span><span class="n">to_landuse_name</span><span class="w"> </span>
+</span><span id="__span-45-8"><a id="__codelineno-45-8" name="__codelineno-45-8" href="#__codelineno-45-8"></a><span class="w">  </span><span class="k">FROM</span><span class="w"> </span><span class="n">v_landuse_with_metadata</span><span class="w"> </span>
+</span><span id="__span-45-9"><a id="__codelineno-45-9" name="__codelineno-45-9" href="#__codelineno-45-9"></a><span class="w">  </span><span class="k">WHERE</span><span class="w"> </span><span class="n">scenario_name</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="s1">&#39;RCP45_SSP1_Ref&#39;</span>
+</span><span id="__span-45-10"><a id="__codelineno-45-10" name="__codelineno-45-10" href="#__codelineno-45-10"></a><span class="p">)</span>
+</span><span id="__span-45-11"><a id="__codelineno-45-11" name="__codelineno-45-11" href="#__codelineno-45-11"></a><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">other_transitions</span>
+</span><span id="__span-45-12"><a id="__codelineno-45-12" name="__codelineno-45-12" href="#__codelineno-45-12"></a><span class="k">WHERE</span><span class="w"> </span><span class="p">(</span><span class="n">from_landuse_name</span><span class="p">,</span><span class="w"> </span><span class="n">to_landuse_name</span><span class="p">)</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">IN</span><span class="w"> </span><span class="p">(</span>
+</span><span id="__span-45-13"><a id="__codelineno-45-13" name="__codelineno-45-13" href="#__codelineno-45-13"></a><span class="w">  </span><span class="k">SELECT</span><span class="w"> </span><span class="n">from_landuse_name</span><span class="p">,</span><span class="w"> </span><span class="n">to_landuse_name</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">baseline_transitions</span>
+</span><span id="__span-45-14"><a id="__codelineno-45-14" name="__codelineno-45-14" href="#__codelineno-45-14"></a><span class="p">)</span>
+</span></code></pre></div></p>
+<h4 id="dynamic-thresholds">Dynamic Thresholds<a class="headerlink" href="#dynamic-thresholds" title="Permanent link">&para;</a></h4>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-46-1"><a id="__codelineno-46-1" name="__codelineno-46-1" href="#__codelineno-46-1"></a>You&gt; Show counties where urban growth exceeds the national average
+</span></code></pre></div>
+<h3 id="advanced-aggregations">Advanced Aggregations<a class="headerlink" href="#advanced-aggregations" title="Permanent link">&para;</a></h3>
+<h4 id="window-functions">Window Functions<a class="headerlink" href="#window-functions" title="Permanent link">&para;</a></h4>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-47-1"><a id="__codelineno-47-1" name="__codelineno-47-1" href="#__codelineno-47-1"></a>You&gt; Calculate the running total of forest loss by year
+</span></code></pre></div>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-48-1"><a id="__codelineno-48-1" name="__codelineno-48-1" href="#__codelineno-48-1"></a>You&gt; Show me the rank of each county by agricultural land area
+</span></code></pre></div>
+<h4 id="percentages-and-ratios">Percentages and Ratios<a class="headerlink" href="#percentages-and-ratios" title="Permanent link">&para;</a></h4>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-49-1"><a id="__codelineno-49-1" name="__codelineno-49-1" href="#__codelineno-49-1"></a>You&gt; What percentage of each county is urban in 2050?
+</span></code></pre></div>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-50-1"><a id="__codelineno-50-1" name="__codelineno-50-1" href="#__codelineno-50-1"></a>You&gt; Calculate the ratio of forest to agricultural land by scenario
+</span></code></pre></div>
+<h4 id="statistical-analysis">Statistical Analysis<a class="headerlink" href="#statistical-analysis" title="Permanent link">&para;</a></h4>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-51-1"><a id="__codelineno-51-1" name="__codelineno-51-1" href="#__codelineno-51-1"></a>You&gt; Show me the standard deviation of land use changes by decade
+</span></code></pre></div>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-52-1"><a id="__codelineno-52-1" name="__codelineno-52-1" href="#__codelineno-52-1"></a>You&gt; Find outlier counties with unusual transition patterns
+</span></code></pre></div>
+<h3 id="time-series-analysis">Time Series Analysis<a class="headerlink" href="#time-series-analysis" title="Permanent link">&para;</a></h3>
+<h4 id="trend-detection">Trend Detection<a class="headerlink" href="#trend-detection" title="Permanent link">&para;</a></h4>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-53-1"><a id="__codelineno-53-1" name="__codelineno-53-1" href="#__codelineno-53-1"></a>You&gt; Identify counties with accelerating urban growth
+</span></code></pre></div>
+<p>The agent will:
+1. Calculate growth rates by period
+2. Compare consecutive periods
+3. Identify acceleration patterns</p>
+<h4 id="period-comparisons">Period Comparisons<a class="headerlink" href="#period-comparisons" title="Permanent link">&para;</a></h4>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-54-1"><a id="__codelineno-54-1" name="__codelineno-54-1" href="#__codelineno-54-1"></a>You&gt; Compare the rate of change between 2020-2050 and 2050-2080
+</span></code></pre></div>
+<h4 id="decade-analysis">Decade Analysis<a class="headerlink" href="#decade-analysis" title="Permanent link">&para;</a></h4>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-55-1"><a id="__codelineno-55-1" name="__codelineno-55-1" href="#__codelineno-55-1"></a>You&gt; Show me which decade has the most dramatic land use changes
+</span></code></pre></div>
+<h4 id="temporal-patterns">Temporal Patterns<a class="headerlink" href="#temporal-patterns" title="Permanent link">&para;</a></h4>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-56-1"><a id="__codelineno-56-1" name="__codelineno-56-1" href="#__codelineno-56-1"></a>You&gt; Find periods where forest loss slows down or reverses
+</span></code></pre></div>
+<h3 id="cross-scenario-analysis">Cross-Scenario Analysis<a class="headerlink" href="#cross-scenario-analysis" title="Permanent link">&para;</a></h3>
+<h4 id="scenario-divergence">Scenario Divergence<a class="headerlink" href="#scenario-divergence" title="Permanent link">&para;</a></h4>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-57-1"><a id="__codelineno-57-1" name="__codelineno-57-1" href="#__codelineno-57-1"></a>You&gt; Where do scenarios diverge the most from Baseline?
+</span></code></pre></div>
+<h4 id="scenario-rankings">Scenario Rankings<a class="headerlink" href="#scenario-rankings" title="Permanent link">&para;</a></h4>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-58-1"><a id="__codelineno-58-1" name="__codelineno-58-1" href="#__codelineno-58-1"></a>You&gt; Rank scenarios by how much natural land they preserve
+</span></code></pre></div>
+<h4 id="impact-analysis">Impact Analysis<a class="headerlink" href="#impact-analysis" title="Permanent link">&para;</a></h4>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-59-1"><a id="__codelineno-59-1" name="__codelineno-59-1" href="#__codelineno-59-1"></a>You&gt; Show me how different scenarios affect agricultural land in the Midwest
+</span></code></pre></div>
+<h3 id="geographic-patterns">Geographic Patterns<a class="headerlink" href="#geographic-patterns" title="Permanent link">&para;</a></h3>
+<h4 id="regional-analysis">Regional Analysis<a class="headerlink" href="#regional-analysis" title="Permanent link">&para;</a></h4>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-60-1"><a id="__codelineno-60-1" name="__codelineno-60-1" href="#__codelineno-60-1"></a>You&gt; Compare land use transitions between coastal and inland counties
+</span></code></pre></div>
+<h4 id="spatial-clustering">Spatial Clustering<a class="headerlink" href="#spatial-clustering" title="Permanent link">&para;</a></h4>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-61-1"><a id="__codelineno-61-1" name="__codelineno-61-1" href="#__codelineno-61-1"></a>You&gt; Find groups of counties with similar transition patterns
+</span></code></pre></div>
+<h4 id="hot-spot-detection">Hot Spot Detection<a class="headerlink" href="#hot-spot-detection" title="Permanent link">&para;</a></h4>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-62-1"><a id="__codelineno-62-1" name="__codelineno-62-1" href="#__codelineno-62-1"></a>You&gt; Identify regions with the most intense land use change
+</span></code></pre></div>
+<h3 id="complex-transitions">Complex Transitions<a class="headerlink" href="#complex-transitions" title="Permanent link">&para;</a></h3>
+<h4 id="multi-step-transitions">Multi-Step Transitions<a class="headerlink" href="#multi-step-transitions" title="Permanent link">&para;</a></h4>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-63-1"><a id="__codelineno-63-1" name="__codelineno-63-1" href="#__codelineno-63-1"></a>You&gt; Track land that goes from forest to agriculture to urban over time
+</span></code></pre></div>
+<h4 id="transition-networks">Transition Networks<a class="headerlink" href="#transition-networks" title="Permanent link">&para;</a></h4>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-64-1"><a id="__codelineno-64-1" name="__codelineno-64-1" href="#__codelineno-64-1"></a>You&gt; Show me the flow of land between all use types in a Sankey diagram format
+</span></code></pre></div>
+<h4 id="circular-transitions">Circular Transitions<a class="headerlink" href="#circular-transitions" title="Permanent link">&para;</a></h4>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-65-1"><a id="__codelineno-65-1" name="__codelineno-65-1" href="#__codelineno-65-1"></a>You&gt; Find cases where land returns to its original use
+</span></code></pre></div>
+<h3 id="custom-metrics">Custom Metrics<a class="headerlink" href="#custom-metrics" title="Permanent link">&para;</a></h3>
+<h4 id="sustainability-indices">Sustainability Indices<a class="headerlink" href="#sustainability-indices" title="Permanent link">&para;</a></h4>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-66-1"><a id="__codelineno-66-1" name="__codelineno-66-1" href="#__codelineno-66-1"></a>You&gt; Calculate a sustainability score based on natural land preservation and urban efficiency
+</span></code></pre></div>
+<h4 id="change-intensity">Change Intensity<a class="headerlink" href="#change-intensity" title="Permanent link">&para;</a></h4>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-67-1"><a id="__codelineno-67-1" name="__codelineno-67-1" href="#__codelineno-67-1"></a>You&gt; Create a metric for land use change intensity by county
+</span></code></pre></div>
+<h4 id="composite-indicators">Composite Indicators<a class="headerlink" href="#composite-indicators" title="Permanent link">&para;</a></h4>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-68-1"><a id="__codelineno-68-1" name="__codelineno-68-1" href="#__codelineno-68-1"></a>You&gt; Develop an agricultural productivity index considering crop and pasture changes
+</span></code></pre></div>
+<h3 id="data-mining-queries">Data Mining Queries<a class="headerlink" href="#data-mining-queries" title="Permanent link">&para;</a></h3>
+<h4 id="pattern-discovery">Pattern Discovery<a class="headerlink" href="#pattern-discovery" title="Permanent link">&para;</a></h4>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-69-1"><a id="__codelineno-69-1" name="__codelineno-69-1" href="#__codelineno-69-1"></a>You&gt; Find unusual or interesting patterns in the land use transitions
+</span></code></pre></div>
+<h4 id="anomaly-detection">Anomaly Detection<a class="headerlink" href="#anomaly-detection" title="Permanent link">&para;</a></h4>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-70-1"><a id="__codelineno-70-1" name="__codelineno-70-1" href="#__codelineno-70-1"></a>You&gt; Identify counties with transition patterns very different from their neighbors
+</span></code></pre></div>
+<h4 id="correlation-analysis">Correlation Analysis<a class="headerlink" href="#correlation-analysis" title="Permanent link">&para;</a></h4>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-71-1"><a id="__codelineno-71-1" name="__codelineno-71-1" href="#__codelineno-71-1"></a>You&gt; What factors correlate with high urban growth?
+</span></code></pre></div>
+<h3 id="optimization-queries">Optimization Queries<a class="headerlink" href="#optimization-queries" title="Permanent link">&para;</a></h3>
+<h4 id="bestworst-case-analysis">Best/Worst Case Analysis<a class="headerlink" href="#bestworst-case-analysis" title="Permanent link">&para;</a></h4>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-72-1"><a id="__codelineno-72-1" name="__codelineno-72-1" href="#__codelineno-72-1"></a>You&gt; Which scenario minimizes agricultural land loss while accommodating urban growth?
+</span></code></pre></div>
+<h4 id="trade-off-analysis">Trade-off Analysis<a class="headerlink" href="#trade-off-analysis" title="Permanent link">&para;</a></h4>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-73-1"><a id="__codelineno-73-1" name="__codelineno-73-1" href="#__codelineno-73-1"></a>You&gt; Show the trade-off between forest preservation and crop production across scenarios
+</span></code></pre></div>
+<h4 id="efficiency-metrics">Efficiency Metrics<a class="headerlink" href="#efficiency-metrics" title="Permanent link">&para;</a></h4>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-74-1"><a id="__codelineno-74-1" name="__codelineno-74-1" href="#__codelineno-74-1"></a>You&gt; Calculate land use efficiency by comparing urban area to population capacity
+</span></code></pre></div>
+<h3 id="advanced-sql-patterns">Advanced SQL Patterns<a class="headerlink" href="#advanced-sql-patterns" title="Permanent link">&para;</a></h3>
+<h4 id="common-table-expressions-ctes">Common Table Expressions (CTEs)<a class="headerlink" href="#common-table-expressions-ctes" title="Permanent link">&para;</a></h4>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-75-1"><a id="__codelineno-75-1" name="__codelineno-75-1" href="#__codelineno-75-1"></a>You&gt; Show me a breakdown of land use changes using step-by-step calculations
+</span></code></pre></div>
+<p>The agent uses CTEs for clarity:
+<div class="language-sql highlight"><pre><span></span><code><span id="__span-76-1"><a id="__codelineno-76-1" name="__codelineno-76-1" href="#__codelineno-76-1"></a><span class="k">WITH</span><span class="w"> </span><span class="n">yearly_totals</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="p">(</span>
+</span><span id="__span-76-2"><a id="__codelineno-76-2" name="__codelineno-76-2" href="#__codelineno-76-2"></a><span class="w">  </span><span class="k">SELECT</span><span class="w"> </span><span class="k">year</span><span class="p">,</span><span class="w"> </span><span class="n">from_landuse_name</span><span class="p">,</span><span class="w"> </span><span class="k">SUM</span><span class="p">(</span><span class="n">acres</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">total</span>
+</span><span id="__span-76-3"><a id="__codelineno-76-3" name="__codelineno-76-3" href="#__codelineno-76-3"></a><span class="w">  </span><span class="k">FROM</span><span class="w"> </span><span class="n">v_landuse_with_metadata</span>
+</span><span id="__span-76-4"><a id="__codelineno-76-4" name="__codelineno-76-4" href="#__codelineno-76-4"></a><span class="w">  </span><span class="k">GROUP</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="k">year</span><span class="p">,</span><span class="w"> </span><span class="n">from_landuse_name</span>
+</span><span id="__span-76-5"><a id="__codelineno-76-5" name="__codelineno-76-5" href="#__codelineno-76-5"></a><span class="p">),</span>
+</span><span id="__span-76-6"><a id="__codelineno-76-6" name="__codelineno-76-6" href="#__codelineno-76-6"></a><span class="n">yearly_changes</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="p">(</span>
+</span><span id="__span-76-7"><a id="__codelineno-76-7" name="__codelineno-76-7" href="#__codelineno-76-7"></a><span class="w">  </span><span class="k">SELECT</span><span class="w"> </span><span class="k">year</span><span class="p">,</span><span class="w"> </span><span class="n">from_landuse_name</span><span class="p">,</span>
+</span><span id="__span-76-8"><a id="__codelineno-76-8" name="__codelineno-76-8" href="#__codelineno-76-8"></a><span class="w">         </span><span class="n">total</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">LAG</span><span class="p">(</span><span class="n">total</span><span class="p">)</span><span class="w"> </span><span class="n">OVER</span><span class="w"> </span><span class="p">(</span><span class="n">PARTITION</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">from_landuse_name</span><span class="w"> </span><span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="k">year</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">change</span>
+</span><span id="__span-76-9"><a id="__codelineno-76-9" name="__codelineno-76-9" href="#__codelineno-76-9"></a><span class="w">  </span><span class="k">FROM</span><span class="w"> </span><span class="n">yearly_totals</span>
+</span><span id="__span-76-10"><a id="__codelineno-76-10" name="__codelineno-76-10" href="#__codelineno-76-10"></a><span class="p">)</span>
+</span><span id="__span-76-11"><a id="__codelineno-76-11" name="__codelineno-76-11" href="#__codelineno-76-11"></a><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">yearly_changes</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">change</span><span class="w"> </span><span class="k">IS</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span>
+</span></code></pre></div></p>
+<h4 id="pivot-operations">Pivot Operations<a class="headerlink" href="#pivot-operations" title="Permanent link">&para;</a></h4>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-77-1"><a id="__codelineno-77-1" name="__codelineno-77-1" href="#__codelineno-77-1"></a>You&gt; Create a matrix showing transitions between all land use types
+</span></code></pre></div>
+<h4 id="recursive-queries">Recursive Queries<a class="headerlink" href="#recursive-queries" title="Permanent link">&para;</a></h4>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-78-1"><a id="__codelineno-78-1" name="__codelineno-78-1" href="#__codelineno-78-1"></a>You&gt; Trace the history of specific land parcels through multiple transitions
+</span></code></pre></div>
+<h2 id="real-world-query-examples">Real-World Query Examples<a class="headerlink" href="#real-world-query-examples" title="Permanent link">&para;</a></h2>
+<h3 id="urban-planning">🏙️ Urban Planning<a class="headerlink" href="#urban-planning" title="Permanent link">&para;</a></h3>
+<h4 id="urban-growth-analysis">Urban Growth Analysis<a class="headerlink" href="#urban-growth-analysis" title="Permanent link">&para;</a></h4>
+<p><strong>Query:</strong>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-79-1"><a id="__codelineno-79-1" name="__codelineno-79-1" href="#__codelineno-79-1"></a>You&gt; Which metropolitan counties will see the most urban expansion by 2050?
+</span></code></pre></div></p>
+<p><strong>Agent Approach:</strong>
+- Identifies counties with major cities
+- Calculates urban area change from 2020 to 2050
+- Ranks by absolute and percentage growth</p>
+<p><strong>Follow-up:</strong>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-80-1"><a id="__codelineno-80-1" name="__codelineno-80-1" href="#__codelineno-80-1"></a>You&gt; For those top counties, what land uses are being converted to urban?
+</span></code></pre></div></p>
+<h4 id="urban-density-trends">Urban Density Trends<a class="headerlink" href="#urban-density-trends" title="Permanent link">&para;</a></h4>
+<p><strong>Query:</strong>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-81-1"><a id="__codelineno-81-1" name="__codelineno-81-1" href="#__codelineno-81-1"></a>You&gt; Show me counties where urban area is growing faster than the state average
+</span></code></pre></div></p>
+<p><strong>Sample Result:</strong>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-82-1"><a id="__codelineno-82-1" name="__codelineno-82-1" href="#__codelineno-82-1"></a>Counties with above-average urban growth:
+</span><span id="__span-82-2"><a id="__codelineno-82-2" name="__codelineno-82-2" href="#__codelineno-82-2"></a>- Riverside County (06065): +45.2% vs state avg 28.3%
+</span><span id="__span-82-3"><a id="__codelineno-82-3" name="__codelineno-82-3" href="#__codelineno-82-3"></a>- San Bernardino (06071): +42.1% vs state avg 28.3%
+</span><span id="__span-82-4"><a id="__codelineno-82-4" name="__codelineno-82-4" href="#__codelineno-82-4"></a>- Placer County (06061): +38.9% vs state avg 28.3%
+</span></code></pre></div></p>
+<h4 id="sustainable-development">Sustainable Development<a class="headerlink" href="#sustainable-development" title="Permanent link">&para;</a></h4>
+<p><strong>Query:</strong>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-83-1"><a id="__codelineno-83-1" name="__codelineno-83-1" href="#__codelineno-83-1"></a>You&gt; Find counties successfully increasing urban density without expanding into forest areas
+</span></code></pre></div></p>
+<h3 id="agricultural-analysis">🌾 Agricultural Analysis<a class="headerlink" href="#agricultural-analysis" title="Permanent link">&para;</a></h3>
+<h4 id="crop-vs-pasture-dynamics">Crop vs Pasture Dynamics<a class="headerlink" href="#crop-vs-pasture-dynamics" title="Permanent link">&para;</a></h4>
+<p><strong>Query:</strong>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-84-1"><a id="__codelineno-84-1" name="__codelineno-84-1" href="#__codelineno-84-1"></a>You&gt; How is the balance between cropland and pasture changing over time?
+</span></code></pre></div></p>
+<p><strong>Agent generates analysis showing:</strong>
+- Total crop and pasture by decade
+- Conversion rates between them
+- Regional variations
+- Scenario comparisons</p>
+<h4 id="agricultural-pressure">Agricultural Pressure<a class="headerlink" href="#agricultural-pressure" title="Permanent link">&para;</a></h4>
+<p><strong>Query:</strong>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-85-1"><a id="__codelineno-85-1" name="__codelineno-85-1" href="#__codelineno-85-1"></a>You&gt; In the High Crop Demand scenario, which counties lose the most pasture to cropland?
+</span></code></pre></div></p>
+<h4 id="food-security-assessment">Food Security Assessment<a class="headerlink" href="#food-security-assessment" title="Permanent link">&para;</a></h4>
+<p><strong>Query:</strong>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-86-1"><a id="__codelineno-86-1" name="__codelineno-86-1" href="#__codelineno-86-1"></a>You&gt; Calculate total agricultural land (crops + pasture) and show if it&#39;s increasing or decreasing nationally
+</span></code></pre></div></p>
+<p><strong>Complex Follow-up:</strong>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-87-1"><a id="__codelineno-87-1" name="__codelineno-87-1" href="#__codelineno-87-1"></a>You&gt; Now break that down by region and identify areas at risk of agricultural land shortage
+</span></code></pre></div></p>
+<h3 id="forest-conservation">🌲 Forest Conservation<a class="headerlink" href="#forest-conservation" title="Permanent link">&para;</a></h3>
+<h4 id="deforestation-hotspots">Deforestation Hotspots<a class="headerlink" href="#deforestation-hotspots" title="Permanent link">&para;</a></h4>
+<p><strong>Query:</strong>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-88-1"><a id="__codelineno-88-1" name="__codelineno-88-1" href="#__codelineno-88-1"></a>You&gt; Identify the top 20 counties with the highest forest loss across all scenarios
+</span></code></pre></div></p>
+<p><strong>Results Format:</strong>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-89-1"><a id="__codelineno-89-1" name="__codelineno-89-1" href="#__codelineno-89-1"></a>Rank | County | FIPS | Forest Loss (acres) | % Loss
+</span><span id="__span-89-2"><a id="__codelineno-89-2" name="__codelineno-89-2" href="#__codelineno-89-2"></a>1    | County A | 12345 | -523,400 | -32.1%
+</span><span id="__span-89-3"><a id="__codelineno-89-3" name="__codelineno-89-3" href="#__codelineno-89-3"></a>2    | County B | 23456 | -498,700 | -28.9%
+</span><span id="__span-89-4"><a id="__codelineno-89-4" name="__codelineno-89-4" href="#__codelineno-89-4"></a>...
+</span></code></pre></div></p>
+<h4 id="forest-recovery">Forest Recovery<a class="headerlink" href="#forest-recovery" title="Permanent link">&para;</a></h4>
+<p><strong>Query:</strong>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-90-1"><a id="__codelineno-90-1" name="__codelineno-90-1" href="#__codelineno-90-1"></a>You&gt; Are there any counties where forest area increases? If so, what&#39;s converting to forest?
+</span></code></pre></div></p>
+<h4 id="conservation-scenarios">Conservation Scenarios<a class="headerlink" href="#conservation-scenarios" title="Permanent link">&para;</a></h4>
+<p><strong>Query:</strong>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-91-1"><a id="__codelineno-91-1" name="__codelineno-91-1" href="#__codelineno-91-1"></a>You&gt; Compare forest preservation between the Baseline and High Forest scenarios - where are the biggest differences?
+</span></code></pre></div></p>
+<h3 id="scenario-comparisons">📊 Scenario Comparisons<a class="headerlink" href="#scenario-comparisons" title="Permanent link">&para;</a></h3>
+<h4 id="comprehensive-scenario-analysis">Comprehensive Scenario Analysis<a class="headerlink" href="#comprehensive-scenario-analysis" title="Permanent link">&para;</a></h4>
+<p><strong>Query:</strong>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-92-1"><a id="__codelineno-92-1" name="__codelineno-92-1" href="#__codelineno-92-1"></a>You&gt; Create a summary table comparing all scenarios for the year 2100:
+</span><span id="__span-92-2"><a id="__codelineno-92-2" name="__codelineno-92-2" href="#__codelineno-92-2"></a>- Total urban area
+</span><span id="__span-92-3"><a id="__codelineno-92-3" name="__codelineno-92-3" href="#__codelineno-92-3"></a>- Total agricultural area  
+</span><span id="__span-92-4"><a id="__codelineno-92-4" name="__codelineno-92-4" href="#__codelineno-92-4"></a>- Total natural area (forest + range)
+</span><span id="__span-92-5"><a id="__codelineno-92-5" name="__codelineno-92-5" href="#__codelineno-92-5"></a>- Percentage of land that changed use
+</span></code></pre></div></p>
+<h4 id="scenario-divergence_1">Scenario Divergence<a class="headerlink" href="#scenario-divergence_1" title="Permanent link">&para;</a></h4>
+<p><strong>Query:</strong>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-93-1"><a id="__codelineno-93-1" name="__codelineno-93-1" href="#__codelineno-93-1"></a>You&gt; At what point do the scenarios start to significantly diverge from the Baseline?
+</span></code></pre></div></p>
+<p><strong>Agent Analysis:</strong>
+- Calculates year-by-year differences
+- Identifies divergence threshold
+- Shows which land uses drive differences</p>
+<h4 id="best-case-analysis">Best Case Analysis<a class="headerlink" href="#best-case-analysis" title="Permanent link">&para;</a></h4>
+<p><strong>Query:</strong>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-94-1"><a id="__codelineno-94-1" name="__codelineno-94-1" href="#__codelineno-94-1"></a>You&gt; Which scenario best balances urban growth needs with environmental preservation?
+</span></code></pre></div></p>
+<h3 id="trend-analysis">📈 Trend Analysis<a class="headerlink" href="#trend-analysis" title="Permanent link">&para;</a></h3>
+<h4 id="acceleration-detection">Acceleration Detection<a class="headerlink" href="#acceleration-detection" title="Permanent link">&para;</a></h4>
+<p><strong>Query:</strong>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-95-1"><a id="__codelineno-95-1" name="__codelineno-95-1" href="#__codelineno-95-1"></a>You&gt; Show me where land use change is accelerating vs slowing down between the first half (2020-2060) and second half (2060-2100) of the projection period
+</span></code></pre></div></p>
+<h4 id="tipping-points">Tipping Points<a class="headerlink" href="#tipping-points" title="Permanent link">&para;</a></h4>
+<p><strong>Query:</strong>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-96-1"><a id="__codelineno-96-1" name="__codelineno-96-1" href="#__codelineno-96-1"></a>You&gt; Identify years where major shifts occur in land use patterns
+</span></code></pre></div></p>
+<h4 id="long-term-projections">Long-term Projections<a class="headerlink" href="#long-term-projections" title="Permanent link">&para;</a></h4>
+<p><strong>Query:</strong>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-97-1"><a id="__codelineno-97-1" name="__codelineno-97-1" href="#__codelineno-97-1"></a>You&gt; Based on current trends, when will urban area exceed 20% in major counties?
+</span></code></pre></div></p>
+<h3 id="regional-patterns">🗺️ Regional Patterns<a class="headerlink" href="#regional-patterns" title="Permanent link">&para;</a></h3>
+<h4 id="state-level-analysis">State-Level Analysis<a class="headerlink" href="#state-level-analysis" title="Permanent link">&para;</a></h4>
+<p><strong>Query:</strong>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-98-1"><a id="__codelineno-98-1" name="__codelineno-98-1" href="#__codelineno-98-1"></a>You&gt; Summarize land use changes by state, focusing on the top 5 states with the most change
+</span></code></pre></div></p>
+<h4 id="coastal-vs-inland">Coastal vs Inland<a class="headerlink" href="#coastal-vs-inland" title="Permanent link">&para;</a></h4>
+<p><strong>Query:</strong>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-99-1"><a id="__codelineno-99-1" name="__codelineno-99-1" href="#__codelineno-99-1"></a>You&gt; Compare land use transition patterns between coastal counties and inland counties
+</span></code></pre></div></p>
+<p><strong>Agent Approach:</strong>
+<div class="language-sql highlight"><pre><span></span><code><span id="__span-100-1"><a id="__codelineno-100-1" name="__codelineno-100-1" href="#__codelineno-100-1"></a><span class="c1">-- Identifies coastal counties (could use FIPS patterns or geographic data)</span>
+</span><span id="__span-100-2"><a id="__codelineno-100-2" name="__codelineno-100-2" href="#__codelineno-100-2"></a><span class="c1">-- Aggregates transitions for each group</span>
+</span><span id="__span-100-3"><a id="__codelineno-100-3" name="__codelineno-100-3" href="#__codelineno-100-3"></a><span class="c1">-- Calculates and compares metrics</span>
+</span></code></pre></div></p>
+<h4 id="metropolitan-influence">Metropolitan Influence<a class="headerlink" href="#metropolitan-influence" title="Permanent link">&para;</a></h4>
+<p><strong>Query:</strong>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-101-1"><a id="__codelineno-101-1" name="__codelineno-101-1" href="#__codelineno-101-1"></a>You&gt; How do land use changes differ between counties with major cities versus rural counties?
+</span></code></pre></div></p>
+<h3 id="transition-patterns">🔄 Transition Patterns<a class="headerlink" href="#transition-patterns" title="Permanent link">&para;</a></h3>
+<h4 id="transition-matrix">Transition Matrix<a class="headerlink" href="#transition-matrix" title="Permanent link">&para;</a></h4>
+<p><strong>Query:</strong>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-102-1"><a id="__codelineno-102-1" name="__codelineno-102-1" href="#__codelineno-102-1"></a>You&gt; Create a transition matrix showing all conversions between land use types for the Baseline scenario
+</span></code></pre></div></p>
+<p><strong>Result Format:</strong>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-103-1"><a id="__codelineno-103-1" name="__codelineno-103-1" href="#__codelineno-103-1"></a>From\To | Crop | Forest | Pasture | Urban | Range
+</span><span id="__span-103-2"><a id="__codelineno-103-2" name="__codelineno-103-2" href="#__codelineno-103-2"></a>--------|------|--------|---------|-------|-------
+</span><span id="__span-103-3"><a id="__codelineno-103-3" name="__codelineno-103-3" href="#__codelineno-103-3"></a>Crop    | 85%  | 2%     | 8%      | 5%    | 0%
+</span><span id="__span-103-4"><a id="__codelineno-103-4" name="__codelineno-103-4" href="#__codelineno-103-4"></a>Forest  | 3%   | 88%    | 2%      | 7%    | 0%
+</span><span id="__span-103-5"><a id="__codelineno-103-5" name="__codelineno-103-5" href="#__codelineno-103-5"></a>...
+</span></code></pre></div></p>
+<h4 id="unusual-transitions">Unusual Transitions<a class="headerlink" href="#unusual-transitions" title="Permanent link">&para;</a></h4>
+<p><strong>Query:</strong>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-104-1"><a id="__codelineno-104-1" name="__codelineno-104-1" href="#__codelineno-104-1"></a>You&gt; Find rare or unexpected land use transitions that might indicate data issues or interesting patterns
+</span></code></pre></div></p>
+<h4 id="transition-chains">Transition Chains<a class="headerlink" href="#transition-chains" title="Permanent link">&para;</a></h4>
+<p><strong>Query:</strong>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-105-1"><a id="__codelineno-105-1" name="__codelineno-105-1" href="#__codelineno-105-1"></a>You&gt; Track agricultural land that eventually becomes urban - does it go directly or through other uses first?
+</span></code></pre></div></p>
+<h3 id="complex-analytical-queries">💡 Complex Analytical Queries<a class="headerlink" href="#complex-analytical-queries" title="Permanent link">&para;</a></h3>
+<h4 id="multi-criteria-analysis">Multi-Criteria Analysis<a class="headerlink" href="#multi-criteria-analysis" title="Permanent link">&para;</a></h4>
+<p><strong>Query:</strong>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-106-1"><a id="__codelineno-106-1" name="__codelineno-106-1" href="#__codelineno-106-1"></a>You&gt; Find counties that meet all these criteria:
+</span><span id="__span-106-2"><a id="__codelineno-106-2" name="__codelineno-106-2" href="#__codelineno-106-2"></a>- Urban growth &gt; 25%
+</span><span id="__span-106-3"><a id="__codelineno-106-3" name="__codelineno-106-3" href="#__codelineno-106-3"></a>- Forest loss &lt; 10%
+</span><span id="__span-106-4"><a id="__codelineno-106-4" name="__codelineno-106-4" href="#__codelineno-106-4"></a>- Agricultural land stable (±5%)
+</span><span id="__span-106-5"><a id="__codelineno-106-5" name="__codelineno-106-5" href="#__codelineno-106-5"></a>- In the Baseline scenario
+</span></code></pre></div></p>
+<h4 id="composite-metrics">Composite Metrics<a class="headerlink" href="#composite-metrics" title="Permanent link">&para;</a></h4>
+<p><strong>Query:</strong>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-107-1"><a id="__codelineno-107-1" name="__codelineno-107-1" href="#__codelineno-107-1"></a>You&gt; Create a &quot;land use change intensity index&quot; that combines:
+</span><span id="__span-107-2"><a id="__codelineno-107-2" name="__codelineno-107-2" href="#__codelineno-107-2"></a>- Rate of change
+</span><span id="__span-107-3"><a id="__codelineno-107-3" name="__codelineno-107-3" href="#__codelineno-107-3"></a>- Diversity of transitions
+</span><span id="__span-107-4"><a id="__codelineno-107-4" name="__codelineno-107-4" href="#__codelineno-107-4"></a>- Deviation from historical patterns
+</span></code></pre></div></p>
+<h4 id="predictive-insights">Predictive Insights<a class="headerlink" href="#predictive-insights" title="Permanent link">&para;</a></h4>
+<p><strong>Query:</strong>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-108-1"><a id="__codelineno-108-1" name="__codelineno-108-1" href="#__codelineno-108-1"></a>You&gt; Based on 2020-2040 patterns, which counties are likely to face land use conflicts by 2080?
+</span></code></pre></div></p>
+<h3 id="reporting-queries">📋 Reporting Queries<a class="headerlink" href="#reporting-queries" title="Permanent link">&para;</a></h3>
+<h4 id="executive-summary">Executive Summary<a class="headerlink" href="#executive-summary" title="Permanent link">&para;</a></h4>
+<p><strong>Query:</strong>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-109-1"><a id="__codelineno-109-1" name="__codelineno-109-1" href="#__codelineno-109-1"></a>You&gt; Generate a one-page executive summary of land use changes including:
+</span><span id="__span-109-2"><a id="__codelineno-109-2" name="__codelineno-109-2" href="#__codelineno-109-2"></a>- Key statistics
+</span><span id="__span-109-3"><a id="__codelineno-109-3" name="__codelineno-109-3" href="#__codelineno-109-3"></a>- Major trends
+</span><span id="__span-109-4"><a id="__codelineno-109-4" name="__codelineno-109-4" href="#__codelineno-109-4"></a>- Critical counties to watch
+</span><span id="__span-109-5"><a id="__codelineno-109-5" name="__codelineno-109-5" href="#__codelineno-109-5"></a>- Policy implications
+</span></code></pre></div></p>
+<h4 id="county-report-card">County Report Card<a class="headerlink" href="#county-report-card" title="Permanent link">&para;</a></h4>
+<p><strong>Query:</strong>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-110-1"><a id="__codelineno-110-1" name="__codelineno-110-1" href="#__codelineno-110-1"></a>You&gt; Create a detailed report card for Sacramento County including all scenarios and land use changes
+</span></code></pre></div></p>
+<h4 id="stakeholder-analysis">Stakeholder Analysis<a class="headerlink" href="#stakeholder-analysis" title="Permanent link">&para;</a></h4>
+<p><strong>Query:</strong>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-111-1"><a id="__codelineno-111-1" name="__codelineno-111-1" href="#__codelineno-111-1"></a>You&gt; Prepare data for different stakeholders:
+</span><span id="__span-111-2"><a id="__codelineno-111-2" name="__codelineno-111-2" href="#__codelineno-111-2"></a>- Farmers: Agricultural land changes
+</span><span id="__span-111-3"><a id="__codelineno-111-3" name="__codelineno-111-3" href="#__codelineno-111-3"></a>- Conservationists: Natural land preservation  
+</span><span id="__span-111-4"><a id="__codelineno-111-4" name="__codelineno-111-4" href="#__codelineno-111-4"></a>- Urban planners: Development opportunities
+</span><span id="__span-111-5"><a id="__codelineno-111-5" name="__codelineno-111-5" href="#__codelineno-111-5"></a>- Policymakers: Overall sustainability
+</span></code></pre></div></p>
+<h3 id="data-quality-checks">🛠️ Data Quality Checks<a class="headerlink" href="#data-quality-checks" title="Permanent link">&para;</a></h3>
+<h4 id="validation-queries">Validation Queries<a class="headerlink" href="#validation-queries" title="Permanent link">&para;</a></h4>
+<p><strong>Query:</strong>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-112-1"><a id="__codelineno-112-1" name="__codelineno-112-1" href="#__codelineno-112-1"></a>You&gt; Verify that total land area remains constant over time for each county
+</span></code></pre></div></p>
+<h4 id="consistency-checks">Consistency Checks<a class="headerlink" href="#consistency-checks" title="Permanent link">&para;</a></h4>
+<p><strong>Query:</strong>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-113-1"><a id="__codelineno-113-1" name="__codelineno-113-1" href="#__codelineno-113-1"></a>You&gt; Check if the sum of all &quot;from&quot; transitions equals the sum of all &quot;to&quot; transitions by year
+</span></code></pre></div></p>
+<h4 id="outlier-detection">Outlier Detection<a class="headerlink" href="#outlier-detection" title="Permanent link">&para;</a></h4>
+<p><strong>Query:</strong>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-114-1"><a id="__codelineno-114-1" name="__codelineno-114-1" href="#__codelineno-114-1"></a>You&gt; Find any suspicious data points where land use changes seem unrealistic
+</span></code></pre></div></p>
+<h3 id="export-and-visualization-prep">📊 Export and Visualization Prep<a class="headerlink" href="#export-and-visualization-prep" title="Permanent link">&para;</a></h3>
+<h4 id="chart-data">Chart Data<a class="headerlink" href="#chart-data" title="Permanent link">&para;</a></h4>
+<p><strong>Query:</strong>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-115-1"><a id="__codelineno-115-1" name="__codelineno-115-1" href="#__codelineno-115-1"></a>You&gt; Prepare data for a line chart showing land use trends over time for all scenarios
+</span></code></pre></div></p>
+<h4 id="geographic-export">Geographic Export<a class="headerlink" href="#geographic-export" title="Permanent link">&para;</a></h4>
+<p><strong>Query:</strong>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-116-1"><a id="__codelineno-116-1" name="__codelineno-116-1" href="#__codelineno-116-1"></a>You&gt; Export county-level urban growth data in a format suitable for GIS mapping
+</span></code></pre></div></p>
+<h4 id="dashboard-metrics">Dashboard Metrics<a class="headerlink" href="#dashboard-metrics" title="Permanent link">&para;</a></h4>
+<p><strong>Query:</strong>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-117-1"><a id="__codelineno-117-1" name="__codelineno-117-1" href="#__codelineno-117-1"></a>You&gt; Create a set of 10 key metrics for a land use monitoring dashboard, updated annually
+</span></code></pre></div></p>
+<h2 id="query-optimization-and-best-practices">Query Optimization and Best Practices<a class="headerlink" href="#query-optimization-and-best-practices" title="Permanent link">&para;</a></h2>
+<h3 id="performance-optimization">Performance Optimization<a class="headerlink" href="#performance-optimization" title="Permanent link">&para;</a></h3>
+<h4 id="query-hints">Query Hints<a class="headerlink" href="#query-hints" title="Permanent link">&para;</a></h4>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-118-1"><a id="__codelineno-118-1" name="__codelineno-118-1" href="#__codelineno-118-1"></a>You&gt; For this large analysis, please optimize the query for performance
+</span></code></pre></div>
+<p>The agent will:
+- Use appropriate indexes
+- Limit data early in the query
+- Avoid unnecessary calculations</p>
+<h4 id="sampling-strategies">Sampling Strategies<a class="headerlink" href="#sampling-strategies" title="Permanent link">&para;</a></h4>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-119-1"><a id="__codelineno-119-1" name="__codelineno-119-1" href="#__codelineno-119-1"></a>You&gt; Analyze a representative sample of counties to estimate national trends
+</span></code></pre></div>
+<h4 id="incremental-analysis">Incremental Analysis<a class="headerlink" href="#incremental-analysis" title="Permanent link">&para;</a></h4>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-120-1"><a id="__codelineno-120-1" name="__codelineno-120-1" href="#__codelineno-120-1"></a>You&gt; Break down this complex analysis into smaller, manageable queries
+</span></code></pre></div>
+<h3 id="integration-queries">Integration Queries<a class="headerlink" href="#integration-queries" title="Permanent link">&para;</a></h3>
+<h4 id="multi-table-analysis">Multi-Table Analysis<a class="headerlink" href="#multi-table-analysis" title="Permanent link">&para;</a></h4>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-121-1"><a id="__codelineno-121-1" name="__codelineno-121-1" href="#__codelineno-121-1"></a>You&gt; Combine data from all dimension tables to show complete transition patterns
+</span></code></pre></div>
+<h4 id="view-utilization">View Utilization<a class="headerlink" href="#view-utilization" title="Permanent link">&para;</a></h4>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-122-1"><a id="__codelineno-122-1" name="__codelineno-122-1" href="#__codelineno-122-1"></a>You&gt; Use the optimized views to compare agricultural changes across scenarios
+</span></code></pre></div>
+<h4 id="data-validation">Data Validation<a class="headerlink" href="#data-validation" title="Permanent link">&para;</a></h4>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-123-1"><a id="__codelineno-123-1" name="__codelineno-123-1" href="#__codelineno-123-1"></a>You&gt; Verify data consistency between the fact and dimension tables
+</span></code></pre></div>
+<h3 id="visualization-preparation">Visualization Preparation<a class="headerlink" href="#visualization-preparation" title="Permanent link">&para;</a></h3>
+<h4 id="chart-ready-data">Chart-Ready Data<a class="headerlink" href="#chart-ready-data" title="Permanent link">&para;</a></h4>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-124-1"><a id="__codelineno-124-1" name="__codelineno-124-1" href="#__codelineno-124-1"></a>You&gt; Prepare data for a stacked area chart of land use over time
+</span></code></pre></div>
+<h4 id="map-data">Map Data<a class="headerlink" href="#map-data" title="Permanent link">&para;</a></h4>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-125-1"><a id="__codelineno-125-1" name="__codelineno-125-1" href="#__codelineno-125-1"></a>You&gt; Format county-level changes for geographic visualization
+</span></code></pre></div>
+<h4 id="dashboard-metrics_1">Dashboard Metrics<a class="headerlink" href="#dashboard-metrics_1" title="Permanent link">&para;</a></h4>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-126-1"><a id="__codelineno-126-1" name="__codelineno-126-1" href="#__codelineno-126-1"></a>You&gt; Create a set of KPIs for a land use monitoring dashboard
+</span></code></pre></div>
+<h3 id="understanding-agent-responses">Understanding Agent Responses<a class="headerlink" href="#understanding-agent-responses" title="Permanent link">&para;</a></h3>
+<h4 id="sql-transparency">SQL Transparency<a class="headerlink" href="#sql-transparency" title="Permanent link">&para;</a></h4>
+<p>The agent shows the generated SQL query:</p>
+<div class="language-sql highlight"><pre><span></span><code><span id="__span-127-1"><a id="__codelineno-127-1" name="__codelineno-127-1" href="#__codelineno-127-1"></a><span class="n">Query</span><span class="p">:</span><span class="w"> </span><span class="k">SELECT</span><span class="w"> </span><span class="n">scenario_name</span><span class="p">,</span><span class="w"> </span><span class="k">year</span><span class="p">,</span><span class="w"> </span><span class="k">SUM</span><span class="p">(</span><span class="n">acres</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">total_forest</span>
+</span><span id="__span-127-2"><a id="__codelineno-127-2" name="__codelineno-127-2" href="#__codelineno-127-2"></a><span class="w">       </span><span class="k">FROM</span><span class="w"> </span><span class="n">v_landuse_with_metadata</span>
+</span><span id="__span-127-3"><a id="__codelineno-127-3" name="__codelineno-127-3" href="#__codelineno-127-3"></a><span class="w">       </span><span class="k">WHERE</span><span class="w"> </span><span class="n">from_landuse_name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;Forest&#39;</span><span class="w"> </span>
+</span><span id="__span-127-4"><a id="__codelineno-127-4" name="__codelineno-127-4" href="#__codelineno-127-4"></a><span class="w">         </span><span class="k">AND</span><span class="w"> </span><span class="n">to_landuse_name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;Forest&#39;</span>
+</span><span id="__span-127-5"><a id="__codelineno-127-5" name="__codelineno-127-5" href="#__codelineno-127-5"></a><span class="w">       </span><span class="k">GROUP</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">scenario_name</span><span class="p">,</span><span class="w"> </span><span class="k">year</span>
+</span><span id="__span-127-6"><a id="__codelineno-127-6" name="__codelineno-127-6" href="#__codelineno-127-6"></a><span class="w">       </span><span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">scenario_name</span><span class="p">,</span><span class="w"> </span><span class="k">year</span>
+</span></code></pre></div>
+<p>This helps you:
+- Verify the query matches your intent
+- Learn SQL patterns
+- Debug unexpected results</p>
+<h4 id="result-interpretation">Result Interpretation<a class="headerlink" href="#result-interpretation" title="Permanent link">&para;</a></h4>
+<p>Results include:
+- <strong>Row count</strong>: "Results: 245 rows"
+- <strong>Formatted data</strong>: Tables with clear headers
+- <strong>Summary</strong>: Key findings highlighted
+- <strong>Context</strong>: Explanations of what the data represents</p>
+<h3 id="common-patterns">Common Patterns<a class="headerlink" href="#common-patterns" title="Permanent link">&para;</a></h3>
+<h4 id="time-based-patterns">Time-Based Patterns<a class="headerlink" href="#time-based-patterns" title="Permanent link">&para;</a></h4>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-128-1"><a id="__codelineno-128-1" name="__codelineno-128-1" href="#__codelineno-128-1"></a>&quot;between 2020 and 2050&quot;
+</span><span id="__span-128-2"><a id="__codelineno-128-2" name="__codelineno-128-2" href="#__codelineno-128-2"></a>&quot;in the year 2100&quot;  
+</span><span id="__span-128-3"><a id="__codelineno-128-3" name="__codelineno-128-3" href="#__codelineno-128-3"></a>&quot;by decade&quot;
+</span><span id="__span-128-4"><a id="__codelineno-128-4" name="__codelineno-128-4" href="#__codelineno-128-4"></a>&quot;over the entire period&quot;
+</span><span id="__span-128-5"><a id="__codelineno-128-5" name="__codelineno-128-5" href="#__codelineno-128-5"></a>&quot;changes from [year] to [year]&quot;
+</span></code></pre></div>
+<h4 id="aggregation-patterns">Aggregation Patterns<a class="headerlink" href="#aggregation-patterns" title="Permanent link">&para;</a></h4>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-129-1"><a id="__codelineno-129-1" name="__codelineno-129-1" href="#__codelineno-129-1"></a>&quot;total area&quot;
+</span><span id="__span-129-2"><a id="__codelineno-129-2" name="__codelineno-129-2" href="#__codelineno-129-2"></a>&quot;average change&quot;
+</span><span id="__span-129-3"><a id="__codelineno-129-3" name="__codelineno-129-3" href="#__codelineno-129-3"></a>&quot;sum by scenario&quot;
+</span><span id="__span-129-4"><a id="__codelineno-129-4" name="__codelineno-129-4" href="#__codelineno-129-4"></a>&quot;count of transitions&quot;
+</span><span id="__span-129-5"><a id="__codelineno-129-5" name="__codelineno-129-5" href="#__codelineno-129-5"></a>&quot;percentage of total&quot;
+</span></code></pre></div>
+<h4 id="filtering-patterns">Filtering Patterns<a class="headerlink" href="#filtering-patterns" title="Permanent link">&para;</a></h4>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-130-1"><a id="__codelineno-130-1" name="__codelineno-130-1" href="#__codelineno-130-1"></a>&quot;only in California&quot; (state_fips = &#39;06&#39;)
+</span><span id="__span-130-2"><a id="__codelineno-130-2" name="__codelineno-130-2" href="#__codelineno-130-2"></a>&quot;excluding same-to-same transitions&quot;
+</span><span id="__span-130-3"><a id="__codelineno-130-3" name="__codelineno-130-3" href="#__codelineno-130-3"></a>&quot;where area &gt; 1000&quot;
+</span><span id="__span-130-4"><a id="__codelineno-130-4" name="__codelineno-130-4" href="#__codelineno-130-4"></a>&quot;for Baseline scenario only&quot;
+</span><span id="__span-130-5"><a id="__codelineno-130-5" name="__codelineno-130-5" href="#__codelineno-130-5"></a>&quot;top 10 by [metric]&quot;
+</span></code></pre></div>
+<h3 id="advanced-techniques">Advanced Techniques<a class="headerlink" href="#advanced-techniques" title="Permanent link">&para;</a></h3>
+<h4 id="multi-step-analysis">Multi-Step Analysis<a class="headerlink" href="#multi-step-analysis" title="Permanent link">&para;</a></h4>
+<p>Break complex questions into steps:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-131-1"><a id="__codelineno-131-1" name="__codelineno-131-1" href="#__codelineno-131-1"></a>You&gt; First, find the counties with the most agricultural land
+</span><span id="__span-131-2"><a id="__codelineno-131-2" name="__codelineno-131-2" href="#__codelineno-131-2"></a>Agent&gt; [Shows top agricultural counties]
+</span><span id="__span-131-3"><a id="__codelineno-131-3" name="__codelineno-131-3" href="#__codelineno-131-3"></a>
+</span><span id="__span-131-4"><a id="__codelineno-131-4" name="__codelineno-131-4" href="#__codelineno-131-4"></a>You&gt; Now show me how urban area changes in those counties
+</span><span id="__span-131-5"><a id="__codelineno-131-5" name="__codelineno-131-5" href="#__codelineno-131-5"></a>Agent&gt; [Analyzes urban growth in previously identified counties]
+</span></code></pre></div>
+<h4 id="conditional-queries">Conditional Queries<a class="headerlink" href="#conditional-queries" title="Permanent link">&para;</a></h4>
+<p>Use conditions and logic:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-132-1"><a id="__codelineno-132-1" name="__codelineno-132-1" href="#__codelineno-132-1"></a>&quot;Show counties where forest loss exceeds 20% AND urban growth is above average&quot;
+</span><span id="__span-132-2"><a id="__codelineno-132-2" name="__codelineno-132-2" href="#__codelineno-132-2"></a>&quot;Find transitions that only occur in the High Crop Demand scenario&quot;
+</span><span id="__span-132-3"><a id="__codelineno-132-3" name="__codelineno-132-3" href="#__codelineno-132-3"></a>&quot;List counties with increasing cropland but decreasing pasture&quot;
+</span></code></pre></div>
+<h4 id="custom-calculations">Custom Calculations<a class="headerlink" href="#custom-calculations" title="Permanent link">&para;</a></h4>
+<p>Request specific computations:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-133-1"><a id="__codelineno-133-1" name="__codelineno-133-1" href="#__codelineno-133-1"></a>&quot;Calculate the net change in agricultural land (crops + pasture) by decade&quot;
+</span><span id="__span-133-2"><a id="__codelineno-133-2" name="__codelineno-133-2" href="#__codelineno-133-2"></a>&quot;Show the ratio of urban growth to forest loss by county&quot;
+</span><span id="__span-133-3"><a id="__codelineno-133-3" name="__codelineno-133-3" href="#__codelineno-133-3"></a>&quot;What percentage of each county converts from natural to developed land?&quot;
+</span></code></pre></div>
+<h2 id="troubleshooting-and-tips">Troubleshooting and Tips<a class="headerlink" href="#troubleshooting-and-tips" title="Permanent link">&para;</a></h2>
+<h3 id="best-practices">Best Practices<a class="headerlink" href="#best-practices" title="Permanent link">&para;</a></h3>
+<h4 id="1-be-specific">1. Be Specific<a class="headerlink" href="#1-be-specific" title="Permanent link">&para;</a></h4>
+<p>❌ Vague: "Show me some data"
+✅ Specific: "Show me forest to urban transitions in California for the Baseline scenario"</p>
+<h4 id="2-include-context">2. Include Context<a class="headerlink" href="#2-include-context" title="Permanent link">&para;</a></h4>
+<p>❌ Ambiguous: "What changes the most?"
+✅ Clear: "Which land use type has the largest area change between 2020 and 2050?"</p>
+<h4 id="3-specify-filters">3. Specify Filters<a class="headerlink" href="#3-specify-filters" title="Permanent link">&para;</a></h4>
+<p>❌ Too broad: "Show transitions"
+✅ Filtered: "Show transitions from agricultural land to urban in counties with FIPS starting with 06"</p>
+<h4 id="4-request-format">4. Request Format<a class="headerlink" href="#4-request-format" title="Permanent link">&para;</a></h4>
+<p>❌ Unclear format: "Give me the data"
+✅ Clear format: "List the top 10 counties by forest loss, showing county FIPS and area lost"</p>
+<h3 id="tips-for-success">Tips for Success<a class="headerlink" href="#tips-for-success" title="Permanent link">&para;</a></h3>
+<h4 id="1-start-simple">1. Start Simple<a class="headerlink" href="#1-start-simple" title="Permanent link">&para;</a></h4>
+<p>Begin with basic queries and add complexity:
+- First: "Show forest data"
+- Then: "Show forest data in 2050"<br />
+- Finally: "Show forest to urban transitions in California in 2050"</p>
+<h4 id="2-use-natural-language">2. Use Natural Language<a class="headerlink" href="#2-use-natural-language" title="Permanent link">&para;</a></h4>
+<p>Don't try to write SQL-like queries:
+- ❌ "SELECT * FROM landuse WHERE..."
+- ✅ "Show me land use data where..."</p>
+<h4 id="3-ask-for-clarification">3. Ask for Clarification<a class="headerlink" href="#3-ask-for-clarification" title="Permanent link">&para;</a></h4>
+<p>If unsure about data:
+<div class="language-text highlight"><pre><span></span><code><span id="__span-134-1"><a id="__codelineno-134-1" name="__codelineno-134-1" href="#__codelineno-134-1"></a>You&gt; What does the &#39;acres&#39; column represent?
+</span><span id="__span-134-2"><a id="__codelineno-134-2" name="__codelineno-134-2" href="#__codelineno-134-2"></a>You&gt; What&#39;s the difference between the scenarios?
+</span></code></pre></div></p>
+<h4 id="4-build-on-previous-queries">4. Build on Previous Queries<a class="headerlink" href="#4-build-on-previous-queries" title="Permanent link">&para;</a></h4>
+<p>The agent remembers context:
+<div class="language-text highlight"><pre><span></span><code><span id="__span-135-1"><a id="__codelineno-135-1" name="__codelineno-135-1" href="#__codelineno-135-1"></a>You&gt; Show me total forest area by year
+</span><span id="__span-135-2"><a id="__codelineno-135-2" name="__codelineno-135-2" href="#__codelineno-135-2"></a>[Agent shows results]
+</span><span id="__span-135-3"><a id="__codelineno-135-3" name="__codelineno-135-3" href="#__codelineno-135-3"></a>You&gt; Now just show me the years where it decreases
+</span></code></pre></div></p>
+<h3 id="best-practices-for-complex-queries">Best Practices for Complex Queries<a class="headerlink" href="#best-practices-for-complex-queries" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Break Down Complex Requests</strong></li>
+<li>Start with simpler components</li>
+<li>Build up to the full analysis</li>
+<li>
+<p>Verify each step</p>
+</li>
+<li>
+<p><strong>Use Agent Memory</strong></p>
+</li>
+<li>Reference previous results</li>
+<li>Build analyses incrementally</li>
+<li>
+<p>Save intermediate results</p>
+</li>
+<li>
+<p><strong>Optimize for Performance</strong></p>
+</li>
+<li>Request samples for exploration</li>
+<li>Use filtered subsets</li>
+<li>
+<p>Leverage indexed columns</p>
+</li>
+<li>
+<p><strong>Validate Results</strong></p>
+</li>
+<li>Check totals and subtotals</li>
+<li>Verify against known values</li>
+<li>Look for logical consistency</li>
+</ol>
+<h3 id="query-optimization-tips">Query Optimization Tips<a class="headerlink" href="#query-optimization-tips" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Start broad, then narrow</strong></li>
+<li>First: "What scenarios are available?"</li>
+<li>
+<p>Then: "Show forest changes in the Baseline scenario"</p>
+</li>
+<li>
+<p><strong>Use table views wisely</strong></p>
+</li>
+<li><code>v_landuse_with_metadata</code>: Complete denormalized view</li>
+<li><code>v_landuse_summary</code>: Pre-aggregated summaries</li>
+<li>
+<p><code>v_scenario_comparison</code>: Cross-scenario analysis</p>
+</li>
+<li>
+<p><strong>Leverage agent memory</strong></p>
+</li>
+<li>Previous results are remembered</li>
+<li>
+<p>Reference earlier queries: "Using those counties, now show..."</p>
+</li>
+<li>
+<p><strong>Request appropriate limits</strong></p>
+</li>
+<li>"Show me a sample of 10 rows"</li>
+<li>"List the top 20 counties"</li>
+<li>"Summarize by decade instead of year"</li>
+</ol>
+<h3 id="practice-exercises">Practice Exercises<a class="headerlink" href="#practice-exercises" title="Permanent link">&para;</a></h3>
+<p>Try these queries to build familiarity:</p>
+<ol>
+<li><strong>Basic Exploration</strong></li>
+<li>List all tables in the database</li>
+<li>Show the first 10 rows of landuse transitions</li>
+<li>
+<p>Count total records in each table</p>
+</li>
+<li>
+<p><strong>Filtering Practice</strong></p>
+</li>
+<li>Find all High Urban scenario data</li>
+<li>Show transitions in the year 2100</li>
+<li>
+<p>List data for FIPS code 06037</p>
+</li>
+<li>
+<p><strong>Simple Analysis</strong></p>
+</li>
+<li>Calculate total urban area</li>
+<li>Find the most common land use transition</li>
+<li>
+<p>Show which scenario has the most forest</p>
+</li>
+<li>
+<p><strong>Basic Comparisons</strong></p>
+</li>
+<li>Compare cropland between 2020 and 2050</li>
+<li>Find the county with the most urban growth</li>
+<li>
+<p>Show the difference between scenarios</p>
+</li>
+<li>
+<p><strong>Complex Analysis</strong></p>
+</li>
+<li>Build incrementally: Start simple, add complexity</li>
+<li>Use context: Reference previous results</li>
+<li>Be specific: Include scenarios, years, and regions</li>
+<li>Think stepwise: Break complex analyses into steps</li>
+<li>Verify results: Ask for row counts and sanity checks</li>
+</ol>
+<h2 id="related-documentation">Related Documentation<a class="headerlink" href="#related-documentation" title="Permanent link">&para;</a></h2>
+<h3 id="quick-links">Quick Links<a class="headerlink" href="#quick-links" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong><a href="../../agents/complete-guide/">Complete Agent System Guide</a></strong> - Agent configuration and capabilities</li>
+<li><strong><a href="../../data/complete-reference/">Complete Database Reference</a></strong> - Database schema and tables</li>
+<li><strong><a href="../../getting-started/complete-setup/">Complete Setup Guide</a></strong> - Installation and configuration</li>
+<li><strong><a href="../../rpa/rpa-assessment-complete/">RPA Assessment Complete</a></strong> - Methodology and background</li>
+</ul>
+<h3 id="cross-references">Cross-References<a class="headerlink" href="#cross-references" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Database Schema</strong>: See <a href="../../data/complete-reference/">Complete Database Reference</a> for detailed table structures and relationships</li>
+<li><strong>Agent Configuration</strong>: See <a href="../../agents/complete-guide/">Complete Agent System Guide</a> for model selection and prompt customization</li>
+<li><strong>Performance Tuning</strong>: See <a href="../../agents/complete-guide/#performance-optimization">Agent Performance Monitoring</a> for query optimization strategies</li>
+<li><strong>API Integration</strong>: See <a href="../../agents/complete-guide/#api-reference">Complete Agent System Guide</a> for programmatic access patterns</li>
+</ul>
+<p>The natural language query system provides an intuitive interface to complex land use data, enabling both simple explorations and sophisticated analytical workflows. With the comprehensive patterns and examples in this guide, you can extract meaningful insights from USDA Forest Service RPA Assessment data through conversational AI.</p>
+<h2 id="see-also">See Also<a class="headerlink" href="#see-also" title="Permanent link">&para;</a></h2>
+<h3 id="related-documentation_1">Related Documentation<a class="headerlink" href="#related-documentation_1" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong><a href="../../examples/complete-examples/">Complete Examples Guide</a></strong> - Real-world workflows and use cases demonstrating these query patterns</li>
+<li><strong><a href="../../agents/complete-guide/">Complete Agent Guide</a></strong> - Agent configuration, advanced capabilities, and system architecture</li>
+<li><strong><a href="../../data/complete-reference/">Complete Database Reference</a></strong> - Database schema, table structures, and optimization details</li>
+<li><strong><a href="../../rpa/rpa-assessment-complete/">RPA Assessment Complete</a></strong> - Comprehensive background on data sources and methodology</li>
+<li><strong><a href="../../getting-started/complete-setup/">Complete Setup Guide</a></strong> - Installation and initial configuration</li>
+</ul>
+<h3 id="quick-navigation-by-topic">Quick Navigation by Topic<a class="headerlink" href="#quick-navigation-by-topic" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Practical Examples</strong>: See <a href="../../examples/complete-examples/#step-by-step-workflows">Complete Examples Guide</a> for detailed query workflows</li>
+<li><strong>Agent Configuration</strong>: Check <a href="../../agents/complete-guide/#configuration">Complete Agent Guide</a> for model settings and optimization</li>
+<li><strong>Database Schema</strong>: Reference <a href="../../data/complete-reference/#star-schema-design">Database Tables</a> for understanding data structure</li>
+<li><strong>Scenario Background</strong>: Learn about <a href="../../rpa/rpa-assessment-complete/#climate-scenarios">Climate Scenarios</a> for query context</li>
+<li><strong>Performance Tuning</strong>: See <a href="../../agents/complete-guide/#performance-optimization">Query Optimization</a> for advanced techniques</li>
+</ul>
+<blockquote>
+<p><strong>Consolidation Note</strong>: This guide consolidates information from overview.md, basic-queries.md, advanced-queries.md, and examples.md into a single comprehensive resource. For the most current query patterns and syntax, always refer to this complete guide rather than individual component files.</p>
+</blockquote>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      &copy; 2025 <a href="https://github.com/mihiarc/rpa-landuse"  target="_blank" rel="noopener">RPA Analytics Team</a> | Data source: USDA Forest Service 2020 RPA Assessment
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        <div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/mihiarc/rpa-landuse" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.0.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path fill="currentColor" d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://www.fs.usda.gov/research/rpa" target="_blank" rel="noopener" title="www.fs.usda.gov" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.0.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path fill="currentColor" d="M384 512H96c-53 0-96-43-96-96V96C0 43 43 0 96 0h304c26.5 0 48 21.5 48 48v288c0 20.9-13.4 38.7-32 45.3V448c17.7 0 32 14.3 32 32s-14.3 32-32 32zM96 384c-17.7 0-32 14.3-32 32s14.3 32 32 32h256v-64zm32-232c0 13.3 10.7 24 24 24h176c13.3 0 24-10.7 24-24s-10.7-24-24-24H152c-13.3 0-24 10.7-24 24m24 72c-13.3 0-24 10.7-24 24s10.7 24 24 24h176c13.3 0 24-10.7 24-24s-10.7-24-24-24z"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.path", "navigation.top", "search.suggest", "search.highlight", "content.tabs.link", "content.code.annotation", "content.code.copy", "toc.integrate"], "search": "../../assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.50899def.min.js"></script>
+      
+    
+  </body>
+</html>
