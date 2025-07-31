@@ -609,7 +609,7 @@ def load_state_transitions():
             SELECT
                 state_code,
                 SUM(total_acres) as total_change_acres,
-                COUNT(DISTINCT from_landuse || '->' || to_landuse) as transition_types
+                COUNT(DISTINCT CONCAT(from_landuse, ' to ', to_landuse)) as transition_types
             FROM state_transitions
             GROUP BY state_code
         )
@@ -617,8 +617,7 @@ def load_state_transitions():
             st.state_code,
             st.total_change_acres,
             st.transition_types,
-            -- Get dominant transition for each state
-            (SELECT from_landuse || ' → ' || to_landuse
+            (SELECT CONCAT(from_landuse, ' → ', to_landuse)
              FROM state_transitions s
              WHERE s.state_code = st.state_code
              ORDER BY total_acres DESC
@@ -668,7 +667,7 @@ def load_sankey_data(from_landuse=None, to_landuse=None, scenario_filter=None):
         JOIN dim_landuse tl ON f.to_landuse_id = tl.landuse_id
         WHERE {where_clause}
         GROUP BY fl.landuse_name, tl.landuse_name
-        HAVING SUM(f.acres) > 1000000  -- Filter small transitions for clarity
+        HAVING SUM(f.acres) > 1000000
         ORDER BY value DESC
         LIMIT 20
         """
@@ -793,7 +792,7 @@ def create_sankey_diagram(df):
         },
         font={"size": 12, "family": "Arial, sans-serif"},
         height=550,
-        margin={"l": 0, "r": 0, "t": 40, "b": 0},
+        margin={"l": 0, "r": 0, "t": 40, "b": 20},
         paper_bgcolor='rgba(0,0,0,0)',
         plot_bgcolor='rgba(0,0,0,0)'
     )
@@ -1012,27 +1011,13 @@ def show_enhanced_visualizations():
             # Create choropleth map
             fig = create_choropleth_map(state_data)
             if fig:
-                st.plotly_chart(fig, use_container_width=True)
+                st.plotly_chart(fig, use_container_width=True, config={'scrollZoom': False})
 
             # Show state details
-            col1, col2 = st.columns([2, 1])
-            with col1:
-                st.markdown("##### 🏆 Top 10 States by Total Change")
-                top_states = state_data.nlargest(10, 'total_change_acres')[['state_name', 'total_change_acres', 'dominant_transition']]
-                top_states['total_change_acres'] = top_states['total_change_acres'].apply(lambda x: f"{x:,.0f}")
-                st.dataframe(top_states, use_container_width=True, hide_index=True)
-
-            with col2:
-                st.markdown("##### 📊 Distribution")
-                fig_hist = px.histogram(
-                    state_data,
-                    x='total_change_acres',
-                    nbins=20,
-                    title='Distribution of State Changes',
-                    labels={'total_change_acres': 'Total Acres Changed', 'count': 'Number of States'}
-                )
-                fig_hist.update_layout(height=300)
-                st.plotly_chart(fig_hist, use_container_width=True)
+            st.markdown("##### 🏆 Top 10 States by Total Change")
+            top_states = state_data.nlargest(10, 'total_change_acres')[['state_name', 'total_change_acres', 'dominant_transition']]
+            top_states['total_change_acres'] = top_states['total_change_acres'].apply(lambda x: f"{x:,.0f}")
+            st.dataframe(top_states, use_container_width=True, hide_index=True)
 
     with viz_tab2:
         st.markdown("#### Land Use Transition Flows")
@@ -1272,8 +1257,8 @@ def main():
 
     # Create tabs for different analysis areas
     tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
-        "🌾 Agricultural Analysis",
         "🏙️ Urbanization Trends",
+        "🌾 Agricultural Analysis",
         "🌲 Forest Analysis",
         "🌡️ Climate Scenarios",
         "📈 Time Series",
@@ -1281,6 +1266,96 @@ def main():
     ])
 
     with tab1:
+        st.markdown("### 🏙️ Urbanization Patterns")
+        st.markdown("**Comprehensive analysis of urban expansion across states and land use sources**")
+
+        urban_data, urban_error = load_urbanization_data()
+        if urban_error:
+            st.error(f"❌ {urban_error}")
+        elif urban_data is not None and not urban_data.empty:
+            # Create two-column layout for urbanization analysis
+            viz_col1, viz_col2 = st.columns(2)
+            
+            with viz_col1:
+                # Sources of urbanization
+                st.markdown("#### 🏘️ Urbanization Sources")
+                source_breakdown = urban_data.groupby('from_landuse')['total_acres_urbanized'].sum().sort_values(ascending=False)
+                
+                fig_pie = px.pie(
+                    values=source_breakdown.values,
+                    names=source_breakdown.index,
+                    title="Land Converted to Urban",
+                    color_discrete_sequence=px.colors.qualitative.Set3,
+                    hole=0.4  # Donut chart
+                )
+                fig_pie.update_traces(textinfo='percent+label')
+                fig_pie.update_layout(height=350, showlegend=False)
+                st.plotly_chart(fig_pie, use_container_width=True)
+                
+            with viz_col2:
+                # Top converting states map preview
+                st.markdown("#### 📍 Geographic Distribution")
+                state_totals = urban_data.groupby('state_code')['total_acres_urbanized'].sum().reset_index()
+                state_totals['state_abbr'] = state_totals['state_code'].map(StateMapper.FIPS_TO_ABBREV)
+                
+                # Mini choropleth
+                fig_map = px.choropleth(
+                    state_totals.head(20),
+                    locations='state_abbr',
+                    locationmode='USA-states',
+                    color='total_acres_urbanized',
+                    color_continuous_scale='Reds',
+                    title="Urban Expansion Hotspots"
+                )
+                fig_map.update_layout(
+                    geo=dict(scope='usa'),
+                    height=350,
+                    margin={"r":0,"t":30,"l":0,"b":0}
+                )
+                st.plotly_chart(fig_map, use_container_width=True, config={'scrollZoom': False})
+
+            # Detailed insights in full width
+            st.markdown("---")
+            
+            # Create expandable sections for detailed analysis
+            with st.container():
+                detail_col1, detail_col2, detail_col3 = st.columns([2, 2, 2])
+                
+                with detail_col1:
+                    st.markdown("#### 🔍 Key Insights")
+                    if not urban_data.empty:
+                        top_state_data = urban_data.groupby('state_code')['total_acres_urbanized'].sum().sort_values(ascending=False)
+                        top_state = top_state_data.index[0]
+                        top_state_acres = top_state_data.iloc[0]
+                        
+                        st.success(f"""
+                        **Urban Development Patterns:**
+                        - **Top State:** {StateMapper.FIPS_TO_NAME.get(top_state, top_state)} ({top_state_acres/1e6:.1f}M acres)
+                        - **Primary Source:** {source_breakdown.index[0]} → Urban
+                        - **Total Urbanized:** {source_breakdown.sum()/1e6:.1f}M acres nationwide
+                        """)
+                        
+                with detail_col2:
+                    st.markdown("#### 📊 Source Breakdown")
+                    source_df = pd.DataFrame({
+                        'Land Type': source_breakdown.index,
+                        'Acres': source_breakdown.apply(lambda x: f"{x/1e6:.2f}M"),
+                        'Percent': source_breakdown.apply(lambda x: f"{x/source_breakdown.sum()*100:.1f}%")
+                    })
+                    st.dataframe(source_df, use_container_width=True, hide_index=True)
+                    
+                with detail_col3:
+                    st.markdown("#### 🏆 Top 10 States")
+                    top_states_df = top_state_data.head(10).reset_index()
+                    top_states_df['state_name'] = top_states_df['state_code'].map(StateMapper.FIPS_TO_NAME)
+                    top_states_df['acres'] = top_states_df['total_acres_urbanized'].apply(lambda x: f"{x/1e6:.2f}M")
+                    display_df = top_states_df[['state_name', 'acres']].copy()
+                    display_df.columns = ['State', 'Urban Expansion']
+                    st.dataframe(display_df, use_container_width=True, hide_index=True)
+        else:
+            st.info("📊 No urbanization data available")
+
+    with tab2:
         st.markdown("### 🌾 Agricultural Land Loss Analysis")
         st.markdown("**Comprehensive analysis of agricultural land conversion across climate scenarios**")
 
@@ -1358,103 +1433,6 @@ def main():
                     )
         else:
             st.info("📊 No agricultural data available")
-
-    with tab2:
-        st.markdown("### 🏙️ Urbanization Patterns")
-        st.markdown("**Comprehensive analysis of urban expansion across states and land use sources**")
-
-        urban_data, urban_error = load_urbanization_data()
-        if urban_error:
-            st.error(f"❌ {urban_error}")
-        elif urban_data is not None and not urban_data.empty:
-            # Create three-column layout for urbanization analysis
-            viz_col1, viz_col2, viz_col3 = st.columns([3, 2, 2])
-            
-            with viz_col1:
-                # Main urbanization chart
-                fig = create_urbanization_chart(urban_data)
-                if fig:
-                    fig.update_layout(height=600)
-                    st.plotly_chart(fig, use_container_width=True)
-            
-            with viz_col2:
-                # Sources of urbanization
-                st.markdown("#### 🏘️ Urbanization Sources")
-                source_breakdown = urban_data.groupby('from_landuse')['total_acres_urbanized'].sum().sort_values(ascending=False)
-                
-                fig_pie = px.pie(
-                    values=source_breakdown.values,
-                    names=source_breakdown.index,
-                    title="Land Converted to Urban",
-                    color_discrete_sequence=px.colors.qualitative.Set3,
-                    hole=0.4  # Donut chart
-                )
-                fig_pie.update_traces(textinfo='percent+label')
-                fig_pie.update_layout(height=350, showlegend=False)
-                st.plotly_chart(fig_pie, use_container_width=True)
-                
-            with viz_col3:
-                # Top converting states map preview
-                st.markdown("#### 📍 Geographic Distribution")
-                state_totals = urban_data.groupby('state_code')['total_acres_urbanized'].sum().reset_index()
-                state_totals['state_abbr'] = state_totals['state_code'].map(StateMapper.FIPS_TO_ABBREV)
-                
-                # Mini choropleth
-                fig_map = px.choropleth(
-                    state_totals.head(20),
-                    locations='state_abbr',
-                    locationmode='USA-states',
-                    color='total_acres_urbanized',
-                    color_continuous_scale='Reds',
-                    title="Urban Expansion Hotspots"
-                )
-                fig_map.update_layout(
-                    geo=dict(scope='usa'),
-                    height=350,
-                    margin={"r":0,"t":30,"l":0,"b":0}
-                )
-                st.plotly_chart(fig_map, use_container_width=True)
-
-            # Detailed insights in full width
-            st.markdown("---")
-            
-            # Create expandable sections for detailed analysis
-            with st.container():
-                detail_col1, detail_col2, detail_col3 = st.columns([2, 2, 2])
-                
-                with detail_col1:
-                    st.markdown("#### 🔍 Key Insights")
-                    if not urban_data.empty:
-                        top_state_data = urban_data.groupby('state_code')['total_acres_urbanized'].sum().sort_values(ascending=False)
-                        top_state = top_state_data.index[0]
-                        top_state_acres = top_state_data.iloc[0]
-                        
-                        st.success(f"""
-                        **Urban Development Patterns:**
-                        - **Top State:** {StateMapper.FIPS_TO_NAME.get(top_state, top_state)} ({top_state_acres/1e6:.1f}M acres)
-                        - **Primary Source:** {source_breakdown.index[0]} → Urban
-                        - **Total Urbanized:** {source_breakdown.sum()/1e6:.1f}M acres nationwide
-                        """)
-                        
-                with detail_col2:
-                    st.markdown("#### 📊 Source Breakdown")
-                    source_df = pd.DataFrame({
-                        'Land Type': source_breakdown.index,
-                        'Acres': source_breakdown.apply(lambda x: f"{x/1e6:.2f}M"),
-                        'Percent': source_breakdown.apply(lambda x: f"{x/source_breakdown.sum()*100:.1f}%")
-                    })
-                    st.dataframe(source_df, use_container_width=True, hide_index=True)
-                    
-                with detail_col3:
-                    st.markdown("#### 🏆 Top 10 States")
-                    top_states_df = top_state_data.head(10).reset_index()
-                    top_states_df['state_name'] = top_states_df['state_code'].map(StateMapper.FIPS_TO_NAME)
-                    top_states_df['acres'] = top_states_df['total_acres_urbanized'].apply(lambda x: f"{x/1e6:.2f}M")
-                    display_df = top_states_df[['state_name', 'acres']].copy()
-                    display_df.columns = ['State', 'Urban Expansion']
-                    st.dataframe(display_df, use_container_width=True, hide_index=True)
-        else:
-            st.info("📊 No urbanization data available")
 
     with tab3:
         st.markdown("### 🌲 Forest Analysis")
@@ -1587,7 +1565,7 @@ def main():
                     # Show map
                     fig = create_forest_state_map(df_states)
                     if fig:
-                        st.plotly_chart(fig, use_container_width=True)
+                        st.plotly_chart(fig, use_container_width=True, config={'scrollZoom': False})
 
                     # State rankings
                     col1, col2 = st.columns(2)
