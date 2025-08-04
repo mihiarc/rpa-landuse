@@ -139,7 +139,7 @@ langgraph-prebuilt==0.5.2
     # via langgraph
 langgraph-sdk==0.1.72
     # via langgraph
-langsmith==0.4.4
+langsmith==0.4.10
     # via
     #   langchain
     #   langchain-community
