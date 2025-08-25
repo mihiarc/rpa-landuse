@@ -5,6 +5,7 @@ on:
     branches: [ main, develop ]
   pull_request:
     branches: [ main, develop ]
+  workflow_dispatch:  # Allow manual triggering
   schedule:
     # Run performance tests weekly on Sundays at 3 AM UTC
     - cron: '0 3 * * 0'
@@ -204,6 +205,7 @@ jobs:
         echo "LANDUSE_MODEL=gpt-4o-mini" > config/.env
         echo "TEMPERATURE=0.1" >> config/.env
         echo "MAX_TOKENS=1000" >> config/.env
+        echo "OPENAI_API_KEY=test-key" >> config/.env
         # Create minimal test database
         uv run python -c "
         import duckdb
@@ -230,10 +232,14 @@ jobs:
         
         def simulate_query_load(num_queries: int = 10) -> List[float]:
             """Simulate multiple concurrent queries"""
-            from landuse.agents.landuse_natural_language_agent import LanduseNaturalLanguageAgent
+            from landuse.agents.landuse_agent import LanduseAgent
             
             try:
-                agent = LanduseNaturalLanguageAgent()
+                from landuse.config.landuse_config import LanduseConfig
+                config = LanduseConfig(
+                    db_path='data/processed/landuse_analytics.duckdb'
+                )
+                agent = LanduseAgent(config)
             except Exception as e:
                 print(f"Could not create agent: {e}")
                 return [0.0] * num_queries
@@ -243,7 +249,7 @@ jobs:
                 start_time = time.time()
                 try:
                     # Simple query that should work with minimal DB
-                    result = agent.query("SELECT COUNT(*) FROM test_table")
+                    result = agent.process_query("SELECT COUNT(*) FROM test_table")
                     return time.time() - start_time
                 except Exception as e:
                     print(f"Query failed: {e}")
