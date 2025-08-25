@@ -6,8 +6,8 @@ AI-powered analytics tool for USDA Forest Service RPA Assessment land use data. 
 
 - **🤖 Natural Language Queries**: Ask questions like "Which scenarios show the most agricultural land loss?"
 - **🦆 Modern Data Stack**: DuckDB star schema optimized for analytics
-- **📊 Rich Analytics**: Automatic summary statistics and business insights
-- **🎨 Beautiful Interface**: Rich terminal UI with colors and markdown
+- **📊 Analytics**: Automatic summary statistics and business insights
+- **🎨 Interface**: Rich terminal UI with colors and markdown
 - **🌍 Climate Analysis**: Compare RCP/SSP scenarios and geographic patterns
 
 ## 🚀 Quick Start
