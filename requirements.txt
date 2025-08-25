@@ -197,7 +197,7 @@ packaging==24.2
     #   plotly
     #   pyogrio
     #   streamlit
-pandas==2.3.1
+pandas==2.3.2
     # via
     #   rpa-landuse-analytics (pyproject.toml)
     #   geopandas
