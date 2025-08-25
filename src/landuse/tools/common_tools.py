@@ -201,17 +201,39 @@ def create_analysis_tool() -> Any:
                 "Consider both cropland and pasture when analyzing total agricultural impact."
             )
 
-        # Socioeconomic insights
-        if "population" in query_results.lower() and "growth" in original_question.lower():
-            insights.append(
-                "Population growth is a key driver of land use change. Higher population scenarios "
-                "(SSP3) typically lead to more urban expansion and agricultural pressure."
-            )
+        # Enhanced socioeconomic insights
+        if "population" in query_results.lower():
+            if "thousands" in query_results.lower():
+                insights.append(
+                    "Population values are in thousands (e.g., 1,000 = 1 million people). "
+                    "Population growth drives urban development and agricultural land conversion. "
+                    "SSP5 typically shows the highest growth, SSP3 the most constrained."
+                )
+            if "growth" in original_question.lower() or "change" in original_question.lower():
+                insights.append(
+                    "Population change reflects SSP scenario assumptions: "
+                    "SSP1 (Sustainability) = moderate growth, SSP2 (Middle Road) = business-as-usual, "
+                    "SSP3 (Regional Rivalry) = slower growth, SSP5 (Fossil Development) = rapid growth. "
+                    "These drive different land use pressures."
+                )
 
-        if "income" in query_results.lower() or "economic" in original_question.lower():
+        if "income" in query_results.lower():
+            if "per_capita" in query_results.lower() or "capita" in query_results.lower():
+                insights.append(
+                    "Income values are per capita in constant 2009 USD thousands. "
+                    "Multiply by 1,000 for actual dollar amounts (e.g., 45.5 = $45,500 per person). "
+                    "Higher income areas typically experience more urban development pressure."
+                )
+            if "economic" in original_question.lower() or "trend" in original_question.lower():
+                insights.append(
+                    "Income growth patterns vary significantly by SSP scenario and reflect different "
+                    "economic development pathways. Higher income growth often correlates with land use intensification."
+                )
+
+        if "demographic" in original_question.lower() or "socioeconomic" in original_question.lower():
             insights.append(
-                "Income levels correlate with development patterns. Higher income areas may experience "
-                "more rapid urban expansion, while economic development drives land use transitions."
+                "Demographic trends directly drive land use changes. Population and income growth "
+                "create demand for housing, infrastructure, and services, leading to agricultural and forest land conversion."
             )
 
         if "ssp" in query_results.lower():
