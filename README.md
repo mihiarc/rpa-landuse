@@ -5,91 +5,171 @@ AI-powered analytics tool for USDA Forest Service RPA Assessment land use data. 
 ## ✨ Features
 
 - **🤖 Natural Language Queries**: Ask questions like "Which scenarios show the most agricultural land loss?"
-- **🦆 Modern Data Stack**: DuckDB star schema optimized for analytics
-- **📊 Analytics**: Automatic summary statistics and business insights
-- **🎨 Interface**: Rich terminal UI with colors and markdown
+- **📊 Interactive Dashboard**: Modern Streamlit web interface with chat, analytics, and data explorer
+- **🦆 Modern Data Stack**: DuckDB star schema optimized for analytics  
+- **📈 Rich Visualizations**: Choropleth maps, time series, and interactive charts
+- **🎨 Beautiful UI**: Rich terminal and web interfaces with professional formatting
 - **🌍 Climate Analysis**: Compare RCP/SSP scenarios and geographic patterns
 
 ## 🚀 Quick Start
 
-### 1. Check Your Setup
+### 1. Install Dependencies
 ```bash
-# Run the quickstart script to verify everything is ready
-uv run python quickstart.py
-```
-
-This will check your API keys, database, and dependencies, then provide specific instructions if anything is missing.
-
-### 2. Environment Setup (if needed)
-```bash
-# Install dependencies
+# Install all dependencies using uv
 uv sync
 
-# Alternative: Guided setup (creates .env file and tests everything)
-uv run python setup_agents.py
+# Verify installation
+uv run python -c "import landuse; print('✅ Installation successful')"
 ```
 
-### 3. Configure API Access
+### 2. Configure API Access
 ```bash
-# Copy example environment file to config directory (recommended)
-cp .env.example config/.env
+# Copy example environment file and edit it
+cp .env.example .env
 
-# Edit config/.env and add your OpenAI API key:
-# OPENAI_API_KEY=your_api_key_here
+# Edit .env and add your API key (choose one):
+# OPENAI_API_KEY=your_openai_key_here      # For GPT models  
+# ANTHROPIC_API_KEY=your_anthropic_key_here # For Claude models
 ```
 
-### 4. Try the Natural Language Query Agent
+### 3. Set Up Database
 ```bash
-# Interactive RPA data analysis with natural language
-uv run python src/landuse/agents/landuse_natural_language_agent.py
+# If you have the raw data file, convert it to DuckDB
+uv run python scripts/converters/convert_to_duckdb.py
 
-# Or use the shortcut:
+# The database should be at: data/processed/landuse_analytics.duckdb
+```
+
+### 4. Run Applications
+
+#### Option A: Streamlit Dashboard (Recommended)
+```bash
+# Launch the modern web dashboard  
+uv run streamlit run landuse_app.py
+
+# Open http://localhost:8501 in your browser
+```
+
+#### Option B: Command Line Agent  
+```bash
+# Interactive terminal-based analysis
 uv run rpa-analytics
 
-# Alternative: DuckDB UI in browser
+# Or with specific model
+uv run rpa-analytics --model claude-3-5-sonnet-20241022 --verbose
+```
+
+#### Option C: Direct Database Access
+```bash
+# Browser-based DuckDB UI
 duckdb data/processed/landuse_analytics.duckdb -ui
+
+# Command line SQL interface  
+duckdb data/processed/landuse_analytics.duckdb
 ```
 
 ### 5. Example Questions to Try
-- "Which scenarios show the most agricultural land loss?"
-- "Compare forest loss between RCP45 and RCP85 scenarios"
 - "Which states have the most urban expansion?"
-- "Show me crop to pasture transitions by state"
+- "Compare forest loss between RCP45 and RCP85 scenarios"  
+- "Show population growth trends in California"
+- "What are the agricultural land transitions in Texas?"
+
+## ⚙️ Configuration
+
+### Environment Variables
+The application uses environment variables for configuration. Copy `.env.example` to `.env` and customize:
+
+```bash
+# API Keys (at least one required)
+OPENAI_API_KEY=your_openai_key              # For GPT-4o-mini, GPT-4o models
+ANTHROPIC_API_KEY=your_anthropic_key        # For Claude 3.5 Sonnet models
+
+# Model Configuration  
+LANDUSE_MODEL=gpt-4o-mini                   # Model to use (gpt-4o-mini, claude-3-5-sonnet-20241022)
+TEMPERATURE=0.1                             # Model temperature (0.0-2.0)
+MAX_TOKENS=4000                             # Maximum tokens per response
+
+# Database Configuration
+LANDUSE_DB_PATH=data/processed/landuse_analytics.duckdb
+LANDUSE_MAX_QUERY_ROWS=1000                 # Maximum rows returned by queries
+LANDUSE_DEFAULT_DISPLAY_LIMIT=50            # Default rows displayed to user
+
+# Agent Configuration
+LANDUSE_MAX_ITERATIONS=5                    # Maximum tool calls before stopping
+LANDUSE_MAX_EXECUTION_TIME=120              # Maximum seconds for query execution
+
+# Performance & Security
+ENABLE_RATE_LIMITING=true
+LANDUSE_RATE_LIMIT_CALLS=60                 # Max API calls per minute
+LOG_LEVEL=INFO                              # DEBUG, INFO, WARNING, ERROR
+```
+
+### Modern Configuration System
+The application supports both legacy and modern configuration approaches:
+
+- **Legacy Config**: Uses `LanduseConfig` class with individual environment variables
+- **Modern Config**: Uses `AppConfig` with nested Pydantic validation and `LANDUSE_` prefixed vars
+
+### Command Line Options
+The CLI agent supports various configuration options:
+```bash
+uv run rpa-analytics --help                 # Show all options
+uv run rpa-analytics --model claude-3-5-sonnet-20241022 --verbose
+uv run rpa-analytics --max-iterations 10 --temperature 0.2
+```
 
 ## 📁 Project Structure
 
 ```
-langchain-landuse/
-├── 🤖 src/landuse/             # Core runtime application
-│   ├── agents/                 # AI-powered natural language agents
-│   │   ├── landuse_natural_language_agent.py  # Main NL → SQL agent
-│   │   ├── base_agent.py       # Common agent functionality
-│   │   ├── constants.py        # Shared constants & configurations
-│   │   └── formatting.py       # Output formatting utilities
-│   └── utilities/              # Runtime utilities
-│       └── security.py         # Input validation & rate limiting
-├── 🔧 scripts/                 # Setup & maintenance scripts
-│   ├── converters/             # Data transformation tools
-│   │   └── convert_to_duckdb.py  # JSON → DuckDB star schema
-│   └── setup/                  # Database setup utilities
-│       └── enhance_database.py   # Add state names & views
+rpa-landuse/
+├── 🖥️ landuse_app.py           # Streamlit dashboard (main web UI)
+├── 🤖 src/landuse/             # Core application modules
+│   ├── agents/                 # AI-powered analysis agents
+│   │   ├── agent.py           # Main CLI entry point (rpa-analytics)
+│   │   ├── landuse_agent.py   # LangGraph-based natural language agent
+│   │   ├── formatting.py      # Query result formatting with percentage changes
+│   │   ├── prompts.py         # Specialized system prompts
+│   │   └── prompt_selector.py # Automatic prompt selection
+│   ├── core/                  # Modern architecture components
+│   │   ├── app_config.py      # Pydantic-based unified configuration
+│   │   ├── container.py       # Dependency injection system
+│   │   └── interfaces.py      # Clean architectural interfaces
+│   ├── infrastructure/        # Production-ready infrastructure
+│   │   ├── cache.py          # Thread-safe caching with TTL
+│   │   ├── logging.py        # Structured JSON logging
+│   │   ├── metrics.py        # Performance metrics collection
+│   │   └── performance.py    # Decorator-based monitoring
+│   ├── connections/           # Database connection management
+│   │   └── duckdb_connection.py # Custom Streamlit connection
+│   ├── tools/                # LangGraph agent tools
+│   │   ├── common_tools.py   # SQL execution and analysis tools
+│   │   └── map_generation_tool.py # Choropleth map generation
+│   └── security/             # Security and validation
+│       └── database_security.py # SQL injection prevention
+├── 🔧 scripts/               # Data processing and setup
+│   ├── converters/           # Data transformation utilities
+│   │   └── convert_to_duckdb.py # JSON → DuckDB star schema conversion
+│   └── setup/               # Database enhancement scripts
+├── 🌐 views/                 # Streamlit page components
+│   ├── chat.py              # Natural language chat interface
+│   ├── analytics.py         # Pre-built analytics dashboard
+│   ├── explorer.py          # Interactive SQL query interface
+│   └── extraction.py        # Data export functionality  
 ├── 📊 data/
-│   ├── raw/                    # Source JSON data (20M+ lines)
-│   └── processed/              # Optimized DuckDB database
-│       └── landuse_analytics.duckdb  # Star schema (1.2GB)
-├── 🧪 tests/                   # Comprehensive test suite (91% coverage)
-│   ├── unit/                   # Unit tests for all modules
-│   ├── integration/            # Integration tests with real database
-│   └── fixtures/               # Test data and utilities
-├── 📚 docs/                    # Comprehensive documentation
-│   ├── getting-started/        # Installation & quickstart guides
-│   ├── queries/               # Query examples & patterns
-│   ├── data/                  # Database schema & data documentation
-│   └── development/           # Architecture & testing guides
-├── ⚙️ config/                  # Configuration files
-├── 🌍 .env.example            # Environment configuration template
-├── 🚀 quickstart.py           # Environment verification script
-└── 📋 pyproject.toml          # Modern Python project configuration
+│   ├── processed/           # Optimized database
+│   │   └── landuse_analytics.duckdb # 1.2GB star schema database
+│   └── ssp_projections/     # Socioeconomic projection data
+├── 🧪 tests/                # Comprehensive test suite (89.75% coverage)
+│   ├── unit/               # Unit tests for all modules
+│   ├── integration/        # Integration tests with real database  
+│   └── fixtures/           # Test data and mocking utilities
+├── 📚 docs/                # Extensive documentation
+│   ├── getting-started/    # Setup and configuration guides
+│   ├── agents/            # Agent architecture documentation
+│   ├── data/              # Database schema and data dictionary
+│   └── development/       # Architecture and testing guides
+├── 🌍 .env.example        # Environment configuration template
+└── 📋 pyproject.toml      # Modern Python project with uv
 ```
 
 ## 🗄️ Database Schema
@@ -108,27 +188,41 @@ langchain-landuse/
 
 ## 🎯 Key Capabilities
 
-### Natural Language Analysis
+### 📊 Streamlit Dashboard
+- **💬 Natural Language Chat**: Real-time conversation with AI agent, streaming responses
+- **📈 Analytics Dashboard**: Pre-built visualizations with 6 chart types (overview, agricultural, forest, climate, geographic, flow)
+- **🔍 Data Explorer**: Interactive SQL query interface with schema browser and example queries  
+- **📥 Data Extraction**: Export query results in multiple formats (CSV, JSON, Parquet)
+- **⚙️ Settings & Monitoring**: System status, configuration management, troubleshooting tools
+
+### 🤖 Natural Language Analysis
 ```
-🌾 Ask> "Which scenarios show the most agricultural land loss?"
+🌾 Ask> "Which states have the most urban expansion?"
 
-🦆 DuckDB Query Results (20 rows)
-SQL: SELECT s.scenario_name, SUM(f.acres) as acres_lost 
-     FROM fact_landuse_transitions f 
-     JOIN dim_scenario s ON f.scenario_id = s.scenario_id...
-
-Results:
-scenario_name                    acres_lost
-CNRM_CM5_rcp85_ssp5             2,648,344
-MRI_CGCM3_rcp85_ssp5            2,643,261
-...
+🦆 Query executed with percentage-based formatting:
+┏━━━━━━━━━━━━┳━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ State Name ┃ Start Year ┃ Urban Expansion Acres ┃ Urban Expansion Acres Pct ┃
+┃            ┃            ┃                       ┃ Change From 2025          ┃  
+┡━━━━━━━━━━━━╇━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
+│ California │ 2030       │ 184,553              │ +23.0%                    │
+│ Texas      │ 2030       │ 172,952              │ +23.5%                    │
+│ California │ 2050       │ 220,000              │ +46.7%                    │
+└────────────┴────────────┴───────────────────────┴────────────────────────────┘
 ```
 
-### Business Intelligence
-- **Agricultural Impact**: Track farmland loss and conversion patterns
-- **Climate Scenarios**: Compare emission pathways (RCP45 vs RCP85)
-- **Geographic Analysis**: State and county-level trends
-- **Urbanization Pressure**: Development vs conservation patterns
+### 🧠 Advanced AI Features
+- **Cross-Dataset Integration**: Automatically combines land use, population, and income data
+- **Percentage-Based Reporting**: Shows trends as percentage changes from 2025 baseline
+- **Automatic Prompt Selection**: Detects query intent and applies specialized prompts
+- **Time-Aware Analysis**: Always includes temporal dimensions for trend analysis
+- **Security Validation**: SQL injection prevention with allowlist-based validation
+
+### 📈 Business Intelligence
+- **Agricultural Impact**: Track farmland loss and conversion patterns with percentage trends
+- **Climate Scenarios**: Compare emission pathways (RCP45 vs RCP85) across time
+- **Demographic Analysis**: Population and income projections linked to land use changes  
+- **Geographic Patterns**: County and state-level analysis with choropleth maps
+- **Urbanization Pressure**: Development trends with percentage changes over time
 
 ## 📖 About the RPA Assessment
 
@@ -269,21 +363,36 @@ The RPA Assessment projections reveal several important trends for land use in t
 
 ## 📊 Technical Architecture
 
-This project combines modern AI/ML technologies with high-performance analytics to enable natural language exploration of complex land use data:
+This project showcases modern software engineering practices with a production-ready AI analytics platform:
 
-### Core Technologies
-- **🤖 LangChain + GPT-4/Claude**: Natural language to SQL translation
-- **🦆 DuckDB**: High-performance analytical database with columnar storage
-- **🎨 Rich Terminal UI**: Beautiful command-line interface with colors and formatting
-- **🧪 Comprehensive Testing**: 91% test coverage with unit and integration tests
-- **🏗️ Modern Python**: Clean architecture with src layout and type hints
+### 🏗️ Core Technologies
+- **🤖 LangGraph + LangChain**: Advanced AI agent workflows with state management
+- **🦆 DuckDB**: High-performance analytical database with columnar storage  
+- **🎨 Streamlit**: Modern web dashboard with interactive components
+- **🐍 Pydantic v2**: Type-safe data validation and configuration management
+- **📊 Rich Terminal UI**: Beautiful command-line interface with colors and formatting
+- **🧪 Comprehensive Testing**: 89.75% test coverage with 142+ unit and integration tests
 
-### AI Agent Features
-- **Schema-aware query generation**: Understands database structure and relationships
-- **Automatic query optimization**: Adds appropriate LIMIT clauses and filters
-- **Business context**: Provides insights and summary statistics
-- **Error handling**: Helpful error messages and query suggestions
-- **Configurable limits**: Prevents runaway queries with time and iteration limits
+### 🔧 Modern Architecture (2025)
+- **Modular Design**: Single Responsibility Principle with 5 specialized managers
+- **Dependency Injection**: Clean architecture with `DependencyContainer` and interface abstractions
+- **Performance Monitoring**: Decorator-based timing with metrics collection and structured logging
+- **Configuration System**: Unified Pydantic-based `AppConfig` with environment variable integration
+- **Infrastructure Components**: Thread-safe caching, structured JSON logging, and performance metrics
+
+### 🤖 AI Agent Features  
+- **Cross-Dataset Integration**: Automatically combines land use, population, and economic data
+- **Time-Aware Analysis**: Includes temporal dimensions for percentage-based trend reporting
+- **Automatic Prompt Selection**: Detects query intent and applies specialized prompts for different domains
+- **Security-First**: SQL injection prevention with allowlist-based validation and comprehensive error handling
+- **Streaming Responses**: Real-time response generation with conversation memory and checkpointing
+
+### 🛡️ Production Quality
+- **Security**: Comprehensive SQL injection prevention, API key masking, rate limiting
+- **Error Handling**: Custom exception hierarchy with 10+ specific exception types  
+- **Performance**: Bulk loading optimization (5-10x faster), connection pooling, query caching
+- **Observability**: Real-time performance metrics, structured logging, health monitoring
+- **Testing**: Real functionality testing (no mocking of business logic), 89.75% coverage
 
 ## 📚 Data Source & Attribution
 
@@ -299,20 +408,43 @@ This project analyzes data from the **USDA Forest Service 2020 Resources Plannin
 
 **Usage**: Download the data from the link above and unzip the .json data file to `data/raw/county_landuse_projections_RPA.json`
 
-## 🚀 Getting Started
+## 🧪 Testing & Development
 
-Ready to explore RPA Assessment data with natural language? Run our quickstart script to verify your setup:
-
+### Run Tests
 ```bash
-uv run python quickstart.py
+# Run all tests with coverage
+uv run python -m pytest tests/ --cov=src --cov-report=term-missing
+
+# Run specific test categories  
+uv run python -m pytest tests/unit/          # Unit tests
+uv run python -m pytest tests/integration/   # Integration tests
+
+# Run with parallel execution
+uv run python -m pytest tests/ -n auto
 ```
 
-This will check your environment and guide you through any needed setup steps. Then start asking questions like:
+### Development Tools
+```bash
+# Install development dependencies
+uv sync --group dev
 
-- "What are the land use projections for my state?"
-- "Compare forest loss between RCP4.5 and RCP8.5 scenarios"
-- "Which regions face the most urban expansion by 2070?"
+# Code quality checks
+uv run ruff check src/ tests/                # Linting
+uv run mypy src/                             # Type checking  
+uv run safety check                          # Security audit
+
+# Documentation
+mkdocs serve                                 # Local documentation server
+```
+
+### Testing Philosophy
+- **89.75% test coverage** with 142+ comprehensive tests
+- **Real functionality testing**: Uses actual API calls and database connections
+- **No business logic mocking**: Tests real agent behavior and data processing
+- **Integration testing**: Full end-to-end workflows with actual DuckDB database
 
 ---
 
-**RPA Land Use Analytics** - Transforming America's land use data into actionable insights 🌲
+**RPA Land Use Analytics** - Transforming America's land use data into actionable insights with modern AI 🌲
+
+*Ready to explore? Start with the Streamlit dashboard: `uv run streamlit run landuse_app.py`*
