@@ -211,10 +211,11 @@ def create_analysis_tool() -> Any:
                 )
             if "growth" in original_question.lower() or "change" in original_question.lower():
                 insights.append(
-                    "Population change reflects SSP scenario assumptions: "
+                    "Population projections should be analyzed from current 2025 baseline levels. "
+                    "SSP scenarios show different growth paths: "
                     "SSP1 (Sustainability) = moderate growth, SSP2 (Middle Road) = business-as-usual, "
                     "SSP3 (Regional Rivalry) = slower growth, SSP5 (Fossil Development) = rapid growth. "
-                    "These drive different land use pressures."
+                    "Use 2025 as baseline unless historical context is specifically requested."
                 )
 
         if "income" in query_results.lower():
