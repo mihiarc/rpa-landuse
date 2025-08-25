@@ -15,11 +15,22 @@ class DatabaseSecurity:
 
     # Allowlist of approved table names
     ALLOWED_TABLES: FrozenSet[str] = frozenset([
+        # Fact tables
         'fact_landuse_transitions',
+        'fact_socioeconomic_projections',
+        # Dimension tables
         'dim_scenario',
         'dim_geography',
         'dim_landuse',
         'dim_time',
+        'dim_indicators',
+        'dim_socioeconomic',
+        # Views for analysis
+        'v_income_trends',
+        'v_population_trends',
+        'v_landuse_socioeconomic',
+        'v_full_projection_period',
+        'v_scenarios_combined',
         # Allow common information schema tables for metadata queries
         'information_schema.tables',
         'information_schema.columns',
@@ -44,7 +55,21 @@ class DatabaseSecurity:
         'table_',
         'column_',
         'data_',
-        'is_'
+        'is_',
+        # Socioeconomic data fields
+        'indicator_',
+        'socioeconomic_',
+        'projection_',
+        'population_',
+        'income_',
+        'economic_',
+        'value',
+        'trend',
+        'growth_',
+        'urbanization_',
+        'narrative_',
+        'unit_',
+        'measure'
     ])
 
     # Disallowed SQL keywords and patterns
