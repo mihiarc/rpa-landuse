@@ -297,7 +297,7 @@ sqlalchemy==2.0.41
     #   langchain-community
 sqlite-vec==0.1.6
     # via langgraph-checkpoint-sqlite
-streamlit==1.46.1
+streamlit==1.48.1
     # via rpa-landuse-analytics (pyproject.toml)
 tenacity==9.1.2
     # via
