@@ -85,6 +85,9 @@ class LanduseConfig:
     domain_focus: str = field(
         default_factory=lambda: os.getenv('LANDUSE_DOMAIN_FOCUS', 'none')
     )
+    enable_dynamic_prompts: bool = field(
+        default_factory=lambda: os.getenv('LANDUSE_ENABLE_DYNAMIC_PROMPTS', 'true').lower() == 'true'
+    )
 
     # Knowledge Base Configuration
     enable_knowledge_base: bool = field(
