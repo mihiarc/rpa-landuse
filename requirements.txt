@@ -154,7 +154,7 @@ matplotlib==3.10.3
     # via rpa-landuse-analytics (pyproject.toml)
 mdurl==0.1.2
     # via markdown-it-py
-multidict==6.6.3
+multidict==6.6.4
     # via
     #   aiohttp
     #   yarl
