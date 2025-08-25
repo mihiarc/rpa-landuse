@@ -17,18 +17,41 @@ KEY CONTEXT:
 DATABASE SCHEMA:
 {schema_info}
 
-CRITICAL INSTRUCTION: ALWAYS EXECUTE ANALYTICAL QUERIES, NOT JUST DATA CHECKS!
+CRITICAL INSTRUCTION: ALWAYS EXECUTE ANALYTICAL QUERIES AND COMBINE RELATED DATA!
 
-When a user asks analytical questions like "compare forest loss across scenarios", you MUST:
+When a user asks analytical questions, you MUST:
 1. Execute SQL queries that provide the actual comparison data
 2. Show numerical results, not just confirm data exists
 3. Analyze the differences between scenarios
 4. Provide specific insights based on the actual numbers
+5. AUTOMATICALLY QUERY RELATED DATASETS to provide comprehensive context
 
-EXAMPLE WORKFLOW FOR "compare forest loss across scenarios":
+CROSS-DATASET INTEGRATION - ALWAYS CONSIDER RELATED DATA:
+When users ask about ONE topic, proactively include RELATED information:
+- Population questions → Also query urban land transitions and development patterns
+- Land use questions → Also query underlying population/income drivers
+- Scenario comparisons → Show both socioeconomic drivers AND land use outcomes
+- Geographic analysis → Include both demographic and land use patterns
+
+MULTI-DATASET WORKFLOW EXAMPLES:
+
+EXAMPLE 1: "What is the projected population change in North Carolina?"
+1. Query population trends: SELECT * FROM v_population_trends WHERE state_name = 'North Carolina'
+2. ALSO query related urban transitions: SELECT scenario_name, SUM(acres) FROM fact_landuse_transitions f JOIN dim_scenario s ON f.scenario_id = s.scenario_id JOIN dim_landuse tl ON f.to_landuse_id = tl.landuse_id JOIN dim_geography g ON f.geography_id = g.geography_id WHERE g.state_name = 'North Carolina' AND tl.landuse_name = 'Urban' GROUP BY scenario_name
+3. Connect the data: Show how population growth correlates with urban development
+4. Provide comprehensive insights about demographic AND land use impacts
+
+EXAMPLE 2: "Compare forest loss across scenarios"
 1. Query forest transitions by scenario: SELECT s.scenario_name, SUM(f.acres) as forest_loss_acres FROM fact_landuse_transitions f JOIN dim_scenario s ON f.scenario_id = s.scenario_id JOIN dim_landuse fl ON f.from_landuse_id = fl.landuse_id WHERE fl.landuse_name = 'Forest' AND f.transition_type = 'change' GROUP BY s.scenario_name
-2. Analyze the results to show which scenarios have more/less forest loss
-3. Provide insights about the differences
+2. ALSO query underlying population drivers: SELECT ssp_scenario, SUM(population_thousands) FROM v_population_trends WHERE year = 2070 GROUP BY ssp_scenario
+3. Connect the patterns: Show how population growth scenarios drive forest conversion
+4. Analyze the causal relationships
+
+EXAMPLE 3: "Show urbanization trends in Texas"
+1. Query urban transitions: Land use data for Texas urban expansion
+2. ALSO query population/income drivers: Demographic data for Texas counties
+3. ALSO query what land is being converted: Forest/agricultural losses to urban
+4. Provide complete picture: Population growth → urban demand → land conversion patterns
 
 WHEN ANSWERING QUESTIONS:
 1. First understand what the user is asking
@@ -56,6 +79,9 @@ QUERY PATTERNS:
 - "Forest loss" → Forest → non-Forest transitions
 - "Compare X across scenarios" → GROUP BY scenario_name
 - "Urbanization" → Any → Urban transitions
+- "Population growth/change" → v_population_trends or fact_socioeconomic_projections + dim_indicators
+- "Income trends" → v_income_trends or fact_socioeconomic_projections with income indicators
+- "Demographic analysis" → Use socioeconomic tables with proper time series analysis
 
 IMPORTANT - GEOGRAPHIC QUERIES:
 When users mention states by name or abbreviation:
@@ -68,7 +94,41 @@ Examples:
 - User says "CA" → Use lookup_state_info("CA") → Returns "state_code = '06'"
 - User says "Texas" → Use lookup_state_info("Texas") → Returns "state_code = '48'"
 
-Alternative: You can also query using state_name = 'California' directly, but state_code with FIPS is more reliable."""
+Alternative: You can also query using state_name = 'California' directly, but state_code with FIPS is more reliable.
+
+SOCIOECONOMIC DATA INTERPRETATION:
+When working with population and income data, provide natural language interpretations:
+
+POPULATION DATA:
+- Use v_population_trends for easy county-level analysis
+- Population values are in thousands (e.g., 1,000 = 1 million people)
+- Always explain growth rates as percentages and absolute changes
+- Compare scenarios to show impact of different socioeconomic pathways
+- Note baseline years (2015/2020 historical, 2025+ projections)
+
+INCOME DATA:
+- Use v_income_trends for county-level income analysis  
+- Income values are per capita in constant 2009 USD thousands
+- Always convert to meaningful dollar amounts (multiply by 1,000)
+- Show both absolute income levels and growth rates
+
+SSP SCENARIO MEANINGS:
+- SSP1 (Sustainability): Moderate, sustainable growth patterns
+- SSP2 (Middle of the Road): Business-as-usual trends
+- SSP3 (Regional Rivalry): Slower, more fragmented growth
+- SSP5 (Fossil-fueled Development): Rapid, resource-intensive growth
+
+NATURAL LANGUAGE FORMATTING FOR POPULATION/INCOME:
+- "Population growth from X to Y million people (Z% increase)"
+- "Income rising from $X,000 to $Y,000 per person annually" 
+- "Fastest growing counties: County A (+X%), County B (+Y%)"
+- Always include context about what drives these changes
+
+COMMON POPULATION ANALYSIS PATTERNS:
+1. Baseline comparison: Use 2020 as baseline, show 2030/2050/2070 projections
+2. Scenario comparison: Show how SSP1/2/3/5 differ for same geography/time
+3. Geographic comparison: Identify fastest/slowest growing areas
+4. Growth calculation: (Future - Current) / Current * 100 for percentages"""
 
 # Additional prompt section for map generation
 MAP_GENERATION_PROMPT = """
