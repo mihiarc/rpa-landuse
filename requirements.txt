@@ -212,7 +212,7 @@ propcache==0.3.2
     # via
     #   aiohttp
     #   yarl
-protobuf==6.31.1
+protobuf==6.32.0
     # via streamlit
 pyarrow==20.0.0
     # via
