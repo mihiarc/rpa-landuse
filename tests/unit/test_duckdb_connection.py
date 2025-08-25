@@ -92,7 +92,7 @@ class TestDuckDBConnection:
     def test_connect_missing_database(self):
         """Test connection with non-existent database file"""
         from tenacity import RetryError
-        
+
         connection = DuckDBConnection(connection_name="test")
 
         # The method has a retry decorator, so it raises RetryError

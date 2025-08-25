@@ -17,20 +17,20 @@ from landuse.security.database_security import DatabaseSecurity
 class QueryExecutor:
     """
     Handles SQL query execution and error management.
-    
+
     Extracted from the monolithic LanduseAgent class to follow Single Responsibility Principle.
     Provides standardized query execution with error handling and result formatting.
     """
 
     def __init__(
-        self, 
-        config: Union[LanduseConfig, AppConfig], 
-        db_connection: duckdb.DuckDBPyConnection, 
+        self,
+        config: Union[LanduseConfig, AppConfig],
+        db_connection: duckdb.DuckDBPyConnection,
         console: Optional[Console] = None
     ):
         """
         Initialize query executor.
-        
+
         Args:
             config: Configuration object (AppConfig or legacy LanduseConfig)
             db_connection: Database connection
@@ -42,7 +42,7 @@ class QueryExecutor:
         else:
             self.config = config
             self.app_config = None
-            
+
         self.db_connection = db_connection
         self.console = console or Console()
 
@@ -50,30 +50,30 @@ class QueryExecutor:
     def execute_query(self, query: str) -> Dict[str, Any]:
         """
         Execute a SQL query with standard error handling and formatting.
-        
+
         Args:
             query: SQL query string to execute
-            
+
         Returns:
             Dictionary with execution results including success status, data, and formatting
         """
         cleaned_query = clean_sql_query(query)
-        
+
         if self.config.debug:
-            print(f"\nDEBUG execute_query: Executing SQL query")
+            print("\nDEBUG execute_query: Executing SQL query")
             print(f"DEBUG execute_query: Query: {cleaned_query}")
 
         try:
             # Validate query security before execution
             DatabaseSecurity.validate_query_safety(cleaned_query)
-            
+
             # Add row limit if not present for safety
             if "limit" not in cleaned_query.lower():
                 cleaned_query = f"{cleaned_query.rstrip(';')} LIMIT {self.config.max_query_rows}"
 
             result = self.db_connection.execute(cleaned_query).fetchall()
             columns = [desc[0] for desc in self.db_connection.description] if self.db_connection.description else []
-            
+
             if self.config.debug:
                 print(f"DEBUG execute_query: Result row count: {len(result)}")
                 print(f"DEBUG execute_query: Columns: {columns}")
@@ -84,7 +84,7 @@ class QueryExecutor:
 
             # Convert to DataFrame for formatting
             df = pd.DataFrame(result, columns=columns)
-            
+
             # Format results
             formatted_results = format_query_results(df, cleaned_query)
 
@@ -100,7 +100,7 @@ class QueryExecutor:
         except (duckdb.Error, duckdb.CatalogException, duckdb.SyntaxException, duckdb.BinderException) as e:
             error_msg = str(e)
             suggestion = self._get_error_suggestion(error_msg)
-            
+
             if self.config.debug:
                 print(f"DEBUG execute_query: DuckDB Error: {error_msg}")
                 print(f"DEBUG execute_query: Suggestion: {suggestion}")
@@ -127,7 +127,7 @@ class QueryExecutor:
             # Wrap other unexpected errors
             wrapped_error = wrap_exception(e, "Query execution")
             error_msg = str(wrapped_error)
-            
+
             if self.config.debug:
                 print(f"DEBUG execute_query: Unexpected Error: {error_msg}")
                 import traceback
@@ -143,10 +143,10 @@ class QueryExecutor:
     def _get_error_suggestion(self, error_msg: str) -> str:
         """
         Get helpful suggestions for common SQL errors.
-        
+
         Args:
             error_msg: The error message from query execution
-            
+
         Returns:
             Human-readable suggestion for fixing the error
         """
@@ -167,26 +167,26 @@ class QueryExecutor:
         """Convert AppConfig to legacy LanduseConfig for backward compatibility."""
         # Create legacy config bypassing validation for now
         from landuse.config.landuse_config import LanduseConfig
-        
+
         # Create instance without validation to avoid API key issues during conversion
         legacy_config = object.__new__(LanduseConfig)
-        
+
         # Map database settings
         legacy_config.db_path = app_config.database.path
-        
-        # Map LLM settings 
+
+        # Map LLM settings
         legacy_config.model = app_config.llm.model_name  # Note: model_name in AppConfig vs model in legacy
         legacy_config.temperature = app_config.llm.temperature
         legacy_config.max_tokens = app_config.llm.max_tokens
-        
+
         # Map agent execution settings
         legacy_config.max_iterations = app_config.agent.max_iterations
         legacy_config.max_execution_time = app_config.agent.max_execution_time
         legacy_config.max_query_rows = app_config.agent.max_query_rows
         legacy_config.default_display_limit = app_config.agent.default_display_limit
-        
+
         # Map debugging settings
         legacy_config.debug = app_config.logging.level == 'DEBUG'
         legacy_config.enable_memory = app_config.agent.enable_memory
-        
+
         return legacy_config

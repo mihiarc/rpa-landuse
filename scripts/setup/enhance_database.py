@@ -3,19 +3,19 @@
 Enhance the landuse database with additional useful information
 """
 
-from pathlib import Path
 import sys
+from pathlib import Path
+
+import duckdb
+from rich.console import Console
+from rich.panel import Panel
 
 # Add src to path to import state mappings
 project_root = Path(__file__).parent.parent.parent
 src_path = project_root / "src"
 sys.path.insert(0, str(src_path))
 
-import duckdb
-from rich.console import Console
-from rich.panel import Panel
-
-from landuse.utilities.state_mappings import StateMapper
+from landuse.utilities.state_mappings import StateMapper  # noqa: E402
 
 console = Console()
 

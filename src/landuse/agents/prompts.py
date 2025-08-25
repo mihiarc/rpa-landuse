@@ -53,7 +53,7 @@ ALWAYS CLEARLY STATE YOUR ASSUMPTIONS in the response.
 
 QUERY PATTERNS:
 - "Agricultural land loss" → Agriculture → non-Agriculture transitions
-- "Forest loss" → Forest → non-Forest transitions  
+- "Forest loss" → Forest → non-Forest transitions
 - "Compare X across scenarios" → GROUP BY scenario_name
 - "Urbanization" → Any → Urban transitions
 
@@ -140,25 +140,25 @@ def get_system_prompt(
 ) -> str:
     """
     Generate a system prompt with the specified configuration.
-    
+
     Args:
         include_maps: Whether to include map generation instructions
         analysis_style: One of "standard", "detailed", "executive"
         domain_focus: Optional domain focus - "agricultural", "climate", "urban"
         schema_info: The database schema information to inject
-        
+
     Returns:
         Complete system prompt string
     """
     # Start with base prompt
     prompt = SYSTEM_PROMPT_BASE.format(schema_info=schema_info)
-    
+
     # Add analysis style modifications
     if analysis_style == "detailed":
         prompt += DETAILED_ANALYSIS_PROMPT
     elif analysis_style == "executive":
         prompt += EXECUTIVE_SUMMARY_PROMPT
-    
+
     # Add domain focus if specified
     if domain_focus == "agricultural":
         prompt += AGRICULTURAL_FOCUS_PROMPT
@@ -166,18 +166,18 @@ def get_system_prompt(
         prompt += CLIMATE_FOCUS_PROMPT
     elif domain_focus == "urban":
         prompt += URBAN_PLANNING_PROMPT
-    
+
     # Add map generation if enabled
     if include_maps:
         prompt += MAP_GENERATION_PROMPT
-    
+
     return prompt
 
 
 # Specialized prompt variations for different use cases
 class PromptVariations:
     """Pre-configured prompt variations for common use cases"""
-    
+
     @staticmethod
     def research_analyst(schema_info: str) -> str:
         """Prompt for detailed research analysis"""
@@ -186,7 +186,7 @@ class PromptVariations:
             analysis_style="detailed",
             schema_info=schema_info
         )
-    
+
     @staticmethod
     def policy_maker(schema_info: str) -> str:
         """Prompt for policy-focused analysis"""
@@ -196,7 +196,7 @@ class PromptVariations:
             domain_focus="climate",
             schema_info=schema_info
         )
-    
+
     @staticmethod
     def agricultural_analyst(schema_info: str) -> str:
         """Prompt for agricultural land use analysis"""
@@ -206,7 +206,7 @@ class PromptVariations:
             domain_focus="agricultural",
             schema_info=schema_info
         )
-    
+
     @staticmethod
     def urban_planner(schema_info: str) -> str:
         """Prompt for urban planning analysis"""
@@ -243,7 +243,7 @@ def create_custom_prompt(
 ) -> str:
     """
     Create a fully custom prompt for specialized use cases.
-    
+
     Example:
         prompt = create_custom_prompt(
             expertise_area="water resource management",

@@ -18,11 +18,11 @@ if os.getenv("STREAMLIT_RUNTIME_ENV") != "cloud":
 try:
     project_root = Path(__file__).parent.resolve()
     src_path = project_root / "src"
-    
+
     # Add to path if not already there
     if str(src_path) not in sys.path:
         sys.path.insert(0, str(src_path))
-    
+
     # Debug output for deployment
     print(f"DEBUG: Working directory: {os.getcwd()}")
     print(f"DEBUG: Project root: {project_root}")
@@ -67,7 +67,7 @@ st.set_page_config(
 # Try to load from .env if it exists (local development)
 try:
     from dotenv import load_dotenv  # noqa: E402
-    
+
     # Try multiple possible env file locations
     possible_env_paths = [
         project_root / "config" / ".env",
@@ -75,7 +75,7 @@ try:
         Path("config/.env"),
         Path(".env")
     ]
-    
+
     env_loaded = False
     for env_path in possible_env_paths:
         try:
@@ -86,10 +86,10 @@ try:
                 break
         except Exception as e:
             print(f"DEBUG: Could not load {env_path}: {e}")
-    
+
     if not env_loaded:
         print("DEBUG: No .env file found, will use st.secrets if available")
-        
+
 except ImportError:
     print("DEBUG: python-dotenv not available, using st.secrets")
 except Exception as e:
@@ -123,7 +123,7 @@ st.markdown("""
         padding-left: 2rem;
         padding-right: 2rem;
     }
-    
+
     /* Responsive design for different screen sizes */
     @media (max-width: 768px) {
         .block-container {
@@ -131,21 +131,21 @@ st.markdown("""
             padding-left: 1rem;
             padding-right: 1rem;
         }
-        
+
         .hero-title {
             font-size: 2rem;
         }
-        
+
         .hero-subtitle {
             font-size: 1rem;
         }
-        
+
         .feature-card {
             margin: 0.25rem;
             padding: 1.5rem;
         }
     }
-    
+
     /* Large screens optimization */
     @media (min-width: 1920px) {
         .block-container {
@@ -153,7 +153,7 @@ st.markdown("""
             margin: 0 auto;
         }
     }
-    
+
     /* Hero section styling */
     .hero-section {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -163,13 +163,13 @@ st.markdown("""
         margin-bottom: 2rem;
         box-shadow: 0 10px 30px rgba(0,0,0,0.2);
     }
-    
+
     .hero-title {
         font-size: 3rem;
         font-weight: 700;
         margin-bottom: 1rem;
     }
-    
+
     .hero-subtitle {
         font-size: 1.25rem;
         opacity: 0.95;
@@ -194,13 +194,13 @@ st.markdown("""
         flex-direction: column;
         justify-content: center;
     }
-    
+
     .metric-value {
         font-size: 2rem;
         font-weight: 700;
         margin-bottom: 0.5rem;
     }
-    
+
     .metric-label {
         font-size: 0.9rem;
         opacity: 0.9;
@@ -222,19 +222,19 @@ st.markdown("""
         transform: translateY(-4px);
         border-color: #667eea;
     }
-    
+
     .feature-icon {
         font-size: 2.5rem;
         margin-bottom: 1rem;
     }
-    
+
     .feature-title {
         font-size: 1.3rem;
         font-weight: 600;
         margin-bottom: 1rem;
         color: #2c3e50;
     }
-    
+
     .feature-description {
         color: #5a6c7d;
         line-height: 1.6;
@@ -256,7 +256,7 @@ st.markdown("""
         background-color: #f8f9fa;
         transform: translateX(4px);
     }
-    
+
     /* Section styling */
     .section-header {
         font-size: 2rem;
@@ -266,11 +266,11 @@ st.markdown("""
         display: flex;
         align-items: center;
     }
-    
+
     .section-icon {
         margin-right: 0.75rem;
     }
-    
+
     /* Quick stats styling */
     .stats-grid {
         display: grid;
@@ -284,14 +284,14 @@ st.markdown("""
 def check_environment():
     """Check if the environment is properly configured"""
     # os and Path already imported at top of file
-    
+
     checks = {
         "database": False,
         "api_keys": False,
         "dependencies": False,
         "landuse_module": False
     }
-    
+
     debug_info = []
 
     # Check database with multiple possible paths
@@ -300,7 +300,7 @@ def check_environment():
         project_root / 'data' / 'processed' / 'landuse_analytics.duckdb',
         Path('data/processed/landuse_analytics.duckdb')
     ]
-    
+
     for db_path in db_paths:
         if db_path.exists():
             checks["database"] = True
@@ -313,7 +313,7 @@ def check_environment():
     openai_key = os.getenv("OPENAI_API_KEY")
     anthropic_key = os.getenv("ANTHROPIC_API_KEY")
     checks["api_keys"] = bool(openai_key or anthropic_key)
-    
+
     if openai_key:
         debug_info.append(f"OpenAI key present ({len(openai_key)} chars)")
     if anthropic_key:
@@ -329,7 +329,7 @@ def check_environment():
     except ImportError as e:
         checks["dependencies"] = False
         debug_info.append(f"Dependency error: {e}")
-    
+
     # Check landuse module
     try:
         from landuse.config import LanduseConfig
@@ -343,7 +343,7 @@ def check_environment():
 
 def show_welcome_page():
     """Display the welcome/home page with wide layout optimization"""
-    
+
     # Hero Section with gradient background
     st.markdown("""
     <div class="hero-section">
@@ -352,7 +352,7 @@ def show_welcome_page():
         <p class="hero-subtitle">Explore county-level land use projections from 2012-2100 across 20 climate scenarios</p>
     </div>
     """, unsafe_allow_html=True)
-    
+
     # Dataset Overview section
     # Quick Stats if database is available
     checks, _ = check_environment()
@@ -361,7 +361,7 @@ def show_welcome_page():
             import duckdb
             db_path = os.getenv('LANDUSE_DB_PATH', 'data/processed/landuse_analytics.duckdb')
             conn = duckdb.connect(str(db_path), read_only=True)
-            
+
             # Get basic stats
             stats = {}
             try:
@@ -369,9 +369,9 @@ def show_welcome_page():
                 stats["scenarios"] = conn.execute("SELECT COUNT(*) FROM dim_scenario").fetchone()[0]
                 stats["transitions"] = conn.execute("SELECT COUNT(*) FROM fact_landuse_transitions").fetchone()[0]
                 stats["time_periods"] = conn.execute("SELECT COUNT(*) FROM dim_time").fetchone()[0]
-                
+
                 st.markdown("### 📊 Dataset Overview")
-                
+
                 # Create a 2x2 grid for metrics
                 metric_col1, metric_col2 = st.columns(2)
                 with metric_col1:
@@ -381,14 +381,14 @@ def show_welcome_page():
                         <div class="metric-label">US Counties</div>
                     </div>
                     """, unsafe_allow_html=True)
-                    
+
                     st.markdown(f"""
                     <div class="metric-card">
                         <div class="metric-value">{stats['scenarios']}</div>
                         <div class="metric-label">Climate Scenarios</div>
                     </div>
                     """, unsafe_allow_html=True)
-                
+
                 with metric_col2:
                     st.markdown(f"""
                     <div class="metric-card">
@@ -396,32 +396,32 @@ def show_welcome_page():
                         <div class="metric-label">Land Transitions</div>
                     </div>
                     """, unsafe_allow_html=True)
-                    
+
                     st.markdown(f"""
                     <div class="metric-card">
                         <div class="metric-value">{stats['time_periods']}</div>
                         <div class="metric-label">Time Periods</div>
                     </div>
                     """, unsafe_allow_html=True)
-                    
+
             except Exception as e:
                 st.warning(f"Could not load dataset statistics: {e}")
             finally:
                 conn.close()
-                
+
         except Exception as e:
             st.error(f"Database connection error: {e}")
-    
+
     # Add system check hint
     if not all(checks.values()):
         st.info("💡 Check **Settings** to view system status and resolve any configuration issues.")
 
     # Feature overview in 2x2 grid layout
     st.markdown('<h2 class="section-header"><span class="section-icon">🚀</span>Features</h2>', unsafe_allow_html=True)
-    
+
     # First row of features
     col1, col2 = st.columns(2)
-    
+
     with col1:
         with st.container():
             st.markdown("""
@@ -436,7 +436,7 @@ def show_welcome_page():
                 </ul>
             </div>
             """, unsafe_allow_html=True)
-            
+
             if st.button("💬 Open Chat", key="feature_chat", use_container_width=True):
                 st.switch_page("views/chat.py")
 
@@ -454,13 +454,13 @@ def show_welcome_page():
                 </ul>
             </div>
             """, unsafe_allow_html=True)
-            
+
             if st.button("📊 Open Analytics", key="feature_analytics", use_container_width=True):
                 st.switch_page("views/analytics.py")
 
     # Second row of features
     col3, col4 = st.columns(2)
-    
+
     with col3:
         with st.container():
             st.markdown("""
@@ -475,10 +475,10 @@ def show_welcome_page():
                 </ul>
             </div>
             """, unsafe_allow_html=True)
-            
+
             if st.button("🔍 Open Explorer", key="feature_explorer", use_container_width=True):
                 st.switch_page("views/explorer.py")
-    
+
     with col4:
         with st.container():
             st.markdown("""
@@ -493,7 +493,7 @@ def show_welcome_page():
                 </ul>
             </div>
             """, unsafe_allow_html=True)
-            
+
             if st.button("🗺️ Open Visualizations", key="feature_viz", use_container_width=True):
                 st.switch_page("views/analytics.py")
 
@@ -553,7 +553,7 @@ def create_pages():
 # Main navigation using modern st.navigation
 def main():
     """Main application entry point with modern navigation"""
-    
+
     try:
         # Create navigation structure
         pages = create_pages()
@@ -563,22 +563,22 @@ def main():
 
         # Run the selected page
         pg.run()
-        
+
     except AttributeError as e:
         if 'navigation' in str(e):
             st.error("❌ Navigation API Error")
             st.error(f"This app requires Streamlit 1.36.0 or later. Current version: {st.__version__}")
             st.info("The app is configured to use st.navigation which was introduced in Streamlit 1.36.0")
-            
+
             # Show welcome page as fallback
             show_welcome_page()
         else:
             raise
-            
+
     except ImportError as e:
         st.error("❌ Import Error Detected")
         st.error(f"Failed to import: {e}")
-        
+
         # Common import issues
         if "landuse" in str(e):
             st.warning("The 'landuse' module could not be imported. Checking paths...")
@@ -586,25 +586,25 @@ def main():
             st.write(f"- Project root: {project_root}")
             st.write(f"- Source path exists: {src_path.exists()}")
             st.write(f"- sys.path includes: {str(src_path) in sys.path}")
-            
+
             # List src directory contents
             if src_path.exists():
                 st.write("Source directory contents:")
                 for item in sorted(os.listdir(src_path)):
                     st.write(f"  - {item}")
-        
+
         # Show basic info
         show_welcome_page()
-        
+
     except Exception as e:
         st.error("❌ Unexpected Error")
         st.error(f"{type(e).__name__}: {e}")
-        
+
         # Show traceback in expander
         import traceback
         with st.expander("Show full traceback"):
             st.code(traceback.format_exc())
-        
+
         # Show basic welcome page
         show_welcome_page()
 
@@ -625,7 +625,7 @@ if __name__ == "__main__":
         print(f"FATAL ERROR in main: {type(e).__name__}: {e}")
         import traceback
         traceback.print_exc()
-        
+
         # Try to show error in Streamlit if possible
         try:
             import streamlit as st
@@ -634,6 +634,6 @@ if __name__ == "__main__":
                 st.code(traceback.format_exc())
         except:
             pass
-        
+
         # Re-raise to ensure proper exit
         raise

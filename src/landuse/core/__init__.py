@@ -2,11 +2,11 @@
 
 from .app_config import AppConfig, ConfigurationError
 from .container import DependencyContainer
-from .interfaces import DatabaseInterface, LLMInterface, ConfigInterface
+from .interfaces import ConfigInterface, DatabaseInterface, LLMInterface
 
 __all__ = [
     'AppConfig',
-    'ConfigurationError', 
+    'ConfigurationError',
     'DependencyContainer',
     'DatabaseInterface',
     'LLMInterface',

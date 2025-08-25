@@ -125,13 +125,13 @@ class DuckDBConnection(BaseConnection[duckdb.DuckDBPyConnection]):
 
         Returns:
             pd.DataFrame: Query results
-            
+
         Raises:
             ValueError: If query fails security validation
         """
         # Validate query security before execution
         DatabaseSecurity.validate_query_safety(query)
-        
+
         @cache_data(ttl=ttl)
         def _query(query: str, **kwargs) -> pd.DataFrame:
             cursor = self.cursor()
@@ -157,7 +157,7 @@ class DuckDBConnection(BaseConnection[duckdb.DuckDBPyConnection]):
 
         Returns:
             QueryResult: Query results with metadata
-            
+
         Raises:
             ValueError: If query fails security validation
         """
@@ -166,7 +166,7 @@ class DuckDBConnection(BaseConnection[duckdb.DuckDBPyConnection]):
         try:
             # Validate query security before execution
             DatabaseSecurity.validate_query_safety(query)
-            
+
             # Validate SQL query
             sql_obj = SQLQuery(sql=query)
 
@@ -236,7 +236,7 @@ class DuckDBConnection(BaseConnection[duckdb.DuckDBPyConnection]):
         """
         # Validate table name using security allowlist
         DatabaseSecurity.validate_table_name(table_name)
-        
+
         query = f"DESCRIBE {table_name}"
         return self.query(query, ttl=ttl)
 

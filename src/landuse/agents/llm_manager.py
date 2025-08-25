@@ -18,7 +18,7 @@ from landuse.infrastructure.performance import time_llm_operation
 class LLMManager(LLMInterface):
     """
     Manages LLM creation and configuration.
-    
+
     Extracted from the monolithic LanduseAgent class to follow Single Responsibility Principle.
     Handles model selection, API key validation, and LLM instantiation.
     Implements LLMInterface for dependency injection compatibility.
@@ -40,43 +40,43 @@ class LLMManager(LLMInterface):
         """Convert AppConfig to legacy LanduseConfig for backward compatibility."""
         # Create legacy config bypassing validation for now
         from landuse.config.landuse_config import LanduseConfig
-        
+
         # Create instance without validation to avoid API key issues during conversion
         legacy_config = object.__new__(LanduseConfig)
-        
+
         # Map database settings
         legacy_config.db_path = app_config.database.path
-        
-        # Map LLM settings 
+
+        # Map LLM settings
         legacy_config.model = app_config.llm.model_name  # Note: model_name in AppConfig vs model in legacy
         legacy_config.temperature = app_config.llm.temperature
         legacy_config.max_tokens = app_config.llm.max_tokens
-        
+
         # Map agent execution settings
         legacy_config.max_iterations = app_config.agent.max_iterations
         legacy_config.max_execution_time = app_config.agent.max_execution_time
         legacy_config.max_query_rows = app_config.agent.max_query_rows
         legacy_config.default_display_limit = app_config.agent.default_display_limit
-        
+
         # Map debugging settings
         legacy_config.debug = app_config.logging.level == 'DEBUG'
         legacy_config.enable_memory = app_config.agent.enable_memory
-        
+
         return legacy_config
 
     @time_llm_operation("create_llm", track_tokens=False)
     def create_llm(self) -> BaseChatModel:
         """
         Create LLM instance based on configuration using factory pattern.
-        
+
         Returns:
             Configured LLM instance
-            
+
         Raises:
             ValueError: If required API keys are missing
         """
         model_name = self.config.model_name
-        
+
         self.console.print(f"[blue]Initializing LLM: {model_name}[/blue]")
 
         if "claude" in model_name.lower():
@@ -88,7 +88,7 @@ class LLMManager(LLMInterface):
         """Create Anthropic Claude LLM instance."""
         api_key = os.getenv('ANTHROPIC_API_KEY')
         self.console.print(f"[dim]Using Anthropic API key: {self._mask_api_key(api_key)}[/dim]")
-        
+
         if not api_key:
             raise APIKeyError("ANTHROPIC_API_KEY environment variable is required for Claude models", model_name)
 
@@ -103,7 +103,7 @@ class LLMManager(LLMInterface):
         """Create OpenAI LLM instance."""
         api_key = os.getenv('OPENAI_API_KEY')
         self.console.print(f"[dim]Using OpenAI API key: {self._mask_api_key(api_key)}[/dim]")
-        
+
         if not api_key:
             raise APIKeyError("OPENAI_API_KEY environment variable is required for OpenAI models", model_name)
 
@@ -117,10 +117,10 @@ class LLMManager(LLMInterface):
     def _mask_api_key(self, api_key: Optional[str]) -> str:
         """
         Safely mask API key for logging purposes.
-        
+
         Args:
             api_key: The API key to mask
-            
+
         Returns:
             Masked API key string
         """
@@ -135,7 +135,7 @@ class LLMManager(LLMInterface):
     def validate_api_key(self) -> bool:
         """Validate API key is available and valid."""
         model_name = self.config.model_name
-        
+
         if "claude" in model_name.lower():
             return os.getenv('ANTHROPIC_API_KEY') is not None
         else:

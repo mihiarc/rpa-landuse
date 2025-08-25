@@ -14,7 +14,7 @@ T = TypeVar('T', bound='AppConfig')
 
 class DatabaseConfig(BaseModel):
     """Database configuration settings."""
-    
+
     path: str = Field(
         default='data/processed/landuse_analytics.duckdb',
         description="Path to DuckDB database file"
@@ -53,7 +53,7 @@ class DatabaseConfig(BaseModel):
 
 class LLMConfig(BaseModel):
     """LLM configuration settings."""
-    
+
     model_name: str = Field(
         default='gpt-4o-mini',
         description="Name of the LLM model to use"
@@ -98,7 +98,7 @@ class LLMConfig(BaseModel):
 
 class AgentConfig(BaseModel):
     """Agent behavior configuration."""
-    
+
     max_iterations: int = Field(
         default=8,
         ge=1,
@@ -137,7 +137,7 @@ class AgentConfig(BaseModel):
 
 class SecurityConfig(BaseModel):
     """Security configuration settings."""
-    
+
     enable_sql_validation: bool = Field(
         default=True,
         description="Enable SQL injection validation"
@@ -166,7 +166,7 @@ class SecurityConfig(BaseModel):
 
 class FeatureConfig(BaseModel):
     """Feature toggle configuration."""
-    
+
     enable_map_generation: bool = Field(
         default=True,
         description="Enable map generation capabilities"
@@ -191,7 +191,7 @@ class FeatureConfig(BaseModel):
 
 class LoggingConfig(BaseModel):
     """Logging configuration."""
-    
+
     level: str = Field(
         default='INFO',
         description="Logging level"
@@ -222,22 +222,22 @@ class LoggingConfig(BaseModel):
 class AppConfig(BaseSettings):
     """
     Unified application configuration with dependency injection support.
-    
+
     This configuration system provides:
-    - Type-safe configuration with Pydantic validation  
+    - Type-safe configuration with Pydantic validation
     - Environment variable integration
     - Dependency injection ready structure
     - Component-specific configuration sections
     - Validation and error handling
     """
-    
+
     model_config = SettingsConfigDict(
         env_prefix='LANDUSE_',
         env_nested_delimiter='__',
         case_sensitive=False,
         extra='forbid'
     )
-    
+
     # Component configurations
     database: DatabaseConfig = Field(default_factory=DatabaseConfig)
     llm: LLMConfig = Field(default_factory=LLMConfig)
@@ -245,7 +245,7 @@ class AppConfig(BaseSettings):
     security: SecurityConfig = Field(default_factory=SecurityConfig)
     features: FeatureConfig = Field(default_factory=FeatureConfig)
     logging: LoggingConfig = Field(default_factory=LoggingConfig)
-    
+
     # Application metadata
     app_name: str = Field(default='RPA Land Use Analytics')
     app_version: str = Field(default='2025.1.0')
@@ -257,28 +257,28 @@ class AppConfig(BaseSettings):
         # Create map output directory if map generation is enabled
         if self.features.enable_map_generation:
             Path(self.features.map_output_dir).mkdir(parents=True, exist_ok=True)
-            
+
         # Validate logging configuration
         if self.logging.log_file:
             log_path = Path(self.logging.log_file)
             log_path.parent.mkdir(parents=True, exist_ok=True)
-            
+
         return self
 
     @classmethod
     def from_env(cls: Type[T], **overrides: Any) -> T:
         """
         Create configuration from environment variables with overrides.
-        
+
         Args:
             **overrides: Configuration overrides
-            
+
         Returns:
             AppConfig instance
         """
         # Load from environment
         config = cls()
-        
+
         # Apply overrides
         for key, value in overrides.items():
             if hasattr(config, key):
@@ -297,18 +297,18 @@ class AppConfig(BaseSettings):
                         raise ConfigurationError(f"Unknown section: {section}")
                 else:
                     raise ConfigurationError(f"Unknown configuration parameter: {key}")
-        
+
         return config
 
     @classmethod
     def for_environment(cls: Type[T], env: str, **overrides: Any) -> T:
         """
         Create configuration for specific environment.
-        
+
         Args:
             env: Environment name ('development', 'testing', 'production')
             **overrides: Additional overrides
-            
+
         Returns:
             AppConfig instance
         """
@@ -332,45 +332,45 @@ class AppConfig(BaseSettings):
                 'agent__max_execution_time': 60
             }
         }
-        
+
         base_config = env_configs.get(env, {})
         base_config.update(overrides)
         base_config['environment'] = env
-        
+
         return cls.from_env(**base_config)
 
     def get_legacy_config(self) -> Dict[str, Any]:
         """
         Convert to legacy LanduseConfig format for backward compatibility.
-        
+
         Returns:
             Dictionary matching old configuration structure
         """
         return {
             # Database
             'db_path': self.database.path,
-            
+
             # LLM
             'model_name': self.llm.model_name,
             'temperature': self.llm.temperature,
             'max_tokens': self.llm.max_tokens,
-            
+
             # Agent
             'max_iterations': self.agent.max_iterations,
             'max_execution_time': self.agent.max_execution_time,
             'max_query_rows': self.agent.max_query_rows,
             'default_display_limit': self.agent.default_display_limit,
             'enable_memory': self.agent.enable_memory,
-            
+
             # Features
             'enable_map_generation': self.features.enable_map_generation,
             'enable_knowledge_base': self.features.enable_knowledge_base,
             'map_output_dir': self.features.map_output_dir,
-            
+
             # Logging
             'debug': self.logging.enable_debug,
             'verbose': self.logging.level == 'DEBUG',
-            
+
             # Security/Rate Limiting
             'rate_limit_calls': self.security.rate_limit_calls,
             'rate_limit_window': self.security.rate_limit_window
@@ -383,13 +383,13 @@ class AppConfig(BaseSettings):
     def mask_sensitive_fields(self) -> Dict[str, Any]:
         """Get configuration dictionary with sensitive fields masked."""
         config_dict = self.to_dict()
-        
+
         # API keys are in environment, not config, but mask if present
         for key in config_dict:
             if 'key' in key.lower() or 'secret' in key.lower() or 'token' in key.lower():
                 if isinstance(config_dict[key], str) and len(config_dict[key]) > 8:
                     config_dict[key] = f"{config_dict[key][:4]}...{config_dict[key][-4:]}"
-                    
+
         return config_dict
 
     def __repr__(self) -> str:

@@ -269,20 +269,20 @@ def format_response(response: str, title: str = "📊 Analysis Results") -> Pane
 def format_raw_query_results(results: list, columns: list, max_display_rows: int = 50) -> str:
     """
     Format raw query results (list of tuples + column names) for display.
-    
+
     Args:
         results: List of result tuples from DuckDB
         columns: List of column names
         max_display_rows: Maximum rows to display
-        
+
     Returns:
         Formatted results string
     """
     if not results:
         return "✅ Query executed successfully but returned no results."
-    
+
     # Convert to DataFrame for easier formatting
     df = pd.DataFrame(results, columns=columns)
-    
+
     # Use standard formatting only
     return format_query_results(df, "Query results", max_display_rows, include_summary=False)

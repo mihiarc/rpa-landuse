@@ -9,6 +9,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
+
 @dataclass
 class LanduseConfig:
     """
@@ -76,7 +77,7 @@ class LanduseConfig:
     enable_map_generation: bool = field(
         default_factory=lambda: os.getenv('LANDUSE_ENABLE_MAPS', 'true').lower() == 'true'
     )
-    
+
     # Prompt Configuration
     analysis_style: str = field(
         default_factory=lambda: os.getenv('LANDUSE_ANALYSIS_STYLE', 'standard')
@@ -84,7 +85,7 @@ class LanduseConfig:
     domain_focus: str = field(
         default_factory=lambda: os.getenv('LANDUSE_DOMAIN_FOCUS', 'none')
     )
-    
+
     # Knowledge Base Configuration
     enable_knowledge_base: bool = field(
         default_factory=lambda: os.getenv('LANDUSE_ENABLE_KNOWLEDGE_BASE', 'false').lower() == 'true'

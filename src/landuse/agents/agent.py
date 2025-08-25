@@ -25,68 +25,68 @@ Examples:
   rpa-analytics                    # Start interactive session
   rpa-analytics --model gpt-4o     # Use specific model
   rpa-analytics --verbose          # Enable verbose output
-  
+
 For more information, visit: https://github.com/yourusername/rpa-landuse
         """
     )
-    
+
     parser.add_argument(
         "--config-file",
         type=str,
         help="Path to configuration file (.env format)",
         metavar="PATH"
     )
-    
+
     parser.add_argument(
         "--model",
         type=str,
         help="Model name to use (overrides config)",
         metavar="MODEL"
     )
-    
+
     parser.add_argument(
         "--temperature",
         type=float,
         help="Model temperature (0.0-2.0)",
         metavar="TEMP"
     )
-    
+
     parser.add_argument(
         "--max-iterations",
         type=int,
         help="Maximum agent iterations",
         metavar="N"
     )
-    
+
     parser.add_argument(
         "--verbose",
         action="store_true",
         help="Enable verbose output"
     )
-    
+
     parser.add_argument(
         "--debug",
         action="store_true",
         help="Enable debug mode"
     )
-    
+
     parser.add_argument(
         "--db-path",
         type=str,
         help="Path to DuckDB database file",
         metavar="PATH"
     )
-    
+
     parser.add_argument(
         "--version",
         action="version",
         version="RPA Land Use Analytics 0.1.0"
     )
-    
+
     args = parser.parse_args()
-    
+
     console = Console()
-    
+
     try:
         # Load configuration file if specified
         if args.config_file:
@@ -95,7 +95,7 @@ For more information, visit: https://github.com/yourusername/rpa-landuse
                 console.print(f"[red]Error: Configuration file not found: {args.config_file}[/red]")
                 sys.exit(1)
             # TODO: Implement config file loading
-        
+
         # Create configuration with overrides
         config_overrides = {}
         if args.model:
@@ -110,10 +110,10 @@ For more information, visit: https://github.com/yourusername/rpa-landuse
             config_overrides["debug"] = True
         if args.db_path:
             config_overrides["db_path"] = args.db_path
-        
+
         # Create agent configuration
         config = LanduseConfig.from_env(**config_overrides)
-        
+
         # Initialize and start the agent
         with LanduseAgent(config=config) as agent:
             if args.verbose:
@@ -122,9 +122,9 @@ For more information, visit: https://github.com/yourusername/rpa-landuse
                 console.print(f"Database: {config.db_path}")
                 console.print(f"Max iterations: {config.max_iterations}")
                 console.print()
-            
+
             agent.chat()
-            
+
     except KeyboardInterrupt:
         console.print("\n[yellow]Interrupted by user.[/yellow]")
         sys.exit(0)

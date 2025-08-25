@@ -16,7 +16,7 @@ from landuse.utils.retry_decorators import database_retry
 class DatabaseManager(DatabaseInterface):
     """
     Manages database connections and schema operations.
-    
+
     Extracted from the monolithic LanduseAgent class to follow Single Responsibility Principle.
     Handles database connection creation, schema retrieval, and connection management.
     """
@@ -29,7 +29,7 @@ class DatabaseManager(DatabaseInterface):
         else:
             self.config = config or LanduseConfig()
             self.app_config = None
-        
+
         self.console = console or Console()
         self._connection: Optional[duckdb.DuckDBPyConnection] = None
         self._schema: Optional[str] = None
@@ -37,7 +37,7 @@ class DatabaseManager(DatabaseInterface):
     def get_connection(self) -> duckdb.DuckDBPyConnection:
         """
         Get or create database connection.
-        
+
         Returns:
             DuckDB connection instance
         """
@@ -48,7 +48,7 @@ class DatabaseManager(DatabaseInterface):
     def create_connection(self) -> duckdb.DuckDBPyConnection:
         """
         Create a new database connection.
-        
+
         Returns:
             DuckDB connection in read-only mode
         """
@@ -59,10 +59,10 @@ class DatabaseManager(DatabaseInterface):
     def get_schema(self) -> str:
         """
         Get the database schema with retry logic.
-        
+
         Returns:
             Formatted schema string
-            
+
         Raises:
             ValueError: If no tables found in database
         """
@@ -104,10 +104,10 @@ class DatabaseManager(DatabaseInterface):
     def _format_schema(self, schema_result: list[tuple]) -> str:
         """
         Format schema query results into a readable string.
-        
+
         Args:
             schema_result: Raw schema query results
-            
+
         Returns:
             Formatted schema string
         """
@@ -142,45 +142,45 @@ class DatabaseManager(DatabaseInterface):
         """Convert AppConfig to legacy LanduseConfig for backward compatibility."""
         # Create legacy config bypassing validation for now
         from landuse.config.landuse_config import LanduseConfig
-        
+
         # Create instance without validation to avoid API key issues during conversion
         legacy_config = object.__new__(LanduseConfig)
-        
+
         # Map database settings
         legacy_config.db_path = app_config.database.path
-        
-        # Map LLM settings 
+
+        # Map LLM settings
         legacy_config.model = app_config.llm.model_name  # Note: model_name in AppConfig vs model in legacy
         legacy_config.temperature = app_config.llm.temperature
         legacy_config.max_tokens = app_config.llm.max_tokens
-        
+
         # Map agent execution settings
         legacy_config.max_iterations = app_config.agent.max_iterations
         legacy_config.max_execution_time = app_config.agent.max_execution_time
         legacy_config.max_query_rows = app_config.agent.max_query_rows
         legacy_config.default_display_limit = app_config.agent.default_display_limit
-        
+
         # Map debugging settings
         legacy_config.debug = app_config.logging.level == 'DEBUG'
         legacy_config.enable_memory = app_config.agent.enable_memory
-        
+
         return legacy_config
-    
+
     @time_database_operation("execute_query")
     def execute_query(self, query: str, **kwargs) -> pd.DataFrame:
         """Execute SQL query and return DataFrame (DatabaseInterface implementation)."""
         conn = self.get_connection()
         result = conn.execute(query).fetchall()
         columns = [desc[0] for desc in conn.description] if conn.description else []
-        
+
         return pd.DataFrame(result, columns=columns)
-    
+
     def validate_table_name(self, table_name: str) -> bool:
         """Validate table name exists and is accessible (DatabaseInterface implementation)."""
         try:
             conn = self.get_connection()
             result = conn.execute("""
-                SELECT COUNT(*) FROM information_schema.tables 
+                SELECT COUNT(*) FROM information_schema.tables
                 WHERE table_name = ? AND table_schema = 'main'
             """, [table_name]).fetchone()
             return result[0] > 0 if result else False

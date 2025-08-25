@@ -14,20 +14,20 @@ from landuse.core.interfaces import ConversationInterface
 class ConversationManager(ConversationInterface):
     """
     Manages conversation history and message handling.
-    
+
     Extracted from the monolithic LanduseAgent class to follow Single Responsibility Principle.
     Implements sliding window memory management to prevent unlimited memory growth.
     """
 
     def __init__(
-        self, 
+        self,
         config: Optional[Union[LanduseConfig, AppConfig]] = None,
-        max_history_length: Optional[int] = None, 
+        max_history_length: Optional[int] = None,
         console: Optional[Console] = None
     ):
         """
         Initialize conversation manager.
-        
+
         Args:
             config: Configuration object (AppConfig or legacy LanduseConfig)
             max_history_length: Maximum number of messages to keep in history (overrides config)
@@ -44,29 +44,29 @@ class ConversationManager(ConversationInterface):
         else:
             self.app_config = None
             self.max_history_length = max_history_length or 20
-        
+
         self.console = console or Console()
-        
+
         # Use deque for efficient sliding window operations
         self._conversation_history: deque = deque(maxlen=self.max_history_length)
 
     def add_conversation(self, question: str, response: str) -> None:
         """
         Add a question-response pair to conversation history.
-        
+
         Args:
             question: User's question
             response: Agent's response
         """
         # Add user question
         self._conversation_history.append(("user", question))
-        # Add assistant response  
+        # Add assistant response
         self._conversation_history.append(("assistant", response))
 
     def get_conversation_messages(self) -> List[BaseMessage]:
         """
         Get conversation history as LangChain messages.
-        
+
         Returns:
             List of BaseMessage objects representing conversation history
         """
@@ -81,7 +81,7 @@ class ConversationManager(ConversationInterface):
     def get_conversation_tuples(self) -> List[Tuple[str, str]]:
         """
         Get conversation history as list of (role, content) tuples.
-        
+
         Returns:
             List of tuples with role and content
         """
@@ -104,10 +104,10 @@ class ConversationManager(ConversationInterface):
     def get_recent_context(self, num_messages: int = 4) -> List[Tuple[str, str]]:
         """
         Get the most recent conversation context.
-        
+
         Args:
             num_messages: Number of recent messages to retrieve
-            
+
         Returns:
             List of recent (role, content) tuples
         """

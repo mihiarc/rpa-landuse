@@ -27,7 +27,7 @@ from landuse.tools.state_lookup_tool import create_state_lookup_tool
 class LanduseAgent:
     """
     Refactored landuse agent with separated concerns and modern architecture.
-    
+
     Uses dependency injection and follows Single Responsibility Principle by delegating
     specific responsibilities to specialized manager classes:
     - LLMManager: Handles LLM creation and configuration
@@ -41,28 +41,28 @@ class LanduseAgent:
         """Initialize the landuse agent with configuration using dependency injection."""
         self.config = config or LanduseConfig()
         self.console = Console()
-        
+
         # Initialize component managers
         self.llm_manager = LLMManager(self.config, self.console)
         self.database_manager = DatabaseManager(self.config, self.console)
         self.conversation_manager = ConversationManager(
-            max_history_length=20, 
+            max_history_length=20,
             console=self.console
         )
-        
+
         # Create core components
         self.llm = self.llm_manager.create_llm()
         self.db_connection = self.database_manager.get_connection()
         self.schema = self.database_manager.get_schema()
-        
+
         # Initialize query executor
         self.query_executor = QueryExecutor(self.config, self.db_connection, self.console)
-        
+
         # Initialize knowledge base if enabled
         self.knowledge_base = None
         if self.config.enable_knowledge_base:
             self._initialize_knowledge_base()
-        
+
         # Create tools and system prompt
         self.tools = self._create_tools()
         self.system_prompt = get_system_prompt(
@@ -71,7 +71,7 @@ class LanduseAgent:
             domain_focus=None if self.config.domain_focus == 'none' else self.config.domain_focus,
             schema_info=self.schema
         )
-        
+
         # Initialize graph builder
         self.graph_builder = GraphBuilder(
             self.config,
@@ -87,7 +87,7 @@ class LanduseAgent:
         """Initialize the knowledge base if enabled."""
         try:
             from landuse.knowledge import RPAKnowledgeBase
-            
+
             self.console.print("[yellow]Initializing RPA knowledge base...[/yellow]")
             self.knowledge_base = RPAKnowledgeBase(
                 docs_path=self.config.knowledge_base_path,
@@ -113,7 +113,7 @@ class LanduseAgent:
             create_schema_tool(self.schema),
             create_state_lookup_tool()
         ]
-        
+
         # Add knowledge base retriever if available
         if self.knowledge_base:
             try:
@@ -123,51 +123,51 @@ class LanduseAgent:
             except Exception as e:
                 wrapped_error = wrap_exception(e, "Retriever tool creation")
                 self.console.print(f"[red]Warning: Failed to create retriever tool: {str(wrapped_error)}[/red]")
-        
+
         return tools
 
-    
+
 
     def simple_query(self, question: str) -> str:
         """Execute a query using simple direct LLM interaction without LangGraph state management."""
         try:
             # Build conversation with history using conversation manager
             messages = [HumanMessage(content=self.system_prompt)]
-            
+
             # Add conversation history from manager
             messages.extend(self.conversation_manager.get_conversation_messages())
-            
+
             # Add current question
             messages.append(HumanMessage(content=question))
-            
+
             # Get initial response
             response = self.llm.bind_tools(self.tools).invoke(messages)
             messages.append(response)
-            
+
             if self.config.debug:
                 print(f"DEBUG: Initial response type: {type(response)}")
                 print(f"DEBUG: Has tool calls: {hasattr(response, 'tool_calls') and bool(response.tool_calls)}")
                 if hasattr(response, 'content'):
                     print(f"DEBUG: Initial content: {response.content[:200] if response.content else 'Empty'}")
-            
+
             # Handle tool calls if any
             max_iterations = 3
             iteration = 0
-            
+
             # Store tool results for creative formatting
             query_results = []
             analysis_results = []
-            
+
             while hasattr(response, 'tool_calls') and response.tool_calls and iteration < max_iterations:
                 iteration += 1
-                
+
                 # Execute each tool call and add proper ToolMessage
                 for tool_call in response.tool_calls:
                     # Find the matching tool
                     tool_name = tool_call["name"]
                     tool_args = tool_call["args"]
                     tool_id = tool_call["id"]  # Important: use the tool call ID
-                    
+
                     # Execute the tool
                     tool_result = None
                     for tool in self.tools:
@@ -176,13 +176,13 @@ class LanduseAgent:
                                 if self.config.debug:
                                     print(f"\nDEBUG: Executing tool '{tool_name}'")
                                     print(f"DEBUG: Tool args: {tool_args}")
-                                    
+
                                 tool_result = tool.invoke(tool_args)
-                                
+
                                 if self.config.debug:
                                     result_str = str(tool_result)
                                     print(f"DEBUG: Tool result length: {len(result_str)} chars")
-                                    
+
                                     # Show more details for query execution
                                     if tool_name == "execute_landuse_query" and "query" in tool_args:
                                         print(f"DEBUG: SQL Query: {tool_args['query']}")
@@ -196,17 +196,17 @@ class LanduseAgent:
                                             print("DEBUG: Query returned NO RESULTS")
                                         # Show first 300 chars of results
                                         print(f"DEBUG: Query result preview: {result_str[:300]}...")
-                                    
+
                                     # Show analysis details
                                     elif tool_name == "analyze_landuse_results":
                                         print(f"DEBUG: Analysis preview: {result_str[:200]}...")
-                                
+
                                 # Store results for formatting
                                 if tool_name == "execute_landuse_query":
                                     query_results.append(str(tool_result))
                                 elif tool_name == "analyze_landuse_results":
                                     analysis_results.append(str(tool_result))
-                                    
+
                                 break
                             except ToolExecutionError as e:
                                 error_msg = f"Tool execution error: {str(e)}"
@@ -221,40 +221,40 @@ class LanduseAgent:
                                     import traceback
                                     traceback.print_exc()
                                 tool_result = error_msg
-                    
+
                     if tool_result is None:
                         tool_result = f"Unknown tool: {tool_name}"
-                    
+
                     # Add tool result using proper ToolMessage format
                     messages.append(ToolMessage(
                         content=str(tool_result),
                         tool_call_id=tool_id
                     ))
-                
+
                 # Get next response
                 response = self.llm.bind_tools(self.tools).invoke(messages)
                 messages.append(response)
-                
+
                 if self.config.debug:
                     print(f"DEBUG: Response after tool execution: {type(response)}")
                     if hasattr(response, 'content'):
                         print(f"DEBUG: Response content type: {type(response.content)}")
                         print(f"DEBUG: Response content: {response.content[:200] if response.content else 'None'}")
-            
+
             # Extract the final text content from the response
             if self.config.debug:
-                print(f"\nDEBUG: Extracting final content from response")
+                print("\nDEBUG: Extracting final content from response")
                 print(f"DEBUG: Response type: {type(response)}")
                 print(f"DEBUG: Has content attr: {hasattr(response, 'content')}")
                 print(f"DEBUG: Has text attr: {hasattr(response, 'text')}")
-                
+
             final_content = ""
             if hasattr(response, 'content'):
                 content = response.content
                 if self.config.debug:
                     print(f"DEBUG: Content type: {type(content)}")
                     print(f"DEBUG: Content value: {content[:200] if content else 'None'}")
-                    
+
                 # Handle different content formats
                 if isinstance(content, list):
                     # Extract text from list of content blocks
@@ -276,14 +276,14 @@ class LanduseAgent:
                 final_content = str(response.text)
             else:
                 final_content = str(response)
-            
+
             # If we still have no content, check if we have tool results we can summarize
             if not final_content.strip() and (query_results or analysis_results):
                 if self.config.debug:
-                    print(f"\nDEBUG: Final content is empty, checking tool results")
+                    print("\nDEBUG: Final content is empty, checking tool results")
                     print(f"DEBUG: Query results count: {len(query_results)}")
                     print(f"DEBUG: Analysis results count: {len(analysis_results)}")
-                    
+
                 # Build a response from the tool results
                 if query_results and analysis_results:
                     final_content = f"{query_results[-1]}\n\n{analysis_results[-1]}"
@@ -291,22 +291,22 @@ class LanduseAgent:
                     final_content = query_results[-1]
                 elif analysis_results:
                     final_content = analysis_results[-1]
-                    
+
                 # If still empty, provide helpful message
                 if not final_content.strip():
                     final_content = "I executed the query but couldn't generate a formatted response. The query completed successfully but may have returned no results."
-            
+
             # Update conversation history using manager
             self.conversation_manager.add_conversation(question, final_content)
-            
+
             # Return clean final content without any special formatting
             if self.config.debug:
                 print(f"\nDEBUG: Final content length: {len(final_content)}")
                 print(f"DEBUG: Final content preview: {final_content[:200]}...")
                 print("DEBUG: === End of simple_query execution ===")
-                
+
             return final_content
-            
+
         except (LanduseError, ToolExecutionError) as e:
             error_msg = f"Query processing error: {str(e)}"
             # Still update history even on error
@@ -325,31 +325,31 @@ class LanduseAgent:
             # Build graph if not already built using graph builder
             if not self.graph:
                 self.graph = self.graph_builder.build_graph()
-            
+
             # Prepare initial state with conversation history
             initial_messages = [HumanMessage(content=self.system_prompt)]
-            
+
             # Add conversation history from manager
             initial_messages.extend(self.conversation_manager.get_conversation_messages())
-            
+
             # Add current question
             initial_messages.append(HumanMessage(content=question))
-            
+
             initial_state = {
                 "messages": initial_messages,
                 "context": {},
                 "iteration_count": 0,
                 "max_iterations": self.config.max_iterations
             }
-            
+
             # Prepare config with thread_id for memory
             config = {}
             if thread_id and self.config.enable_memory:
                 config = {"configurable": {"thread_id": thread_id}}
-            
+
             # Execute the graph
             result = self.graph.invoke(initial_state, config=config)
-            
+
             # Extract the final response from messages
             if result and "messages" in result:
                 messages = result["messages"]
@@ -376,11 +376,11 @@ class LanduseAgent:
                             final_response = str(content)
                             self.conversation_manager.add_conversation(question, final_response)
                             return final_response
-            
+
             default_response = "I couldn't generate a proper response. Please try rephrasing your question."
             self.conversation_manager.add_conversation(question, default_response)
             return default_response
-            
+
         except GraphExecutionError as e:
             error_msg = f"Graph execution error: {str(e)}"
             if self.config.debug:
@@ -402,12 +402,12 @@ class LanduseAgent:
     def query(self, question: str, use_graph: bool = False, thread_id: Optional[str] = None) -> str:
         """
         Execute a natural language query using the agent.
-        
+
         Args:
             question: The natural language question to answer
             use_graph: Whether to use the full LangGraph workflow (default: False for stability)
             thread_id: Optional thread ID for conversation memory (only used with graph)
-            
+
         Returns:
             The agent's response as a string
         """
@@ -438,7 +438,7 @@ class LanduseAgent:
             "iteration_count": 0,
             "max_iterations": self.config.max_iterations
         }
-        
+
         # Prepare config
         config = {}
         if thread_id and self.config.enable_memory:
@@ -474,22 +474,22 @@ class LanduseAgent:
     def create_map_subgraph(self) -> StateGraph:
         """
         Create a specialized subgraph for map-based analysis.
-        
+
         This subgraph adds geographic visualization capabilities.
-        
+
         Returns:
             Compiled map analysis subgraph
         """
         # Import map tools only when needed
         from landuse.tools.map_tools import create_choropleth_tool, create_heatmap_tool
-        
+
         map_tools = [
             create_execute_query_tool(self.config, self.db_connection, self.schema),
             create_choropleth_tool(),
             create_heatmap_tool(),
             create_analysis_tool()
         ]
-        
+
         return self.create_subgraph("map_analysis", map_tools)
 
     def _display_results_table(self, results: list[tuple], columns: list[str], title: str = "Query Results") -> None:
@@ -510,11 +510,11 @@ class LanduseAgent:
             table.caption = f"Showing {display_limit} of {len(results)} rows"
 
         self.console.print(table)
-    
+
     def clear_history(self) -> None:
         """Clear conversation history."""
         self.conversation_manager.clear_history()
-    
+
     def chat(self) -> None:
         """Interactive chat interface for the agent."""
         self.console.print(Panel.fit(
@@ -524,31 +524,31 @@ class LanduseAgent:
             title="Welcome",
             border_style="green"
         ))
-        
+
         while True:
             try:
                 question = input("\n[You] > ").strip()
-                
+
                 if not question:
                     continue
-                    
+
                 if question.lower() in ['exit', 'quit', 'q']:
                     self.console.print("[yellow]Goodbye![/yellow]")
                     break
-                    
+
                 if question.lower() in ['help', '?']:
                     self._show_help()
                     continue
-                
+
                 if question.lower() == 'clear':
                     self.clear_history()
                     continue
-                
+
                 # Process the question
                 self.console.print("\n[bold cyan][Agent][/bold cyan] Thinking...")
                 response = self.query(question)
                 self.console.print(f"\n[bold cyan][Agent][/bold cyan] {response}")
-                
+
             except KeyboardInterrupt:
                 self.console.print("\n[yellow]Interrupted. Type 'exit' to quit.[/yellow]")
             except (LanduseError, ToolExecutionError, GraphExecutionError) as e:
@@ -556,7 +556,7 @@ class LanduseAgent:
             except Exception as e:
                 wrapped_error = wrap_exception(e, "Chat interaction")
                 self.console.print(f"\n[red]Unexpected Error: {str(wrapped_error)}[/red]")
-    
+
     def _show_help(self) -> None:
         """Show help information with example queries."""
         examples = [
@@ -566,7 +566,7 @@ class LanduseAgent:
             "What land use types are converting to urban?",
             "Analyze cropland changes in the Midwest by 2070"
         ]
-        
+
         self.console.print(Panel.fit(
             "\n".join([f"• {ex}" for ex in examples]),
             title="Example Questions",
@@ -581,11 +581,11 @@ class LanduseAgent:
     def _get_schema_help(self) -> str:
         """Get user-friendly schema information for display in the UI."""
         return self.schema
-    
+
     def __enter__(self):
         """Context manager entry."""
         return self
-        
+
     def __exit__(self, exc_type, exc_val, exc_tb):
         """Context manager exit - clean up resources."""
         # Clean up database connection using manager

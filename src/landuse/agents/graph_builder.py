@@ -18,22 +18,22 @@ from landuse.core.app_config import AppConfig
 class GraphBuilder:
     """
     Constructs and manages LangGraph workflows.
-    
+
     Extracted from the monolithic LanduseAgent class to follow Single Responsibility Principle.
     Handles graph construction, node creation, and workflow orchestration.
     """
 
     def __init__(
-        self, 
-        config: Union[LanduseConfig, AppConfig], 
-        llm: BaseChatModel, 
+        self,
+        config: Union[LanduseConfig, AppConfig],
+        llm: BaseChatModel,
         tools: List[BaseTool],
         system_prompt: str,
         console: Optional[Console] = None
     ):
         """
         Initialize graph builder.
-        
+
         Args:
             config: Configuration object (AppConfig or legacy LanduseConfig)
             llm: Language model instance
@@ -47,7 +47,7 @@ class GraphBuilder:
         else:
             self.config = config
             self.app_config = None
-            
+
         self.llm = llm
         self.tools = tools
         self.system_prompt = system_prompt
@@ -57,7 +57,7 @@ class GraphBuilder:
     def build_graph(self) -> StateGraph:
         """
         Build the main LangGraph state graph.
-        
+
         Returns:
             Compiled StateGraph ready for execution
         """
@@ -103,14 +103,14 @@ class GraphBuilder:
         # Ensure we have proper message types
         if not messages:
             messages = []
-        
+
         # Add system prompt as first message if needed
         has_system = any(
-            isinstance(m, (HumanMessage, AIMessage)) and 
-            self.system_prompt[:50] in str(m.content) 
+            isinstance(m, (HumanMessage, AIMessage)) and
+            self.system_prompt[:50] in str(m.content)
             for m in messages[:1]
         )
-        
+
         if not has_system:
             messages = [HumanMessage(content=self.system_prompt)] + messages
 
@@ -239,26 +239,26 @@ Focus on:
         """Convert AppConfig to legacy LanduseConfig for backward compatibility."""
         # Create legacy config bypassing validation for now
         from landuse.config.landuse_config import LanduseConfig
-        
+
         # Create instance without validation to avoid API key issues during conversion
         legacy_config = object.__new__(LanduseConfig)
-        
+
         # Map database settings
         legacy_config.db_path = app_config.database.path
-        
-        # Map LLM settings 
+
+        # Map LLM settings
         legacy_config.model = app_config.llm.model_name  # Note: model_name in AppConfig vs model in legacy
         legacy_config.temperature = app_config.llm.temperature
         legacy_config.max_tokens = app_config.llm.max_tokens
-        
+
         # Map agent execution settings
         legacy_config.max_iterations = app_config.agent.max_iterations
         legacy_config.max_execution_time = app_config.agent.max_execution_time
         legacy_config.max_query_rows = app_config.agent.max_query_rows
         legacy_config.default_display_limit = app_config.agent.default_display_limit
-        
+
         # Map debugging settings
         legacy_config.debug = app_config.logging.level == 'DEBUG'
         legacy_config.enable_memory = app_config.agent.enable_memory
-        
+
         return legacy_config

@@ -2,12 +2,12 @@
 
 from typing import Any, Optional
 
+import duckdb
 from langchain_core.tools import tool
 from pydantic import BaseModel, Field
 
 from landuse.agents.formatting import clean_sql_query, format_raw_query_results
 from landuse.config.landuse_config import LanduseConfig
-import duckdb
 from landuse.utils.retry_decorators import database_retry
 
 
@@ -43,7 +43,7 @@ def create_execute_query_tool(
         - dim_scenario: Climate scenario details (RCP45/85, SSP1-5)
         - dim_geography: County and state information with enhanced metadata
         - fact_socioeconomic_projections: Population and income projections by SSP scenario
-        - dim_socioeconomic: SSP scenario narratives and characteristics  
+        - dim_socioeconomic: SSP scenario narratives and characteristics
         - dim_indicators: Socioeconomic indicator definitions
         - dim_landuse: Land use categories (crop, pasture, forest, urban, rangeland)
         - dim_time: Time periods from 2012 to 2100
@@ -310,7 +310,7 @@ def create_socioeconomic_analysis_tool() -> Any:
 
         This tool provides specialized analysis for:
         - Population growth trends and drivers
-        - Income and economic development patterns  
+        - Income and economic development patterns
         - SSP scenario comparisons
         - Demographic-landuse correlations
         - Economic drivers of land conversion
@@ -325,7 +325,7 @@ def create_socioeconomic_analysis_tool() -> Any:
             Analysis and insights specific to socioeconomic trends
         """
         insights = []
-        
+
         # Population-specific analysis
         if "population" in analysis_type.lower():
             insights.append(
@@ -333,27 +333,27 @@ def create_socioeconomic_analysis_tool() -> Any:
                 "due to regional rivalry and slower demographic transition, while SSP1 shows "
                 "lower growth with rapid development and education improvements."
             )
-            
+
             if "growth" in query_results.lower() or "increase" in query_results.lower():
                 insights.append(
                     "Population growth drives land development pressure. Fast-growing counties "
                     "typically experience more forest-to-urban and agricultural-to-urban transitions."
                 )
-        
-        # Income-specific analysis  
+
+        # Income-specific analysis
         if "income" in analysis_type.lower():
             insights.append(
                 "Income projections reflect economic development pathways. SSP5 shows highest "
                 "per capita income growth due to fossil-fueled development, while SSP3 shows "
                 "slower income growth due to regional conflicts and inequality."
             )
-            
+
             if "per capita" in query_results.lower():
                 insights.append(
                     "Per capita income (in constant 2009 USD) accounts for inflation. Rising income "
                     "typically correlates with increased urban development and agricultural intensification."
                 )
-        
+
         # Correlation analysis
         if "correlation" in analysis_type.lower() or "relationship" in analysis_type.lower():
             insights.append(
@@ -361,29 +361,29 @@ def create_socioeconomic_analysis_tool() -> Any:
                 "(2) Income growth → Agricultural intensification, (3) Economic development → Forest loss, "
                 "(4) Urbanization → Infrastructure development."
             )
-            
+
             insights.append(
                 "Consider time lags between socioeconomic changes and land use responses. "
                 "Population growth may precede urban development by 5-10 years."
             )
-        
+
         # SSP scenario context
         if any(ssp in query_results.lower() for ssp in ["ssp1", "ssp2", "ssp3", "ssp5"]):
             insights.append(
                 "SSP Scenario Context:\n"
                 "• SSP1 (Sustainability): Low population growth, medium-high income, sustainable development\n"
-                "• SSP2 (Middle Road): Medium population/income growth, gradual progress\n" 
+                "• SSP2 (Middle Road): Medium population/income growth, gradual progress\n"
                 "• SSP3 (Regional Rivalry): High population growth, low income growth, fragmented development\n"
                 "• SSP5 (Fossil Development): Low population growth, high income growth, energy-intensive lifestyle"
             )
-        
+
         # Regional patterns
         if any(region in query_results.lower() for region in ["south", "west", "northeast", "midwest"]):
             insights.append(
                 "Regional differences in socioeconomic trends reflect historical patterns, policy differences, "
                 "and economic structures. Southern and Western states often show higher population growth rates."
             )
-        
+
         # Combine insights
         if insights:
             return "\n\n".join(["Socioeconomic Analysis:"] + [f"• {insight}" for insight in insights])
@@ -401,7 +401,7 @@ def create_integration_query_tool() -> Any:
         Configured integration query suggestion tool
     """
 
-    @tool 
+    @tool
     def suggest_integration_queries(
         user_question: str,
         analysis_focus: Optional[str] = None
@@ -423,7 +423,7 @@ def create_integration_query_tool() -> Any:
             Suggested SQL queries and analysis approaches
         """
         suggestions = []
-        
+
         # Base integration patterns
         if "population" in user_question.lower() and "urban" in user_question.lower():
             suggestions.append(
@@ -442,7 +442,7 @@ def create_integration_query_tool() -> Any:
                 "ORDER BY urban_expansion_acres DESC\n"
                 "```"
             )
-        
+
         if "income" in user_question.lower() and ("agricultural" in user_question.lower() or "farm" in user_question.lower()):
             suggestions.append(
                 "Income-Agricultural Change Analysis:\n"
@@ -463,7 +463,7 @@ def create_integration_query_tool() -> Any:
                 "ORDER BY ag_to_urban_acres DESC\n"
                 "```"
             )
-        
+
         if "correlation" in user_question.lower() or "relationship" in user_question.lower():
             suggestions.append(
                 "Cross-Dataset Correlation Analysis:\n"
@@ -503,7 +503,7 @@ def create_integration_query_tool() -> Any:
                 "ORDER BY pop_urban_correlation DESC\n"
                 "```"
             )
-        
+
         if "scenario" in user_question.lower() and "comparison" in user_question.lower():
             suggestions.append(
                 "Multi-Scenario Comparison:\n"
@@ -529,7 +529,7 @@ def create_integration_query_tool() -> Any:
                 "ORDER BY total_urban_expansion DESC\n"
                 "```"
             )
-        
+
         # Generic suggestions if no specific pattern matched
         if not suggestions:
             suggestions.append(
@@ -540,7 +540,7 @@ def create_integration_query_tool() -> Any:
                 "4. Analyze time series relationships between demographic and land use changes\n"
                 "5. Examine county-level correlations using statistical functions (CORR, REGR_SLOPE)"
             )
-        
+
         return "\n\n".join(["Integration Query Suggestions:"] + suggestions)
 
     return suggest_integration_queries

@@ -125,6 +125,19 @@ ignore = [
     "E722", # bare except (allow for now)
     "F401", # unused imports (allow for now)
     "F841", # unused variable (allow for now)
+    "UP035", # typing.List -> list (allow for now)
+    "UP006", # typing.Dict -> dict (allow for now)
+    "UP007", # typing.Union -> | (allow for now)
+    "F821", # undefined name (allow for testing files)
+    "B007", # unused loop control variable (allow for now)
+    "B904", # raise from None (allow for now)
+    "C408", # unnecessary dict() call (allow for now)
+    "E402", # module level import not at top (allow for scripts)
+    "W291", # trailing whitespace (allow for now)
+    "W293", # blank line contains whitespace (allow for now)
+    "UP028", # yield from optimization (allow for now)
+    "UP018", # isinstance call optimization (allow for now)
+    "UP034", # extraneous parentheses (allow for now)
 ]
 
 [tool.ruff.lint.per-file-ignores]

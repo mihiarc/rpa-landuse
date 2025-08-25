@@ -4,12 +4,12 @@ This module provides a single source of truth for all state-related mappings
 to eliminate duplication across the codebase.
 """
 
-from typing import Optional, Dict
+from typing import Dict, Optional
 
 
 class StateMapper:
     """Utility class for state name, code, and abbreviation conversions."""
-    
+
     # FIPS code to state name mapping
     FIPS_TO_NAME: Dict[str, str] = {
         "01": "Alabama",
@@ -67,7 +67,7 @@ class StateMapper:
         "72": "Puerto Rico",
         "78": "Virgin Islands"
     }
-    
+
     # FIPS code to abbreviation mapping
     FIPS_TO_ABBREV: Dict[str, str] = {
         "01": "AL", "02": "AK", "04": "AZ", "05": "AR", "06": "CA",
@@ -82,7 +82,7 @@ class StateMapper:
         "50": "VT", "51": "VA", "53": "WA", "54": "WV", "55": "WI",
         "56": "WY", "72": "PR", "78": "VI"
     }
-    
+
     # Abbreviation to name mapping (derived)
     ABBREV_TO_NAME: Dict[str, str] = {
         "AL": "Alabama", "AK": "Alaska", "AZ": "Arizona", "AR": "Arkansas",
@@ -100,12 +100,12 @@ class StateMapper:
         "WV": "West Virginia", "WI": "Wisconsin", "WY": "Wyoming",
         "PR": "Puerto Rico", "VI": "Virgin Islands"
     }
-    
+
     # Reverse mappings (created on first use)
     _name_to_fips: Optional[Dict[str, str]] = None
     _abbrev_to_fips: Optional[Dict[str, str]] = None
     _name_to_abbrev: Optional[Dict[str, str]] = None
-    
+
     @classmethod
     def _ensure_reverse_mappings(cls) -> None:
         """Create reverse mappings if they don't exist."""
@@ -115,17 +115,17 @@ class StateMapper:
             cls._abbrev_to_fips = {v: k for k, v in cls.FIPS_TO_ABBREV.items()}
         if cls._name_to_abbrev is None:
             cls._name_to_abbrev = {v: k for k, v in cls.ABBREV_TO_NAME.items()}
-    
+
     @classmethod
     def fips_to_name(cls, fips_code: str) -> Optional[str]:
         """Convert FIPS code to state name."""
         return cls.FIPS_TO_NAME.get(fips_code)
-    
+
     @classmethod
     def fips_to_abbrev(cls, fips_code: str) -> Optional[str]:
         """Convert FIPS code to state abbreviation."""
         return cls.FIPS_TO_ABBREV.get(fips_code)
-    
+
     @classmethod
     def name_to_fips(cls, name: str) -> Optional[str]:
         """Convert state name to FIPS code."""
@@ -139,18 +139,18 @@ class StateMapper:
             if state_name.lower() == name_lower:
                 return fips
         return None
-    
+
     @classmethod
     def abbrev_to_fips(cls, abbrev: str) -> Optional[str]:
         """Convert state abbreviation to FIPS code."""
         cls._ensure_reverse_mappings()
         return cls._abbrev_to_fips.get(abbrev.upper())
-    
+
     @classmethod
     def abbrev_to_name(cls, abbrev: str) -> Optional[str]:
         """Convert state abbreviation to name."""
         return cls.ABBREV_TO_NAME.get(abbrev.upper())
-    
+
     @classmethod
     def name_to_abbrev(cls, name: str) -> Optional[str]:
         """Convert state name to abbreviation."""
@@ -164,33 +164,33 @@ class StateMapper:
             if state_name.lower() == name_lower:
                 return abbrev
         return None
-    
+
     @classmethod
     def is_valid_fips(cls, fips_code: str) -> bool:
         """Check if a FIPS code is valid."""
         return fips_code in cls.FIPS_TO_NAME
-    
+
     @classmethod
     def is_valid_abbrev(cls, abbrev: str) -> bool:
         """Check if a state abbreviation is valid."""
         return abbrev.upper() in cls.ABBREV_TO_NAME
-    
+
     @classmethod
     def is_valid_name(cls, name: str) -> bool:
         """Check if a state name is valid."""
         cls._ensure_reverse_mappings()
         return cls.name_to_fips(name) is not None
-    
+
     @classmethod
     def get_all_fips_codes(cls) -> list[str]:
         """Get all FIPS codes."""
         return list(cls.FIPS_TO_NAME.keys())
-    
+
     @classmethod
     def get_all_abbreviations(cls) -> list[str]:
         """Get all state abbreviations."""
         return list(cls.ABBREV_TO_NAME.keys())
-    
+
     @classmethod
     def get_all_names(cls) -> list[str]:
         """Get all state names."""

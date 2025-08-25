@@ -15,11 +15,12 @@ src_path = project_root / "src"
 sys.path.insert(0, str(src_path))
 
 # Import third-party libraries after sys.path modification
+import time  # noqa: E402
+from io import BytesIO  # noqa: E402
+
 import duckdb  # noqa: E402
 import pandas as pd  # noqa: E402
 import streamlit as st  # noqa: E402
-import time  # noqa: E402
-from io import BytesIO  # noqa: E402
 
 # Import connection
 from landuse.connections import DuckDBConnection  # noqa: E402
@@ -490,12 +491,12 @@ def show_interactive_schema_browser():
     if schema_info:
         # Database overview metrics
         col1, col2, col3, col4 = st.columns(4)
-        
+
         total_tables = len(schema_info)
         total_rows = sum(info['row_count'] for info in schema_info.values())
         fact_tables = sum(1 for name in schema_info.keys() if 'fact' in name)
         dim_tables = sum(1 for name in schema_info.keys() if 'dim' in name)
-        
+
         with col1:
             st.metric("📊 Total Tables", total_tables)
         with col2:
@@ -504,32 +505,32 @@ def show_interactive_schema_browser():
             st.metric("📦 Fact Tables", fact_tables)
         with col4:
             st.metric("🎯 Dimension Tables", dim_tables)
-        
+
         st.markdown("---")
-        
+
         # Add search/filter for tables
         search_term = st.text_input("🔍 Search tables:", placeholder="Type to filter tables...")
-        
+
         # Filter tables based on search
-        filtered_tables = {name: info for name, info in schema_info.items() 
+        filtered_tables = {name: info for name, info in schema_info.items()
                           if search_term.lower() in name.lower()} if search_term else schema_info
-        
+
         if not filtered_tables:
             st.info(f"No tables found matching '{search_term}'")
             return
-        
+
         st.markdown(f"### 📁 Tables ({len(filtered_tables)} found)")
-        
+
         # Create two columns for table layout
         col_left, col_right = st.columns(2)
-        
+
         # Split tables into two columns
         table_items = list(filtered_tables.items())
-        
+
         for idx, (table_name, info) in enumerate(table_items):
             # Determine which column to use
             target_col = col_left if idx % 2 == 0 else col_right
-            
+
             with target_col:
                 # Determine table type icon and color
                 if 'fact' in table_name:
@@ -544,7 +545,7 @@ def show_interactive_schema_browser():
                     icon = "🗺️"  # Other
                     card_color = "#e8f5e9"  # Light green
                     border_color = "#4caf50"
-                
+
                 # Create a container for the table card
                 with st.container():
                     # Use columns to create a card-like layout
@@ -557,7 +558,7 @@ def show_interactive_schema_browser():
                         st.session_state.selected_table = table_name
                         st.session_state.query_text = f"-- Query for {table_name}\nSELECT * FROM {table_name} LIMIT 10;"
                         st.rerun()
-                    
+
                     # Add visual separation with colored background
                     if 'fact' in table_name:
                         st.markdown(
@@ -577,14 +578,14 @@ def show_interactive_schema_browser():
                             f'<small>🗺️ Table · {info["row_count"]:,} rows · {len(info["columns"])} columns</small></div>',
                             unsafe_allow_html=True
                         )
-                
+
                 # Show details if selected
                 if 'selected_table' in st.session_state and st.session_state.selected_table == table_name:
                     with st.expander("📋 Table Details", expanded=True):
                         # Show table type
                         table_type = "Fact Table" if 'fact' in table_name else "Dimension Table" if 'dim' in table_name else "Table"
                         st.info(f"**Type:** {table_type}")
-                        
+
                         # Column information in a more compact format
                         st.markdown("**Columns:**")
                         cols_per_row = 2
@@ -595,7 +596,7 @@ def show_interactive_schema_browser():
                                 if j < len(col_row):
                                     with col_row[j]:
                                         st.caption(f"• `{col['column_name']}` ({col['column_type']})")
-                        
+
                         # Quick actions
                         st.markdown("**Quick Actions:**")
                         action_col1, action_col2, action_col3 = st.columns(3)
@@ -615,7 +616,7 @@ def show_interactive_schema_browser():
 def show_enhanced_query_interface():
     """Show enhanced SQL query interface with live results"""
     st.markdown("### 📝 SQL Query Editor")
-    
+
     # Add helpful note about schema browser
     st.info("💡 **Tip:** Switch to the **Schema Browser** tab to explore tables and generate queries automatically")
 
@@ -651,7 +652,7 @@ def show_enhanced_query_interface():
             st.session_state.query_text = ""
             st.session_state.query_results = None
             st.rerun()
-    
+
     with col3:
         if st.button("📄 Format SQL", use_container_width=True):
             # Simple SQL formatting
@@ -670,7 +671,7 @@ def show_enhanced_query_interface():
             ["", "Basic SELECT", "JOIN tables", "Aggregation", "Time series"],
             help="Load a query template"
         )
-        
+
         if template == "Basic SELECT":
             st.session_state.query_text = "SELECT *\nFROM table_name\nWHERE condition\nLIMIT 10;"
             st.rerun()
@@ -703,7 +704,7 @@ def run_custom_query_enhanced(query: str):
             start_time = time.time()
             df = conn.query(query, ttl=0)  # Don't cache custom queries
             execution_time = time.time() - start_time
-            
+
             # Store results in session state
             st.session_state.query_results = df
             st.session_state.last_query = query
@@ -716,13 +717,13 @@ def run_custom_query_enhanced(query: str):
             st.info(f"⏱️ {execution_time:.2f}s")
         with col3:
             st.info(f"📊 {len(df):,} rows returned")
-        
+
         # Display results
         display_query_results(df, query)
 
     except Exception as e:
         st.error(f"❌ Query Error: {str(e)}")
-        
+
         # Enhanced error hints
         error_str = str(e).lower()
         if "column" in error_str and "not found" in error_str:
@@ -745,18 +746,18 @@ def display_query_results(df, query):
     if df is not None and not df.empty:
         # Show results header
         st.markdown("### 📄 Query Results")
-        
+
         # Display options
         display_col1, display_col2, display_col3 = st.columns([2, 2, 3])
-        
+
         with display_col1:
             show_index = st.checkbox("Show index", value=False)
-        
+
         with display_col2:
             # Determine numeric columns
             numeric_cols = df.select_dtypes(include=['int64', 'float64']).columns.tolist()
             format_numbers = st.checkbox("Format numbers", value=True)
-        
+
         with display_col3:
             # Row limit for display
             max_rows = st.number_input(
@@ -766,7 +767,7 @@ def display_query_results(df, query):
                 value=min(100, len(df)),
                 step=10 if len(df) >= 10 else 1  # Adjust step based on data size
             )
-        
+
         # Format dataframe if requested
         display_df = df.head(max_rows).copy()
         if format_numbers and numeric_cols:
@@ -775,7 +776,7 @@ def display_query_results(df, query):
                     display_df[col] = display_df[col].apply(lambda x: f"{x:,}")
                 else:
                     display_df[col] = display_df[col].apply(lambda x: f"{x:,.2f}")
-        
+
         # Show data
         st.dataframe(
             display_df,
@@ -783,15 +784,15 @@ def display_query_results(df, query):
             hide_index=not show_index,
             height=min(400, len(display_df) * 35 + 35)
         )
-        
+
         # If results are truncated, show note
         if len(df) > max_rows:
             st.caption(f"📄 Showing first {max_rows} of {len(df):,} rows")
-        
+
         # Export options
         st.markdown("#### 📥 Export Options")
         export_col1, export_col2, export_col3, export_col4 = st.columns(4)
-        
+
         with export_col1:
             csv = df.to_csv(index=False)
             st.download_button(
@@ -801,7 +802,7 @@ def display_query_results(df, query):
                 mime="text/csv",
                 use_container_width=True
             )
-        
+
         with export_col2:
             json_str = df.to_json(orient='records', indent=2)
             st.download_button(
@@ -811,7 +812,7 @@ def display_query_results(df, query):
                 mime="application/json",
                 use_container_width=True
             )
-        
+
         with export_col3:
             # Parquet export
             parquet_buffer = BytesIO()
@@ -823,13 +824,13 @@ def display_query_results(df, query):
                 mime="application/octet-stream",
                 use_container_width=True
             )
-        
+
         with export_col4:
             # Copy query button
             if st.button("📋 Copy Query", use_container_width=True):
                 st.code(query, language='sql')
                 st.success("Query displayed above for copying")
-        
+
         # Statistics for numeric columns
         if numeric_cols and len(numeric_cols) > 0:
             with st.expander("📊 View Statistics"):
@@ -842,26 +843,26 @@ def show_query_examples_panel():
     """Show query examples in a panel format"""
     st.markdown("### 📋 Example Queries")
     st.markdown("Click any example to load it into the SQL editor")
-    
+
     examples = get_query_examples()
-    
+
     # Create tabs for each category
     tabs = st.tabs(list(examples.keys()))
-    
-    for i, (category, tab) in enumerate(zip(examples.keys(), tabs)):
+
+    for _i, (category, tab) in enumerate(zip(examples.keys(), tabs)):
         with tab:
             for name, query in examples[category].items():
                 # Create an expander for each query
                 with st.expander(f"🔍 {name}"):
                     st.code(query, language="sql")
-                    
+
                     col1, col2 = st.columns([3, 1])
                     with col1:
-                        if st.button(f"Load Query", key=f"load_{category}_{name}", use_container_width=True):
+                        if st.button("Load Query", key=f"load_{category}_{name}", use_container_width=True):
                             st.session_state.query_text = query
                             st.rerun()
                     with col2:
-                        if st.button(f"Run Now", key=f"run_{category}_{name}", type="primary", use_container_width=True):
+                        if st.button("Run Now", key=f"run_{category}_{name}", type="primary", use_container_width=True):
                             st.session_state.query_text = query
                             run_custom_query_enhanced(query)
 
@@ -915,10 +916,10 @@ def show_data_dictionary():
 
 def main():
     """Main data explorer interface with three-panel layout"""
-    
+
     st.title("🔍 Data Explorer")
     st.markdown("**Interactive database exploration with live schema browser and SQL editor**")
-    
+
     # Initialize session state
     if 'selected_table' not in st.session_state:
         st.session_state.selected_table = None
@@ -926,7 +927,7 @@ def main():
         st.session_state.query_results = None
     if 'last_query' not in st.session_state:
         st.session_state.last_query = ""
-    
+
     # Create main tabs for better organization
     tab1, tab2, tab3, tab4 = st.tabs([
         "📝 SQL Editor",
@@ -934,18 +935,18 @@ def main():
         "📋 Example Queries",
         "📚 Data Dictionary"
     ])
-    
+
     with tab1:
         show_enhanced_query_interface()
-    
+
     with tab2:
         st.markdown("### 🗺️ Database Schema Browser")
         st.markdown("Explore the database structure, view table relationships, and preview data.")
         show_interactive_schema_browser()
-        
+
     with tab3:
         show_query_examples_panel()
-        
+
     with tab4:
         show_data_dictionary()
 

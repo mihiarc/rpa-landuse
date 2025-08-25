@@ -23,7 +23,7 @@ def initialize_agent(model_name: str = None):
     try:
         from landuse.agents import LanduseAgent
         from landuse.config import LanduseConfig
-        
+
         # Show loading message
         with st.spinner(f"🤖 Initializing AI agent with {model_name or 'default model'}..."):
             # Create config for Streamlit with specified model
@@ -33,7 +33,7 @@ def initialize_agent(model_name: str = None):
             config = LanduseConfig.for_agent_type('streamlit', **config_kwargs)
             agent = LanduseAgent(config)
             print(f"DEBUG: Agent initialized with model {agent.model_name}")
-        
+
         return agent, None
     except FileNotFoundError as e:
         error_msg = f"Database not found: {e}"
@@ -65,7 +65,7 @@ def initialize_session_state():
 
     if "show_welcome" not in st.session_state:
         st.session_state.show_welcome = True
-    
+
     if "selected_model" not in st.session_state:
         # Default to OpenAI
         st.session_state.selected_model = "gpt-4o-mini"
@@ -162,7 +162,7 @@ def handle_user_input():
 
                     # Stream the response for better UX
                     response_container = st.empty()
-                    
+
                     # Display the response directly - simple and clean
                     response_container.markdown(response)
 
@@ -288,7 +288,7 @@ def main():
         padding: 1rem;
         margin-bottom: 1rem;
     }
-    
+
     /* Context panel styling */
     .context-panel {
         background: white;
@@ -297,14 +297,14 @@ def main():
         box-shadow: 0 2px 8px rgba(0,0,0,0.08);
         height: 100%;
     }
-    
+
     .context-header {
         font-size: 1.2rem;
         font-weight: 600;
         margin-bottom: 1rem;
         color: #2c3e50;
     }
-    
+
     /* Quick action buttons */
     .quick-action {
         background: #e3f2fd;
@@ -315,14 +315,14 @@ def main():
         cursor: pointer;
         transition: all 0.2s;
     }
-    
+
     .quick-action:hover {
         background: #bbdefb;
         transform: translateY(-2px);
     }
     </style>
     """, unsafe_allow_html=True)
-    
+
     st.title("💬 Natural Language Chat")
     st.markdown("**AI-powered analysis of USDA Forest Service RPA land use data**")
 
@@ -339,7 +339,7 @@ def main():
 
     # Create two-column layout for chat interface
     chat_col, context_col = st.columns([3, 2])
-    
+
     with chat_col:
         # Show agent status
         status_col1, status_col2 = st.columns([3, 1])
@@ -357,14 +357,14 @@ def main():
 
         # Handle user input
         handle_user_input()
-    
+
     with context_col:
         # Context panel with query insights and quick actions
         st.markdown('<div class="context-panel">', unsafe_allow_html=True)
-        
+
         # Model selection at top of context panel
         st.markdown('<div class="context-header">🤖 Model Selection</div>', unsafe_allow_html=True)
-        
+
         # Model options
         model_options = {
             "gpt-4o-mini": "GPT-4O Mini",
@@ -374,12 +374,12 @@ def main():
             "claude-3-opus-20240229": "Claude 3 Opus",
             "claude-3-haiku-20240307": "Claude 3 Haiku"
         }
-        
+
         # Check which API keys are available
         import os
         has_openai = bool(os.getenv('OPENAI_API_KEY'))
         has_anthropic = bool(os.getenv('ANTHROPIC_API_KEY'))
-        
+
         # Filter available models
         available_models = {}
         for model_id, model_name in model_options.items():
@@ -389,7 +389,7 @@ def main():
                 available_models[model_id] = f"✅ {model_name}"
             else:
                 available_models[model_id] = f"❌ {model_name}"
-        
+
         # Model selector
         selected_model = st.selectbox(
             "Choose AI Model:",
@@ -398,7 +398,7 @@ def main():
             index=list(model_options.keys()).index(st.session_state.selected_model),
             help="Select the AI model to use for chat"
         )
-        
+
         # Update model if changed
         if selected_model != st.session_state.selected_model:
             st.session_state.selected_model = selected_model
@@ -406,19 +406,19 @@ def main():
             st.session_state.show_welcome = True
             st.cache_resource.clear()  # Clear agent cache
             st.rerun()
-        
+
         st.markdown("---")
-        
+
         # Quick actions section
         st.markdown('<div class="context-header">🚀 Quick Actions</div>', unsafe_allow_html=True)
-        
+
         action_col1, action_col2 = st.columns(2)
         with action_col1:
             if st.button("🔄 Clear Chat", use_container_width=True):
                 st.session_state.messages = []
                 st.session_state.show_welcome = True
                 st.rerun()
-                
+
             if st.button("📊 View Schema", use_container_width=True):
                 if agent:
                     schema_info = agent._get_schema_help()
@@ -427,12 +427,12 @@ def main():
                         "content": f"📊 **Database Schema:**\n\n{schema_info}"
                     })
                     st.rerun()
-                    
+
         with action_col2:
             if st.button("💡 Show Examples", use_container_width=True):
                 st.session_state.show_welcome = True
                 st.rerun()
-                
+
             if st.button("📥 Export Chat", use_container_width=True):
                 # Export chat history
                 chat_text = "\n\n".join([f"{m['role'].upper()}: {m['content']}" for m in st.session_state.messages])
@@ -442,30 +442,30 @@ def main():
                     file_name="landuse_chat_history.txt",
                     mime="text/plain"
                 )
-        
+
         st.markdown("---")
-        
+
         # Session statistics
         st.markdown('<div class="context-header">📊 Session Statistics</div>', unsafe_allow_html=True)
-        
+
         total_queries = len([m for m in st.session_state.messages if m["role"] == "user"])
         successful_queries = len([m for m in st.session_state.messages if m["role"] == "assistant" and not m["content"].startswith("❌")])
-        
+
         metric_col1, metric_col2 = st.columns(2)
         with metric_col1:
             st.metric("Total Queries", total_queries)
         with metric_col2:
             success_rate = (successful_queries / total_queries * 100) if total_queries > 0 else 0
             st.metric("Success Rate", f"{success_rate:.0f}%")
-        
+
         if hasattr(st.session_state, 'last_query_time') and st.session_state.last_query_time:
             st.caption(f"⏱️ Last query: {st.session_state.last_query_time:.1f}s")
-        
+
         st.markdown("---")
-        
+
         # Quick query suggestions
         st.markdown('<div class="context-header">💡 Try These Queries</div>', unsafe_allow_html=True)
-        
+
         quick_queries = [
             "How much agricultural land is being lost?",
             "Which states have the most urban expansion?",
@@ -474,39 +474,39 @@ def main():
             "What are the top 5 counties by land change?",
             "Analyze California land transitions"
         ]
-        
+
         for query in quick_queries:
             if st.button(f"🔍 {query}", key=f"quick_{query[:20]}", use_container_width=True):
                 st.session_state.messages.append({"role": "user", "content": query})
                 st.rerun()
-        
+
         st.markdown('</div>', unsafe_allow_html=True)
-    
+
     # Show additional controls in sidebar
     with st.sidebar:
         st.markdown("### ℹ️ System Information")
-        
+
         # API key status
         st.markdown("**API Key Status:**")
         if has_openai:
             st.success("✅ OpenAI API Key configured")
         else:
             st.error("❌ OpenAI API Key missing")
-        
+
         if has_anthropic:
             st.success("✅ Anthropic API Key configured")
         else:
             st.error("❌ Anthropic API Key missing")
-        
+
         st.markdown("---")
-        
+
         # Configuration info
         st.markdown("### ⚙️ Configuration")
         st.caption(f"🤖 Current Model: {st.session_state.selected_model}")
         st.caption(f"🔄 Max iterations: {os.getenv('LANDUSE_MAX_ITERATIONS', '5')}")
         st.caption(f"⏱️ Max query time: {os.getenv('LANDUSE_MAX_EXECUTION_TIME', '120')}s")
         st.caption(f"📊 Max rows: {os.getenv('LANDUSE_MAX_QUERY_ROWS', '1000')}")
-        
+
         st.markdown("---")
         st.markdown("### 💡 Tips")
         st.info("""
