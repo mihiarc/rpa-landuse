@@ -75,7 +75,7 @@ class LLMManager(LLMInterface):
         Raises:
             ValueError: If required API keys are missing
         """
-        model_name = self.config.model
+        model_name = self.config.model_name
         
         self.console.print(f"[blue]Initializing LLM: {model_name}[/blue]")
 
@@ -130,11 +130,11 @@ class LLMManager(LLMInterface):
 
     def get_model_name(self) -> str:
         """Get the current model name."""
-        return self.config.model
+        return self.config.model_name
 
     def validate_api_key(self) -> bool:
         """Validate API key is available and valid."""
-        model_name = self.config.model
+        model_name = self.config.model_name
         
         if "claude" in model_name.lower():
             return os.getenv('ANTHROPIC_API_KEY') is not None

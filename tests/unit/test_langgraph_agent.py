@@ -130,7 +130,7 @@ class TestLanduseAgent:
         )
     
     @patch.dict(os.environ, {'OPENAI_API_KEY': 'test-key-456'})
-    @patch('landuse.agents.landuse_agent.ChatOpenAI')
+    @patch('landuse.agents.llm_manager.ChatOpenAI')
     def test_openai_initialization(self, mock_llm, test_config):
         """Test agent initialization with OpenAI"""
         # Mock LLM

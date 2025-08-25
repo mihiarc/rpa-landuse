@@ -206,13 +206,15 @@ jobs:
         echo "TEMPERATURE=0.1" >> config/.env
         echo "MAX_TOKENS=1000" >> config/.env
         echo "OPENAI_API_KEY=test-key" >> config/.env
-        # Create minimal test database
+        # Create minimal test database (remove any existing file first)
+        rm -f data/processed/landuse_analytics.duckdb
         uv run python -c "
         import duckdb
         conn = duckdb.connect('data/processed/landuse_analytics.duckdb')
         conn.execute('CREATE TABLE test_table (id INTEGER, name VARCHAR)')
         conn.execute(\"INSERT INTO test_table VALUES (1, 'test')\")
         conn.close()
+        print('✅ Test database created successfully')
         "
         
     - name: Run agent load testing
@@ -236,9 +238,12 @@ jobs:
             
             try:
                 from landuse.config.landuse_config import LanduseConfig
-                config = LanduseConfig(
-                    db_path='data/processed/landuse_analytics.duckdb'
-                )
+                from unittest.mock import patch
+                
+                # Bypass validation like in tests
+                with patch('landuse.config.landuse_config.LanduseConfig.__post_init__', return_value=None):
+                    config = LanduseConfig(db_path='data/processed/landuse_analytics.duckdb')
+                
                 agent = LanduseAgent(config)
             except Exception as e:
                 print(f"Could not create agent: {e}")

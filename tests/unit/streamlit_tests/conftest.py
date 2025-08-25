@@ -16,7 +16,7 @@ import pytest  # noqa: E402
 def mock_streamlit_module():
     """Mock streamlit module for all tests"""
     # Import mock here to avoid circular imports
-    from tests.unit.streamlit.mock_streamlit import mock_st
+    from tests.unit.streamlit_tests.mock_streamlit import mock_st
 
     # Save original module if it exists
     original_streamlit = sys.modules.get('streamlit', None)

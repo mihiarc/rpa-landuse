@@ -113,7 +113,7 @@ class TestLangGraphWorkflow:
             )
         
         with patch.dict(os.environ, {'OPENAI_API_KEY': 'test-key'}):
-            with patch('landuse.agents.landuse_agent.ChatOpenAI') as mock_llm:
+            with patch('landuse.agents.llm_manager.ChatOpenAI') as mock_llm:
                 # Create a mock LLM that returns reasonable responses
                 mock_llm_instance = Mock()
                 mock_llm.return_value = mock_llm_instance
@@ -126,7 +126,7 @@ class TestLangGraphWorkflow:
     def test_full_graph_workflow(self, agent):
         """Test the complete graph workflow from query to response."""
         # Build the graph
-        agent.graph = agent._build_graph()
+        agent.graph = agent.graph_builder.build_graph()
         assert agent.graph is not None
         
         # Mock LLM responses for the workflow
@@ -158,7 +158,7 @@ class TestLangGraphWorkflow:
     def test_graph_with_multiple_tools(self, agent):
         """Test graph workflow with multiple tool calls."""
         # Build the graph
-        agent.graph = agent._build_graph()
+        agent.graph = agent.graph_builder.build_graph()
         
         # Mock responses for multiple tool usage
         responses = [
@@ -202,7 +202,7 @@ class TestLangGraphWorkflow:
     def test_memory_persistence_in_graph(self, agent):
         """Test that memory persists across queries in graph mode."""
         # Build graph with memory
-        agent.graph = agent._build_graph()
+        agent.graph = agent.graph_builder.build_graph()
         
         # First query
         responses1 = [
@@ -225,7 +225,7 @@ class TestLangGraphWorkflow:
     def test_error_handling_in_graph(self, agent):
         """Test error handling within the graph workflow."""
         # Build graph
-        agent.graph = agent._build_graph()
+        agent.graph = agent.graph_builder.build_graph()
         
         # Mock an error in tool execution
         error_response = Mock(
@@ -256,7 +256,7 @@ class TestLangGraphWorkflow:
     def test_iteration_limit(self, agent):
         """Test that the graph respects iteration limits."""
         # Build graph
-        agent.graph = agent._build_graph()
+        agent.graph = agent.graph_builder.build_graph()
         
         # Mock responses that would loop forever
         loop_response = Mock(
@@ -280,7 +280,7 @@ class TestLangGraphWorkflow:
     def test_streaming_workflow(self, agent):
         """Test the streaming functionality."""
         # Build graph
-        agent.graph = agent._build_graph()
+        agent.graph = agent.graph_builder.build_graph()
         
         # Mock streaming chunks
         mock_chunks = [

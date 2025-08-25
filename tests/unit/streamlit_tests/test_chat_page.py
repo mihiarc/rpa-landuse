@@ -11,7 +11,7 @@ from unittest.mock import MagicMock, Mock, call, patch
 import pandas as pd
 import pytest
 
-from tests.unit.streamlit.mock_streamlit import mock_st
+from tests.unit.streamlit_tests.mock_streamlit import mock_st
 
 sys.modules['streamlit'] = mock_st
 import streamlit as st  # noqa: E402

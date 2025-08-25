@@ -30,7 +30,7 @@ class TestConversationHistory:
             config = LanduseConfig(db_path=str(db_path))
             
         with patch.dict(os.environ, {'OPENAI_API_KEY': 'test-key'}):
-            with patch('landuse.agents.landuse_agent.ChatOpenAI') as mock_llm:
+            with patch('landuse.agents.llm_manager.ChatOpenAI') as mock_llm:
                 mock_llm_instance = Mock()
                 mock_llm.return_value = mock_llm_instance
                 agent = LanduseAgent(config)
