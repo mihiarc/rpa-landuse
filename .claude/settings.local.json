@@ -39,7 +39,8 @@
       "Bash(export:*)",
       "Bash(timeout 5 uv run:*)",
       "Bash(gh api:*)",
-      "Bash(gh run view:*)"
+      "Bash(gh run view:*)",
+      "Bash(gh run list:*)"
     ],
     "deny": []
   }

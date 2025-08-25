@@ -298,7 +298,9 @@ jobs:
             main()
         EOF
         
-        # Run load testing
+        # Run load testing with environment variables
+        export OPENAI_API_KEY=test-key
+        export LANDUSE_MODEL=gpt-4o-mini
         uv run python load_test.py > load-test-results.txt 2>&1 || true
         
     - name: Upload load testing results
