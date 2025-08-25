@@ -24,10 +24,10 @@ uv run python -c "import landuse; print('✅ Installation successful')"
 
 ### 2. Configure API Access
 ```bash
-# Copy example environment file and edit it
-cp .env.example .env
+# Copy example environment file to config directory
+cp .env.example config/.env
 
-# Edit .env and add your API key (choose one):
+# Edit config/.env and add your API key (choose one):
 # OPENAI_API_KEY=your_openai_key_here      # For GPT models  
 # ANTHROPIC_API_KEY=your_anthropic_key_here # For Claude models
 ```
@@ -77,7 +77,7 @@ duckdb data/processed/landuse_analytics.duckdb
 ## ⚙️ Configuration
 
 ### Environment Variables
-The application uses environment variables for configuration. Copy `.env.example` to `.env` and customize:
+The application uses environment variables for configuration. Copy `.env.example` to `config/.env` and customize:
 
 ```bash
 # API Keys (at least one required)
@@ -168,6 +168,8 @@ rpa-landuse/
 │   ├── agents/            # Agent architecture documentation
 │   ├── data/              # Database schema and data dictionary
 │   └── development/       # Architecture and testing guides
+├── ⚙️ config/              # Configuration directory
+│   └── .env               # Environment variables (create from .env.example)
 ├── 🌍 .env.example        # Environment configuration template
 └── 📋 pyproject.toml      # Modern Python project with uv
 ```
