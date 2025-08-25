@@ -47,6 +47,11 @@ def create_execute_query_tool(
         - dim_indicators: Socioeconomic indicator definitions
         - dim_landuse: Land use categories (crop, pasture, forest, urban, rangeland)
         - dim_time: Time periods from 2012 to 2100
+        
+        RECOMMENDED VIEWS (use these first for socioeconomic analysis):
+        - v_population_trends: Easy population analysis by county/state/scenario
+        - v_income_trends: Easy income analysis by county/state/scenario
+        - v_scenarios_combined: Combined scenario and socioeconomic information
 
         Args:
             query: SQL query to execute
