@@ -308,7 +308,7 @@ tiktoken==0.9.0
     # via langchain-openai
 toml==0.10.2
     # via streamlit
-tornado==6.5.1
+tornado==6.5.2
     # via streamlit
 tqdm==4.67.1
     # via openai
