@@ -250,15 +250,65 @@ def create_analysis_tool() -> Any:
             )
 
         # Add geographic context if present
-        if any(state in query_results.lower() for state in ["california", "texas", "florida"]):
+        if any(state in query_results.lower() for state in ["california", "texas", "florida", "north carolina"]):
             insights.append(
                 "Large states show significant variation at the county level. "
                 "Consider disaggregating to county-level analysis for more detailed insights."
             )
 
-        # Combine insights
+        # Cross-dataset recommendations - suggest related queries
+        cross_dataset_suggestions = []
+        
+        if "population" in query_results.lower() and "urban" not in query_results.lower():
+            cross_dataset_suggestions.append(
+                "RECOMMENDATION: Query urban land transitions to see how population growth drives development: "
+                "SELECT scenario_name, SUM(acres) FROM fact_landuse_transitions WHERE to_landuse_name = 'Urban'"
+            )
+        
+        if "urban" in query_results.lower() and "population" not in query_results.lower():
+            cross_dataset_suggestions.append(
+                "RECOMMENDATION: Query population projections to understand demographic drivers: "
+                "SELECT ssp_scenario, population_thousands FROM v_population_trends"
+            )
+            
+        if "forest" in query_results.lower() and "population" not in query_results.lower():
+            cross_dataset_suggestions.append(
+                "RECOMMENDATION: Query population growth to understand development pressure on forests: "
+                "Population growth often drives forest conversion to urban/agricultural uses"
+            )
+            
+        if "agricultural" in query_results.lower() and "income" not in query_results.lower():
+            cross_dataset_suggestions.append(
+                "RECOMMENDATION: Query income trends to understand agricultural economic drivers: "
+                "SELECT ssp_scenario, income_per_capita_2009usd FROM v_income_trends"
+            )
+
+        # State-specific recommendations
+        if "north carolina" in query_results.lower():
+            if "population" in query_results.lower() and "land" not in original_question.lower():
+                cross_dataset_suggestions.append(
+                    "FOLLOW-UP: Query NC urban expansion patterns: "
+                    "SELECT scenario_name, SUM(acres) as urban_acres FROM fact_landuse_transitions f "
+                    "JOIN dim_scenario s ON f.scenario_id = s.scenario_id "
+                    "JOIN dim_geography g ON f.geography_id = g.geography_id "
+                    "JOIN dim_landuse tl ON f.to_landuse_id = tl.landuse_id "
+                    "WHERE g.state_name = 'North Carolina' AND tl.landuse_name = 'Urban' GROUP BY scenario_name"
+                )
+
+        # Combine all insights and recommendations
+        all_content = []
         if insights:
-            return "\n\n".join(["Key Insights:"] + [f"• {insight}" for insight in insights])
+            all_content.append("Key Insights:")
+            all_content.extend([f"• {insight}" for insight in insights])
+        
+        if cross_dataset_suggestions:
+            if all_content:
+                all_content.append("")  # Add blank line
+            all_content.append("Suggested Related Queries:")
+            all_content.extend([f"• {suggestion}" for suggestion in cross_dataset_suggestions])
+
+        if all_content:
+            return "\n\n".join(all_content)
         else:
             return "Results show the requested data. Consider examining trends over time or comparing scenarios for deeper insights."
 
