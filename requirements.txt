@@ -180,7 +180,7 @@ openai==1.93.1
     # via langchain-openai
 openpyxl==3.1.5
     # via rpa-landuse-analytics (pyproject.toml)
-orjson==3.10.18
+orjson==3.11.3
     # via
     #   langgraph-sdk
     #   langsmith
