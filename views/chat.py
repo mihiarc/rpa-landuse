@@ -30,6 +30,7 @@ def initialize_agent(model_name: str = None):
             config_kwargs = {'debug': True}
             if model_name:
                 config_kwargs['model_name'] = model_name
+
             config = LanduseConfig.for_agent_type('streamlit', **config_kwargs)
             agent = LanduseAgent(config)
             print(f"DEBUG: Agent initialized with model {agent.model_name}")
@@ -68,7 +69,8 @@ def initialize_session_state():
 
     if "selected_model" not in st.session_state:
         # Default to OpenAI
-        st.session_state.selected_model = "gpt-4o-mini"
+        # st.session_state.selected_model = "gpt-4o-mini"
+        st.session_state.selected_model = "bedrock"
 
 def show_welcome_message():
     """Show welcome message and example queries"""
@@ -146,7 +148,7 @@ def handle_user_input():
                     print(f"DEBUG Chat: Query '{prompt}' returned response of length {len(response) if response else 0}")
                     print(f"DEBUG Chat: Response type: {type(response)}")
                     if response:
-                        print(f"DEBUG Chat: Response preview: {response[:100]}...")
+                        print(f"DEBUG Chat: Response preview: {response}...")
 
                     # Ensure response is a string
                     if not isinstance(response, str):
@@ -372,7 +374,7 @@ def main():
             "gpt-3.5-turbo": "GPT-3.5 Turbo",
             "claude-3-5-sonnet-20241022": "Claude 3.5 Sonnet",
             "claude-3-opus-20240229": "Claude 3 Opus",
-            "claude-3-haiku-20240307": "Claude 3 Haiku"
+            "bedrock": "Nova Lite (Bedrock)",
         }
 
         # Check which API keys are available

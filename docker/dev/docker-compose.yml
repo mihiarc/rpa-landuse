@@ -1,0 +1,34 @@
+services:
+  streamlit-app:
+    build:
+      context: ../..
+      dockerfile: docker/dev/dockerfile.yml
+    command: python -m streamlit run landuse_app.py
+    ports:
+      - "80:8501"
+    env_file:
+      - ./.env.dev
+    volumes:
+      # Mount only necessary files/directories for faster performance
+      - ../../landuse_app.py:/app/landuse_app.py
+      - ../../src:/app/src
+      - ../../views:/app/views
+      - ../../data:/app/data
+      - ../../config:/app/config
+
+  terraform-dev:
+    build:
+      context: ../../
+      dockerfile: ./docker/dev/dockerfile.terraform.yml
+    container_name: rpa-terraform-dev
+    working_dir: /workspace
+    volumes:
+      # Mount your project directory
+      - ../../terraform/dev:/workspace
+      # Mount SSH keys directory (EC2 PEM files)
+      - ~/.ssh:/workspace/.ssh
+    env_file:
+      - ./.env.terraform
+    stdin_open: true
+    tty: true
+    restart: unless-stopped

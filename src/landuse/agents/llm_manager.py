@@ -3,6 +3,8 @@
 import os
 from typing import Optional, Union
 
+import boto3
+from langchain_aws import ChatBedrock
 from langchain_anthropic import ChatAnthropic
 from langchain_core.language_models import BaseChatModel
 from langchain_openai import ChatOpenAI
@@ -79,7 +81,9 @@ class LLMManager(LLMInterface):
 
         self.console.print(f"[blue]Initializing LLM: {model_name}[/blue]")
 
-        if "claude" in model_name.lower():
+        if "bedrock" == model_name.lower():
+            return self._create_bedrock_llm(model_name)
+        elif "claude" in model_name.lower():
             return self._create_anthropic_llm(model_name)
         else:
             return self._create_openai_llm(model_name)
@@ -114,6 +118,53 @@ class LLMManager(LLMInterface):
             max_tokens=self.config.max_tokens,
         )
 
+    def _create_bedrock_llm(self, model_name: str) -> 'ChatBedrock':
+        """
+        Create AWS Bedrock LLM instance with boto3 configuration.
+        
+        Args:
+            model_name: The Bedrock model name (e.g., 'amazon.nova-micro-v1:0', 'anthropic.claude-3-sonnet-20240229-v1:0')
+            
+        Returns:
+            Configured ChatBedrock instance
+            
+        Raises:
+            LLMError: If Bedrock dependencies are not available or AWS credentials are missing
+        """
+
+        # Get AWS configuration from environment variables
+        aws_region = os.getenv('AWS_DEFAULT_REGION', os.getenv('AWS_DEFAULT_REGION', 'us-east-1'))  # Default to us-east-1
+        aws_model = os.getenv('AWS_BEDROCK_MODEL', 'anthropic.claude-3-sonnet-20240229-v1:0')
+        
+        try:
+            # Create boto3 session
+            session = boto3.Session(region_name=aws_region)
+            
+            # Create bedrock-runtime client with session
+            bedrock_client = session.client(
+                service_name='bedrock-runtime',
+                region_name=aws_region
+            )
+            
+            # Create ChatBedrock instance with both client and region
+            bedrock_llm = ChatBedrock(
+                client=bedrock_client,
+                model_id=aws_model,
+                region_name=aws_region,  # Explicitly pass region to ChatBedrock
+                model_kwargs={
+                    "max_tokens": self.config.max_tokens,
+                    "temperature": self.config.temperature,
+                }
+            )
+            
+            self.console.print(f"[green]✓ AWS Bedrock LLM initialized with model: {aws_model}[/green]")
+            return bedrock_llm
+            
+        except Exception as e:
+            error_msg = f"Failed to initialize AWS Bedrock client: {str(e)}"
+            self.console.print(f"[red]✗ {error_msg}[/red]")
+            raise LLMError(error_msg)
+
     def _mask_api_key(self, api_key: Optional[str]) -> str:
         """
         Safely mask API key for logging purposes.
@@ -138,5 +189,10 @@ class LLMManager(LLMInterface):
 
         if "claude" in model_name.lower():
             return os.getenv('ANTHROPIC_API_KEY') is not None
+        elif "bedrock" == model_name.lower():
+            pass
+            # For Bedrock, check if AWS credentials are available
+            # return (os.getenv('AWS_ACCESS_KEY_ID') is not None and 
+            #         os.getenv('AWS_SECRET_ACCESS_KEY') is not None)
         else:
             return os.getenv('OPENAI_API_KEY') is not None

@@ -1,0 +1,17 @@
+services:
+  streamlit-app:
+    build:
+      context: ../..
+      dockerfile: docker/prod/dockerfile.yml
+    command: python -m streamlit run landuse_app.py
+    ports:
+      - "80:8501"
+    env_file:
+      - ./.env.dev
+    volumes:
+      # Mount only necessary files/directories for faster performance
+      - ../../landuse_app.py:/app/landuse_app.py
+      - ../../src:/app/src
+      - ../../views:/app/views
+      - ../../data:/app/data
+      - ../../config:/app/config

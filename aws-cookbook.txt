@@ -1,0 +1,70 @@
+# AWS CLI Cookbook
+
+## Add AWS Profile
+```bash
+# Configure new profile
+aws configure --profile myprofile
+
+# Non-interactive setup
+aws configure set aws_access_key_id YOUR_KEY --profile myprofile
+aws configure set aws_secret_access_key YOUR_SECRET --profile myprofile
+aws configure set region us-east-1 --profile myprofile
+
+# Test profile
+aws sts get-caller-identity --profile myprofile
+```
+
+## Viewing Profiles
+```bash
+# List all configured profiles
+aws configure list-profiles
+
+# Show specific profile configuration
+aws configure list --profile myprofile
+
+# Get all settings for a profile
+aws configure get aws_access_key_id --profile myprofile
+aws configure get aws_secret_access_key --profile myprofile
+aws configure get region --profile myprofile
+aws configure get output --profile myprofile
+```
+
+## List EC2 Instances
+```bash
+# List all instances
+aws ec2 describe-instances --profile myprofile
+
+# List running instances with details including security groups
+aws ec2 describe-instances --filters "Name=instance-state-name,Values=running" \
+  --query 'Reservations[*].Instances[*].{ID:InstanceId,Name:Tags[?Key==`Name`].Value|[0],State:State.Name,IP:PublicIpAddress,SecurityGroups:SecurityGroups[*].GroupId}' \
+  --output table
+
+
+# Filter by tags
+aws ec2 describe-instances --filters "Name=tag:Environment,Values=production"
+
+# Get instances by type
+aws ec2 describe-instances --filters "Name=instance-type,Values=t3.micro"
+```
+
+## Create EC2 Key Pair
+```bash
+# Create key pair and save to file
+aws ec2 create-key-pair --key-name usfs-rpa-app-server --query 'KeyMaterial' --output text > UsfsRpaAppServer.pem
+
+# Create with tags
+aws ec2 create-key-pair --key-name usfs-rpa-app-server \
+  --tag-specifications 'ResourceType=key-pair,Tags=[{Key=Environment,Value=Production},{Key=Project,Value=RPA}]' \
+  --query 'KeyMaterial' --output text > UsfsRpaAppServer.pem
+
+# Set permissions
+chmod 400 MyKeyPair.pem
+
+# List key pairs
+aws ec2 describe-key-pairs
+```
+
+## Connect to EC2 Instance (SSH)
+
+```bash
+ssh -i UsfsRpaAppServer.pem ec2-user@<Public-IP-Address>

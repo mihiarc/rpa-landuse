@@ -158,3 +158,15 @@ wheels/
 .installed.cfg
 *.egg
 data/processed/landuse_analytics.duckdb
+
+# Terraform
+.terraform/
+.terraform.lock.hcl
+terraform.tfstate
+terraform.tfstate.backup
+*.tfvars
+.terraformrc
+terraform.rc
+*.pem
+*.env*
+*app-deployment.zip

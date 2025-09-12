@@ -1,0 +1,61 @@
+# Terraform Development Container
+FROM ubuntu:22.04
+
+# Set environment variables
+ENV DEBIAN_FRONTEND=noninteractive
+ENV TF_VERSION=1.6.6
+ENV TERRAGRUNT_VERSION=0.54.8
+ENV AWS_CLI_VERSION=2.15.17
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    curl \
+    wget \
+    unzip \
+    git \
+    jq \
+    vim \
+    nano \
+    tree \
+    ca-certificates \
+    gnupg \
+    software-properties-common \
+    python3 \
+    python3-pip \
+    openssh-client \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Terraform
+RUN wget https://releases.hashicorp.com/terraform/${TF_VERSION}/terraform_${TF_VERSION}_linux_amd64.zip && \
+    unzip terraform_${TF_VERSION}_linux_amd64.zip && \
+    mv terraform /usr/local/bin/ && \
+    rm terraform_${TF_VERSION}_linux_amd64.zip
+
+# Install Terragrunt
+RUN wget https://github.com/gruntwork-io/terragrunt/releases/download/v${TERRAGRUNT_VERSION}/terragrunt_linux_amd64 && \
+    mv terragrunt_linux_amd64 /usr/local/bin/terragrunt && \
+    chmod +x /usr/local/bin/terragrunt
+
+# Install AWS CLI v2
+RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" && \
+    unzip awscliv2.zip && \
+    ./aws/install && \
+    rm -rf awscliv2.zip aws/
+
+# Install additional tools
+RUN pip3 install --no-cache-dir \
+    boto3 \
+    awscli-local \
+    terraform-compliance \
+    pre-commit \
+    checkov
+
+# Create workspace directory
+WORKDIR /workspace
+
+# Create a non-root user for Terraform operations
+RUN useradd -ms /bin/bash terraform
+RUN chown -R terraform:terraform /workspace
+USER terraform
+
+COPY ./terraform/dev /workspace

@@ -23,7 +23,6 @@ class LanduseConfig:
     db_path: str = field(
         default_factory=lambda: os.getenv('LANDUSE_DB_PATH', 'data/processed/landuse_analytics.duckdb')
     )
-
     # Model Configuration
     model_name: str = field(
         default_factory=lambda: os.getenv('LANDUSE_MODEL', 'gpt-4o-mini')
@@ -112,7 +111,9 @@ class LanduseConfig:
             raise FileNotFoundError(f"Database file not found: {self.db_path}")
 
         # Validate model configuration
-        if self.model_name.startswith("claude"):
+        if self.model_name=="bedrock":
+            pass
+        elif self.model_name.startswith("claude"):
             if not os.getenv('ANTHROPIC_API_KEY'):
                 raise ValueError("ANTHROPIC_API_KEY required for Claude models")
         else:
