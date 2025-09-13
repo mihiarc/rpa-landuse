@@ -1,11 +1,19 @@
 #!/usr/bin/env python3
-"""
-Convert nested landuse JSON data to a well-structured DuckDB database
-This script normalizes the data into proper relational tables following modern data warehousing principles
+"""Convert nested landuse JSON data to optimized DuckDB star schema.
+
+This ETL script transforms deeply nested JSON land use projections from the
+USDA Forest Service RPA Assessment into a normalized star schema optimized
+for analytical queries. Supports both bulk COPY loading (5-10x faster) and
+traditional INSERT methods.
+
+Typical usage:
+    uv run python scripts/converters/convert_to_duckdb.py
 """
 
 import json
 import os
+import secrets
+import shutil
 import sys
 import tempfile
 import time
@@ -29,14 +37,33 @@ sys.path.insert(0, str(src_path))
 console = Console()
 
 class LanduseDataConverter:
-    """Convert nested landuse JSON to normalized DuckDB database using modern bulk loading techniques"""
+    """Convert nested landuse JSON to normalized DuckDB database.
+
+    Handles the complete ETL pipeline for transforming RPA Assessment land use
+    projections into a star schema with dimension and fact tables. Uses bulk
+    loading with Parquet files for optimal performance on large datasets.
+
+    Attributes:
+        input_file: Path to source JSON file with nested projections.
+        output_file: Path to target DuckDB database file.
+        use_bulk_copy: If True, uses COPY from Parquet (5-10x faster).
+        conn: Active DuckDB connection.
+        temp_dir: Directory for temporary Parquet files during bulk loading.
+    """
+
+    # Security limits
+    MAX_FILE_SIZE = 10 * 1024 * 1024 * 1024  # 10GB max file size
+    MAX_RECORDS = 100_000_000  # 100M max records
+    MAX_BATCH_SIZE = 1_000_000  # 1M records per batch
 
     def __init__(self, input_file: str, output_file: str, use_bulk_copy: bool = True):
-        self.input_file = Path(input_file)
-        self.output_file = Path(output_file)
+        # Validate and resolve paths securely
+        self.input_file = self._validate_input_path(input_file)
+        self.output_file = self._validate_output_path(output_file)
         self.conn = None
         self.use_bulk_copy = use_bulk_copy
         self.temp_dir = tempfile.mkdtemp(prefix="landuse_convert_")
+        self._validate_file_size()
 
         # Land use type mappings
         self.landuse_types = {
@@ -49,8 +76,84 @@ class LanduseDataConverter:
 
         console.print(f"🚀 Using {'bulk COPY' if use_bulk_copy else 'traditional INSERT'} loading method")
 
+    def _validate_input_path(self, input_file: str) -> Path:
+        """Validate input file path for security.
+
+        Args:
+            input_file: Path to input JSON file.
+
+        Returns:
+            Validated Path object.
+
+        Raises:
+            ValueError: If path is invalid or insecure.
+            FileNotFoundError: If file doesn't exist.
+        """
+        # Prevent path traversal
+        if ".." in str(input_file):
+            raise ValueError("Path traversal detected in input file")
+
+        path = Path(input_file).resolve()
+
+        # Check file exists
+        if not path.exists():
+            raise FileNotFoundError(f"Input file not found: {input_file}")
+
+        # Validate file type
+        if not path.suffix.lower() == '.json':
+            raise ValueError("Input must be a JSON file")
+
+        return path
+
+    def _validate_output_path(self, output_file: str) -> Path:
+        """Validate output file path for security.
+
+        Args:
+            output_file: Path to output database file.
+
+        Returns:
+            Validated Path object.
+
+        Raises:
+            ValueError: If path is invalid or insecure.
+            FileNotFoundError: If parent directory doesn't exist.
+        """
+        # Prevent path traversal
+        if ".." in str(output_file):
+            raise ValueError("Path traversal detected in output file")
+
+        path = Path(output_file).resolve()
+
+        # Check parent directory exists
+        if not path.parent.exists():
+            raise FileNotFoundError(f"Output directory does not exist: {path.parent}")
+
+        # Validate file extension
+        if path.suffix and path.suffix.lower() not in ['.db', '.duckdb', '.duck']:
+            raise ValueError("Output file must be a DuckDB database file")
+
+        return path
+
+    def _validate_file_size(self):
+        """Check input file size against security limits.
+
+        Raises:
+            ValueError: If file exceeds size limit.
+        """
+        file_size = self.input_file.stat().st_size
+        if file_size > self.MAX_FILE_SIZE:
+            raise ValueError(f"Input file too large ({file_size / 1024 / 1024 / 1024:.2f}GB > {self.MAX_FILE_SIZE / 1024 / 1024 / 1024}GB limit)")
+
     def create_schema(self):
-        """Create the normalized database schema"""
+        """Create star schema with dimension and fact tables.
+
+        Creates:
+            - dim_scenario: Climate scenarios (RCP/SSP combinations)
+            - dim_time: Time periods (e.g., 2015-2020)
+            - dim_geography: US counties with FIPS codes
+            - dim_landuse: Land use categories (crop, forest, urban, etc.)
+            - fact_landuse_transitions: Main fact table with transitions
+        """
         console.print(Panel.fit("🏗️ [bold blue]Creating DuckDB Schema[/bold blue]", border_style="blue"))
 
         # Connect to DuckDB
@@ -190,7 +293,16 @@ class LanduseDataConverter:
             return 'Other'
 
     def load_data(self):
-        """Load and transform the JSON data into the normalized database"""
+        """Load JSON data and populate all database tables.
+
+        Performs the complete ETL process:
+        1. Loads and parses nested JSON structure
+        2. Extracts unique dimensions (scenarios, time, geography)
+        3. Populates dimension tables
+        4. Transforms and loads fact table with transitions
+
+        Uses bulk loading with temporary Parquet files if use_bulk_copy=True.
+        """
         console.print(Panel.fit("📊 [bold yellow]Loading Data[/bold yellow]", border_style="yellow"))
 
         # Load JSON data
@@ -212,18 +324,18 @@ class LanduseDataConverter:
         console.print("✅ [green]Data loaded successfully[/green]")
 
     def _extract_scenarios(self, data: dict) -> list[str]:
-        """Extract unique scenarios from the data"""
+        """Extract unique scenario names from top-level keys."""
         return list(data.keys())
 
     def _extract_time_periods(self, data: dict) -> list[str]:
-        """Extract unique time periods from the data"""
+        """Extract unique time period strings across all scenarios."""
         time_periods = set()
         for scenario_data in data.values():
             time_periods.update(scenario_data.keys())
         return list(time_periods)
 
     def _extract_geographies(self, data: dict) -> list[str]:
-        """Extract unique FIPS codes from the data"""
+        """Extract unique county FIPS codes from all data branches."""
         fips_codes = set()
         for scenario_data in data.values():
             for time_data in scenario_data.values():
@@ -389,7 +501,15 @@ class LanduseDataConverter:
                     progress.update(task, advance=1)
 
     def _load_transitions(self, data: dict):
-        """Load the main fact table data using bulk copy for maximum performance"""
+        """Load fact table with land use transitions.
+
+        Args:
+            data: Nested dictionary with structure:
+                {scenario: {time: {fips: {from_lu: {to_lu: acres}}}}}
+
+        Uses bulk COPY from Parquet for batches of 100k records when
+        use_bulk_copy=True, otherwise uses traditional batch INSERT.
+        """
         console.print("🔄 [cyan]Processing transitions data...[/cyan]")
 
         # Get dimension lookups
@@ -558,23 +678,45 @@ class LanduseDataConverter:
         return total
 
     def _write_and_copy_batch(self, batch_data: list[dict], batch_num: int):
-        """Write batch to Parquet file and use DuckDB COPY to load it"""
+        """Write batch to Parquet file and use DuckDB COPY to load it.
+
+        Args:
+            batch_data: List of transition records.
+            batch_num: Batch number for unique file naming.
+        """
+        # Validate batch size
+        if len(batch_data) > self.MAX_BATCH_SIZE:
+            raise ValueError(f"Batch size {len(batch_data)} exceeds maximum {self.MAX_BATCH_SIZE}")
+
         # Create DataFrame from batch
         df = pd.DataFrame(batch_data)
 
-        # Write to temporary Parquet file
-        temp_file = Path(self.temp_dir) / f"transitions_batch_{batch_num}.parquet"
-        df.to_parquet(temp_file, index=False)
+        # Generate secure temporary filename
+        temp_file = Path(self.temp_dir) / f"transitions_batch_{batch_num}_{secrets.token_hex(8)}.parquet"
 
-        # Use DuckDB COPY to load the batch
-        self.conn.execute(f"""
-            COPY fact_landuse_transitions
-            (transition_id, scenario_id, time_id, geography_id, from_landuse_id, to_landuse_id, acres, transition_type)
-            FROM '{temp_file}' (FORMAT PARQUET)
-        """)
+        try:
+            # Write to temporary Parquet file
+            df.to_parquet(temp_file, index=False)
 
-        # Clean up temporary file to save space
-        temp_file.unlink()
+            # Validate temp file path is within temp directory
+            if not temp_file.resolve().is_relative_to(Path(self.temp_dir).resolve()):
+                raise ValueError("Temporary file path escape detected")
+
+            # Use validated path for COPY
+            validated_path = str(temp_file.resolve())
+            if not Path(validated_path).exists():
+                raise FileNotFoundError(f"Temp file not found: {validated_path}")
+
+            # Execute COPY with validated path
+            self.conn.execute(f"""
+                COPY fact_landuse_transitions
+                (transition_id, scenario_id, time_id, geography_id, from_landuse_id, to_landuse_id, acres, transition_type)
+                FROM '{validated_path}' (FORMAT PARQUET)
+            """)
+        finally:
+            # Always clean up temp file
+            if temp_file.exists():
+                temp_file.unlink()
 
     def _insert_batch(self, batch_data: list[tuple]):
         """Insert a batch of transition records"""
@@ -585,7 +727,13 @@ class LanduseDataConverter:
         """, batch_data)
 
     def create_views(self):
-        """Create useful analytical views"""
+        """Create analytical views for common query patterns.
+
+        Creates optimized views for:
+            - v_agricultural_transitions: Agriculture-specific analysis
+            - v_net_changes: Net changes by land use type
+            - v_transition_matrix: From-to transition summaries
+        """
         console.print(Panel.fit("📊 [bold green]Creating Analytical Views[/bold green]", border_style="green"))
 
         # Agriculture transitions view
@@ -673,7 +821,7 @@ class LanduseDataConverter:
         console.print("✅ [green]Views created successfully[/green]")
 
     def generate_summary(self):
-        """Generate a summary of the converted database"""
+        """Display database statistics and record counts."""
         console.print(Panel.fit("📈 [bold magenta]Database Summary[/bold magenta]", border_style="magenta"))
 
         # Create summary table
@@ -701,13 +849,12 @@ class LanduseDataConverter:
         console.print(f"\n📁 Database file size: [bold cyan]{file_size:.2f} MB[/bold cyan]")
 
     def close(self):
-        """Close database connection and clean up temporary files"""
+        """Close connection and remove temporary files."""
         if self.conn:
             self.conn.close()
 
-        # Clean up temporary directory
-        import shutil
-        if os.path.exists(self.temp_dir):
+        # Securely clean up temporary directory
+        if self.temp_dir and os.path.exists(self.temp_dir):
             try:
                 shutil.rmtree(self.temp_dir)
                 console.print(f"🧹 Cleaned up temporary files from {self.temp_dir}")
@@ -715,7 +862,12 @@ class LanduseDataConverter:
                 console.print(f"⚠️ Warning: Could not clean up temp directory: {e}")
 
 def main():
-    """Main conversion function with performance options"""
+    """Execute land use data conversion to DuckDB.
+
+    Command-line arguments:
+        --no-bulk-copy: Use traditional INSERT instead of bulk COPY.
+            Slower but useful for debugging or systems with limited memory.
+    """
     import argparse
 
     parser = argparse.ArgumentParser(description="Convert landuse JSON to DuckDB")
