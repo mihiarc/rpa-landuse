@@ -63,6 +63,9 @@ def initialize_session_state():
     if "show_welcome" not in st.session_state:
         st.session_state.show_welcome = True
 
+    if "quick_query_key" not in st.session_state:
+        st.session_state.quick_query_key = 0
+
     # Always use gpt-4o-mini - no model selection needed
 
 def show_welcome_message():
@@ -112,7 +115,7 @@ def display_chat_history():
 @st.fragment
 def handle_user_input():
     """Handle user input and generate response - runs in isolation"""
-    # Get agent with selected model
+    # Get agent instance
     agent, error = get_agent()
 
     if error:
@@ -238,41 +241,10 @@ Timestamp: {time.strftime('%Y-%m-%d %H:%M:%S')}
                         "content": error_message
                     })
 
-@st.fragment
-def show_chat_controls():
-    """Show chat control buttons - runs in isolation"""
-    col1, col2, col3, col4 = st.columns(4)
-
-    with col1:
-        if st.button("🔄 Clear Chat", help="Clear conversation history"):
-            st.session_state.messages = []
-            st.session_state.show_welcome = True
-            st.rerun()
-
-    with col2:
-        if st.button("💡 Show Examples", help="Show example queries"):
-            st.session_state.show_welcome = True
-            st.rerun()
-
-    with col3:
-        if st.button("📊 View Schema", help="Show database schema"):
-            if "agent_initialized" in st.session_state:
-                agent, _ = get_agent()
-                if agent:
-                    schema_info = agent._get_schema_help()
-                    st.session_state.messages.append({
-                        "role": "assistant",
-                        "content": f"📊 **Database Schema:**\n\n{schema_info}"
-                    })
-                    st.rerun()
-
-    with col4:
-        message_count = len([m for m in st.session_state.messages if m["role"] == "user"])
-        st.metric("Questions Asked", message_count)
 
 
 def main():
-    """Main chat interface with two-column layout for wide screens"""
+    """Main chat interface with single-column layout for cleaner UX"""
     # Add custom CSS for chat layout
     st.markdown("""
     <style>
@@ -282,22 +254,6 @@ def main():
         border-radius: 10px;
         padding: 1rem;
         margin-bottom: 1rem;
-    }
-
-    /* Context panel styling */
-    .context-panel {
-        background: white;
-        border-radius: 10px;
-        padding: 1.5rem;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-        height: 100%;
-    }
-
-    .context-header {
-        font-size: 1.2rem;
-        font-weight: 600;
-        margin-bottom: 1rem;
-        color: #2c3e50;
     }
 
     /* Quick action buttons */
@@ -324,7 +280,7 @@ def main():
     # Initialize session state
     initialize_session_state()
 
-    # Check agent status with selected model
+    # Check agent status
     agent, error = get_agent()
 
     if error:
@@ -332,17 +288,118 @@ def main():
         st.info("💡 Please check the Settings page for configuration help.")
         return
 
-    # Create two-column layout for chat interface
-    chat_col, context_col = st.columns([3, 2])
+    # Show agent status
+    status_col1, status_col2, status_col3 = st.columns([2, 1, 1])
+    with status_col1:
+        st.success("✅ AI Agent Ready - Ask me anything about landuse data!")
+    with status_col2:
+        if agent:
+            st.info(f"🤖 {agent.model_name.split('/')[-1]}")
+    with status_col3:
+        total_queries = len([m for m in st.session_state.messages if m["role"] == "user"])
+        st.metric("Queries", total_queries)
 
-    with chat_col:
-        # Show agent status
-        status_col1, status_col2 = st.columns([3, 1])
-        with status_col1:
-            st.success("✅ AI Agent Ready - Ask me anything about landuse data!")
-        with status_col2:
-            if agent:
-                st.info(f"🤖 {agent.model_name.split('/')[-1]}")
+    # Quick actions at the top
+    with st.container():
+        st.markdown("### 🚀 Quick Actions")
+        # Use responsive columns - fewer on mobile
+        num_cols = 3 if st.session_state.get("mobile_view", False) else 5
+        if num_cols == 5:
+            col1, col2, col3, col4, col5 = st.columns(5)
+        else:
+            col1, col2, col3 = st.columns(3)
+            col4 = col5 = None  # These will be handled differently on mobile
+
+        with col1:
+            if st.button("🔄 Clear Chat", use_container_width=True, help="Clear conversation history"):
+                st.session_state.messages = []
+                st.session_state.show_welcome = True
+                st.rerun()
+
+        with col2:
+            if st.button("💡 Examples", use_container_width=True, help="Show example queries"):
+                st.session_state.show_welcome = True
+                st.rerun()
+
+        with col3:
+            if st.button("📊 Schema", use_container_width=True, help="View database schema"):
+                if agent:
+                    try:
+                        # Use public method if available, fallback to private
+                        schema_info = getattr(agent, 'get_schema_help', agent._get_schema_help)()
+                        st.session_state.messages.append({
+                            "role": "assistant",
+                            "content": f"📊 **Database Schema:**\n\n{schema_info}"
+                        })
+                        st.rerun()
+                    except Exception as e:
+                        st.error(f"Failed to get schema: {str(e)}")
+
+        # Handle column 4 based on layout
+        if col4 is not None:
+            with col4:
+                # Export chat button with error handling
+                try:
+                    # Limit export size to prevent memory issues
+                    MAX_EXPORT_MESSAGES = 500
+                    export_messages = st.session_state.messages[-MAX_EXPORT_MESSAGES:]
+                    chat_text = "\n\n".join([f"{m['role'].upper()}: {m['content'][:1000]}" for m in export_messages])
+                    st.download_button(
+                        "📥 Export",
+                        data=chat_text,
+                        file_name="landuse_chat_history.txt",
+                        mime="text/plain",
+                        use_container_width=True,
+                        help="Download chat history (last 500 messages)"
+                    )
+                except Exception as e:
+                    st.error(f"Export failed: {str(e)}")
+
+        # Handle column 5 based on layout
+        if col5 is not None:
+            with col5:
+                # Quick query dropdown with key to prevent infinite loop
+                quick_queries = [
+                    "Select a quick query...",
+                    "How much agricultural land is being lost?",
+                    "Which states have the most urban expansion?",
+                    "Compare forest loss between RCP45 and RCP85",
+                    "Show crop to pasture transitions by state",
+                    "What are the top 5 counties by land change?",
+                    "Analyze California land transitions"
+                ]
+                selected_query = st.selectbox(
+                    "Quick Query",
+                    quick_queries,
+                    key=f"quick_query_{st.session_state.quick_query_key}",
+                    label_visibility="visible",  # Better for accessibility
+                    help="Select a pre-built query"
+                )
+                if selected_query != "Select a quick query...":
+                    st.session_state.messages.append({"role": "user", "content": selected_query})
+                    st.session_state.quick_query_key += 1  # Reset selectbox
+                    st.rerun()
+        else:
+            # On mobile, show quick queries in a separate row
+            st.markdown("#### 💡 Quick Queries")
+            quick_queries = [
+                "How much agricultural land is being lost?",
+                "Which states have the most urban expansion?",
+                "Compare forest loss between RCP45 and RCP85"
+            ]
+            for query in quick_queries:
+                if st.button(f"🔍 {query[:30]}...", key=f"mobile_quick_{query[:20]}", use_container_width=True):
+                    st.session_state.messages.append({"role": "user", "content": query})
+                    st.rerun()
+
+    st.divider()
+
+    # Main chat area
+    with st.container():
+        # Limit chat history size to prevent memory issues
+        MAX_CHAT_HISTORY = 1000
+        if len(st.session_state.messages) > MAX_CHAT_HISTORY:
+            st.session_state.messages = st.session_state.messages[-MAX_CHAT_HISTORY:]
 
         # Show welcome message
         show_welcome_message()
@@ -353,133 +410,59 @@ def main():
         # Handle user input
         handle_user_input()
 
-    with context_col:
-        # Context panel with query insights and quick actions
-        st.markdown('<div class="context-panel">', unsafe_allow_html=True)
-
-        # Model info at top of context panel
-        st.markdown('<div class="context-header">🤖 AI Model</div>', unsafe_allow_html=True)
-
-        # Check API key status
+    # Show additional info in sidebar
+    with st.sidebar:
         import os
-        has_openai = bool(os.getenv('OPENAI_API_KEY'))
 
-        if has_openai:
-            st.success("✅ GPT-4O Mini")
-        else:
-            st.error("❌ GPT-4O Mini (API key missing)")
-
-        st.caption("Using OpenAI's GPT-4O Mini model for all queries")
-
-        st.markdown("---")
-
-        # Quick actions section
-        st.markdown('<div class="context-header">🚀 Quick Actions</div>', unsafe_allow_html=True)
-
-        action_col1, action_col2 = st.columns(2)
-        with action_col1:
-            if st.button("🔄 Clear Chat", use_container_width=True):
-                st.session_state.messages = []
-                st.session_state.show_welcome = True
-                st.rerun()
-
-            if st.button("📊 View Schema", use_container_width=True):
-                if agent:
-                    schema_info = agent._get_schema_help()
-                    st.session_state.messages.append({
-                        "role": "assistant",
-                        "content": f"📊 **Database Schema:**\n\n{schema_info}"
-                    })
-                    st.rerun()
-
-        with action_col2:
-            if st.button("💡 Show Examples", use_container_width=True):
-                st.session_state.show_welcome = True
-                st.rerun()
-
-            if st.button("📥 Export Chat", use_container_width=True):
-                # Export chat history
-                chat_text = "\n\n".join([f"{m['role'].upper()}: {m['content']}" for m in st.session_state.messages])
-                st.download_button(
-                    label="Download Chat",
-                    data=chat_text,
-                    file_name="landuse_chat_history.txt",
-                    mime="text/plain"
-                )
-
-        st.markdown("---")
-
-        # Session statistics
-        st.markdown('<div class="context-header">📊 Session Statistics</div>', unsafe_allow_html=True)
-
+        st.markdown("### 📊 Session Statistics")
         total_queries = len([m for m in st.session_state.messages if m["role"] == "user"])
         successful_queries = len([m for m in st.session_state.messages if m["role"] == "assistant" and not m["content"].startswith("❌")])
 
-        metric_col1, metric_col2 = st.columns(2)
-        with metric_col1:
+        col1, col2 = st.columns(2)
+        with col1:
             st.metric("Total Queries", total_queries)
-        with metric_col2:
+        with col2:
             success_rate = (successful_queries / total_queries * 100) if total_queries > 0 else 0
             st.metric("Success Rate", f"{success_rate:.0f}%")
 
         if hasattr(st.session_state, 'last_query_time') and st.session_state.last_query_time:
             st.caption(f"⏱️ Last query: {st.session_state.last_query_time:.1f}s")
 
-        st.markdown("---")
+        st.divider()
 
-        # Quick query suggestions
-        st.markdown('<div class="context-header">💡 Try These Queries</div>', unsafe_allow_html=True)
-
-        quick_queries = [
-            "How much agricultural land is being lost?",
-            "Which states have the most urban expansion?",
-            "Compare forest loss between RCP45 and RCP85",
-            "Show crop to pasture transitions by state",
-            "What are the top 5 counties by land change?",
-            "Analyze California land transitions"
-        ]
-
-        for query in quick_queries:
-            if st.button(f"🔍 {query}", key=f"quick_{query[:20]}", use_container_width=True):
-                st.session_state.messages.append({"role": "user", "content": query})
-                st.rerun()
-
-        st.markdown('</div>', unsafe_allow_html=True)
-
-    # Show additional controls in sidebar
-    with st.sidebar:
         st.markdown("### ℹ️ System Information")
 
         # API key status
-        st.markdown("**API Key Status:**")
+        has_openai = bool(os.getenv('OPENAI_API_KEY'))
         if has_openai:
             st.success("✅ OpenAI API Key configured")
         else:
             st.error("❌ OpenAI API Key missing")
 
+        # Model info
+        st.info("🤖 Model: GPT-4O Mini")
 
-        st.markdown("---")
+        st.divider()
 
         # Configuration info
         st.markdown("### ⚙️ Configuration")
-        st.caption("🤖 Current Model: gpt-4o-mini")
         st.caption(f"🔄 Max iterations: {os.getenv('LANDUSE_MAX_ITERATIONS', '5')}")
         st.caption(f"⏱️ Max query time: {os.getenv('LANDUSE_MAX_EXECUTION_TIME', '120')}s")
         st.caption(f"📊 Max rows: {os.getenv('LANDUSE_MAX_QUERY_ROWS', '1000')}")
 
-        st.markdown("---")
+        st.divider()
+
         st.markdown("### 💡 Tips")
         st.info("""
         **Query Tips:**
         - Be specific about what you want to analyze
-        - Mention states, scenarios, or time periods for focused results
-        - Ask follow-up questions to drill down into details
-        - Use "compare" to analyze differences between scenarios
+        - Mention states, scenarios, or time periods
+        - Ask follow-up questions for details
+        - Use "compare" to analyze differences
 
         **If you hit rate limits:**
         - Wait 10-60 seconds between queries
         - Use simpler, more specific queries
-        - Check Settings page for configuration options
         """)
 
 if __name__ == "__main__":
