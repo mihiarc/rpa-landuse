@@ -45,7 +45,9 @@
       "WebFetch(domain:github.com)",
       "Bash(gh pr view:*)",
       "Bash(gh pr comment:*)",
-      "Bash(gh pr checks:*)"
+      "Bash(gh pr checks:*)",
+      "Bash(awk:*)",
+      "WebSearch"
     ],
     "deny": []
   }
