@@ -63,6 +63,9 @@ def initialize_session_state():
     if "show_welcome" not in st.session_state:
         st.session_state.show_welcome = True
 
+    if "quick_query_key" not in st.session_state:
+        st.session_state.quick_query_key = 0
+
     # Always use gpt-4o-mini - no model selection needed
 
 def show_welcome_message():
@@ -299,7 +302,13 @@ def main():
     # Quick actions at the top
     with st.container():
         st.markdown("### 🚀 Quick Actions")
-        col1, col2, col3, col4, col5 = st.columns(5)
+        # Use responsive columns - fewer on mobile
+        num_cols = 3 if st.session_state.get("mobile_view", False) else 5
+        if num_cols == 5:
+            col1, col2, col3, col4, col5 = st.columns(5)
+        else:
+            col1, col2, col3 = st.columns(3)
+            col4 = col5 = None  # These will be handled differently on mobile
 
         with col1:
             if st.button("🔄 Clear Chat", use_container_width=True, help="Clear conversation history"):
@@ -315,50 +324,83 @@ def main():
         with col3:
             if st.button("📊 Schema", use_container_width=True, help="View database schema"):
                 if agent:
-                    schema_info = agent._get_schema_help()
-                    st.session_state.messages.append({
-                        "role": "assistant",
-                        "content": f"📊 **Database Schema:**\n\n{schema_info}"
-                    })
+                    try:
+                        # Use public method if available, fallback to private
+                        schema_info = getattr(agent, 'get_schema_help', agent._get_schema_help)()
+                        st.session_state.messages.append({
+                            "role": "assistant",
+                            "content": f"📊 **Database Schema:**\n\n{schema_info}"
+                        })
+                        st.rerun()
+                    except Exception as e:
+                        st.error(f"Failed to get schema: {str(e)}")
+
+        # Handle column 4 based on layout
+        if col4 is not None:
+            with col4:
+                # Export chat button with error handling
+                try:
+                    # Limit export size to prevent memory issues
+                    MAX_EXPORT_MESSAGES = 500
+                    export_messages = st.session_state.messages[-MAX_EXPORT_MESSAGES:]
+                    chat_text = "\n\n".join([f"{m['role'].upper()}: {m['content'][:1000]}" for m in export_messages])
+                    st.download_button(
+                        "📥 Export",
+                        data=chat_text,
+                        file_name="landuse_chat_history.txt",
+                        mime="text/plain",
+                        use_container_width=True,
+                        help="Download chat history (last 500 messages)"
+                    )
+                except Exception as e:
+                    st.error(f"Export failed: {str(e)}")
+
+        # Handle column 5 based on layout
+        if col5 is not None:
+            with col5:
+                # Quick query dropdown with key to prevent infinite loop
+                quick_queries = [
+                    "Select a quick query...",
+                    "How much agricultural land is being lost?",
+                    "Which states have the most urban expansion?",
+                    "Compare forest loss between RCP45 and RCP85",
+                    "Show crop to pasture transitions by state",
+                    "What are the top 5 counties by land change?",
+                    "Analyze California land transitions"
+                ]
+                selected_query = st.selectbox(
+                    "Quick Query",
+                    quick_queries,
+                    key=f"quick_query_{st.session_state.quick_query_key}",
+                    label_visibility="visible",  # Better for accessibility
+                    help="Select a pre-built query"
+                )
+                if selected_query != "Select a quick query...":
+                    st.session_state.messages.append({"role": "user", "content": selected_query})
+                    st.session_state.quick_query_key += 1  # Reset selectbox
                     st.rerun()
-
-        with col4:
-            # Export chat button
-            chat_text = "\n\n".join([f"{m['role'].upper()}: {m['content']}" for m in st.session_state.messages])
-            st.download_button(
-                "📥 Export",
-                data=chat_text,
-                file_name="landuse_chat_history.txt",
-                mime="text/plain",
-                use_container_width=True,
-                help="Download chat history"
-            )
-
-        with col5:
-            # Quick query dropdown
+        else:
+            # On mobile, show quick queries in a separate row
+            st.markdown("#### 💡 Quick Queries")
             quick_queries = [
-                "Select a quick query...",
                 "How much agricultural land is being lost?",
                 "Which states have the most urban expansion?",
-                "Compare forest loss between RCP45 and RCP85",
-                "Show crop to pasture transitions by state",
-                "What are the top 5 counties by land change?",
-                "Analyze California land transitions"
+                "Compare forest loss between RCP45 and RCP85"
             ]
-            selected_query = st.selectbox(
-                "Quick Query",
-                quick_queries,
-                label_visibility="collapsed",
-                help="Select a pre-built query"
-            )
-            if selected_query != "Select a quick query...":
-                st.session_state.messages.append({"role": "user", "content": selected_query})
-                st.rerun()
+            for query in quick_queries:
+                if st.button(f"🔍 {query[:30]}...", key=f"mobile_quick_{query[:20]}", use_container_width=True):
+                    st.session_state.messages.append({"role": "user", "content": query})
+                    st.rerun()
 
     st.divider()
 
     # Main chat area
     with st.container():
+        # Limit chat history size to prevent memory issues
+        MAX_CHAT_HISTORY = 1000
+        if len(st.session_state.messages) > MAX_CHAT_HISTORY:
+            st.session_state.messages = st.session_state.messages[-MAX_CHAT_HISTORY:]
+
         # Show welcome message
         show_welcome_message()
 
