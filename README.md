@@ -1,6 +1,6 @@
 # 🌲 RPA Land Use Analytics
 
-AI-powered analytics tool for USDA Forest Service RPA Assessment land use data. Built with a modern data stack (DuckDB, LangChain, Claude/GPT-4) to analyze county-level land use projections from the 2020 Resources Planning Act Assessment.
+AI-powered analytics tool for USDA Forest Service RPA Assessment land use data. Built with a modern data stack (DuckDB, LangChain, GPT-4) to analyze county-level land use projections from the 2020 Resources Planning Act Assessment.
 
 ## ✨ Features
 
@@ -27,9 +27,8 @@ uv run python -c "import landuse; print('✅ Installation successful')"
 # Copy example environment file to config directory
 cp .env.example config/.env
 
-# Edit config/.env and add your API key (choose one):
-# OPENAI_API_KEY=your_openai_key_here      # For GPT models  
-# ANTHROPIC_API_KEY=your_anthropic_key_here # For Claude models
+# Edit config/.env and add your API key:
+# OPENAI_API_KEY=your_openai_key_here      # For GPT models
 ```
 
 ### 3. Set Up Database
@@ -56,7 +55,7 @@ uv run streamlit run landuse_app.py
 uv run rpa-analytics
 
 # Or with specific model
-uv run rpa-analytics --model claude-3-5-sonnet-20241022 --verbose
+uv run rpa-analytics --model gpt-4o --verbose
 ```
 
 #### Option C: Direct Database Access
@@ -80,12 +79,11 @@ duckdb data/processed/landuse_analytics.duckdb
 The application uses environment variables for configuration. Copy `.env.example` to `config/.env` and customize:
 
 ```bash
-# API Keys (at least one required)
+# API Key (required)
 OPENAI_API_KEY=your_openai_key              # For GPT-4o-mini, GPT-4o models
-ANTHROPIC_API_KEY=your_anthropic_key        # For Claude 3.5 Sonnet models
 
 # Model Configuration  
-LANDUSE_MODEL=gpt-4o-mini                   # Model to use (gpt-4o-mini, claude-3-5-sonnet-20241022)
+LANDUSE_MODEL=gpt-4o-mini                   # Model to use (gpt-4o-mini, gpt-4o, gpt-3.5-turbo)
 TEMPERATURE=0.1                             # Model temperature (0.0-2.0)
 MAX_TOKENS=4000                             # Maximum tokens per response
 
@@ -114,7 +112,7 @@ The application supports both legacy and modern configuration approaches:
 The CLI agent supports various configuration options:
 ```bash
 uv run rpa-analytics --help                 # Show all options
-uv run rpa-analytics --model claude-3-5-sonnet-20241022 --verbose
+uv run rpa-analytics --model gpt-4o --verbose
 uv run rpa-analytics --max-iterations 10 --temperature 0.2
 ```
 

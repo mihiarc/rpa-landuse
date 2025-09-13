@@ -64,7 +64,6 @@ Add your API keys in the Streamlit Cloud secrets management:
 ```toml
 # In Streamlit Cloud Secrets (Advanced Settings)
 OPENAI_API_KEY = "your-openai-api-key"
-ANTHROPIC_API_KEY = "your-anthropic-api-key"  # Optional
 
 # Optional configuration
 LANDUSE_MODEL = "gpt-4o-mini"
@@ -89,7 +88,6 @@ The app reads from Streamlit secrets automatically. Configure these in the Strea
 OPENAI_API_KEY = st.secrets["OPENAI_API_KEY"]
 
 # Optional (with defaults)
-ANTHROPIC_API_KEY = st.secrets.get("ANTHROPIC_API_KEY", "")
 LANDUSE_MODEL = st.secrets.get("LANDUSE_MODEL", "gpt-4o-mini")
 ```
 

@@ -131,7 +131,6 @@ def test_model_config():
     assert "default_max_tokens" in MODEL_CONFIG
     assert "max_iterations" in MODEL_CONFIG
     assert "default_openai_model" in MODEL_CONFIG
-    assert "default_anthropic_model" in MODEL_CONFIG
 
     # Check values
     assert MODEL_CONFIG["default_temperature"] == 0.1
@@ -139,7 +138,6 @@ def test_model_config():
     assert MODEL_CONFIG["max_iterations"] == 5  # Updated default
     assert MODEL_CONFIG["max_execution_time"] == 120  # New field
     assert "gpt" in MODEL_CONFIG["default_openai_model"]
-    assert "claude" in MODEL_CONFIG["default_anthropic_model"]
 
 
 def test_rate_limit_config():

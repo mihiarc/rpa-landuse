@@ -112,12 +112,8 @@ class LanduseConfig:
             raise FileNotFoundError(f"Database file not found: {self.db_path}")
 
         # Validate model configuration
-        if self.model_name.startswith("claude"):
-            if not os.getenv('ANTHROPIC_API_KEY'):
-                raise ValueError("ANTHROPIC_API_KEY required for Claude models")
-        else:
-            if not os.getenv('OPENAI_API_KEY'):
-                raise ValueError("OPENAI_API_KEY required for OpenAI models")
+        if not os.getenv('OPENAI_API_KEY'):
+            raise ValueError("OPENAI_API_KEY required for OpenAI models")
 
         # Validate numeric ranges
         if not 0.0 <= self.temperature <= 2.0:
@@ -207,13 +203,12 @@ class LanduseConfig:
 
     def __repr__(self) -> str:
         """Clean string representation for debugging"""
-        masked_keys = ['ANTHROPIC_API_KEY', 'OPENAI_API_KEY']
+        masked_keys = ['OPENAI_API_KEY']
 
         # Create a copy of the dict with masked sensitive values
         config_dict = self.to_dict()
 
         # Mask API keys if they would be visible in repr
-        api_key_anthropic = os.getenv('ANTHROPIC_API_KEY', '')
         api_key_openai = os.getenv('OPENAI_API_KEY', '')
 
         repr_lines = [f"{self.__class__.__name__}("]

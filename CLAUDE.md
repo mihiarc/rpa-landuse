@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-RPA Land Use Analytics is an AI-powered analytics tool for USDA Forest Service RPA Assessment data. Built with a modern data stack (DuckDB, LangChain, Claude/GPT-4), it processes county-level land use projections and enables users to ask questions in plain English about land use changes across different climate scenarios from the 2020 RPA Assessment.
+RPA Land Use Analytics is an AI-powered analytics tool for USDA Forest Service RPA Assessment data. Built with a modern data stack (DuckDB, LangChain, GPT-4), it processes county-level land use projections and enables users to ask questions in plain English about land use changes across different climate scenarios from the 2020 RPA Assessment.
 
 ## Key Commands
 
@@ -313,12 +313,11 @@ The application now uses a unified Pydantic-based configuration system with comp
 #### Environment Variables
 Create `config/.env` with LANDUSE_ prefixed variables:
 ```bash
-# Required API Keys
+# Required API Key
 OPENAI_API_KEY=your_openai_key
-ANTHROPIC_API_KEY=your_anthropic_key  # For Claude models
 
 # LLM Configuration (LANDUSE_LLM__ prefix)
-LANDUSE_LLM__MODEL_NAME=gpt-4o-mini        # or claude-3-5-sonnet-20241022
+LANDUSE_LLM__MODEL_NAME=gpt-4o-mini        # or gpt-4o, gpt-3.5-turbo
 LANDUSE_LLM__TEMPERATURE=0.1
 LANDUSE_LLM__MAX_TOKENS=4000
 
@@ -361,7 +360,7 @@ config = AppConfig()
 
 # Or create with overrides
 config = AppConfig.from_env(
-    llm__model_name='claude-3-5-sonnet-20241022',
+    llm__model_name='gpt-4o',
     agent__max_iterations=12,
     logging__level='DEBUG'
 )
@@ -804,7 +803,7 @@ duckdb data/processed/landuse_analytics.duckdb
 1. **Home Page**: Feature overview with dataset statistics and navigation cards
 2. **Natural Language Chat** (`views/chat.py`): 
    - Real-time streaming responses with agent conversation
-   - Model selection (GPT-4o-mini, Claude 3.5 Sonnet)
+   - Model selection (GPT-4o-mini, GPT-4o, GPT-3.5 Turbo)
    - Conversation history with agent reasoning display
    - Error handling with rate limit detection
 3. **Analytics Dashboard** (`views/analytics.py`):
@@ -884,7 +883,7 @@ uv run python -m pytest tests/integration/   # Integration tests
 ## Dependencies
 
 Key packages (managed via `uv`):
-- **Core**: langchain, langchain-anthropic, langchain-community, langgraph
+- **Core**: langchain, langchain-openai, langchain-community, langgraph
 - **Modern Agent Framework**: langgraph (for state-based agents)
 - **Data**: pandas, duckdb (0.11.0+), pyarrow, ijson
 - **Web UI**: streamlit (1.40.0+), plotly  
