@@ -5,8 +5,8 @@ Detects query intent and selects appropriate specialized prompts.
 """
 
 import re
-from typing import Dict, List, Optional, Tuple
 from dataclasses import dataclass
+from typing import Dict, List, Optional, Tuple
 
 from landuse.agents.prompts import PromptVariations, get_system_prompt
 

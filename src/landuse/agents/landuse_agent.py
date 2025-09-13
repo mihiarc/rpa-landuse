@@ -15,8 +15,8 @@ from landuse.agents.conversation_manager import ConversationManager
 from landuse.agents.database_manager import DatabaseManager
 from landuse.agents.graph_builder import GraphBuilder
 from landuse.agents.llm_manager import LLMManager
-from landuse.agents.prompts import get_system_prompt
 from landuse.agents.prompt_selector import auto_select_prompt
+from landuse.agents.prompts import get_system_prompt
 from landuse.agents.query_executor import QueryExecutor
 from landuse.agents.state import AgentState
 from landuse.config.landuse_config import LanduseConfig
