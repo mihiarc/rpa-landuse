@@ -47,7 +47,9 @@
       "Bash(gh pr comment:*)",
       "Bash(gh pr checks:*)",
       "Bash(awk:*)",
-      "WebSearch"
+      "WebSearch",
+      "Bash(gh pr create:*)",
+      "Bash(gh pr diff:*)"
     ],
     "deny": []
   }

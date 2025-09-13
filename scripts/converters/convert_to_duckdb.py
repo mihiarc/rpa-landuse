@@ -12,6 +12,8 @@ Typical usage:
 
 import json
 import os
+import secrets
+import shutil
 import sys
 import tempfile
 import time
@@ -49,12 +51,19 @@ class LanduseDataConverter:
         temp_dir: Directory for temporary Parquet files during bulk loading.
     """
 
+    # Security limits
+    MAX_FILE_SIZE = 10 * 1024 * 1024 * 1024  # 10GB max file size
+    MAX_RECORDS = 100_000_000  # 100M max records
+    MAX_BATCH_SIZE = 1_000_000  # 1M records per batch
+
     def __init__(self, input_file: str, output_file: str, use_bulk_copy: bool = True):
-        self.input_file = Path(input_file)
-        self.output_file = Path(output_file)
+        # Validate and resolve paths securely
+        self.input_file = self._validate_input_path(input_file)
+        self.output_file = self._validate_output_path(output_file)
         self.conn = None
         self.use_bulk_copy = use_bulk_copy
         self.temp_dir = tempfile.mkdtemp(prefix="landuse_convert_")
+        self._validate_file_size()
 
         # Land use type mappings
         self.landuse_types = {
@@ -66,6 +75,74 @@ class LanduseDataConverter:
         }
 
         console.print(f"🚀 Using {'bulk COPY' if use_bulk_copy else 'traditional INSERT'} loading method")
+
+    def _validate_input_path(self, input_file: str) -> Path:
+        """Validate input file path for security.
+
+        Args:
+            input_file: Path to input JSON file.
+
+        Returns:
+            Validated Path object.
+
+        Raises:
+            ValueError: If path is invalid or insecure.
+            FileNotFoundError: If file doesn't exist.
+        """
+        # Prevent path traversal
+        if ".." in str(input_file):
+            raise ValueError("Path traversal detected in input file")
+
+        path = Path(input_file).resolve()
+
+        # Check file exists
+        if not path.exists():
+            raise FileNotFoundError(f"Input file not found: {input_file}")
+
+        # Validate file type
+        if not path.suffix.lower() == '.json':
+            raise ValueError("Input must be a JSON file")
+
+        return path
+
+    def _validate_output_path(self, output_file: str) -> Path:
+        """Validate output file path for security.
+
+        Args:
+            output_file: Path to output database file.
+
+        Returns:
+            Validated Path object.
+
+        Raises:
+            ValueError: If path is invalid or insecure.
+            FileNotFoundError: If parent directory doesn't exist.
+        """
+        # Prevent path traversal
+        if ".." in str(output_file):
+            raise ValueError("Path traversal detected in output file")
+
+        path = Path(output_file).resolve()
+
+        # Check parent directory exists
+        if not path.parent.exists():
+            raise FileNotFoundError(f"Output directory does not exist: {path.parent}")
+
+        # Validate file extension
+        if path.suffix and path.suffix.lower() not in ['.db', '.duckdb', '.duck']:
+            raise ValueError("Output file must be a DuckDB database file")
+
+        return path
+
+    def _validate_file_size(self):
+        """Check input file size against security limits.
+
+        Raises:
+            ValueError: If file exceeds size limit.
+        """
+        file_size = self.input_file.stat().st_size
+        if file_size > self.MAX_FILE_SIZE:
+            raise ValueError(f"Input file too large ({file_size / 1024 / 1024 / 1024:.2f}GB > {self.MAX_FILE_SIZE / 1024 / 1024 / 1024}GB limit)")
 
     def create_schema(self):
         """Create star schema with dimension and fact tables.
@@ -601,23 +678,45 @@ class LanduseDataConverter:
         return total
 
     def _write_and_copy_batch(self, batch_data: list[dict], batch_num: int):
-        """Write batch to Parquet file and use DuckDB COPY to load it"""
+        """Write batch to Parquet file and use DuckDB COPY to load it.
+
+        Args:
+            batch_data: List of transition records.
+            batch_num: Batch number for unique file naming.
+        """
+        # Validate batch size
+        if len(batch_data) > self.MAX_BATCH_SIZE:
+            raise ValueError(f"Batch size {len(batch_data)} exceeds maximum {self.MAX_BATCH_SIZE}")
+
         # Create DataFrame from batch
         df = pd.DataFrame(batch_data)
 
-        # Write to temporary Parquet file
-        temp_file = Path(self.temp_dir) / f"transitions_batch_{batch_num}.parquet"
-        df.to_parquet(temp_file, index=False)
+        # Generate secure temporary filename
+        temp_file = Path(self.temp_dir) / f"transitions_batch_{batch_num}_{secrets.token_hex(8)}.parquet"
 
-        # Use DuckDB COPY to load the batch
-        self.conn.execute(f"""
-            COPY fact_landuse_transitions
-            (transition_id, scenario_id, time_id, geography_id, from_landuse_id, to_landuse_id, acres, transition_type)
-            FROM '{temp_file}' (FORMAT PARQUET)
-        """)
+        try:
+            # Write to temporary Parquet file
+            df.to_parquet(temp_file, index=False)
 
-        # Clean up temporary file to save space
-        temp_file.unlink()
+            # Validate temp file path is within temp directory
+            if not temp_file.resolve().is_relative_to(Path(self.temp_dir).resolve()):
+                raise ValueError("Temporary file path escape detected")
+
+            # Use validated path for COPY
+            validated_path = str(temp_file.resolve())
+            if not Path(validated_path).exists():
+                raise FileNotFoundError(f"Temp file not found: {validated_path}")
+
+            # Execute COPY with validated path
+            self.conn.execute(f"""
+                COPY fact_landuse_transitions
+                (transition_id, scenario_id, time_id, geography_id, from_landuse_id, to_landuse_id, acres, transition_type)
+                FROM '{validated_path}' (FORMAT PARQUET)
+            """)
+        finally:
+            # Always clean up temp file
+            if temp_file.exists():
+                temp_file.unlink()
 
     def _insert_batch(self, batch_data: list[tuple]):
         """Insert a batch of transition records"""
@@ -754,9 +853,8 @@ class LanduseDataConverter:
         if self.conn:
             self.conn.close()
 
-        # Clean up temporary directory
-        import shutil
-        if os.path.exists(self.temp_dir):
+        # Securely clean up temporary directory
+        if self.temp_dir and os.path.exists(self.temp_dir):
             try:
                 shutil.rmtree(self.temp_dir)
                 console.print(f"🧹 Cleaned up temporary files from {self.temp_dir}")
