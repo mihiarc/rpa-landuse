@@ -112,7 +112,7 @@ def display_chat_history():
 @st.fragment
 def handle_user_input():
     """Handle user input and generate response - runs in isolation"""
-    # Get agent with selected model
+    # Get agent instance
     agent, error = get_agent()
 
     if error:
@@ -324,7 +324,7 @@ def main():
     # Initialize session state
     initialize_session_state()
 
-    # Check agent status with selected model
+    # Check agent status
     agent, error = get_agent()
 
     if error:
