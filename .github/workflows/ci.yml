@@ -31,4 +31,4 @@ jobs:
       run: |
         mkdir -p data/processed
         touch data/processed/landuse_analytics.duckdb
-        uv run pytest tests/ --maxfail=5 -q
+        uv run pytest tests/ --maxfail=5 --cov=src --cov-report=term-missing
