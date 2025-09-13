@@ -43,7 +43,9 @@
       "Bash(gh run list:*)",
       "Bash(gh run watch:*)",
       "WebFetch(domain:github.com)",
-      "Bash(gh pr view:*)"
+      "Bash(gh pr view:*)",
+      "Bash(gh pr comment:*)",
+      "Bash(gh pr checks:*)"
     ],
     "deny": []
   }
