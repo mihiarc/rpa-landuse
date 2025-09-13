@@ -3,7 +3,6 @@
 import os
 from typing import Optional, Union
 
-from langchain_anthropic import ChatAnthropic
 from langchain_core.language_models import BaseChatModel
 from langchain_openai import ChatOpenAI
 from rich.console import Console
@@ -79,25 +78,8 @@ class LLMManager(LLMInterface):
 
         self.console.print(f"[blue]Initializing LLM: {model_name}[/blue]")
 
-        if "claude" in model_name.lower():
-            return self._create_anthropic_llm(model_name)
-        else:
-            return self._create_openai_llm(model_name)
-
-    def _create_anthropic_llm(self, model_name: str) -> ChatAnthropic:
-        """Create Anthropic Claude LLM instance."""
-        api_key = os.getenv('ANTHROPIC_API_KEY')
-        self.console.print(f"[dim]Using Anthropic API key: {self._mask_api_key(api_key)}[/dim]")
-
-        if not api_key:
-            raise APIKeyError("ANTHROPIC_API_KEY environment variable is required for Claude models", model_name)
-
-        return ChatAnthropic(
-            model=model_name,
-            anthropic_api_key=api_key,
-            temperature=self.config.temperature,
-            max_tokens=self.config.max_tokens,
-        )
+        # Always use OpenAI
+        return self._create_openai_llm(model_name)
 
     def _create_openai_llm(self, model_name: str) -> ChatOpenAI:
         """Create OpenAI LLM instance."""
@@ -134,9 +116,4 @@ class LLMManager(LLMInterface):
 
     def validate_api_key(self) -> bool:
         """Validate API key is available and valid."""
-        model_name = self.config.model_name
-
-        if "claude" in model_name.lower():
-            return os.getenv('ANTHROPIC_API_KEY') is not None
-        else:
-            return os.getenv('OPENAI_API_KEY') is not None
+        return os.getenv('OPENAI_API_KEY') is not None

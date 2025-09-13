@@ -3,7 +3,6 @@
 import os
 from typing import Optional, Union
 
-from langchain_anthropic import ChatAnthropic
 from langchain_core.language_models import BaseChatModel
 from langchain_openai import ChatOpenAI
 
@@ -47,37 +46,9 @@ class LLMFactory:
             temperature = temperature or config.temperature
             max_tokens = max_tokens or config.max_tokens
 
-        # Determine which LLM to create based on model name
-        if "claude" in model_name.lower():
-            return LLMFactory._create_anthropic_llm(
-                model_name, temperature, max_tokens, config
-            )
-        else:
-            return LLMFactory._create_openai_llm(
-                model_name, temperature, max_tokens, config
-            )
-
-    @staticmethod
-    def _create_anthropic_llm(
-        model_name: str,
-        temperature: float,
-        max_tokens: int,
-        config: LanduseConfig
-    ) -> ChatAnthropic:
-        """Create an Anthropic Claude LLM instance."""
-        api_key = os.getenv('ANTHROPIC_API_KEY')
-
-        if not api_key:
-            raise ValueError(
-                "ANTHROPIC_API_KEY environment variable is required for Claude models. "
-                "Please set it in your .env file or environment."
-            )
-
-        return ChatAnthropic(
-            model=model_name,
-            anthropic_api_key=api_key,
-            temperature=temperature,
-            max_tokens=max_tokens,
+        # Create OpenAI LLM
+        return LLMFactory._create_openai_llm(
+            model_name, temperature, max_tokens, config
         )
 
     @staticmethod
@@ -113,12 +84,6 @@ class LLMFactory:
                 "gpt-4-turbo",
                 "gpt-4",
                 "gpt-3.5-turbo",
-            ],
-            "anthropic": [
-                "claude-3-5-sonnet-20241022",
-                "claude-3-haiku-20240307",
-                "claude-3-opus-20240229",
-                "claude-3-sonnet-20240229",
             ]
         }
 

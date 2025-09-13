@@ -42,29 +42,17 @@ def check_system_status():
 
     # Check API keys
     openai_key = os.getenv("OPENAI_API_KEY")
-    anthropic_key = os.getenv("ANTHROPIC_API_KEY")
 
     if openai_key:
         status["api_keys"]["details"]["openai"] = {
             "configured": True,
             "preview": f"{openai_key[:8]}...{openai_key[-4:]}" if len(openai_key) > 12 else "****"
         }
+        status["api_keys"]["status"] = True
+        status["api_keys"]["message"] = "OpenAI API key configured"
     else:
         status["api_keys"]["details"]["openai"] = {"configured": False}
-
-    if anthropic_key:
-        status["api_keys"]["details"]["anthropic"] = {
-            "configured": True,
-            "preview": f"{anthropic_key[:8]}...{anthropic_key[-4:]}" if len(anthropic_key) > 12 else "****"
-        }
-    else:
-        status["api_keys"]["details"]["anthropic"] = {"configured": False}
-
-    if openai_key or anthropic_key:
-        status["api_keys"]["status"] = True
-        status["api_keys"]["message"] = "At least one API key configured"
-    else:
-        status["api_keys"]["message"] = "No API keys found"
+        status["api_keys"]["message"] = "OpenAI API key not found"
 
     # Check dependencies
     try:
@@ -179,7 +167,6 @@ def show_system_status():
                 2. Add your API keys:
                    ```
                    OPENAI_API_KEY=your_openai_key_here
-                   ANTHROPIC_API_KEY=your_anthropic_key_here
                    ```
                 3. Restart the application
                 """)
@@ -209,7 +196,7 @@ def show_configuration():
         },
         "LANDUSE_MODEL": {
             "current": os.getenv('LANDUSE_MODEL', 'gpt-4o-mini'),
-            "description": "AI model to use (gpt-4o-mini, claude-3-5-sonnet-20241022, etc.)"
+            "description": "AI model to use (gpt-4o-mini, gpt-4o, gpt-3.5-turbo)"
         },
         "TEMPERATURE": {
             "current": os.getenv('TEMPERATURE', '0.1'),
@@ -243,7 +230,6 @@ def show_configuration():
         st.code("""
 # API Keys (required)
 OPENAI_API_KEY=your_openai_api_key_here
-ANTHROPIC_API_KEY=your_anthropic_api_key_here
 
 # Model Configuration
 LANDUSE_MODEL=gpt-4o-mini

@@ -87,12 +87,8 @@ class LLMConfig(BaseModel):
     @classmethod
     def validate_model_name(cls, v: str) -> str:
         """Validate model name and check API key availability."""
-        if v.lower().startswith('claude'):
-            if not os.getenv('ANTHROPIC_API_KEY'):
-                raise ConfigurationError("ANTHROPIC_API_KEY required for Claude models")
-        elif v.lower().startswith('gpt') or v.lower().startswith('o1'):
-            if not os.getenv('OPENAI_API_KEY'):
-                raise ConfigurationError("OPENAI_API_KEY required for OpenAI models")
+        if not os.getenv('OPENAI_API_KEY'):
+            raise ConfigurationError("OPENAI_API_KEY required for OpenAI models")
         return v
 
 

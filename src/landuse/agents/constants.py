@@ -171,8 +171,7 @@ MODEL_CONFIG = {
     "default_max_tokens": 4000,
     "max_iterations": int(os.getenv("LANDUSE_MAX_ITERATIONS", "5")),  # Increased from 3 to 5
     "max_execution_time": int(os.getenv("LANDUSE_MAX_EXECUTION_TIME", "120")),  # 2 minutes default
-    "default_openai_model": "gpt-4o-mini",
-    "default_anthropic_model": "claude-3-5-sonnet-20241022"
+    "default_openai_model": "gpt-4o-mini"
 }
 
 # Rate limiting configuration

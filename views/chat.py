@@ -369,23 +369,17 @@ def main():
         model_options = {
             "gpt-4o-mini": "GPT-4O Mini",
             "gpt-4o": "GPT-4O",
-            "gpt-3.5-turbo": "GPT-3.5 Turbo",
-            "claude-3-5-sonnet-20241022": "Claude 3.5 Sonnet",
-            "claude-3-opus-20240229": "Claude 3 Opus",
-            "claude-3-haiku-20240307": "Claude 3 Haiku"
+            "gpt-3.5-turbo": "GPT-3.5 Turbo"
         }
 
         # Check which API keys are available
         import os
         has_openai = bool(os.getenv('OPENAI_API_KEY'))
-        has_anthropic = bool(os.getenv('ANTHROPIC_API_KEY'))
 
         # Filter available models
         available_models = {}
         for model_id, model_name in model_options.items():
-            if model_id.startswith("gpt") and has_openai:
-                available_models[model_id] = f"✅ {model_name}"
-            elif model_id.startswith("claude") and has_anthropic:
+            if has_openai:
                 available_models[model_id] = f"✅ {model_name}"
             else:
                 available_models[model_id] = f"❌ {model_name}"
@@ -493,10 +487,6 @@ def main():
         else:
             st.error("❌ OpenAI API Key missing")
 
-        if has_anthropic:
-            st.success("✅ Anthropic API Key configured")
-        else:
-            st.error("❌ Anthropic API Key missing")
 
         st.markdown("---")
 
