@@ -23,7 +23,7 @@ class LLMFactory:
         Create an LLM instance based on model name and configuration.
 
         Args:
-            model_name: The model to use (e.g., 'gpt-4o-mini', 'claude-3-haiku-20240307')
+            model_name: Ignored - always uses 'gpt-4o-mini'
             temperature: Temperature for generation (0.0-1.0)
             max_tokens: Maximum tokens to generate
             config: LanduseConfig instance (if provided, overrides other params)
@@ -36,17 +36,16 @@ class LLMFactory:
         """
         # Use config if provided, otherwise use individual params
         if config:
-            model_name = model_name or config.model_name
             temperature = temperature or config.temperature
             max_tokens = max_tokens or config.max_tokens
         else:
             # Load config for API keys
             config = LanduseConfig()
-            model_name = model_name or config.model_name
             temperature = temperature or config.temperature
             max_tokens = max_tokens or config.max_tokens
 
-        # Create OpenAI LLM
+        # Always use gpt-4o-mini
+        model_name = "gpt-4o-mini"
         return LLMFactory._create_openai_llm(
             model_name, temperature, max_tokens, config
         )
@@ -80,10 +79,6 @@ class LLMFactory:
         return {
             "openai": [
                 "gpt-4o-mini",
-                "gpt-4o",
-                "gpt-4-turbo",
-                "gpt-4",
-                "gpt-3.5-turbo",
             ]
         }
 

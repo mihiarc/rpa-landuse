@@ -63,10 +63,10 @@ class TestLLMManager:
                     manager = LLMManager(config)
                     manager.create_llm()
 
-                    # Verify correct model was requested
+                    # Verify gpt-4o-mini is always used regardless of config
                     mock_openai.assert_called_once()
                     call_args = mock_openai.call_args
-                    assert call_args[1]['model'] == model_name
+                    assert call_args[1]['model'] == "gpt-4o-mini"
 
     def test_create_llm_missing_api_key(self):
         """Test error handling when OpenAI API key is missing."""
@@ -83,32 +83,6 @@ class TestLLMManager:
             assert "OPENAI_API_KEY environment variable is required" in str(exc_info.value)
             assert exc_info.value.model_name == "gpt-4o-mini"
 
-    def test_create_llm_with_anthropic_model_should_fail(self):
-        """Test that Anthropic models are rejected gracefully."""
-        anthropic_models = [
-            "claude-3-5-sonnet-20241022",
-            "claude-3-sonnet-20240229",
-            "claude-3-haiku-20240307",
-            "claude-3-opus-20240229"
-        ]
-
-        for model_name in anthropic_models:
-            with patch('landuse.config.landuse_config.LanduseConfig.__post_init__', return_value=None):
-                config = LanduseConfig(model_name=model_name)
-
-            with patch.dict(os.environ, {'OPENAI_API_KEY': 'sk-test123456789012345678901234567890123456789012345'}):
-                manager = LLMManager(config)
-
-                # Claude models should now raise a helpful migration error
-                with pytest.raises(LLMError) as exc_info:
-                    manager.create_llm()
-
-                # Check the error message provides migration guidance
-                error_msg = str(exc_info.value)
-                assert "no longer supported" in error_msg
-                assert "Please use" in error_msg
-                assert "LANDUSE_MODEL=" in error_msg
-                assert "OPENAI_API_KEY" in error_msg
 
     def test_api_key_masking(self):
         """Test API key masking for security."""
@@ -143,12 +117,12 @@ class TestLLMManager:
             assert manager.validate_api_key() is False
 
     def test_get_model_name(self):
-        """Test getting current model name."""
+        """Test getting current model name - always gpt-4o-mini."""
         with patch('landuse.config.landuse_config.LanduseConfig.__post_init__', return_value=None):
             config = LanduseConfig(model_name="gpt-4o")
 
         manager = LLMManager(config)
-        assert manager.get_model_name() == "gpt-4o"
+        assert manager.get_model_name() == "gpt-4o-mini"
 
     def test_app_config_compatibility(self):
         """Test LLM Manager works with new AppConfig."""

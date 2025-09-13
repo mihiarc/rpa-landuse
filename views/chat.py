@@ -18,21 +18,18 @@ sys.path.insert(0, str(src_path))
 import streamlit as st  # noqa: E402
 
 
-def initialize_agent(model_name: str = None):
-    """Initialize the landuse agent with specified model"""
+def initialize_agent():
+    """Initialize the landuse agent with gpt-4o-mini"""
     try:
         from landuse.agents import LanduseAgent
         from landuse.config import LanduseConfig
 
         # Show loading message
-        with st.spinner(f"🤖 Initializing AI agent with {model_name or 'default model'}..."):
-            # Create config for Streamlit with specified model
-            config_kwargs = {'debug': True}
-            if model_name:
-                config_kwargs['model_name'] = model_name
-            config = LanduseConfig.for_agent_type('streamlit', **config_kwargs)
+        with st.spinner("🤖 Initializing AI agent with gpt-4o-mini..."):
+            # Create config for Streamlit
+            config = LanduseConfig.for_agent_type('streamlit', debug=True)
             agent = LanduseAgent(config)
-            print(f"DEBUG: Agent initialized with model {agent.model_name}")
+            print("DEBUG: Agent initialized with gpt-4o-mini")
 
         return agent, None
     except FileNotFoundError as e:
@@ -46,9 +43,9 @@ def initialize_agent(model_name: str = None):
         return None, error_msg
 
 @st.cache_resource(ttl=300)  # 5 minute TTL to prevent stale agent
-def get_agent(model_name: str = None):
+def get_agent():
     """Get cached agent instance with TTL"""
-    agent, error = initialize_agent(model_name)
+    agent, error = initialize_agent()
     if error:
         # Don't cache errors
         st.cache_resource.clear()
@@ -66,9 +63,7 @@ def initialize_session_state():
     if "show_welcome" not in st.session_state:
         st.session_state.show_welcome = True
 
-    if "selected_model" not in st.session_state:
-        # Default to OpenAI
-        st.session_state.selected_model = "gpt-4o-mini"
+    # Always use gpt-4o-mini - no model selection needed
 
 def show_welcome_message():
     """Show welcome message and example queries"""
@@ -118,7 +113,7 @@ def display_chat_history():
 def handle_user_input():
     """Handle user input and generate response - runs in isolation"""
     # Get agent with selected model
-    agent, error = get_agent(st.session_state.selected_model)
+    agent, error = get_agent()
 
     if error:
         st.error(f"❌ {error}")
@@ -262,7 +257,7 @@ def show_chat_controls():
     with col3:
         if st.button("📊 View Schema", help="Show database schema"):
             if "agent_initialized" in st.session_state:
-                agent, _ = get_agent(st.session_state.selected_model)
+                agent, _ = get_agent()
                 if agent:
                     schema_info = agent._get_schema_help()
                     st.session_state.messages.append({
@@ -330,7 +325,7 @@ def main():
     initialize_session_state()
 
     # Check agent status with selected model
-    agent, error = get_agent(st.session_state.selected_model)
+    agent, error = get_agent()
 
     if error:
         st.error(f"❌ {error}")
@@ -362,44 +357,19 @@ def main():
         # Context panel with query insights and quick actions
         st.markdown('<div class="context-panel">', unsafe_allow_html=True)
 
-        # Model selection at top of context panel
-        st.markdown('<div class="context-header">🤖 Model Selection</div>', unsafe_allow_html=True)
+        # Model info at top of context panel
+        st.markdown('<div class="context-header">🤖 AI Model</div>', unsafe_allow_html=True)
 
-        # Model options
-        model_options = {
-            "gpt-4o-mini": "GPT-4O Mini",
-            "gpt-4o": "GPT-4O",
-            "gpt-3.5-turbo": "GPT-3.5 Turbo"
-        }
-
-        # Check which API keys are available
+        # Check API key status
         import os
         has_openai = bool(os.getenv('OPENAI_API_KEY'))
 
-        # Filter available models
-        available_models = {}
-        for model_id, model_name in model_options.items():
-            if has_openai:
-                available_models[model_id] = f"✅ {model_name}"
-            else:
-                available_models[model_id] = f"❌ {model_name}"
+        if has_openai:
+            st.success("✅ GPT-4O Mini")
+        else:
+            st.error("❌ GPT-4O Mini (API key missing)")
 
-        # Model selector
-        selected_model = st.selectbox(
-            "Choose AI Model:",
-            options=list(model_options.keys()),
-            format_func=lambda x: available_models[x],
-            index=list(model_options.keys()).index(st.session_state.selected_model),
-            help="Select the AI model to use for chat"
-        )
-
-        # Update model if changed
-        if selected_model != st.session_state.selected_model:
-            st.session_state.selected_model = selected_model
-            st.session_state.messages = []  # Clear chat history
-            st.session_state.show_welcome = True
-            st.cache_resource.clear()  # Clear agent cache
-            st.rerun()
+        st.caption("Using OpenAI's GPT-4O Mini model for all queries")
 
         st.markdown("---")
 
@@ -492,7 +462,7 @@ def main():
 
         # Configuration info
         st.markdown("### ⚙️ Configuration")
-        st.caption(f"🤖 Current Model: {st.session_state.selected_model}")
+        st.caption("🤖 Current Model: gpt-4o-mini")
         st.caption(f"🔄 Max iterations: {os.getenv('LANDUSE_MAX_ITERATIONS', '5')}")
         st.caption(f"⏱️ Max query time: {os.getenv('LANDUSE_MAX_EXECUTION_TIME', '120')}s")
         st.caption(f"📊 Max rows: {os.getenv('LANDUSE_MAX_QUERY_ROWS', '1000')}")

@@ -74,24 +74,8 @@ class LLMManager(LLMInterface):
         Raises:
             ValueError: If required API keys are missing
         """
-        model_name = self.config.model_name
-
-        # Migration helper for Claude users
-        if "claude" in model_name.lower():
-            suggested_model = self._suggest_openai_equivalent(model_name)
-            raise LLMError(
-                f"Claude model '{model_name}' is no longer supported. "
-                f"Please use '{suggested_model}' instead.\n"
-                f"To migrate:\n"
-                f"1. Update your .env file: LANDUSE_MODEL={suggested_model}\n"
-                f"2. Or set environment variable: export LANDUSE_MODEL={suggested_model}\n"
-                f"3. Ensure you have OPENAI_API_KEY configured",
-                model_name=model_name
-            )
-
+        model_name = "gpt-4o-mini"
         self.console.print(f"[blue]Initializing LLM: {model_name}[/blue]")
-
-        # Use OpenAI
         return self._create_openai_llm(model_name)
 
     def _create_openai_llm(self, model_name: str) -> ChatOpenAI:
@@ -125,35 +109,8 @@ class LLMManager(LLMInterface):
 
     def get_model_name(self) -> str:
         """Get the current model name."""
-        return self.config.model_name
+        return "gpt-4o-mini"
 
     def validate_api_key(self) -> bool:
         """Validate API key is available and valid."""
         return os.getenv('OPENAI_API_KEY') is not None
-
-    def _suggest_openai_equivalent(self, claude_model: str) -> str:
-        """
-        Suggest an equivalent OpenAI model for a Claude model.
-
-        Args:
-            claude_model: The Claude model name
-
-        Returns:
-            Suggested OpenAI model name
-        """
-        model_mappings = {
-            "claude-3-5-sonnet": "gpt-4o",
-            "claude-3-opus": "gpt-4o",
-            "claude-3-sonnet": "gpt-4o-mini",
-            "claude-3-haiku": "gpt-4o-mini",
-            "claude-2": "gpt-4o-mini",
-            "claude-instant": "gpt-3.5-turbo"
-        }
-
-        lower_model = claude_model.lower()
-        for claude_key, openai_model in model_mappings.items():
-            if claude_key in lower_model:
-                return openai_model
-
-        # Default fallback
-        return "gpt-4o-mini"
