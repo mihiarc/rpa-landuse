@@ -417,6 +417,20 @@ db_manager = DatabaseManager(legacy_config) # Legacy config
 
 ## Development Patterns
 
+### Streamlit Development Guidelines
+
+**IMPORTANT: Use Streamlit Built-in Features**
+- Always prefer Streamlit's built-in functionality over custom solutions
+- Do NOT over-engineer custom implementations when Streamlit provides native support
+- Examples:
+  - Use Streamlit's built-in theme system (Settings menu) instead of custom theme toggles
+  - Use st.connection for database connections instead of custom connection managers
+  - Use st.cache_data and st.cache_resource instead of custom caching solutions
+  - Use st.session_state for state management instead of custom state handlers
+  - Use Streamlit's native widgets and layouts instead of custom HTML/CSS when possible
+- Only create custom solutions when Streamlit genuinely lacks the required functionality
+- This approach ensures better maintainability, compatibility, and performance
+
 ### Modern Architecture Development (2025)
 
 #### Unified Configuration Pattern

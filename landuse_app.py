@@ -114,7 +114,7 @@ except Exception as e:
     if "No secrets found" not in str(e):
         print(f"ERROR loading st.secrets: {e}")
 
-# Custom CSS for modern styling with wide layout optimization
+# Custom CSS for modern styling with theme-aware colors
 st.markdown("""
 <style>
     /* Wide layout optimizations */
@@ -154,7 +154,7 @@ st.markdown("""
         }
     }
 
-    /* Hero section styling */
+    /* Hero section styling - keeps accent color for branding */
     .hero-section {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         padding: 3rem 2rem;
@@ -175,13 +175,14 @@ st.markdown("""
         opacity: 0.95;
     }
 
-    /* Main app styling */
+    /* Main app styling - theme aware */
     .main-header {
         padding: 1rem 0;
-        border-bottom: 1px solid #e0e0e0;
+        border-bottom: 1px solid rgba(128, 128, 128, 0.2);
         margin-bottom: 2rem;
     }
 
+    /* Metric card - keeps accent gradient for visual hierarchy */
     .metric-card {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         padding: 1.5rem;
@@ -206,9 +207,10 @@ st.markdown("""
         opacity: 0.9;
     }
 
+    /* Feature card - theme aware with semi-transparent backgrounds */
     .feature-card {
-        background: #ffffff;
-        border: 1px solid #e9ecef;
+        background: rgba(128, 128, 128, 0.05);
+        border: 1px solid rgba(128, 128, 128, 0.2);
         border-radius: 12px;
         padding: 2rem;
         margin: 0.5rem;
@@ -221,6 +223,7 @@ st.markdown("""
         box-shadow: 0 8px 24px rgba(0,0,0,0.12);
         transform: translateY(-4px);
         border-color: #667eea;
+        background: rgba(102, 126, 234, 0.05);
     }
 
     .feature-icon {
@@ -232,16 +235,16 @@ st.markdown("""
         font-size: 1.3rem;
         font-weight: 600;
         margin-bottom: 1rem;
-        color: #2c3e50;
+        color: inherit;
     }
 
     .feature-description {
-        color: #5a6c7d;
+        color: inherit;
+        opacity: 0.8;
         line-height: 1.6;
     }
 
-
-    /* Navigation improvements */
+    /* Navigation improvements - theme aware */
     .nav-link {
         display: flex;
         align-items: center;
@@ -253,16 +256,16 @@ st.markdown("""
     }
 
     .nav-link:hover {
-        background-color: #f8f9fa;
+        background-color: rgba(128, 128, 128, 0.1);
         transform: translateX(4px);
     }
 
-    /* Section styling */
+    /* Section styling - inherits theme colors */
     .section-header {
         font-size: 2rem;
         font-weight: 600;
         margin-bottom: 1.5rem;
-        color: #2c3e50;
+        color: inherit;
         display: flex;
         align-items: center;
     }
