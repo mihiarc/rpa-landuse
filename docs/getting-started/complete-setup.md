@@ -91,7 +91,6 @@ LANDUSE_MAX_EXECUTION_TIME=120
 # Features
 LANDUSE_ENABLE_MAPS=true
 LANDUSE_ENABLE_MEMORY=true
-LANDUSE_ENABLE_KNOWLEDGE_BASE=false
 
 # Performance
 LANDUSE_RATE_LIMIT_CALLS=60
@@ -142,7 +141,6 @@ USDA Forest Service RPA Assessment Data Analysis
 
 RPA Land Use Analytics Database:
 ✓ Found 5 tables in database
-✓ Knowledge base ready (if enabled)
 
 Welcome to RPA Land Use Analytics!
 Ask questions about land use projections and transitions.
@@ -258,7 +256,6 @@ LANDUSE_DEFAULT_DISPLAY_LIMIT=50 # Default display limit
 # Features
 LANDUSE_ENABLE_MEMORY=true       # Enable conversation memory
 LANDUSE_ENABLE_MAPS=true         # Enable map generation
-LANDUSE_ENABLE_KNOWLEDGE_BASE=false  # Enable knowledge base integration
 
 # Performance
 LANDUSE_RATE_LIMIT_CALLS=60      # API calls per window
@@ -271,9 +268,6 @@ DEBUG=false                      # Enable debug mode
 # Map Generation Settings
 LANDUSE_MAP_OUTPUT_DIR=maps/agent_generated  # Output directory for maps
 
-# Knowledge Base Settings  
-LANDUSE_KNOWLEDGE_BASE_PATH=src/landuse/docs # Path to documentation
-LANDUSE_CHROMA_PERSIST_DIR=data/chroma_db    # Vector database location
 
 # Streamlit Settings
 STREAMLIT_CACHE_TTL=300          # Cache time-to-live (seconds)
@@ -386,7 +380,6 @@ analysis_config = LanduseConfig.from_env(
     temperature=0.0,
     max_query_rows=5000,
     max_execution_time=300,
-    enable_knowledge_base=True
 )
 ```
 
@@ -476,17 +469,6 @@ Configure map output and visualization:
 # Map generation
 LANDUSE_MAP_OUTPUT_DIR=maps/agent_generated  # Output directory for maps
 LANDUSE_ENABLE_MAPS=true                     # Enable/disable map generation
-```
-
-### Knowledge Base Integration
-
-Enable knowledge base for enhanced context:
-
-```bash
-# Knowledge base settings
-LANDUSE_ENABLE_KNOWLEDGE_BASE=false          # Enable knowledge base
-LANDUSE_KNOWLEDGE_BASE_PATH=src/landuse/docs # Path to documentation
-LANDUSE_CHROMA_PERSIST_DIR=data/chroma_db    # Vector database location
 ```
 
 ### Security Configuration

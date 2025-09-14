@@ -167,10 +167,6 @@ class FeatureConfig(BaseModel):
         default=True,
         description="Enable map generation capabilities"
     )
-    enable_knowledge_base: bool = Field(
-        default=False,
-        description="Enable RPA knowledge base integration"
-    )
     enable_streaming: bool = Field(
         default=True,
         description="Enable streaming responses"
@@ -360,7 +356,6 @@ class AppConfig(BaseSettings):
 
             # Features
             'enable_map_generation': self.features.enable_map_generation,
-            'enable_knowledge_base': self.features.enable_knowledge_base,
             'map_output_dir': self.features.map_output_dir,
 
             # Logging

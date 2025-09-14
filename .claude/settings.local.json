@@ -50,7 +50,9 @@
       "WebSearch",
       "Bash(gh pr create:*)",
       "Bash(gh pr diff:*)",
-      "Bash(git branch:*)"
+      "Bash(git branch:*)",
+      "Bash(git log:*)",
+      "Bash(xargs cat:*)"
     ],
     "deny": []
   }

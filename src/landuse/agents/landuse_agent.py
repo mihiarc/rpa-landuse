@@ -59,10 +59,6 @@ class LanduseAgent:
         # Initialize query executor
         self.query_executor = QueryExecutor(self.config, self.db_connection, self.console)
 
-        # Initialize knowledge base if enabled
-        self.knowledge_base = None
-        if self.config.enable_knowledge_base:
-            self._initialize_knowledge_base()
 
         # Create tools and system prompt
         self.tools = self._create_tools()
@@ -84,27 +80,6 @@ class LanduseAgent:
         self.graph = None
 
 
-    def _initialize_knowledge_base(self):
-        """Initialize the knowledge base if enabled."""
-        try:
-            from landuse.knowledge import RPAKnowledgeBase
-
-            self.console.print("[yellow]Initializing RPA knowledge base...[/yellow]")
-            self.knowledge_base = RPAKnowledgeBase(
-                docs_path=self.config.knowledge_base_path,
-                persist_directory=self.config.chroma_persist_dir
-            )
-            self.knowledge_base.initialize()
-            self.console.print("[green]✓ Knowledge base ready[/green]")
-        except (ImportError, ModuleNotFoundError) as e:
-            self.console.print(f"[red]Warning: Knowledge base dependencies not available: {str(e)}[/red]")
-            self.console.print("[yellow]Continuing without knowledge base...[/yellow]")
-            self.knowledge_base = None
-        except Exception as e:
-            wrapped_error = wrap_exception(e, "Knowledge base initialization")
-            self.console.print(f"[red]Warning: Failed to initialize knowledge base: {str(wrapped_error)}[/red]")
-            self.console.print("[yellow]Continuing without knowledge base...[/yellow]")
-            self.knowledge_base = None
 
     def _create_tools(self) -> list[BaseTool]:
         """Create tools for the agent."""
@@ -115,15 +90,6 @@ class LanduseAgent:
             create_state_lookup_tool()
         ]
 
-        # Add knowledge base retriever if available
-        if self.knowledge_base:
-            try:
-                retriever_tool = self.knowledge_base.create_retriever_tool()
-                tools.append(retriever_tool)
-                self.console.print("[green]✓ Added RPA documentation retriever tool[/green]")
-            except Exception as e:
-                wrapped_error = wrap_exception(e, "Retriever tool creation")
-                self.console.print(f"[red]Warning: Failed to create retriever tool: {str(wrapped_error)}[/red]")
 
         return tools
 
@@ -616,7 +582,6 @@ class LanduseAgent:
         # Clean up database connection using manager
         if hasattr(self, 'database_manager'):
             self.database_manager.close()
-        # Knowledge base (Chroma) will persist automatically
 
 
 def main() -> None:
