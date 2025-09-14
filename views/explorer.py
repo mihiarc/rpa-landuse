@@ -532,19 +532,13 @@ def show_interactive_schema_browser():
             target_col = col_left if idx % 2 == 0 else col_right
 
             with target_col:
-                # Determine table type icon and color
+                # Determine table type icon
                 if 'fact' in table_name:
                     icon = "📦"  # Fact table
-                    card_color = "#e3f2fd"  # Light blue
-                    border_color = "#2196f3"
                 elif 'dim' in table_name:
                     icon = "🎯"  # Dimension table
-                    card_color = "#f3e5f5"  # Light purple
-                    border_color = "#9c27b0"
                 else:
                     icon = "🗺️"  # Other
-                    card_color = "#e8f5e9"  # Light green
-                    border_color = "#4caf50"
 
                 # Create a container for the table card
                 with st.container():
@@ -559,22 +553,22 @@ def show_interactive_schema_browser():
                         st.session_state.query_text = f"-- Query for {table_name}\nSELECT * FROM {table_name} LIMIT 10;"
                         st.rerun()
 
-                    # Add visual separation with colored background
+                    # Add visual separation with theme-aware background
                     if 'fact' in table_name:
                         st.markdown(
-                            f'<div style="background: #e3f2fd; padding: 0.5rem; margin: -0.5rem 0 1rem 0; border-radius: 0 0 8px 8px;">'
+                            f'<div style="background: rgba(33, 150, 243, 0.1); padding: 0.5rem; margin: -0.5rem 0 1rem 0; border-radius: 0 0 8px 8px;">'
                             f'<small>📦 Fact Table · {info["row_count"]:,} rows · {len(info["columns"])} columns</small></div>',
                             unsafe_allow_html=True
                         )
                     elif 'dim' in table_name:
                         st.markdown(
-                            f'<div style="background: #f3e5f5; padding: 0.5rem; margin: -0.5rem 0 1rem 0; border-radius: 0 0 8px 8px;">'
+                            f'<div style="background: rgba(156, 39, 176, 0.1); padding: 0.5rem; margin: -0.5rem 0 1rem 0; border-radius: 0 0 8px 8px;">'
                             f'<small>🎯 Dimension Table · {info["row_count"]:,} rows · {len(info["columns"])} columns</small></div>',
                             unsafe_allow_html=True
                         )
                     else:
                         st.markdown(
-                            f'<div style="background: #e8f5e9; padding: 0.5rem; margin: -0.5rem 0 1rem 0; border-radius: 0 0 8px 8px;">'
+                            f'<div style="background: rgba(76, 175, 80, 0.1); padding: 0.5rem; margin: -0.5rem 0 1rem 0; border-radius: 0 0 8px 8px;">'
                             f'<small>🗺️ Table · {info["row_count"]:,} rows · {len(info["columns"])} columns</small></div>',
                             unsafe_allow_html=True
                         )
