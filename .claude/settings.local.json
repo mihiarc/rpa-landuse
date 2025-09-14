@@ -52,7 +52,8 @@
       "Bash(gh pr diff:*)",
       "Bash(git branch:*)",
       "Bash(git log:*)",
-      "Bash(xargs cat:*)"
+      "Bash(xargs cat:*)",
+      "Bash(gh pr merge:*)"
     ],
     "deny": []
   }
