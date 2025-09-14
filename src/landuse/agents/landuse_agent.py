@@ -582,7 +582,6 @@ class LanduseAgent:
         # Clean up database connection using manager
         if hasattr(self, 'database_manager'):
             self.database_manager.close()
-        # Knowledge base (Chroma) will persist automatically
 
 
 def main() -> None:
