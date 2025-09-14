@@ -54,7 +54,8 @@
       "Bash(git log:*)",
       "Bash(xargs cat:*)",
       "WebFetch(domain:docs.streamlit.io)",
-      "WebFetch(domain:discuss.streamlit.io)"
+      "WebFetch(domain:discuss.streamlit.io)",
+      "Bash(gh pr merge:*)"
     ],
     "deny": []
   }
