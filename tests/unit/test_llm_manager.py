@@ -7,8 +7,9 @@ now that only OpenAI models are supported.
 """
 
 import os
-import pytest
 from unittest.mock import Mock, patch
+
+import pytest
 from langchain_openai import ChatOpenAI
 
 from landuse.agents.llm_manager import LLMManager
