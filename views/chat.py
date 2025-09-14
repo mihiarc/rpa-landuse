@@ -85,7 +85,10 @@ def handle_user_input():
         with st.chat_message("assistant"):
             with st.spinner("Analyzing..."):
                 try:
+                    # Track query time
+                    start_time = time.time()
                     response = agent.query(prompt)
+                    query_time = time.time() - start_time
 
                     # Ensure response is a string
                     if not isinstance(response, str):
@@ -95,6 +98,9 @@ def handle_user_input():
                         response = "I couldn't generate a response. Please try rephrasing your question."
 
                     st.markdown(response)
+
+                    # Show performance feedback
+                    st.caption(f"⏱️ Response time: {query_time:.1f}s")
 
                     # Add to history
                     st.session_state.messages.append({
@@ -122,6 +128,20 @@ def handle_user_input():
 
 def main():
     """Main chat interface - simplified"""
+    # Minimal CSS for accessibility and mobile
+    st.markdown("""
+    <style>
+    /* Ensure minimum touch target size for mobile */
+    .stButton > button { min-height: 44px; }
+    /* Better spacing for chat messages */
+    .stChatMessage { margin-bottom: 0.5rem; }
+    /* Responsive columns on mobile */
+    @media (max-width: 768px) {
+        .stColumns { flex-direction: column; }
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
     st.title("💬 Natural Language Chat")
     st.caption("AI-powered analysis of USDA Forest Service land use data")
 
@@ -136,13 +156,18 @@ def main():
         st.info("Please check your API key configuration in Settings.")
         return
 
-    # Simple status bar
-    col1, col2, col3 = st.columns([3, 1, 1])
+    # Status bar with export functionality
+    col1, col2, col3, col4 = st.columns([3, 1, 1, 1])
     with col1:
         st.success("✅ Ready - Ask me anything about land use data!")
     with col2:
         st.info(f"🤖 {agent.model_name.split('/')[-1]}")
     with col3:
+        # Export functionality restored
+        if st.session_state.messages:
+            chat_text = "\n\n".join([f"{m['role'].upper()}: {m['content']}" for m in st.session_state.messages])
+            st.download_button("📥 Export", chat_text, "chat_history.txt", use_container_width=True)
+    with col4:
         if st.button("🔄 Clear", use_container_width=True):
             st.session_state.messages = []
             st.session_state.show_welcome = True
