@@ -38,7 +38,6 @@ LANDUSE_DEFAULT_DISPLAY_LIMIT=50 # Default display limit
 # Features
 LANDUSE_ENABLE_MEMORY=true       # Enable conversation memory
 LANDUSE_ENABLE_MAPS=true         # Enable map generation
-LANDUSE_ENABLE_KNOWLEDGE_BASE=false  # Enable knowledge base integration
 
 # Performance
 LANDUSE_RATE_LIMIT_CALLS=60      # API calls per window
@@ -51,9 +50,6 @@ DEBUG=false                      # Enable debug mode
 # Map Generation Settings
 LANDUSE_MAP_OUTPUT_DIR=maps/agent_generated  # Output directory for maps
 
-# Knowledge Base Settings  
-LANDUSE_KNOWLEDGE_BASE_PATH=src/landuse/docs # Path to documentation
-LANDUSE_CHROMA_PERSIST_DIR=data/chroma_db    # Vector database location
 
 # Streamlit Settings
 STREAMLIT_CACHE_TTL=300          # Cache time-to-live (seconds)
@@ -165,16 +161,6 @@ LANDUSE_MAP_OUTPUT_DIR=maps/agent_generated  # Output directory for maps
 LANDUSE_ENABLE_MAPS=true                     # Enable/disable map generation
 ```
 
-### Knowledge Base Integration
-
-Enable knowledge base for enhanced context:
-
-```bash
-# Knowledge base settings
-LANDUSE_ENABLE_KNOWLEDGE_BASE=false          # Enable knowledge base
-LANDUSE_KNOWLEDGE_BASE_PATH=src/landuse/docs # Path to documentation
-LANDUSE_CHROMA_PERSIST_DIR=data/chroma_db    # Vector database location
-```
 
 ### Streamlit Configuration
 
