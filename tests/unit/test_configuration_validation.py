@@ -7,8 +7,9 @@ OpenAI-only models and rejects unsupported configurations.
 """
 
 import os
-import pytest
 from unittest.mock import patch
+
+import pytest
 from pydantic import ValidationError
 
 from landuse.config.landuse_config import LanduseConfig
