@@ -1,5 +1,9 @@
 # Dark Mode Testing Guide
 
+## Important Configuration Change
+
+**The toolbar was set to "minimal" which was hiding the settings menu. This has been fixed.**
+
 ## How to Test Dark Mode
 
 The Streamlit app now has proper dark mode support using Streamlit's built-in theme system.
@@ -7,9 +11,10 @@ The Streamlit app now has proper dark mode support using Streamlit's built-in th
 ### Access Theme Settings
 
 1. Run the app: `uv run streamlit run landuse_app.py`
-2. Click the **⋮** menu in the top-right corner
-3. Select **Settings**
-4. You'll see theme options:
+2. Look for the **⋮** (three dots) menu in the top-right corner of the app
+3. Click on it and select **Settings**
+4. In the Settings dialog, you'll see **"Choose app theme, colors, and fonts"**
+5. You'll see theme options:
    - **Light** - Light theme
    - **Dark** - Dark theme
    - **Use system setting** - Follows your OS preference

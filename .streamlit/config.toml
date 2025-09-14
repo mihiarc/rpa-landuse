@@ -31,5 +31,5 @@ gatherUsageStats = false
 # Show error messages in the browser
 showErrorDetails = true
 
-# Tools for developers
-toolbarMode = "minimal"
+# Tools for developers - set to "auto" to show the menu with theme settings
+toolbarMode = "auto"
