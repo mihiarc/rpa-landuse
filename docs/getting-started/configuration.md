@@ -222,7 +222,6 @@ analysis_config = LanduseConfig.from_env(
     temperature=0.0,
     max_query_rows=5000,
     max_execution_time=300,
-    enable_knowledge_base=True
 )
 ```
 

@@ -46,7 +46,6 @@ agent.chat()
 - **💾 Conversation Memory**: Persistent checkpointing across sessions
 - **🔄 Streaming Support**: Real-time response streaming for interactive experiences
 - **⚡ Retry Logic**: Robust error handling with database connection retry
-- **📚 Knowledge Base**: Optional RPA documentation integration via ChromaDB
 - **🎯 Multi-Model Support**: GPT-4, Claude 3.5 Sonnet, and configurable LLM backends
 - **🛠️ Tool Composition**: Modular tool system with subgraph support
 
@@ -73,7 +72,6 @@ config = LanduseConfig(
     enable_map_generation=True,
     analysis_style="detailed",  # "standard", "detailed", "executive"
     domain_focus="agricultural",  # "agricultural", "climate", "urban", or "none"
-    enable_knowledge_base=True
 )
 agent = LanduseAgent(config)
 
@@ -102,7 +100,6 @@ config = LanduseConfig.from_env(
 #### Agent Capabilities
 - `enable_memory`: Enable conversation memory with checkpointing (default: `true`)
 - `enable_map_generation`: Enable map generation tools (default: `true`)
-- `enable_knowledge_base`: Enable RPA documentation retrieval (default: `false`)
 
 #### Prompt Customization
 - `analysis_style`: Analysis style - "standard", "detailed", "executive" (default: `standard`)
@@ -126,7 +123,6 @@ The agent features a modular tool composition system with factory pattern:
 
 ### Optional Tools (Configuration-Dependent)
 - **`create_map`**: Generate choropleth maps (when `enable_map_generation=True`)
-- **`search_rpa_docs`**: Retrieve RPA documentation (when `enable_knowledge_base=True`)
 
 ### Tool Creation Pattern
 
@@ -219,7 +215,6 @@ response = agent.query("Show forest loss patterns by climate model with maps")
 config = LanduseConfig(
     domain_focus="agricultural",
     analysis_style="executive",
-    enable_knowledge_base=True
 )
 agent = LanduseAgent(config)
 
@@ -303,7 +298,6 @@ LANDUSE_MAX_EXECUTION_TIME=120
 # Agent Features
 LANDUSE_ENABLE_MEMORY=true
 LANDUSE_ENABLE_MAPS=true
-LANDUSE_ENABLE_KNOWLEDGE_BASE=false
 
 # Prompt Customization
 LANDUSE_ANALYSIS_STYLE=standard  # standard, detailed, executive
@@ -315,9 +309,6 @@ DEBUG=false
 LANDUSE_RATE_LIMIT_CALLS=60
 LANDUSE_RATE_LIMIT_WINDOW=60
 
-# Knowledge Base (if enabled)
-LANDUSE_KNOWLEDGE_BASE_PATH=src/landuse/docs
-LANDUSE_CHROMA_PERSIST_DIR=data/chroma_db
 
 # Map Generation (if enabled)
 LANDUSE_MAP_OUTPUT_DIR=maps/agent_generated
@@ -327,7 +318,7 @@ LANDUSE_MAP_OUTPUT_DIR=maps/agent_generated
 
 ### Configuration Strategy
 1. **Start with Defaults**: Use `LanduseConfig.from_env()` for most cases
-2. **Progressive Enhancement**: Enable features (maps, memory, knowledge base) as needed
+2. **Progressive Enhancement**: Enable features (maps, memory) as needed
 3. **Environment-Based Config**: Use `.env` files for deployment-specific settings
 4. **Model Selection**: Claude 3.5 Sonnet for analysis quality, GPT-4o-mini for speed
 
@@ -352,7 +343,6 @@ LANDUSE_MAP_OUTPUT_DIR=maps/agent_generated
 3. **Tool Call Errors**: Verify database schema and table availability
 4. **Memory Issues**: Disable memory for simple queries or increase `max_iterations`
 5. **Rate Limiting**: Adjust `rate_limit_calls` and `rate_limit_window` settings
-6. **Knowledge Base Errors**: Ensure ChromaDB dependencies and document paths
 
 ### Debug and Monitoring
 
@@ -472,7 +462,6 @@ class LanduseConfig:
     # Agent Capabilities
     enable_memory: bool
     enable_map_generation: bool
-    enable_knowledge_base: bool
     
     # Prompt Customization
     analysis_style: str  # "standard", "detailed", "executive"
@@ -553,20 +542,6 @@ result = map_subgraph.invoke({
 })
 ```
 
-### Knowledge Base Integration
-
-```python
-# Enable RPA documentation retrieval
-config = LanduseConfig(
-    enable_knowledge_base=True,
-    knowledge_base_path="src/landuse/docs",
-    chroma_persist_dir="data/chroma_db"
-)
-agent = LanduseAgent(config)
-
-# Queries can reference methodology and background
-response = agent.query("Explain the econometric model used in RPA projections")
-```
 
 ## Summary
 
