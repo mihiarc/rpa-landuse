@@ -116,6 +116,13 @@ mock_st.status = Mock()
 mock_st.toast = Mock()
 mock_st.connection = Mock()
 
+# Configuration and theme-related functions
+mock_st.set_page_config = Mock()
+mock_st.get_option = Mock()
+mock_st.rerun = Mock()  # For triggering reruns
+mock_st.navigation = Mock()  # For multi-page navigation
+mock_st.Page = Mock()  # For page creation
+
 # Session state mock
 class SessionState:
     def __init__(self):
