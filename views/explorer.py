@@ -77,7 +77,9 @@ def get_table_schema():
             row_count = conn.get_row_count(table_name, ttl=300)
 
             # Get sample data
-            sample_query = f"SELECT * FROM {table_name} LIMIT 5"
+            # Note: table_name is from ALLOWED_TABLES list, validated by security allowlist
+            # Using identifier quoting to prevent SQL injection even though table is pre-validated
+            sample_query = f'SELECT * FROM "{table_name}" LIMIT 5'
             sample_data = conn.query(sample_query, ttl=3600)
 
             schema_info[table_name] = {
@@ -100,7 +102,6 @@ def get_query_examples():
     return {
         "Basic Queries": {
             "Count records by table": """
--- Get row counts for all main tables
 SELECT 'dim_scenario' as table_name, COUNT(*) as row_count FROM dim_scenario
 UNION ALL
 SELECT 'dim_time', COUNT(*) FROM dim_time
@@ -112,7 +113,6 @@ UNION ALL
 SELECT 'fact_landuse_transitions', COUNT(*) FROM fact_landuse_transitions;
 """,
             "Browse scenarios": """
--- View all climate scenarios
 SELECT
     scenario_id,
     scenario_name,
@@ -123,7 +123,6 @@ FROM dim_scenario
 ORDER BY scenario_name;
 """,
             "Browse geography": """
--- View geography with state information
 SELECT
     geography_id,
     fips_code,
@@ -139,7 +138,6 @@ LIMIT 20;
         },
         "Agricultural Analysis": {
             "Agricultural land loss": """
--- Agricultural land being converted to other uses
 SELECT
     s.scenario_name,
     g.state_code,
@@ -159,7 +157,6 @@ ORDER BY total_acres DESC
 LIMIT 50;
 """,
             "Crop vs Pasture transitions": """
--- Transitions between crop and pasture land
 SELECT
     t.year_range,
     g.state_code,
@@ -183,7 +180,6 @@ LIMIT 30;
         },
         "Climate Analysis": {
             "RCP scenario comparison": """
--- Compare land use changes between RCP scenarios
 SELECT
     s.rcp_scenario,
     fl.landuse_name as from_landuse,
@@ -201,7 +197,6 @@ ORDER BY total_acres DESC
 LIMIT 40;
 """,
             "SSP pathway impacts": """
--- Compare socioeconomic pathways (SSP)
 SELECT
     s.ssp_scenario,
     fl.landuse_name as from_landuse,
@@ -221,7 +216,6 @@ LIMIT 40;
         },
         "Geographic Analysis": {
             "State-level summaries": """
--- Land use changes by state
 SELECT
     g.state_code,
     g.state_name,
@@ -241,7 +235,6 @@ ORDER BY total_acres DESC
 LIMIT 50;
 """,
             "County hotspots": """
--- Counties with most land use change
 SELECT
     g.fips_code,
     g.county_name,
@@ -261,7 +254,6 @@ LIMIT 30;
         },
         "Time Series": {
             "Trends over time": """
--- How transitions change over time periods
 SELECT
     t.year_range,
     t.start_year,
@@ -280,7 +272,6 @@ GROUP BY t.year_range, t.start_year, t.end_year, fl.landuse_name, tl.landuse_nam
 ORDER BY t.start_year, total_acres DESC;
 """,
             "Acceleration analysis": """
--- Compare early vs late periods
 WITH period_comparison AS (
   SELECT
     CASE
@@ -423,7 +414,7 @@ def show_query_interface():
             )
             default_query = example_queries[example_name]
         else:
-            default_query = "-- Enter your SQL query here\nSELECT * FROM dim_landuse LIMIT 10;"
+            default_query = "SELECT * FROM dim_landuse LIMIT 10;"
 
         # SQL editor
         query = st.text_area(
@@ -581,7 +572,7 @@ def show_interactive_schema_browser():
 
                     if button_clicked:
                         st.session_state.selected_table = table_name
-                        st.session_state.query_text = f"-- Query for {table_name}\nSELECT * FROM {table_name} LIMIT 10;"
+                        st.session_state.query_text = f"SELECT * FROM {table_name} LIMIT 10;"
 
                     # Add visual separation using Streamlit native components
                     if 'fact' in table_name:
@@ -634,7 +625,7 @@ def show_enhanced_query_interface():
 
     # Initialize query text in session state if not exists
     if 'query_text' not in st.session_state:
-        st.session_state.query_text = "-- Welcome to the SQL editor!\n-- Use the Schema Browser tab to explore tables\n-- Or write your own query below\n\nSELECT * FROM dim_landuse LIMIT 10;"
+        st.session_state.query_text = "SELECT * FROM dim_landuse LIMIT 10;"
 
     # Query input with syntax highlighting hint
     query = st.text_area(
@@ -964,6 +955,7 @@ def show_data_dictionary():
 
     # Time periods
     st.markdown("#### 📅 Time Periods")
+    st.markdown("#### 📅 Dataset Overview")
     st.info("""
     The dataset covers projections from 2012 to 2100 in 10-year intervals:
     - **2012-2020**: Calibration period (historical baseline)
@@ -972,6 +964,7 @@ def show_data_dictionary():
     - **2040-2050**: Long-term projections
     - **2050-2060**: Extended projections
     - **2060-2070**: Future projections
+    - **2070-2100**: Long-term projections
     """)
 
 def main():
@@ -1013,7 +1006,7 @@ def main():
     # Footer
     st.markdown("---")
     st.markdown("""
-    **🎯 Pro Tips:**
+    **💡 Pro Tips:**
     - Use the **Schema Browser** tab to explore table structures and relationships
     - Copy **Example Queries** as templates for your own analysis
     - Check the **Data Dictionary** tab for field definitions and categories
