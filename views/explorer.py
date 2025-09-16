@@ -493,11 +493,14 @@ def show_query_interface():
             # Download option
             if not result_df.empty:
                 csv = result_df.to_csv(index=False)
+                # Generate unique key for this context
+                download_key = f"download_query_interface_{int(time.time() * 1000)}"
                 st.download_button(
                     label="📥 Download CSV",
                     data=csv,
                     file_name="landuse_query_results.csv",
-                    mime="text/csv"
+                    mime="text/csv",
+                    key=download_key
                 )
 
 def show_interactive_schema_browser():
@@ -714,7 +717,7 @@ def show_enhanced_query_interface():
         run_custom_query_enhanced(query)
     elif 'query_results' in st.session_state and st.session_state.query_results is not None:
         # Show cached results
-        display_query_results(st.session_state.query_results, st.session_state.get('last_query', ''))
+        display_query_results(st.session_state.query_results, st.session_state.get('last_query', ''), result_id="cached_results")
 
 def run_custom_query_enhanced(query: str):
     """Run a custom SQL query with enhanced error handling and display"""
@@ -742,8 +745,9 @@ def run_custom_query_enhanced(query: str):
         with col3:
             st.info(f"📊 {len(df):,} rows returned")
 
-        # Display results
-        display_query_results(df, query)
+        # Display results with a unique ID based on execution time
+        result_id = f"query_{int(time.time() * 1000)}"
+        display_query_results(df, query, result_id=result_id)
 
     except duckdb.BinderException as e:
         st.error(f"❌ Binding Error: {str(e)}")
@@ -770,8 +774,14 @@ def run_custom_query_enhanced(query: str):
         if "type" in str(e).lower():
             st.info("💡 **Tip:** Check data types. Use CAST() to convert between types if needed.")
 
-def display_query_results(df, query):
-    """Display query results with enhanced formatting"""
+def display_query_results(df, query, result_id=None):
+    """Display query results with enhanced formatting
+
+    Args:
+        df: DataFrame to display
+        query: SQL query string
+        result_id: Optional unique identifier for this result display
+    """
     if df is None:
         st.info("ℹ️ No query results to display")
         return
@@ -787,13 +797,18 @@ def display_query_results(df, query):
         # Display options
         display_col1, display_col2, display_col3 = st.columns([2, 2, 3])
 
+        # Create a unique key suffix using result_id or generate one
+        if result_id is None:
+            # Use timestamp and a portion of query hash for uniqueness
+            result_id = f"{int(time.time() * 1000)}_{str(hash(query))[:6]}"
+
         with display_col1:
-            show_index = st.checkbox("Show index", value=False)
+            show_index = st.checkbox("Show index", value=False, key=f"show_index_{result_id}")
 
         with display_col2:
             # Determine numeric columns
             numeric_cols = df.select_dtypes(include=['int64', 'float64']).columns.tolist()
-            format_numbers = st.checkbox("Format numbers", value=True)
+            format_numbers = st.checkbox("Format numbers", value=True, key=f"format_numbers_{result_id}")
 
         with display_col3:
             # Row limit for display
@@ -805,7 +820,8 @@ def display_query_results(df, query):
                     min_value=1,
                     max_value=min(1000, len(df)),
                     value=min(100, len(df)),
-                    step=step_size
+                    step=step_size,
+                    key=f"max_rows_{result_id}"
                 )
             else:
                 max_rows = 0
@@ -843,7 +859,8 @@ def display_query_results(df, query):
                 data=csv,
                 file_name="query_results.csv",
                 mime="text/csv",
-                use_container_width=True
+                use_container_width=True,
+                key=f"download_csv_{result_id}"
             )
 
         with export_col2:
@@ -853,7 +870,8 @@ def display_query_results(df, query):
                 data=json_str,
                 file_name="query_results.json",
                 mime="application/json",
-                use_container_width=True
+                use_container_width=True,
+                key=f"download_json_{result_id}"
             )
 
         with export_col3:
@@ -865,12 +883,13 @@ def display_query_results(df, query):
                 data=parquet_buffer.getvalue(),
                 file_name="query_results.parquet",
                 mime="application/octet-stream",
-                use_container_width=True
+                use_container_width=True,
+                key=f"download_parquet_{result_id}"
             )
 
         with export_col4:
             # Copy query button
-            if st.button("📋 Copy Query", use_container_width=True):
+            if st.button("📋 Copy Query", use_container_width=True, key=f"copy_query_{result_id}"):
                 st.code(query, language='sql')
                 st.success("Query displayed above for copying")
 
