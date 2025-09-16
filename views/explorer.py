@@ -788,12 +788,14 @@ def display_query_results(df, query):
         display_col1, display_col2, display_col3 = st.columns([2, 2, 3])
 
         with display_col1:
-            show_index = st.checkbox("Show index", value=False)
+            # Use query hash as part of key to make it unique per query
+            query_hash = str(hash(query))[:8] if query else "default"
+            show_index = st.checkbox("Show index", value=False, key=f"show_index_{query_hash}")
 
         with display_col2:
             # Determine numeric columns
             numeric_cols = df.select_dtypes(include=['int64', 'float64']).columns.tolist()
-            format_numbers = st.checkbox("Format numbers", value=True)
+            format_numbers = st.checkbox("Format numbers", value=True, key=f"format_numbers_{query_hash}")
 
         with display_col3:
             # Row limit for display
@@ -805,7 +807,8 @@ def display_query_results(df, query):
                     min_value=1,
                     max_value=min(1000, len(df)),
                     value=min(100, len(df)),
-                    step=step_size
+                    step=step_size,
+                    key=f"max_rows_{query_hash}"
                 )
             else:
                 max_rows = 0
