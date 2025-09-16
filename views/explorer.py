@@ -743,7 +743,6 @@ def run_custom_query_enhanced(query: str):
             st.info(f"📊 {len(df):,} rows returned")
 
         # Display results with a unique ID based on execution time
-        import time
         result_id = f"query_{int(time.time() * 1000)}"
         display_query_results(df, query, result_id=result_id)
 
@@ -796,7 +795,6 @@ def display_query_results(df, query, result_id=None):
         display_col1, display_col2, display_col3 = st.columns([2, 2, 3])
 
         # Create a unique key suffix using result_id or generate one
-        import time
         if result_id is None:
             # Use timestamp and a portion of query hash for uniqueness
             result_id = f"{int(time.time() * 1000)}_{str(hash(query))[:6]}"
