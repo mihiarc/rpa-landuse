@@ -52,10 +52,23 @@ def get_table_schema():
         # Get all tables
         tables_df = conn.list_tables(ttl=3600)
 
+        # Define allowed tables for the explorer
+        allowed_tables = {
+            'dim_geography', 'dim_indicators', 'dim_landuse', 'dim_scenario',
+            'dim_socioeconomic', 'dim_time', 'fact_landuse_transitions',
+            'fact_socioeconomic_projections', 'v_full_projection_period',
+            'v_income_trends', 'v_landuse_socioeconomic', 'v_population_trends',
+            'v_scenarios_combined'
+        }
+
         schema_info = {}
 
         for _, row in tables_df.iterrows():
             table_name = row['table_name']
+
+            # Skip tables not in allowed list
+            if table_name not in allowed_tables:
+                continue
 
             # Get column information
             columns = conn.get_table_info(table_name, ttl=3600)
