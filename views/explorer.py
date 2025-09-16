@@ -74,8 +74,12 @@ def get_table_schema():
             }
 
         return schema_info, None
+    except duckdb.CatalogException as e:
+        return None, f"Database catalog error: {e}"
+    except duckdb.ConnectionException as e:
+        return None, f"Database connection error: {e}"
     except Exception as e:
-        return None, f"Error getting schema: {e}"
+        return None, f"Unexpected error getting schema: {e}"
 
 @st.cache_data
 def get_query_examples():
@@ -303,16 +307,28 @@ def execute_custom_query(query):
         return None, error
 
     try:
-        # Add LIMIT if not present for safety
+        # Add LIMIT if not present for safety (check main query only, not subqueries)
+        # Split by common CTE/subquery indicators
         query_upper = query.upper().strip()
-        if query_upper.startswith('SELECT') and 'LIMIT' not in query_upper:
+
+        # Only add LIMIT to main SELECT if it doesn't have one
+        # Check for LIMIT at the end of the query (not in subqueries)
+        if (query_upper.startswith('SELECT') and
+            not query_upper.endswith(')') and  # Not a subquery
+            'LIMIT' not in query_upper.split(')')[-1]):  # Check only the final part
             query = f"{query.rstrip(';')} LIMIT 1000"
 
         # Use short TTL for custom queries to see fresh results
         df = conn.query(query, ttl=60)
         return df, None
+    except duckdb.BinderException as e:
+        return None, f"SQL binding error (check column/table names): {e}"
+    except duckdb.SyntaxException as e:
+        return None, f"SQL syntax error: {e}"
+    except duckdb.ConnectionException as e:
+        return None, f"Database connection error: {e}"
     except Exception as e:
-        return None, f"Query error: {e}"
+        return None, f"Query execution error: {e}"
 
 def show_schema_browser():
     """Display interactive schema browser"""
@@ -543,35 +559,27 @@ def show_interactive_schema_browser():
                 # Create a container for the table card
                 with st.container():
                     # Use columns to create a card-like layout
-                    if st.button(
-                    f"{icon} **{table_name}**",
-                    key=f"table_{table_name}",
-                    use_container_width=True,
-                    help=f"📊 {info['row_count']:,} rows · {len(info['columns'])} columns"
-                    ):
+                    button_clicked = st.button(
+                        f"{icon} **{table_name}**",
+                        key=f"table_{table_name}",
+                        use_container_width=True,
+                        help=f"📊 {info['row_count']:,} rows · {len(info['columns'])} columns"
+                    )
+
+                    if button_clicked:
                         st.session_state.selected_table = table_name
                         st.session_state.query_text = f"-- Query for {table_name}\nSELECT * FROM {table_name} LIMIT 10;"
-                        st.rerun()
 
-                    # Add visual separation with theme-aware background
+                    # Add visual separation using Streamlit native components
                     if 'fact' in table_name:
-                        st.markdown(
-                            f'<div style="background: rgba(33, 150, 243, 0.1); padding: 0.5rem; margin: -0.5rem 0 1rem 0; border-radius: 0 0 8px 8px;">'
-                            f'<small>📦 Fact Table · {info["row_count"]:,} rows · {len(info["columns"])} columns</small></div>',
-                            unsafe_allow_html=True
-                        )
+                        st.caption(f"📦 Fact Table · {info['row_count']:,} rows · {len(info['columns'])} columns")
                     elif 'dim' in table_name:
-                        st.markdown(
-                            f'<div style="background: rgba(156, 39, 176, 0.1); padding: 0.5rem; margin: -0.5rem 0 1rem 0; border-radius: 0 0 8px 8px;">'
-                            f'<small>🎯 Dimension Table · {info["row_count"]:,} rows · {len(info["columns"])} columns</small></div>',
-                            unsafe_allow_html=True
-                        )
+                        st.caption(f"🎯 Dimension Table · {info['row_count']:,} rows · {len(info['columns'])} columns")
                     else:
-                        st.markdown(
-                            f'<div style="background: rgba(76, 175, 80, 0.1); padding: 0.5rem; margin: -0.5rem 0 1rem 0; border-radius: 0 0 8px 8px;">'
-                            f'<small>🗺️ Table · {info["row_count"]:,} rows · {len(info["columns"])} columns</small></div>',
-                            unsafe_allow_html=True
-                        )
+                        st.caption(f"🗺️ Table · {info['row_count']:,} rows · {len(info['columns'])} columns")
+
+                    # Add spacing
+                    st.write("")  # Empty line for spacing
 
                 # Show details if selected
                 if 'selected_table' in st.session_state and st.session_state.selected_table == table_name:
@@ -597,15 +605,12 @@ def show_interactive_schema_browser():
                         with action_col1:
                             if st.button("🔍 Browse", key=f"browse_{table_name}", use_container_width=True):
                                 st.session_state.query_text = f"SELECT * FROM {table_name} LIMIT 100;"
-                                st.rerun()
                         with action_col2:
                             if st.button("📊 Stats", key=f"count_{table_name}", use_container_width=True):
                                 st.session_state.query_text = f"SELECT COUNT(*) as total_rows FROM {table_name};"
-                                st.rerun()
                         with action_col3:
                             if st.button("🔎 Sample", key=f"sample_{table_name}", use_container_width=True):
                                 st.session_state.query_text = f"SELECT * FROM {table_name} USING SAMPLE 10;"
-                                st.rerun()
 
 def show_enhanced_query_interface():
     """Show enhanced SQL query interface with live results"""
@@ -649,12 +654,33 @@ def show_enhanced_query_interface():
 
     with col3:
         if st.button("📄 Format SQL", use_container_width=True):
-            # Simple SQL formatting
-            formatted = query.upper().replace('SELECT', 'SELECT\n    ')
-            formatted = formatted.replace('FROM', '\nFROM')
-            formatted = formatted.replace('WHERE', '\nWHERE')
-            formatted = formatted.replace('GROUP BY', '\nGROUP BY')
-            formatted = formatted.replace('ORDER BY', '\nORDER BY')
+            # Improved SQL formatting that preserves strings
+            import re
+
+            # Preserve string literals by replacing them temporarily
+            strings = []
+            def preserve_string(match):
+                strings.append(match.group(0))
+                return f"__STRING_{len(strings)-1}__"
+
+            # Replace strings temporarily
+            temp_query = re.sub(r"'[^']*'", preserve_string, query)
+
+            # Format SQL keywords
+            formatted = temp_query
+            for keyword in ['SELECT', 'FROM', 'WHERE', 'JOIN', 'LEFT JOIN', 'RIGHT JOIN',
+                          'INNER JOIN', 'GROUP BY', 'ORDER BY', 'HAVING', 'LIMIT']:
+                # Add newline before keyword (case insensitive)
+                pattern = r'\b' + keyword.replace(' ', r'\s+') + r'\b'
+                formatted = re.sub(pattern, '\n' + keyword, formatted, flags=re.IGNORECASE)
+
+            # Restore string literals
+            for i, string in enumerate(strings):
+                formatted = formatted.replace(f"__STRING_{i}__", string)
+
+            # Clean up extra newlines at the start
+            formatted = formatted.strip()
+
             st.session_state.query_text = formatted
             st.rerun()
 
@@ -696,7 +722,7 @@ def run_custom_query_enhanced(query: str):
     try:
         with st.spinner("Executing query..."):
             start_time = time.time()
-            df = conn.query(query, ttl=0)  # Don't cache custom queries
+            df = conn.query(query, ttl=30)  # Use short TTL for custom queries
             execution_time = time.time() - start_time
 
             # Store results in session state
@@ -715,10 +741,9 @@ def run_custom_query_enhanced(query: str):
         # Display results
         display_query_results(df, query)
 
-    except Exception as e:
-        st.error(f"❌ Query Error: {str(e)}")
-
-        # Enhanced error hints
+    except duckdb.BinderException as e:
+        st.error(f"❌ Binding Error: {str(e)}")
+        st.info("💡 **Tip:** Check that all column and table names exist. Use the Schema Browser to verify names.")
         error_str = str(e).lower()
         if "column" in error_str and "not found" in error_str:
             st.info("💡 **Tip:** Check column names in the Schema Browser")
@@ -730,13 +755,27 @@ def run_custom_query_enhanced(query: str):
                 st.warning(f"Column '{bad_column}' not found. Check the schema for correct column names.")
         elif "table" in error_str and "not exist" in error_str:
             st.info("💡 **Tip:** Available tables: fact_landuse_transitions, dim_scenario, dim_geography, dim_landuse, dim_time")
-        elif "syntax" in error_str:
-            st.info("💡 **Tip:** DuckDB uses standard SQL syntax. Common issues: missing commas, unclosed quotes, invalid keywords.")
-        elif "type" in error_str:
+    except duckdb.SyntaxException as e:
+        st.error(f"❌ SQL Syntax Error: {str(e)}")
+        st.info("💡 **Tip:** DuckDB uses standard SQL syntax. Common issues: missing commas, unclosed quotes, invalid keywords.")
+    except duckdb.ConnectionException as e:
+        st.error(f"❌ Database Connection Error: {str(e)}")
+        st.info("💡 **Tip:** The database connection may have been lost. Try refreshing the page.")
+    except Exception as e:
+        st.error(f"❌ Unexpected Error: {str(e)}")
+        if "type" in str(e).lower():
             st.info("💡 **Tip:** Check data types. Use CAST() to convert between types if needed.")
 
 def display_query_results(df, query):
     """Display query results with enhanced formatting"""
+    if df is None:
+        st.info("ℹ️ No query results to display")
+        return
+
+    if df.empty:
+        st.info("ℹ️ Query returned no results")
+        return
+
     if df is not None and not df.empty:
         # Show results header
         st.markdown("### 📄 Query Results")
@@ -754,13 +793,19 @@ def display_query_results(df, query):
 
         with display_col3:
             # Row limit for display
-            max_rows = st.number_input(
-                "Display rows:",
-                min_value=min(1, len(df)),  # At least 1 row if data exists
-                max_value=min(1000, len(df)),
-                value=min(100, len(df)),
-                step=10 if len(df) >= 10 else 1  # Adjust step based on data size
-            )
+            if len(df) > 0:
+                # Calculate appropriate step size
+                step_size = max(1, min(100, len(df) // 10))
+                max_rows = st.number_input(
+                    "Display rows:",
+                    min_value=1,
+                    max_value=min(1000, len(df)),
+                    value=min(100, len(df)),
+                    step=step_size
+                )
+            else:
+                max_rows = 0
+                st.info("No data to display")
 
         # Format dataframe if requested
         display_df = df.head(max_rows).copy()
@@ -776,7 +821,7 @@ def display_query_results(df, query):
             display_df,
             use_container_width=True,
             hide_index=not show_index,
-            height=min(400, len(display_df) * 35 + 35)
+            height=min(600, max(100, len(display_df) * 35 + 50))  # Better height calculation
         )
 
         # If results are truncated, show note
@@ -843,7 +888,7 @@ def show_query_examples_panel():
     # Create tabs for each category
     tabs = st.tabs(list(examples.keys()))
 
-    for _i, (category, tab) in enumerate(zip(examples.keys(), tabs)):
+    for category, tab in zip(examples.keys(), tabs):
         with tab:
             for name, query in examples[category].items():
                 # Create an expander for each query
@@ -854,11 +899,19 @@ def show_query_examples_panel():
                     with col1:
                         if st.button("Load Query", key=f"load_{category}_{name}", use_container_width=True):
                             st.session_state.query_text = query
-                            st.rerun()
+                            st.session_state.should_rerun = True
                     with col2:
                         if st.button("Run Now", key=f"run_{category}_{name}", type="primary", use_container_width=True):
                             st.session_state.query_text = query
-                            run_custom_query_enhanced(query)
+                            st.session_state.run_query_now = True
+
+                # Check if we should rerun after loop completes
+                if 'should_rerun' in st.session_state and st.session_state.should_rerun:
+                    del st.session_state.should_rerun
+                    st.rerun()
+                if 'run_query_now' in st.session_state and st.session_state.run_query_now:
+                    del st.session_state.run_query_now
+                    run_custom_query_enhanced(query)
 
 def show_data_dictionary():
     """Display data dictionary and documentation"""
