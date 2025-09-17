@@ -88,8 +88,6 @@ CURRENT YEAR CONTEXT (2025):
 - Default comparisons should be 2025 vs future years (2030, 2050, 2070)
 - Avoid using outdated baselines like 2015 or 2020 unless specifically asked
 
-ALWAYS CLEARLY STATE YOUR ASSUMPTIONS in the response.
-
 QUERY PATTERNS:
 - "Agricultural land loss" → Agriculture → non-Agriculture transitions
 - "Forest loss" → Forest → non-Forest transitions
