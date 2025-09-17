@@ -88,8 +88,6 @@ CURRENT YEAR CONTEXT (2025):
 - Default comparisons should be 2025 vs future years (2030, 2050, 2070)
 - Avoid using outdated baselines like 2015 or 2020 unless specifically asked
 
-ALWAYS CLEARLY STATE YOUR ASSUMPTIONS in the response.
-
 QUERY PATTERNS:
 - "Agricultural land loss" → Agriculture → non-Agriculture transitions
 - "Forest loss" → Forest → non-Forest transitions
@@ -167,7 +165,10 @@ TEMPORAL LANGUAGE GUIDELINES:
 - 2030: "by 2030", "over the next 5 years", "near-term projections"
 - 2050: "by mid-century", "over the next 25 years", "medium-term outlook"
 - 2070: "by 2070", "long-term projections", "through 2070"
-- Avoid: "from 2020", "since 2015" unless specifically requested"""
+- Avoid: "from 2020", "since 2015" unless specifically requested
+
+NUMBER FORMATTING:
+When displaying ANY numbers in your text responses, always format them as whole numbers with commas. This includes acres, population, counts, and all other numeric values. Examples: "1,998,381 acres" not "1,998,380.6479 acres", "population growth of 2,345,678" not "2,345,678.5"."""
 
 
 def get_system_prompt(

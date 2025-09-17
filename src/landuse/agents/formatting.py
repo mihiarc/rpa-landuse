@@ -137,29 +137,9 @@ def format_row_values(row: pd.Series, columns: list) -> list:
         if isinstance(val, (int, float)):
             if pd.isna(val):
                 formatted_row.append("N/A")
-            elif col.lower().endswith('acres') or 'acre' in col.lower():
-                # Round acres to whole numbers
-                formatted_row.append(f"{int(round(val)):,}")
-            elif 'population' in col.lower() and 'thousands' in col.lower():
-                # Format population in thousands with context
-                if val >= 1000:
-                    formatted_row.append(f"{val:,.0f}k ({val/1000:.1f}M)")
-                else:
-                    formatted_row.append(f"{val:,.1f}k")
-            elif 'income' in col.lower() and ('per_capita' in col.lower() or 'capita' in col.lower()):
-                # Format income as dollar amounts
-                formatted_row.append(f"${val*1000:,.0f}")
-            elif 'percent' in col.lower() or 'growth' in col.lower():
-                # Format percentages
-                formatted_row.append(f"{val:.1f}%")
-            elif isinstance(val, float):
-                # For other floats, use 2 decimal places if needed
-                if val == int(val):
-                    formatted_row.append(f"{int(val):,}")
-                else:
-                    formatted_row.append(f"{val:,.2f}")
             else:
-                formatted_row.append(f"{val:,}")
+                # Round all numeric values to whole numbers
+                formatted_row.append(f"{int(round(val)):,}")
         else:
             formatted_row.append(str(val))
 
