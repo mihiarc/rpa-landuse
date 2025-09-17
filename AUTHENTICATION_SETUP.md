@@ -2,7 +2,7 @@
 
 ## 🔐 Setting up Authentication
 
-The Land Use Analytics application includes a simple password-based authentication system.
+The RPA Landuse Analytics application includes a simple password-based authentication system.
 
 ### 1. Configure Authentication
 
@@ -34,14 +34,6 @@ Navigate to the application and log in with your configured password.
 - ✅ **Secure Hashing**: SHA-256 password hashing
 - ✅ **Easy Configuration**: Simple secrets.toml setup
 
-### 5. Production Deployment
-
-For production, always:
-
-1. Change the default password
-2. Use environment variables instead of secrets.toml
-3. Use HTTPS
-4. Regularly rotate passwords
 
 ---
 
