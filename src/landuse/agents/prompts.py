@@ -177,18 +177,21 @@ def get_system_prompt(
     schema_info: str = ""
 ) -> str:
     """
-    Generate a system prompt with the specified configuration.
+    Generate the system prompt with database schema information.
 
     Args:
-        include_maps: Whether to include map generation instructions
-        analysis_style: One of "standard", "detailed", "executive"
-        domain_focus: Optional domain focus - "agricultural", "climate", "urban"
+        include_maps: (Deprecated) Previously controlled map generation instructions
+        analysis_style: (Deprecated) Previously selected analysis style
+        domain_focus: (Deprecated) Previously selected domain specialization
         schema_info: The database schema information to inject
 
     Returns:
-        Complete system prompt string
-    """
-    # Start with base prompt
-    prompt = SYSTEM_PROMPT_BASE.format(schema_info=schema_info)
+        Complete system prompt string with schema information
 
-    return prompt
+    Note:
+        The include_maps, analysis_style, and domain_focus parameters are
+        maintained for backward compatibility but no longer affect the output.
+        The function now returns a consistent base prompt optimized for
+        general land use analytics queries.
+    """
+    return SYSTEM_PROMPT_BASE.format(schema_info=schema_info)

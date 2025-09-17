@@ -204,9 +204,8 @@ class PromptSelector:
             Tuple of (generated_prompt, query_intent)
         """
         intent = self.analyze_query(query)
-        
-        # Since PromptVariations no longer exists, always use get_system_prompt
-        # get_system_prompt now only returns the base prompt
+
+        # Generate the system prompt with schema information
         prompt = get_system_prompt(
             include_maps=enable_maps,
             analysis_style=intent.analysis_style,
