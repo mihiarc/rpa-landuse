@@ -8,7 +8,7 @@ import re
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Tuple
 
-from landuse.agents.prompts import PromptVariations, get_system_prompt
+from landuse.agents.prompts import get_system_prompt
 
 
 @dataclass
@@ -204,33 +204,14 @@ class PromptSelector:
             Tuple of (generated_prompt, query_intent)
         """
         intent = self.analyze_query(query)
-        
-        # Use pre-configured prompt variations for high-confidence matches
-        if intent.confidence >= 0.5:
-            if intent.domain_focus == "agricultural" and intent.analysis_style == "detailed":
-                prompt = PromptVariations.agricultural_analyst(schema_info)
-            elif intent.domain_focus == "climate" and intent.analysis_style == "executive":
-                prompt = PromptVariations.policy_maker(schema_info)
-            elif intent.domain_focus == "urban":
-                prompt = PromptVariations.urban_planner(schema_info)
-            elif intent.analysis_style == "detailed":
-                prompt = PromptVariations.research_analyst(schema_info)
-            else:
-                # Use standard prompt with detected specializations
-                prompt = get_system_prompt(
-                    include_maps=enable_maps,
-                    analysis_style=intent.analysis_style,
-                    domain_focus=intent.domain_focus,
-                    schema_info=schema_info
-                )
-        else:
-            # Use standard prompt with any detected specializations
-            prompt = get_system_prompt(
-                include_maps=enable_maps,
-                analysis_style=intent.analysis_style,
-                domain_focus=intent.domain_focus,
-                schema_info=schema_info
-            )
+
+        # Generate the system prompt with schema information
+        prompt = get_system_prompt(
+            include_maps=enable_maps,
+            analysis_style=intent.analysis_style,
+            domain_focus=intent.domain_focus,
+            schema_info=schema_info
+        )
         
         return prompt, intent
     

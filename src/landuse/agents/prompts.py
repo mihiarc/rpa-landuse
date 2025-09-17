@@ -17,7 +17,7 @@ KEY CONTEXT:
 DATABASE SCHEMA:
 {schema_info}
 
-CRITICAL INSTRUCTION: ALWAYS EXECUTE ANALYTICAL QUERIES AND COMBINE RELATED DATA!
+CRITICAL INSTRUCTION: ALWAYS EXECUTE ANALYTICAL QUERIES AND COMBINE RELATED DATA! TELL THE USER YOUR ASSUMPTIONS!
 
 When a user asks analytical questions, you MUST:
 1. Execute SQL queries that provide the actual comparison data
@@ -169,67 +169,6 @@ TEMPORAL LANGUAGE GUIDELINES:
 - 2070: "by 2070", "long-term projections", "through 2070"
 - Avoid: "from 2020", "since 2015" unless specifically requested"""
 
-# Additional prompt section for map generation
-MAP_GENERATION_PROMPT = """
-
-MAP GENERATION:
-When results include geographic data (state_code), consider creating choropleth maps to visualize patterns.
-Use the create_choropleth_map tool when appropriate.
-Use the create_map tool when appropriate."""
-
-# Alternative prompts for different analysis styles
-DETAILED_ANALYSIS_PROMPT = """
-
-DETAILED ANALYSIS MODE:
-When providing results:
-1. Include summary statistics (mean, median, std dev)
-2. Identify outliers and anomalies
-3. Suggest statistical significance where relevant
-4. Provide confidence intervals if applicable
-5. Compare results to historical baselines"""
-
-EXECUTIVE_SUMMARY_PROMPT = """
-
-EXECUTIVE SUMMARY MODE:
-When providing results:
-1. Lead with the key finding in one sentence
-2. Use user-friendly language (avoid technical jargon)
-3. Focus on implications rather than raw numbers
-4. Provide actionable insights
-5. Keep responses concise (3-5 key points max)
-6. Use the create_map tool when appropriate"""
-
-# Prompt for handling specific domains
-AGRICULTURAL_FOCUS_PROMPT = """
-
-AGRICULTURAL ANALYSIS FOCUS:
-You are particularly focused on agricultural land use:
-1. Pay special attention to Crop and Pasture transitions
-2. Highlight food security implications
-3. Consider agricultural productivity impacts
-4. Note irrigation and water resource connections
-5. Flag significant agricultural land losses (>10%)"""
-
-CLIMATE_FOCUS_PROMPT = """
-
-CLIMATE SCENARIO FOCUS:
-You are analyzing climate impacts on land use:
-1. Always compare RCP4.5 vs RCP8.5 scenarios
-2. Highlight differences between SSP pathways
-3. Emphasize climate-driven transitions
-4. Note temperature and precipitation influences
-5. Project long-term trends (2050, 2070, 2100)"""
-
-URBAN_PLANNING_PROMPT = """
-
-URBAN PLANNING FOCUS:
-You are supporting urban planning decisions:
-1. Focus on Urban expansion patterns
-2. Identify sources of new urban land
-3. Calculate urbanization rates
-4. Note infrastructure implications
-5. Highlight sprawl vs densification patterns"""
-
 
 def get_system_prompt(
     include_maps: bool = False,
@@ -238,124 +177,21 @@ def get_system_prompt(
     schema_info: str = ""
 ) -> str:
     """
-    Generate a system prompt with the specified configuration.
+    Generate the system prompt with database schema information.
 
     Args:
-        include_maps: Whether to include map generation instructions
-        analysis_style: One of "standard", "detailed", "executive"
-        domain_focus: Optional domain focus - "agricultural", "climate", "urban"
+        include_maps: (Deprecated) Previously controlled map generation instructions
+        analysis_style: (Deprecated) Previously selected analysis style
+        domain_focus: (Deprecated) Previously selected domain specialization
         schema_info: The database schema information to inject
 
     Returns:
-        Complete system prompt string
+        Complete system prompt string with schema information
+
+    Note:
+        The include_maps, analysis_style, and domain_focus parameters are
+        maintained for backward compatibility but no longer affect the output.
+        The function now returns a consistent base prompt optimized for
+        general land use analytics queries.
     """
-    # Start with base prompt
-    prompt = SYSTEM_PROMPT_BASE.format(schema_info=schema_info)
-
-    # Add analysis style modifications
-    if analysis_style == "detailed":
-        prompt += DETAILED_ANALYSIS_PROMPT
-    elif analysis_style == "executive":
-        prompt += EXECUTIVE_SUMMARY_PROMPT
-
-    # Add domain focus if specified
-    if domain_focus == "agricultural":
-        prompt += AGRICULTURAL_FOCUS_PROMPT
-    elif domain_focus == "climate":
-        prompt += CLIMATE_FOCUS_PROMPT
-    elif domain_focus == "urban":
-        prompt += URBAN_PLANNING_PROMPT
-
-    # Add map generation if enabled
-    if include_maps:
-        prompt += MAP_GENERATION_PROMPT
-
-    return prompt
-
-
-# Specialized prompt variations for different use cases
-class PromptVariations:
-    """Pre-configured prompt variations for common use cases"""
-
-    @staticmethod
-    def research_analyst(schema_info: str) -> str:
-        """Prompt for detailed research analysis"""
-        return get_system_prompt(
-            include_maps=True,
-            analysis_style="detailed",
-            schema_info=schema_info
-        )
-
-    @staticmethod
-    def policy_maker(schema_info: str) -> str:
-        """Prompt for policy-focused analysis"""
-        return get_system_prompt(
-            include_maps=True,
-            analysis_style="executive",
-            domain_focus="climate",
-            schema_info=schema_info
-        )
-
-    @staticmethod
-    def agricultural_analyst(schema_info: str) -> str:
-        """Prompt for agricultural land use analysis"""
-        return get_system_prompt(
-            include_maps=True,
-            analysis_style="detailed",
-            domain_focus="agricultural",
-            schema_info=schema_info
-        )
-
-    @staticmethod
-    def urban_planner(schema_info: str) -> str:
-        """Prompt for urban planning analysis"""
-        return get_system_prompt(
-            include_maps=True,
-            analysis_style="standard",
-            domain_focus="urban",
-            schema_info=schema_info
-        )
-
-
-# Example custom prompts that users might want to add
-CUSTOM_PROMPT_TEMPLATE = """You are a specialized Landuse Data Analyst AI with expertise in {expertise_area}.
-
-DATABASE SCHEMA:
-{schema_info}
-
-YOUR EXPERTISE:
-{expertise_description}
-
-ANALYSIS APPROACH:
-{analysis_approach}
-
-When answering questions:
-{response_guidelines}"""
-
-
-def create_custom_prompt(
-    expertise_area: str,
-    expertise_description: str,
-    analysis_approach: str,
-    response_guidelines: str,
-    schema_info: str
-) -> str:
-    """
-    Create a fully custom prompt for specialized use cases.
-
-    Example:
-        prompt = create_custom_prompt(
-            expertise_area="water resource management",
-            expertise_description="You understand the connections between land use and water resources...",
-            analysis_approach="1. Consider watershed boundaries\\n2. Analyze impervious surface changes...",
-            response_guidelines="1. Always mention water quality implications\\n2. Note stormwater management needs...",
-            schema_info=schema_info
-        )
-    """
-    return CUSTOM_PROMPT_TEMPLATE.format(
-        expertise_area=expertise_area,
-        expertise_description=expertise_description,
-        analysis_approach=analysis_approach,
-        response_guidelines=response_guidelines,
-        schema_info=schema_info
-    )
+    return SYSTEM_PROMPT_BASE.format(schema_info=schema_info)
