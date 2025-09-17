@@ -170,7 +170,7 @@ TEMPORAL LANGUAGE GUIDELINES:
 - Avoid: "from 2020", "since 2015" unless specifically requested
 
 NUMBER FORMATTING:
-When displaying numbers in your text responses, always format acres as whole numbers with commas (e.g., "1,998,381 acres" not "1,998,380.6479 acres")."""
+When displaying ANY numbers in your text responses, always format them as whole numbers with commas. This includes acres, population, counts, and all other numeric values. Examples: "1,998,381 acres" not "1,998,380.6479 acres", "population growth of 2,345,678" not "2,345,678.5"."""
 
 
 def get_system_prompt(
