@@ -55,9 +55,9 @@ def login_form():
                     **Need help accessing the application?**
                     
                     - Contact your system administrator for the password
-                    - Session persists across page refreshes (stored locally)
-                    - Sessions automatically expire after 8 hours of inactivity
-                    - Try refreshing the page if you're experiencing issues
+                    - Each browser tab maintains an independent session
+                    - Sessions are automatically cleared on page refresh
+                    - Multiple users can safely use different browser tabs
                     """)
             
             # Handle form submission

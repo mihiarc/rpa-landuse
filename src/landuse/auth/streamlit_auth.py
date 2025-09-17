@@ -6,9 +6,7 @@ Simple password-based authentication for the Land Use Analytics application
 import streamlit as st
 import hashlib
 import secrets
-import json
 import os
-from pathlib import Path
 from datetime import datetime, timedelta
 from typing import Optional
 
@@ -36,9 +34,7 @@ class StreamlitAuth:
         else:
             self.security_logger = None
         
-        # Session file path for persistent storage
-        self.session_dir = Path.home() / ".streamlit" / "sessions"
-        self.session_dir.mkdir(parents=True, exist_ok=True)
+        # No persistent storage needed - using only Streamlit session state
     
     def hash_password(self, password: str) -> str:
         """
@@ -81,12 +77,9 @@ class StreamlitAuth:
         Returns:
             True if user has valid authentication session
         """
-        # First check session state (fast)
-        if st.session_state.get('authenticated', False):
-            return True
-        
-        # If not in session state, try to load from persistent storage
-        return self._load_persistent_session()
+        # Only check session state - no persistent storage
+        # This ensures each browser tab has independent sessions
+        return st.session_state.get('authenticated', False)
     
     def get_stored_password_hash(self) -> Optional[str]:
         """
@@ -130,13 +123,10 @@ class StreamlitAuth:
             return False
         
         if self.verify_password(password, stored_hash):
-            # Authentication successful
+            # Authentication successful - only set session state
             st.session_state.authenticated = True
             st.session_state.session_token = self.generate_session_token()
             st.session_state.auth_time = datetime.now()
-            
-            # Save to persistent storage
-            self._save_persistent_session()
             
             if self.security_logger:
                 self.security_logger.log_access(
@@ -170,15 +160,12 @@ class StreamlitAuth:
                 result="success"
             )
         
-        # Clear authentication state
+        # Clear authentication state - no persistent storage
         st.session_state.authenticated = False
         if 'session_token' in st.session_state:
             del st.session_state.session_token
         if 'auth_time' in st.session_state:
             del st.session_state.auth_time
-        
-        # Clear persistent storage
-        self._clear_persistent_session()
     
     def check_session_timeout(self, timeout_hours: int = 8) -> bool:
         """
@@ -204,89 +191,7 @@ class StreamlitAuth:
         
         return True
     
-    def _get_session_file_path(self) -> Path:
-        """Get the path to the session file for this browser session"""
-        # Use a simple session file approach
-        # This creates one session per machine/user - works for single-user apps
-        return self.session_dir / "auth_session.json"
-    
-    def _save_persistent_session(self):
-        """Save authentication session to persistent storage"""
-        try:
-            session_data = {
-                'authenticated': st.session_state.get('authenticated', False),
-                'session_token': st.session_state.get('session_token'),
-                'auth_time': st.session_state.get('auth_time').isoformat() if st.session_state.get('auth_time') else None
-            }
-            
-            session_file = self._get_session_file_path()
-            with open(session_file, 'w') as f:
-                json.dump(session_data, f)
-                
-        except Exception as e:
-            print(f"DEBUG: Could not save persistent session: {e}")
-    
-    def _load_persistent_session(self) -> bool:
-        """Load authentication session from persistent storage"""
-        try:
-            session_file = self._get_session_file_path()
-            if not session_file.exists():
-                return False
-            
-            with open(session_file, 'r') as f:
-                session_data = json.load(f)
-            
-            # Check if session is still valid
-            if not session_data.get('authenticated', False):
-                return False
-            
-            auth_time_str = session_data.get('auth_time')
-            if not auth_time_str:
-                return False
-            
-            auth_time = datetime.fromisoformat(auth_time_str)
-            
-            # Check timeout (8 hours default)
-            timeout_hours = self._get_timeout_hours()
-            if datetime.now() - auth_time > timedelta(hours=timeout_hours):
-                # Session expired, clean up
-                self._clear_persistent_session()
-                return False
-            
-            # Restore session state
-            st.session_state.authenticated = session_data['authenticated']
-            st.session_state.session_token = session_data['session_token']
-            st.session_state.auth_time = auth_time
-            
-            return True
-            
-        except Exception as e:
-            print(f"DEBUG: Could not load persistent session: {e}")
-            return False
-    
-    def _clear_persistent_session(self):
-        """Clear persistent session storage"""
-        try:
-            session_file = self._get_session_file_path()
-            if session_file.exists():
-                session_file.unlink()
-        except Exception as e:
-            print(f"DEBUG: Could not clear persistent session: {e}")
-    
-    def _get_timeout_hours(self) -> int:
-        """Get session timeout from configuration"""
-        # Try Streamlit secrets first
-        try:
-            if hasattr(st, 'secrets') and 'auth' in st.secrets:
-                return int(st.secrets.auth.get('timeout_hours', 8))
-        except Exception:
-            pass
-        
-        # Try environment variable
-        try:
-            return int(os.getenv('STREAMLIT_AUTH_TIMEOUT_HOURS', '8'))
-        except ValueError:
-            return 8
+
 
 
 def generate_password_hash(password: str) -> str:
