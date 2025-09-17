@@ -23,7 +23,6 @@ from .formatting import (
     get_summary_statistics,
 )
 from .landuse_agent import AgentState, LanduseAgent
-from .llm_factory import LLMFactory
 
 # Import prompts system
 from .prompts import get_system_prompt
@@ -32,7 +31,6 @@ __all__ = [
     # Agent classes
     'LanduseAgent',
     'AgentState',
-    'LLMFactory',
 
     # Constants
     'STATE_NAMES', 'SCHEMA_INFO_TEMPLATE', 'DEFAULT_ASSUMPTIONS',
