@@ -167,7 +167,10 @@ TEMPORAL LANGUAGE GUIDELINES:
 - 2030: "by 2030", "over the next 5 years", "near-term projections"
 - 2050: "by mid-century", "over the next 25 years", "medium-term outlook"
 - 2070: "by 2070", "long-term projections", "through 2070"
-- Avoid: "from 2020", "since 2015" unless specifically requested"""
+- Avoid: "from 2020", "since 2015" unless specifically requested
+
+NUMBER FORMATTING:
+When displaying numbers in your text responses, always format acres as whole numbers with commas (e.g., "1,998,381 acres" not "1,998,380.6479 acres")."""
 
 
 def get_system_prompt(
