@@ -15,7 +15,6 @@ from landuse.agents.conversation_manager import ConversationManager
 from landuse.agents.database_manager import DatabaseManager
 from landuse.agents.graph_builder import GraphBuilder
 from landuse.agents.llm_manager import LLMManager
-from landuse.agents.prompt_selector import auto_select_prompt
 from landuse.agents.prompts import get_system_prompt
 from landuse.agents.query_executor import QueryExecutor
 from landuse.agents.state import AgentState
@@ -96,24 +95,16 @@ class LanduseAgent:
     def get_dynamic_system_prompt(self, question: str) -> str:
         """
         Get appropriate system prompt based on query content.
-        
+
         Args:
             question: User's natural language question
-            
+
         Returns:
             Specialized system prompt for the query
         """
-        # Use automatic prompt selection if enabled (default behavior)
-        if self.config.enable_dynamic_prompts:
-            return auto_select_prompt(
-                query=question,
-                schema_info=self.schema,
-                enable_maps=self.config.enable_map_generation,
-                debug=self.config.debug
-            )
-        else:
-            # Fall back to static system prompt
-            return self.system_prompt
+        # Always use the standard system prompt
+        # (Dynamic prompt selection was removed as specialized prompts were not effective)
+        return self.system_prompt
 
     def simple_query(self, question: str) -> str:
         """Execute a query using simple direct LLM interaction without LangGraph state management."""
