@@ -1,9 +1,18 @@
 services:
   streamlit-app:
+    image: 810875545305.dkr.ecr.us-east-1.amazonaws.com/rpa-landuse:streamlit-latest
     build:
       context: ../..
       dockerfile: docker/prod/dockerfile.yml
-    command: python -m streamlit run landuse_app.py
+    command: >
+      streamlit run landuse_app.py
+      --server.port=8501
+      --server.address=0.0.0.0
+      --server.headless=true
+      --server.enableCORS=false
+      --server.enableXsrfProtection=true
+      --server.maxUploadSize=200
+      --logger.level=info
     ports:
       - "80:8501"
     env_file:
@@ -14,4 +23,3 @@ services:
       - ../../src:/app/src
       - ../../views:/app/views
       - ../../data:/app/data
-      - ../../config:/app/config

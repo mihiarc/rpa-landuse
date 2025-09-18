@@ -128,10 +128,54 @@ resource "aws_iam_policy" "bedrock_nova_policy" {
   }
 }
 
+# IAM policy for ECR access
+resource "aws_iam_policy" "ecr_access_policy" {
+  name        = "rpa-landuse-ecr-access-policy"
+  description = "Policy for EC2 instance to access ECR repository"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "ecr:GetAuthorizationToken",
+          "ecr:BatchCheckLayerAvailability",
+          "ecr:GetDownloadUrlForLayer",
+          "ecr:BatchGetImage"
+        ]
+        Resource = "*"
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "ecr:PutImage",
+          "ecr:InitiateLayerUpload",
+          "ecr:UploadLayerPart",
+          "ecr:CompleteLayerUpload"
+        ]
+        Resource = aws_ecr_repository.rpa_landuse_repo.arn
+      }
+    ]
+  })
+
+  tags = {
+    Name        = "rpa-landuse-ecr-access-policy"
+    Environment = var.environment
+    Project     = var.project_name
+  }
+}
+
 # Attach policy to role
 resource "aws_iam_role_policy_attachment" "bedrock_policy_attachment" {
   role       = aws_iam_role.ec2_bedrock_role.name
   policy_arn = aws_iam_policy.bedrock_nova_policy.arn
+}
+
+# Attach ECR policy to role
+resource "aws_iam_role_policy_attachment" "ecr_policy_attachment" {
+  role       = aws_iam_role.ec2_bedrock_role.name
+  policy_arn = aws_iam_policy.ecr_access_policy.arn
 }
 
 # Instance profile for EC2
@@ -146,6 +190,75 @@ resource "aws_iam_instance_profile" "ec2_profile" {
   }
 }
 
+# Create private ECR repository
+resource "aws_ecr_repository" "rpa_landuse_repo" {
+  name                 = "rpa-landuse"
+  image_tag_mutability = "MUTABLE"
+
+  image_scanning_configuration {
+    scan_on_push = true
+  }
+
+  encryption_configuration {
+    encryption_type = "AES256"
+  }
+
+  tags = {
+    Name        = "rpa-landuse-ecr"
+    Environment = var.environment
+    Project     = var.project_name
+  }
+}
+
+# ECR lifecycle policy to manage image retention
+resource "aws_ecr_lifecycle_policy" "rpa_landuse_lifecycle" {
+  repository = aws_ecr_repository.rpa_landuse_repo.name
+
+  policy = jsonencode({
+    rules = [
+      {
+        rulePriority = 1
+        description  = "Keep last 10 production images"
+        selection = {
+          tagStatus     = "tagged"
+          tagPrefixList = ["prod"]
+          countType     = "imageCountMoreThan"
+          countNumber   = 10
+        }
+        action = {
+          type = "expire"
+        }
+      },
+      {
+        rulePriority = 2
+        description  = "Keep last 5 dev images"
+        selection = {
+          tagStatus     = "tagged"
+          tagPrefixList = ["dev"]
+          countType     = "imageCountMoreThan"
+          countNumber   = 5
+        }
+        action = {
+          type = "expire"
+        }
+      },
+      {
+        rulePriority = 3
+        description  = "Delete untagged images older than 1 day"
+        selection = {
+          tagStatus   = "untagged"
+          countType   = "sinceImagePushed"
+          countUnit   = "days"
+          countNumber = 1
+        }
+        action = {
+          type = "expire"
+        }
+      }
+    ]
+  })
+}
+
 # Get the latest Amazon Linux 2 AMI
 data "aws_ami" "amazon_linux" {
   most_recent = true
@@ -153,7 +266,7 @@ data "aws_ami" "amazon_linux" {
 
   filter {
     name   = "name"
-    values = ["amzn2-ami-hvm-*-x86_64-gp2"]
+    values = ["amzn2-ami-hvm-2.0.20250902.3-x86_64-gp2"]
   }
 
   filter {
