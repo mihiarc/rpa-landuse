@@ -280,36 +280,6 @@ def load_climate_comparison_data():
     except Exception as e:
         return None, f"Error loading climate comparison data: {e}"
 
-@st.cache_data
-def load_time_series_data():
-    """Load time series data for trend analysis"""
-    conn, error = get_database_connection()
-    if error:
-        return None, error
-
-    try:
-        query = """
-        SELECT
-            t.start_year,
-            t.end_year,
-            t.year_range,
-            fl.landuse_name as from_landuse,
-            tl.landuse_name as to_landuse,
-            SUM(f.acres) as total_acres
-        FROM fact_landuse_transitions f
-        JOIN dim_time t ON f.time_id = t.time_id
-        JOIN dim_landuse fl ON f.from_landuse_id = fl.landuse_id
-        JOIN dim_landuse tl ON f.to_landuse_id = tl.landuse_id
-        WHERE f.transition_type = 'change'
-          AND fl.landuse_name != tl.landuse_name
-        GROUP BY t.start_year, t.end_year, t.year_range, fl.landuse_name, tl.landuse_name
-        ORDER BY t.start_year, total_acres DESC
-        """
-
-        df = conn.query(query, ttl=300)
-        return df, None
-    except Exception as e:
-        return None, f"Error loading time series data: {e}"
 
 def create_agricultural_loss_chart(df):
     """Create agricultural land loss visualization"""
@@ -577,41 +547,6 @@ def create_climate_comparison_chart(df):
 
     return fig
 
-def create_time_series_chart(df):
-    """Create time series trend visualization"""
-    if df is None or df.empty:
-        return None
-
-    # Focus on major land use changes
-    major_changes = df.groupby(['start_year', 'from_landuse', 'to_landuse'])['total_acres'].sum().reset_index()
-    major_changes = major_changes[major_changes['total_acres'] > major_changes['total_acres'].quantile(0.7)]
-
-    # Create transition labels
-    major_changes['transition'] = major_changes['from_landuse'] + ' → ' + major_changes['to_landuse']
-
-    fig = px.line(
-        major_changes,
-        x='start_year',
-        y='total_acres',
-        color='transition',
-        title='Major Land Use Transitions Over Time',
-        labels={
-            'start_year': 'Year',
-            'total_acres': 'Total Acres Transitioned',
-            'transition': 'Land Use Transition'
-        }
-    )
-
-    fig.update_layout(
-        height=500,
-        xaxis_title="Year",
-        yaxis_title="Acres (millions)",
-        yaxis_tickformat='.1s',  # Format y-axis to show millions
-        font={"size": 12},
-        legend={"orientation": "v", "yanchor": "top", "y": 1, "xanchor": "left", "x": 1.02}
-    )
-
-    return fig
 
 @st.cache_data
 def load_state_transitions():
@@ -1287,12 +1222,11 @@ def main():
     st.markdown("---")
 
     # Create tabs for different analysis areas
-    tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
+    tab1, tab2, tab3, tab4, tab5 = st.tabs([
         "🏙️ Urbanization Trends",
         "🌾 Agricultural Analysis",
         "🌲 Forest Analysis",
         "🌡️ Climate Scenarios",
-        "📈 Time Series",
         "🎨 Enhanced Visualizations"
     ])
 
@@ -1764,53 +1698,6 @@ def main():
             st.info("📊 No climate comparison data available")
 
     with tab5:
-        st.markdown("### Time Series Analysis")
-        st.markdown("**How land use transitions change over time periods**")
-
-        time_data, time_error = load_time_series_data()
-        if time_error:
-            st.error(f"❌ {time_error}")
-        elif time_data is not None and not time_data.empty:
-
-            # Show time series chart
-            fig = create_time_series_chart(time_data)
-            if fig:
-                st.plotly_chart(fig, use_container_width=True)
-
-            # Show period analysis
-            col1, col2 = st.columns([2, 1])
-
-            with col1:
-                st.markdown("#### 📅 Changes by Time Period")
-                period_totals = time_data.groupby('year_range')['total_acres'].sum().sort_values(ascending=False)
-
-                fig_period = px.bar(
-                    x=period_totals.index,
-                    y=period_totals.values,
-                    title="Total Land Use Changes by Time Period",
-                    labels={'x': 'Time Period', 'y': 'Total Acres'},
-                    color=period_totals.values,
-                    color_continuous_scale=RPA_BLUE_SCALE
-                )
-                fig_period.update_layout(height=400, showlegend=False)
-                st.plotly_chart(fig_period, use_container_width=True)
-
-            with col2:
-                st.markdown("#### 🔍 Temporal Insights")
-                if not time_data.empty:
-                    peak_period = period_totals.index[0]
-                    st.markdown(f"""
-                    - **Peak Activity:** {peak_period} shows highest land use change
-                    - **Trends:** Acceleration or deceleration of transitions over time
-                    - **Future Outlook:** Projections through 2100
-                    """)
-
-                st.markdown("#### 📊 Period Summary")
-                st.dataframe(period_totals.head(6), use_container_width=True)
-        else:
-            st.info("📊 No time series data available")
-
-    with tab6:
         show_enhanced_visualizations()
 
     # Footer
