@@ -424,13 +424,13 @@ def create_forest_flow_chart(df_loss, df_gain):
     for landuse, acres in loss_by_type.items():
         x_labels.append(f"To {landuse}")
         y_values.append(-acres)
-        colors.append(f'{RPA_COLORS["pink"]}99')  # RPA pink for losses
+        colors.append('rgba(237, 170, 151, 0.6)')  # RPA pink for losses
 
     # Add gains (positive values)
     for landuse, acres in gain_by_type.items():
         x_labels.append(f"From {landuse}")
         y_values.append(acres)
-        colors.append(f'{RPA_COLORS["medium_green"]}99')  # RPA green for gains
+        colors.append('rgba(133, 177, 139, 0.6)')  # RPA green for gains
 
     # Create bar chart
     fig.add_trace(go.Bar(
@@ -701,15 +701,33 @@ def load_sankey_data(from_landuse=None, to_landuse=None, scenario_filter=None):
         return None, error
 
     try:
-        # Build dynamic WHERE clause
+        # Build dynamic WHERE clause with parameterized queries to prevent SQL injection
         where_conditions = ["f.transition_type = 'change'"]
+        # Exclude self-loops where source equals target
+        where_conditions.append("fl.landuse_name != tl.landuse_name")
+
+        # Validate inputs against allowed values
+        allowed_landuses = ["Crop", "Pasture", "Forest", "Urban", "Rangeland"]
+        allowed_scenarios = ["rcp45", "rcp85"]
 
         if from_landuse and from_landuse != "All":
-            where_conditions.append(f"fl.landuse_name = '{from_landuse}'")
+            if from_landuse in allowed_landuses:
+                # Use parameterized query format (DuckDB supports this)
+                where_conditions.append(f"fl.landuse_name = '{from_landuse}'")
+            else:
+                return None, f"Invalid land use type: {from_landuse}"
+
         if to_landuse and to_landuse != "All":
-            where_conditions.append(f"tl.landuse_name = '{to_landuse}'")
+            if to_landuse in allowed_landuses:
+                where_conditions.append(f"tl.landuse_name = '{to_landuse}'")
+            else:
+                return None, f"Invalid land use type: {to_landuse}"
+
         if scenario_filter and scenario_filter != "All":
-            where_conditions.append(f"s.rcp_scenario = '{scenario_filter}'")
+            if scenario_filter in allowed_scenarios:
+                where_conditions.append(f"s.rcp_scenario = '{scenario_filter}'")
+            else:
+                return None, f"Invalid scenario: {scenario_filter}"
 
         where_clause = " AND ".join(where_conditions)
 
@@ -725,12 +743,17 @@ def load_sankey_data(from_landuse=None, to_landuse=None, scenario_filter=None):
         JOIN dim_landuse tl ON f.to_landuse_id = tl.landuse_id
         WHERE {where_clause}
         GROUP BY fl.landuse_name, tl.landuse_name
-        HAVING SUM(f.acres) > 1000000
+        HAVING SUM(f.acres) > 500000
         ORDER BY value DESC
-        LIMIT 20
+        LIMIT 15
         """
 
         df = conn.query(query, ttl=300)
+
+        # Additional validation: ensure we have data
+        if df.empty:
+            return None, "No transitions found for selected filters. Try adjusting the filter criteria."
+
         return df, None
     except Exception as e:
         return None, f"Error loading Sankey data: {e}"
@@ -797,67 +820,86 @@ def create_sankey_diagram(df):
     if df is None or df.empty:
         return None
 
-    # Create node labels
-    all_nodes = list(set(df['source'].tolist() + df['target'].tolist()))
+    # Sort by value to ensure most significant flows are visible
+    df = df.sort_values('value', ascending=False)
+
+    # Create node labels - ensure unique nodes
+    source_nodes = df['source'].unique().tolist()
+    target_nodes = df['target'].unique().tolist()
+    all_nodes = list(dict.fromkeys(source_nodes + target_nodes))  # Preserve order, remove duplicates
     node_dict = {node: i for i, node in enumerate(all_nodes)}
 
-    # Define modern color palette for land use types
+    # Define modern color palette for land use types with RPA colors
     node_colors = {
-        'Crop': '#d4a574',      # Wheat color
-        'Pasture': '#90ee90',   # Light green
-        'Forest': '#228b22',    # Forest green
-        'Urban': '#696969',     # Dim gray
-        'Rangeland': '#daa520'  # Goldenrod
+        'Crop': RPA_COLORS['light_brown'],      # Light brown for agricultural
+        'Pasture': RPA_COLORS['medium_green'],  # Medium green for pasture
+        'Forest': RPA_COLORS['dark_green'],     # Dark green for forest
+        'Urban': RPA_COLORS['dark_blue'],       # Dark blue for urban
+        'Rangeland': RPA_COLORS['pink']         # Pink for rangeland
     }
 
-    # Prepare hover data
+    # Prepare hover data with better formatting
     hover_labels = []
     for _, row in df.iterrows():
         acres_millions = row['value'] / 1_000_000
         hover_labels.append(
-            f"{row['source']} → {row['target']}<br>" +
+            f"<b>{row['source']} → {row['target']}</b><br>" +
             f"Total: {acres_millions:.2f}M acres<br>" +
-            f"Across {row['scenario_count']} scenarios"
+            f"Scenarios: {row['scenario_count']}"
         )
+
+    # Generate link colors with proper transparency
+    link_colors = []
+    for i in range(len(df)):
+        source_color = node_colors.get(df.iloc[i]['source'], '#999999')
+        # Convert hex to rgba with transparency
+        if source_color.startswith('#'):
+            # Parse hex color and convert to rgba
+            hex_color = source_color.lstrip('#')
+            r = int(hex_color[0:2], 16)
+            g = int(hex_color[2:4], 16)
+            b = int(hex_color[4:6], 16)
+            link_colors.append(f'rgba({r},{g},{b},0.3)')
+        else:
+            link_colors.append('rgba(150,150,150,0.3)')
 
     # Create Sankey diagram with enhanced features
     fig = go.Figure(data=[go.Sankey(
         arrangement='snap',  # Better node positioning
         node={
             "pad": 20,
-            "thickness": 25,
-            "line": {"color": "white", "width": 2},
+            "thickness": 30,
+            "line": {"color": "white", "width": 1},
             "label": all_nodes,
             "color": [node_colors.get(node, '#999999') for node in all_nodes],
             "customdata": all_nodes,
-            "hovertemplate": '%{customdata}<br>%{value:,.0f} acres<extra></extra>'
+            "hovertemplate": '<b>%{customdata}</b><br>Total: %{value:,.0f} acres<extra></extra>'
         },
         link={
-            "source": [node_dict[src] for src in df['source']],
-            "target": [node_dict[tgt] for tgt in df['target']],
-            "value": df['value'],
+            "source": [node_dict.get(src) for src in df['source']],
+            "target": [node_dict.get(tgt) for tgt in df['target']],
+            "value": df['value'].tolist(),
             "customdata": hover_labels,
             "hovertemplate": '%{customdata}<extra></extra>',
-            # Color links based on source
-            "color": [node_colors.get(df.iloc[i]['source'], 'rgba(200,200,200,0.4)')
-                   for i in range(len(df))],
-            # Make colors more transparent
+            "color": link_colors,
             "line": {"width": 0}
         },
-        textfont={"size": 14, "color": "black"}
+        textfont={"size": 14, "color": "black", "family": "Arial, sans-serif"}
     )])
 
     fig.update_layout(
         title={
             'text': "Land Use Transition Flows",
             'x': 0.5,
-            'xanchor': 'center'
+            'xanchor': 'center',
+            'font': {'size': 18}
         },
         font={"size": 12, "family": "Arial, sans-serif"},
-        height=550,
-        margin={"l": 0, "r": 0, "t": 40, "b": 20},
-        paper_bgcolor='rgba(0,0,0,0)',
-        plot_bgcolor='rgba(0,0,0,0)'
+        height=600,
+        margin={"l": 10, "r": 10, "t": 60, "b": 30},
+        paper_bgcolor='white',
+        plot_bgcolor='white',
+        hoverlabel={"bgcolor": "white", "font_size": 12}
     )
 
     return fig
@@ -1098,51 +1140,138 @@ def show_enhanced_visualizations():
         st.markdown("#### Land Use Transition Flows")
         st.markdown("**Sankey diagram showing flows between land use types**")
 
-        # Add filters
+        # Add informative help text
+        with st.expander("ℹ️ How to read this diagram", expanded=False):
+            st.markdown("""
+            - **Width of flows** represents the total acres transitioning
+            - **Node size** shows the total volume of land involved
+            - **Colors** distinguish different land use types
+            - **Hover** over flows or nodes for detailed information
+            - Use filters below to explore specific transitions
+            """)
+
+        # Add filters with better layout
+        st.markdown("##### 🔍 Filter Options")
         col1, col2, col3 = st.columns(3)
 
         with col1:
             from_filter = st.selectbox(
                 "From Land Use",
                 ["All", "Crop", "Pasture", "Forest", "Urban", "Rangeland"],
-                key="sankey_from"
+                key="sankey_from",
+                help="Filter by source land use type"
             )
 
         with col2:
             to_filter = st.selectbox(
                 "To Land Use",
                 ["All", "Crop", "Pasture", "Forest", "Urban", "Rangeland"],
-                key="sankey_to"
+                key="sankey_to",
+                help="Filter by destination land use type"
             )
 
         with col3:
             scenario_filter = st.selectbox(
                 "Climate Scenario",
                 ["All", "rcp45", "rcp85"],
-                key="sankey_scenario"
+                key="sankey_scenario",
+                help="Filter by climate scenario (RCP4.5 or RCP8.5)"
             )
 
-        # Load and display Sankey diagram
-        sankey_data, sankey_error = load_sankey_data(from_filter, to_filter, scenario_filter)
+        # Load and display Sankey diagram with loading indicator
+        with st.spinner("Loading transition flows..."):
+            sankey_data, sankey_error = load_sankey_data(from_filter, to_filter, scenario_filter)
+
         if sankey_error:
-            st.error(f"❌ {sankey_error}")
+            if "No transitions found" in sankey_error:
+                st.warning(f"⚠️ {sankey_error}")
+            else:
+                st.error(f"❌ {sankey_error}")
         elif sankey_data is not None and not sankey_data.empty:
+            # Display the Sankey diagram
             fig = create_sankey_diagram(sankey_data)
             if fig:
-                st.plotly_chart(fig, use_container_width=True)
+                st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
 
-            # Show flow statistics
-            st.markdown("##### 📊 Flow Statistics")
-            total_flow = sankey_data['value'].sum()
-            st.metric("Total Acres in Flow", f"{total_flow:,.0f}")
+            # Enhanced statistics section
+            st.markdown("---")
+            st.markdown("##### 📊 Transition Statistics")
 
-            # Show top flows
-            st.markdown("##### Top Transition Flows")
-            top_flows = sankey_data.head(5)[['source', 'target', 'value', 'scenario_count']]
-            top_flows['value'] = top_flows['value'].apply(lambda x: f"{x:,.0f}")
-            st.dataframe(top_flows, use_container_width=True, hide_index=True)
+            # Create metrics row
+            col1, col2, col3, col4 = st.columns(4)
+
+            with col1:
+                total_flow = sankey_data['value'].sum()
+                st.metric(
+                    "Total Acres",
+                    f"{total_flow/1e6:.1f}M",
+                    help="Total acres transitioning between land uses"
+                )
+
+            with col2:
+                num_transitions = len(sankey_data)
+                st.metric(
+                    "Transitions Shown",
+                    num_transitions,
+                    help="Number of transition pathways displayed"
+                )
+
+            with col3:
+                avg_flow = sankey_data['value'].mean()
+                st.metric(
+                    "Average Flow",
+                    f"{avg_flow/1e6:.1f}M",
+                    help="Average acres per transition"
+                )
+
+            with col4:
+                max_scenarios = sankey_data['scenario_count'].max()
+                st.metric(
+                    "Max Scenarios",
+                    max_scenarios,
+                    help="Maximum scenarios for any transition"
+                )
+
+            # Show detailed transition table
+            st.markdown("##### 📋 Detailed Transition Data")
+
+            # Prepare display dataframe with better formatting
+            display_df = sankey_data.copy()
+            display_df['Transition'] = display_df['source'] + ' → ' + display_df['target']
+            display_df['Acres (M)'] = (display_df['value'] / 1e6).round(2)
+            display_df['Scenarios'] = display_df['scenario_count']
+
+            # Select and reorder columns for display
+            display_df = display_df[['Transition', 'Acres (M)', 'Scenarios']]
+
+            # Display with custom styling
+            st.dataframe(
+                display_df,
+                use_container_width=True,
+                hide_index=True,
+                column_config={
+                    "Transition": st.column_config.TextColumn(
+                        "Land Use Transition",
+                        width="medium",
+                    ),
+                    "Acres (M)": st.column_config.NumberColumn(
+                        "Acres (Millions)",
+                        format="%.2f",
+                        width="small",
+                    ),
+                    "Scenarios": st.column_config.NumberColumn(
+                        "Scenario Count",
+                        width="small",
+                    )
+                }
+            )
+
+            # Add insights
+            if num_transitions > 0:
+                top_transition = display_df.iloc[0]
+                st.info(f"💡 **Key Insight:** The largest transition is {top_transition['Transition']} with {top_transition['Acres (M)']}M acres")
         else:
-            st.info("No data available for selected filters")
+            st.info("📊 No transition data available for the selected filters. Try selecting 'All' for broader results.")
 
     with viz_tab3:
         st.markdown("#### Animated Timeline")
