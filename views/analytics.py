@@ -615,45 +615,74 @@ def create_time_series_chart(df):
 
 @st.cache_data
 def load_state_transitions():
-    """Load state-level transition data for choropleth map"""
+    """Load state-level transition data for choropleth map showing percentage change between 2025-2070"""
     conn, error = get_database_connection()
     if error:
         return None, error
 
     try:
         query = """
-        WITH state_transitions AS (
+        WITH
+        baseline_2025 AS (
+            SELECT
+                g.state_code,
+                SUM(f.acres) as acres_2025
+            FROM fact_landuse_transitions f
+            JOIN dim_geography g ON f.geography_id = g.geography_id
+            JOIN dim_time t ON f.time_id = t.time_id
+            WHERE t.year_range = '2020-2030'
+              AND f.transition_type = 'change'
+            GROUP BY g.state_code
+        ),
+        future_2070 AS (
+            SELECT
+                g.state_code,
+                SUM(f.acres) as acres_2070
+            FROM fact_landuse_transitions f
+            JOIN dim_geography g ON f.geography_id = g.geography_id
+            JOIN dim_time t ON f.time_id = t.time_id
+            WHERE t.year_range = '2060-2070'
+              AND f.transition_type = 'change'
+            GROUP BY g.state_code
+        ),
+        state_changes AS (
+            SELECT
+                COALESCE(b.state_code, f.state_code) as state_code,
+                COALESCE(b.acres_2025, 0) as baseline,
+                COALESCE(f.acres_2070, 0) as future,
+                CASE
+                    WHEN COALESCE(b.acres_2025, 0) > 0
+                    THEN ((COALESCE(f.acres_2070, 0) - COALESCE(b.acres_2025, 0)) / b.acres_2025) * 100
+                    ELSE 0
+                END as percent_change
+            FROM baseline_2025 b
+            FULL OUTER JOIN future_2070 f ON b.state_code = f.state_code
+        ),
+        state_transitions AS (
             SELECT
                 g.state_code,
                 fl.landuse_name as from_landuse,
                 tl.landuse_name as to_landuse,
-                SUM(f.acres) as total_acres,
-                AVG(f.acres) as avg_acres_per_scenario
+                SUM(f.acres) as total_acres
             FROM fact_landuse_transitions f
             JOIN dim_geography g ON f.geography_id = g.geography_id
             JOIN dim_landuse fl ON f.from_landuse_id = fl.landuse_id
             JOIN dim_landuse tl ON f.to_landuse_id = tl.landuse_id
             WHERE f.transition_type = 'change'
             GROUP BY g.state_code, fl.landuse_name, tl.landuse_name
-        ),
-        state_totals AS (
-            SELECT
-                state_code,
-                SUM(total_acres) as total_change_acres,
-                COUNT(DISTINCT CONCAT(from_landuse, ' to ', to_landuse)) as transition_types
-            FROM state_transitions
-            GROUP BY state_code
         )
         SELECT
-            st.state_code,
-            st.total_change_acres,
-            st.transition_types,
+            sc.state_code,
+            sc.percent_change,
+            sc.baseline,
+            sc.future,
             (SELECT CONCAT(from_landuse, ' → ', to_landuse)
-             FROM state_transitions s
-             WHERE s.state_code = st.state_code
+             FROM state_transitions st
+             WHERE st.state_code = sc.state_code
              ORDER BY total_acres DESC
              LIMIT 1) as dominant_transition
-        FROM state_totals st
+        FROM state_changes sc
+        WHERE sc.state_code IS NOT NULL
         """
 
         df = conn.query(query, ttl=300)
@@ -661,6 +690,9 @@ def load_state_transitions():
         # Add state abbreviations and names
         df['state_abbr'] = df['state_code'].map(StateMapper.FIPS_TO_ABBREV)
         df['state_name'] = df['state_code'].map(StateMapper.FIPS_TO_NAME)
+
+        # Round percentage for display
+        df['percent_change'] = df['percent_change'].round(1)
 
         return df, None
     except Exception as e:
@@ -709,31 +741,35 @@ def load_sankey_data(from_landuse=None, to_landuse=None, scenario_filter=None):
         return None, f"Error loading Sankey data: {e}"
 
 def create_choropleth_map(df):
-    """Create interactive choropleth map of state-level transitions using modern Plotly API"""
+    """Create interactive choropleth map showing percentage change between 2025-2070"""
     if df is None or df.empty:
         return None
 
-    # Use Plotly Express for cleaner API (2025 best practice)
+    # Use diverging color scale for percentage changes (red for decrease, green for increase)
     fig = px.choropleth(
         df,
         locations='state_abbr',
         locationmode='USA-states',
-        color='total_change_acres',
-        color_continuous_scale=RPA_BROWN_SCALE,
+        color='percent_change',
+        color_continuous_scale='RdYlGn',  # Red-Yellow-Green diverging scale
+        color_continuous_midpoint=0,  # Center at 0% change
+        range_color=[-50, 50],  # Cap display range at ±50% for better visualization
         hover_name='state_name',
         hover_data={
             'state_abbr': False,  # Hide from hover
-            'total_change_acres': ':,.0f',
+            'percent_change': ':.1f',
+            'baseline': ':,.0f',
+            'future': ':,.0f',
             'dominant_transition': True,
-            'transition_types': True,
             'state_name': False  # Already shown as hover_name
         },
         labels={
-            'total_change_acres': 'Total Acres Changed',
-            'dominant_transition': 'Dominant Transition',
-            'transition_types': 'Transition Types'
+            'percent_change': 'Change (%)',
+            'baseline': '2020-2030 Period (acres)',
+            'future': '2060-2070 Period (acres)',
+            'dominant_transition': 'Most Common Transition'
         },
-        title='Total Land Use Changes by State'
+        title='Change in Land Use Transition Activity: 2020-2030 vs 2060-2070 (%)'
     )
 
     # Update layout for better visualization
@@ -748,13 +784,14 @@ def create_choropleth_map(df):
         height=600,
         margin={"r":0,"t":40,"l":0,"b":0},
         coloraxis_colorbar={
-            "title": "Total Acres<br>Changed",
+            "title": "Transition<br>Activity<br>Change (%)",
             "thicknessmode": "pixels",
             "thickness": 15,
             "lenmode": "pixels",
             "len": 300,
             "yanchor": "middle",
-            "y": 0.5
+            "y": 0.5,
+            "ticksuffix": "%"
         }
     )
 
@@ -1033,7 +1070,8 @@ def show_enhanced_visualizations():
 
     with viz_tab1:
         st.markdown("#### State-Level Land Use Changes")
-        st.markdown("**Interactive map showing total land use changes by state**")
+        st.markdown("**Interactive map showing the percentage change in land use transition activity between 2020-2030 and 2060-2070 periods**")
+        st.info("📊 **What this shows:** The percentage increase or decrease in the total amount of land changing from one use to another. Green = more transition activity, Red = less transition activity.")
 
         state_data, state_error = load_state_transitions()
         if state_error:
@@ -1045,10 +1083,21 @@ def show_enhanced_visualizations():
                 st.plotly_chart(fig, use_container_width=True, config={'scrollZoom': False})
 
             # Show state details
-            st.markdown("##### 🏆 Top 10 States by Total Change")
-            top_states = state_data.nlargest(10, 'total_change_acres')[['state_name', 'total_change_acres', 'dominant_transition']]
-            top_states['total_change_acres'] = top_states['total_change_acres'].apply(lambda x: f"{x:,.0f}")
-            st.dataframe(top_states, use_container_width=True, hide_index=True)
+            st.markdown("##### 🏆 Top 10 States by Percentage Change (2025-2070)")
+
+            # Sort by absolute percentage change to show biggest changes (positive or negative)
+            df_sorted = state_data.copy()
+            df_sorted['abs_change'] = df_sorted['percent_change'].abs()
+            top_states = df_sorted.nlargest(10, 'abs_change')[['state_name', 'percent_change', 'baseline', 'future', 'dominant_transition']]
+
+            # Format the display
+            top_states['Change (%)'] = top_states['percent_change'].apply(lambda x: f"{x:+.1f}%")
+            top_states['2025 Baseline'] = top_states['baseline'].apply(lambda x: f"{x:,.0f}")
+            top_states['2070 Projection'] = top_states['future'].apply(lambda x: f"{x:,.0f}")
+
+            display_df = top_states[['state_name', 'Change (%)', '2025 Baseline', '2070 Projection', 'dominant_transition']]
+            display_df.columns = ['State', 'Change (%)', '2025 (acres)', '2070 (acres)', 'Dominant Transition']
+            st.dataframe(display_df, use_container_width=True, hide_index=True)
 
     with viz_tab2:
         st.markdown("#### Land Use Transition Flows")
