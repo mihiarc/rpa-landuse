@@ -118,7 +118,7 @@ class LanduseCombinedScenarioConverter:
 
         console.print(f"🚀 Using {'bulk COPY' if use_bulk_copy else 'traditional INSERT'} loading method")
         console.print(f"🔄 Aggregating {len(self.gcm_models)} GCMs into {len(self.COMBINED_SCENARIOS)} combined scenarios")
-        console.print(f"📊 Including OVERALL scenario (mean of all GCMs and RCP-SSP combinations)")
+        console.print("📊 Including OVERALL scenario (mean of all GCMs and RCP-SSP combinations)")
 
     def _validate_input_path(self, input_file: str) -> Path:
         """Validate input file path for security."""

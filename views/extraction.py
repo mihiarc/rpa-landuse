@@ -835,8 +835,8 @@ def show_bulk_export():
 
 def main():
     """Main data extraction interface"""
-    st.title("🔄 Data Extraction")
-    st.markdown("**Extract, filter, and export land use transition data**")
+    st.title("🔄 RPA Assessment Data Extraction")
+    st.markdown("**Extract, filter, and export RPA land use transition data**")
 
     # Create tabs
     tab1, tab2, tab3 = st.tabs([

@@ -28,6 +28,35 @@ from landuse.connections import DuckDBConnection  # noqa: E402
 # Import state mappings and connection
 from landuse.utilities.state_mappings import StateMapper  # noqa: E402
 
+# RPA Assessment Official Color Palette
+RPA_COLORS = {
+    'dark_green': '#496f4a',
+    'medium_green': '#85b18b',
+    'medium_blue': '#a3cad4',
+    'light_brown': '#cec597',
+    'pink': '#edaa97',
+    'dark_blue': '#61a4b5',
+    'lighter_dark_green': '#89b18b',
+    'lighter_medium_green': '#b8d0b9',
+    'lighter_medium_blue': '#c8dfe5',
+    'lighter_light_brown': '#e2dcc1'
+}
+
+# RPA color sequences for Plotly
+RPA_COLOR_SEQUENCE = [
+    RPA_COLORS['dark_green'],
+    RPA_COLORS['medium_blue'],
+    RPA_COLORS['medium_green'],
+    RPA_COLORS['light_brown'],
+    RPA_COLORS['pink'],
+    RPA_COLORS['dark_blue']
+]
+
+# RPA gradient scales
+RPA_GREEN_SCALE = [[0, RPA_COLORS['lighter_medium_green']], [0.5, RPA_COLORS['medium_green']], [1, RPA_COLORS['dark_green']]]
+RPA_BLUE_SCALE = [[0, RPA_COLORS['lighter_medium_blue']], [0.5, RPA_COLORS['medium_blue']], [1, RPA_COLORS['dark_blue']]]
+RPA_BROWN_SCALE = [[0, RPA_COLORS['lighter_light_brown']], [0.5, RPA_COLORS['light_brown']], [1, '#9f6b25']]
+
 
 @st.cache_resource
 def get_database_connection():
@@ -331,7 +360,7 @@ def create_urbanization_chart(df):
             'state_code': 'State'
         },
         color='total_acres_urbanized',
-        color_continuous_scale='Reds'
+        color_continuous_scale=RPA_BROWN_SCALE
     )
 
     fig.update_layout(
@@ -365,13 +394,13 @@ def create_forest_flow_chart(df_loss, df_gain):
     for landuse, acres in loss_by_type.items():
         x_labels.append(f"To {landuse}")
         y_values.append(-acres)
-        colors.append('rgba(255, 0, 0, 0.6)')  # Red for losses
+        colors.append(f'{RPA_COLORS["pink"]}99')  # RPA pink for losses
 
     # Add gains (positive values)
     for landuse, acres in gain_by_type.items():
         x_labels.append(f"From {landuse}")
         y_values.append(acres)
-        colors.append('rgba(0, 128, 0, 0.6)')  # Green for gains
+        colors.append(f'{RPA_COLORS["medium_green"]}99')  # RPA green for gains
 
     # Create bar chart
     fig.add_trace(go.Bar(
@@ -418,7 +447,7 @@ def create_forest_state_map(df_states):
         locations='state_abbr',
         locationmode='USA-states',
         color='net_change',
-        color_continuous_scale='RdYlGn',  # Red-Yellow-Green for loss-neutral-gain
+        color_continuous_scale=RPA_GREEN_SCALE,  # RPA green scale
         color_continuous_midpoint=0,
         hover_name='state_name',
         hover_data={
@@ -541,7 +570,7 @@ def create_climate_comparison_chart(df):
         values='total_acres',
         title='Land Use Transitions by Climate Scenario',
         color='total_acres',
-        color_continuous_scale='RdYlBu_r'
+        color_continuous_scale=RPA_BLUE_SCALE
     )
 
     fig.update_layout(height=600, font={"size": 12})
@@ -690,7 +719,7 @@ def create_choropleth_map(df):
         locations='state_abbr',
         locationmode='USA-states',
         color='total_change_acres',
-        color_continuous_scale='YlOrRd',
+        color_continuous_scale=RPA_BROWN_SCALE,
         hover_name='state_name',
         hover_data={
             'state_abbr': False,  # Hide from hover
@@ -1249,7 +1278,7 @@ def show_summary_metrics():
 
 def main():
     """Main analytics dashboard"""
-    st.title("📊 RPA Land Use Analytics Dashboard")
+    st.title("📊 RPA Assessment Analytics Dashboard")
     st.markdown("**Visualizations and insights from the USDA Forest Service 2020 RPA Assessment**")
 
     # Show summary metrics
@@ -1287,7 +1316,7 @@ def main():
                     values=source_breakdown.values,
                     names=source_breakdown.index,
                     title="Land Converted to Urban",
-                    color_discrete_sequence=px.colors.qualitative.Set3,
+                    color_discrete_sequence=RPA_COLOR_SEQUENCE,
                     hole=0.4  # Donut chart
                 )
                 fig_pie.update_traces(textinfo='percent+label')
@@ -1306,7 +1335,7 @@ def main():
                     locations='state_abbr',
                     locationmode='USA-states',
                     color='total_acres_urbanized',
-                    color_continuous_scale='Reds',
+                    color_continuous_scale=RPA_BROWN_SCALE,
                     title="Urban Expansion Hotspots"
                 )
                 fig_map.update_layout(
@@ -1518,7 +1547,7 @@ def main():
                             title="Where Forests Convert To",
                             labels={'x': 'Acres', 'y': 'Land Use Type'},
                             color=loss_summary.values,
-                            color_continuous_scale='Reds'
+                            color_continuous_scale=RPA_BROWN_SCALE
                         )
                         fig_loss.update_layout(height=300, showlegend=False)
                         st.plotly_chart(fig_loss, use_container_width=True)
@@ -1535,7 +1564,7 @@ def main():
                             title="Where Forest Gains Come From",
                             labels={'x': 'Acres', 'y': 'Land Use Type'},
                             color=gain_summary.values,
-                            color_continuous_scale='Greens'
+                            color_continuous_scale=RPA_GREEN_SCALE
                         )
                         fig_gain.update_layout(height=300, showlegend=False)
                         st.plotly_chart(fig_gain, use_container_width=True)
@@ -1761,7 +1790,7 @@ def main():
                     title="Total Land Use Changes by Time Period",
                     labels={'x': 'Time Period', 'y': 'Total Acres'},
                     color=period_totals.values,
-                    color_continuous_scale='Blues'
+                    color_continuous_scale=RPA_BLUE_SCALE
                 )
                 fig_period.update_layout(height=400, showlegend=False)
                 st.plotly_chart(fig_period, use_container_width=True)
