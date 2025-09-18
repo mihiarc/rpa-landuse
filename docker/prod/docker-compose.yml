@@ -17,9 +17,9 @@ services:
       - "80:8501"
     env_file:
       - ./.env.dev
-    volumes:
-      # Mount only necessary files/directories for faster performance
-      - ../../landuse_app.py:/app/landuse_app.py
-      - ../../src:/app/src
-      - ../../views:/app/views
-      - ../../data:/app/data
+    # volumes:
+    #   # Mount only necessary files/directories for faster performance
+    #   - ../../landuse_app.py:/app/landuse_app.py
+    #   - ../../src:/app/src
+    #   - ../../views:/app/views
+    #   - ../../data:/app/data

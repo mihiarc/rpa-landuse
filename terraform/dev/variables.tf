@@ -74,7 +74,7 @@ variable "allowed_https_cidr" {
 variable "volume_size" {
   description = "Size of the root EBS volume in GB"
   type        = number
-  default     = 8
+  default     = 16
 }
 
 variable "volume_type" {
