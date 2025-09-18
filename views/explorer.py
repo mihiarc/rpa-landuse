@@ -989,7 +989,7 @@ def show_data_dictionary():
 def main():
     """Main data explorer interface with three-panel layout"""
 
-    st.title("🔍 Data Explorer")
+    st.title("🔍 RPA Assessment Data Explorer")
     st.markdown("**Interactive database exploration with live schema browser and SQL editor**")
 
     # Initialize session state
