@@ -555,8 +555,17 @@ def main():
     """Main application entry point with modern navigation"""
 
     try:
+        # Check authentication first
+        from landuse.auth import require_authentication, show_logout_button
+        
+        if not require_authentication():
+            return  # Show login page, don't proceed with app
+        
         # Create navigation structure
         pages = create_pages()
+
+        # Add logout button to sidebar
+        show_logout_button("sidebar")
 
         # Use modern st.navigation API
         pg = st.navigation(pages)
