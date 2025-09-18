@@ -861,7 +861,7 @@ def load_state_transitions():
         return None, f"Error loading state transitions: {e}"
 
 @st.cache_data
-def load_sankey_data(from_landuse=None, to_landuse=None, scenario_filter=None):
+def load_sankey_data(from_landuse=None, to_landuse=None, state_filter=None):
     """Load data for Sankey diagram of land use flows"""
     conn, error = get_database_connection()
     if error:
@@ -875,7 +875,6 @@ def load_sankey_data(from_landuse=None, to_landuse=None, scenario_filter=None):
 
         # Validate inputs against allowed values
         allowed_landuses = ["Crop", "Pasture", "Forest", "Urban", "Rangeland"]
-        allowed_scenarios = ["rcp45", "rcp85"]
 
         if from_landuse and from_landuse != "All":
             if from_landuse in allowed_landuses:
@@ -890,11 +889,13 @@ def load_sankey_data(from_landuse=None, to_landuse=None, scenario_filter=None):
             else:
                 return None, f"Invalid land use type: {to_landuse}"
 
-        if scenario_filter and scenario_filter != "All":
-            if scenario_filter in allowed_scenarios:
-                where_conditions.append(f"s.rcp_scenario = '{scenario_filter}'")
+        if state_filter and state_filter != "All":
+            # Convert state name to FIPS code for database query
+            state_fips = StateMapper.name_to_fips(state_filter)
+            if state_fips:
+                where_conditions.append(f"g.state_code = '{state_fips}'")
             else:
-                return None, f"Invalid scenario: {scenario_filter}"
+                return None, f"Invalid state: {state_filter}"
 
         where_clause = " AND ".join(where_conditions)
 
@@ -903,14 +904,16 @@ def load_sankey_data(from_landuse=None, to_landuse=None, scenario_filter=None):
             fl.landuse_name as source,
             tl.landuse_name as target,
             SUM(f.acres) as value,
-            COUNT(DISTINCT s.scenario_id) as scenario_count
+            COUNT(DISTINCT s.scenario_id) as scenario_count,
+            COUNT(DISTINCT g.county_name) as county_count
         FROM fact_landuse_transitions f
         JOIN dim_scenario s ON f.scenario_id = s.scenario_id
         JOIN dim_landuse fl ON f.from_landuse_id = fl.landuse_id
         JOIN dim_landuse tl ON f.to_landuse_id = tl.landuse_id
+        JOIN dim_geography g ON f.geography_id = g.geography_id
         WHERE {where_clause}
         GROUP BY fl.landuse_name, tl.landuse_name
-        HAVING SUM(f.acres) > 500000
+        HAVING SUM(f.acres) > 100000
         ORDER BY value DESC
         LIMIT 15
         """
@@ -919,7 +922,7 @@ def load_sankey_data(from_landuse=None, to_landuse=None, scenario_filter=None):
 
         # Additional validation: ensure we have data
         if df.empty:
-            return None, "No transitions found for selected filters. Try adjusting the filter criteria."
+            return None, "No transitions found for selected filters. Try adjusting the filter criteria or selecting 'All' for broader results."
 
         return df, None
     except Exception as e:
@@ -1009,11 +1012,14 @@ def create_sankey_diagram(df):
     hover_labels = []
     for _, row in df.iterrows():
         acres_millions = row['value'] / 1_000_000
-        hover_labels.append(
+        label_text = (
             f"<b>{row['source']} → {row['target']}</b><br>" +
-            f"Total: {acres_millions:.2f}M acres<br>" +
-            f"Scenarios: {row['scenario_count']}"
+            f"Total: {acres_millions:.2f}M acres<br>"
         )
+        if 'county_count' in row:
+            label_text += f"Counties: {row['county_count']}<br>"
+        label_text += f"Scenarios: {row['scenario_count']}"
+        hover_labels.append(label_text)
 
     # Generate link colors with proper transparency
     link_colors = []
@@ -1336,16 +1342,18 @@ def show_enhanced_visualizations():
             )
 
         with col3:
-            scenario_filter = st.selectbox(
-                "Climate Scenario",
-                ["All", "rcp45", "rcp85"],
-                key="sankey_scenario",
-                help="Filter by climate scenario (RCP4.5 or RCP8.5)"
+            # Create list of states for dropdown
+            state_options = ["All"] + sorted(StateMapper.get_all_names())
+            state_filter = st.selectbox(
+                "State",
+                state_options,
+                key="sankey_state",
+                help="Filter by state to see regional land use transitions"
             )
 
         # Load and display Sankey diagram with loading indicator
         with st.spinner("Loading transition flows..."):
-            sankey_data, sankey_error = load_sankey_data(from_filter, to_filter, scenario_filter)
+            sankey_data, sankey_error = load_sankey_data(from_filter, to_filter, state_filter)
 
         if sankey_error:
             if "No transitions found" in sankey_error:
@@ -1390,12 +1398,20 @@ def show_enhanced_visualizations():
                 )
 
             with col4:
-                max_scenarios = sankey_data['scenario_count'].max()
-                st.metric(
-                    "Max Scenarios",
-                    max_scenarios,
-                    help="Maximum scenarios for any transition"
-                )
+                if 'county_count' in sankey_data.columns:
+                    total_counties = sankey_data['county_count'].sum()
+                    st.metric(
+                        "Counties Affected",
+                        total_counties,
+                        help="Number of counties with transitions"
+                    )
+                else:
+                    max_scenarios = sankey_data['scenario_count'].max()
+                    st.metric(
+                        "Max Scenarios",
+                        max_scenarios,
+                        help="Maximum scenarios for any transition"
+                    )
 
             # Show detailed transition table
             st.markdown("##### 📋 Detailed Transition Data")
@@ -1434,7 +1450,10 @@ def show_enhanced_visualizations():
             # Add insights
             if num_transitions > 0:
                 top_transition = display_df.iloc[0]
-                st.info(f"💡 **Key Insight:** The largest transition is {top_transition['Transition']} with {top_transition['Acres (M)']}M acres")
+                if state_filter and state_filter != "All":
+                    st.info(f"💡 **Key Insight for {state_filter}:** The largest transition is {top_transition['Transition']} with {top_transition['Acres (M)']}M acres")
+                else:
+                    st.info(f"💡 **Key Insight:** The largest transition is {top_transition['Transition']} with {top_transition['Acres (M)']}M acres")
         else:
             st.info("📊 No transition data available for the selected filters. Try selecting 'All' for broader results.")
 
