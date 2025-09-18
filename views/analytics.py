@@ -104,35 +104,91 @@ def load_summary_data():
         return None, f"Error loading summary data: {e}"
 
 @st.cache_data
-def load_agricultural_loss_data():
-    """Load agricultural land loss data by scenario"""
+def load_agricultural_analysis_data():
+    """Load comprehensive agricultural transition data (gains and losses)"""
     conn, error = get_database_connection()
     if error:
-        return None, error
+        return None, None, None, error
 
     try:
-        query = """
+        # Query 1: Agricultural loss by destination (what agriculture becomes)
+        ag_loss_query = """
         SELECT
-            s.scenario_name,
+            tl.landuse_name as to_landuse,
             s.rcp_scenario,
-            s.ssp_scenario,
-            SUM(f.acres) as total_acres_lost
+            SUM(f.acres) as total_acres,
+            AVG(f.acres) as avg_acres_per_county,
+            COUNT(DISTINCT g.state_code) as states_affected
         FROM fact_landuse_transitions f
         JOIN dim_scenario s ON f.scenario_id = s.scenario_id
         JOIN dim_landuse fl ON f.from_landuse_id = fl.landuse_id
         JOIN dim_landuse tl ON f.to_landuse_id = tl.landuse_id
+        JOIN dim_geography g ON f.geography_id = g.geography_id
         WHERE fl.landuse_category = 'Agriculture'
           AND tl.landuse_category != 'Agriculture'
           AND f.transition_type = 'change'
-        GROUP BY s.scenario_name, s.rcp_scenario, s.ssp_scenario
-        ORDER BY total_acres_lost DESC
-        LIMIT 20
+        GROUP BY tl.landuse_name, s.rcp_scenario
+        ORDER BY total_acres DESC
         """
 
-        df = conn.query(query, ttl=300)
-        return df, None
+        # Query 2: Agricultural gain by source (what becomes agriculture)
+        ag_gain_query = """
+        SELECT
+            fl.landuse_name as from_landuse,
+            s.rcp_scenario,
+            SUM(f.acres) as total_acres,
+            AVG(f.acres) as avg_acres_per_county,
+            COUNT(DISTINCT g.state_code) as states_affected
+        FROM fact_landuse_transitions f
+        JOIN dim_scenario s ON f.scenario_id = s.scenario_id
+        JOIN dim_landuse fl ON f.from_landuse_id = fl.landuse_id
+        JOIN dim_landuse tl ON f.to_landuse_id = tl.landuse_id
+        JOIN dim_geography g ON f.geography_id = g.geography_id
+        WHERE fl.landuse_category != 'Agriculture'
+          AND tl.landuse_category = 'Agriculture'
+          AND f.transition_type = 'change'
+        GROUP BY fl.landuse_name, s.rcp_scenario
+        ORDER BY total_acres DESC
+        """
+
+        # Query 3: State-level agricultural changes
+        state_ag_query = """
+        WITH ag_changes AS (
+            SELECT
+                g.state_code,
+                g.state_name,
+                CASE
+                    WHEN fl.landuse_category = 'Agriculture' AND tl.landuse_category != 'Agriculture'
+                    THEN -f.acres
+                    WHEN fl.landuse_category != 'Agriculture' AND tl.landuse_category = 'Agriculture'
+                    THEN f.acres
+                    ELSE 0
+                END as net_change
+            FROM fact_landuse_transitions f
+            JOIN dim_geography g ON f.geography_id = g.geography_id
+            JOIN dim_landuse fl ON f.from_landuse_id = fl.landuse_id
+            JOIN dim_landuse tl ON f.to_landuse_id = tl.landuse_id
+            WHERE f.transition_type = 'change'
+              AND (fl.landuse_category = 'Agriculture' OR tl.landuse_category = 'Agriculture')
+        )
+        SELECT
+            state_code,
+            state_name,
+            SUM(net_change) as net_change,
+            SUM(CASE WHEN net_change < 0 THEN ABS(net_change) ELSE 0 END) as total_loss,
+            SUM(CASE WHEN net_change > 0 THEN net_change ELSE 0 END) as total_gain
+        FROM ag_changes
+        GROUP BY state_code, state_name
+        ORDER BY ABS(SUM(net_change)) DESC
+        """
+
+        df_loss = conn.query(ag_loss_query, ttl=300)
+        df_gain = conn.query(ag_gain_query, ttl=300)
+        df_states = conn.query(state_ag_query, ttl=300)
+
+        return df_loss, df_gain, df_states, None
     except Exception as e:
-        return None, f"Error loading agricultural data: {e}"
+        return None, None, None, f"Error loading agricultural data: {e}"
 
 @st.cache_data
 def load_urbanization_data():
@@ -311,35 +367,6 @@ def load_time_series_data():
     except Exception as e:
         return None, f"Error loading time series data: {e}"
 
-def create_agricultural_loss_chart(df):
-    """Create agricultural land loss visualization"""
-    if df is None or df.empty:
-        return None
-
-    # Create bar chart
-    fig = px.bar(
-        df.head(10),
-        x='total_acres_lost',
-        y='scenario_name',
-        color='rcp_scenario',
-        title='Top 10 Scenarios by Agricultural Land Loss',
-        labels={
-            'total_acres_lost': 'Total Acres Lost',
-            'scenario_name': 'Scenario',
-            'rcp_scenario': 'RCP Pathway'
-        },
-        color_discrete_map={'rcp45': '#2E86AB', 'rcp85': '#F24236'}
-    )
-
-    fig.update_layout(
-        height=500,
-        yaxis={'categoryorder': 'total ascending'},
-        xaxis_title="Acres Lost (millions)",
-        xaxis_tickformat='.1s',  # Format x-axis to show millions
-        font={"size": 12}
-    )
-
-    return fig
 
 def create_urbanization_chart(df):
     """Create urbanization analysis visualization"""
@@ -369,6 +396,66 @@ def create_urbanization_chart(df):
         xaxis_title="Acres Urbanized (millions)",
         xaxis_tickformat='.1s',  # Format x-axis to show millions
         font={"size": 12}
+    )
+
+    return fig
+
+def create_agricultural_flow_chart(df_loss, df_gain):
+    """Create agricultural transition flow chart (similar to forest flow chart)"""
+    if df_loss is None or df_gain is None:
+        return None
+
+    # Create waterfall-style chart showing gains and losses
+    fig = make_subplots(rows=1, cols=1)
+
+    # Aggregate data
+    loss_by_type = df_loss.groupby('to_landuse')['total_acres'].sum().to_dict()
+    gain_by_type = df_gain.groupby('from_landuse')['total_acres'].sum().to_dict()
+
+    # Create waterfall chart
+    x_labels = []
+    y_values = []
+    colors = []
+
+    # Add losses (negative values)
+    for landuse, acres in loss_by_type.items():
+        x_labels.append(f"To {landuse}")
+        y_values.append(-acres)
+        colors.append('rgba(237, 170, 151, 0.6)')  # RPA pink for losses
+
+    # Add gains (positive values)
+    for landuse, acres in gain_by_type.items():
+        x_labels.append(f"From {landuse}")
+        y_values.append(acres)
+        colors.append('rgba(133, 177, 139, 0.6)')  # RPA green for gains
+
+    # Create bar chart
+    fig.add_trace(go.Bar(
+        x=x_labels,
+        y=y_values,
+        marker_color=colors,
+        text=[f"{abs(v/1e6):.1f}M" for v in y_values],
+        textposition='auto',
+        name='Agricultural Transitions'
+    ))
+
+    # Update layout
+    fig.update_layout(
+        title={
+            'text': 'Agricultural Land Transitions: Gains vs Losses',
+            'x': 0.5,
+            'xanchor': 'center'
+        },
+        xaxis_title="Transition Type",
+        yaxis_title="Acres (Millions)",
+        yaxis_tickformat='.1s',
+        showlegend=False,
+        height=450,
+        hovermode='x unified',
+        xaxis_tickangle=-45,
+        yaxis_zeroline=True,
+        yaxis_zerolinewidth=2,
+        yaxis_zerolinecolor='black'
     )
 
     return fig
@@ -1387,83 +1474,237 @@ def main():
             st.info("📊 No urbanization data available")
 
     with tab2:
-        st.markdown("### 🌾 Agricultural Land Loss Analysis")
-        st.markdown("**Comprehensive analysis of agricultural land conversion across climate scenarios**")
+        st.markdown("### 🌾 Agricultural Analysis")
+        st.markdown("**Comprehensive analysis of agricultural gains, losses, and transitions**")
 
-        ag_data, ag_error = load_agricultural_loss_data()
+        # Load agricultural data
+        df_loss, df_gain, df_states, ag_error = load_agricultural_analysis_data()
+
         if ag_error:
             st.error(f"❌ {ag_error}")
-        elif ag_data is not None and not ag_data.empty:
-            # Create side-by-side layout for charts
-            chart_col1, chart_col2 = st.columns([3, 2])
+        else:
+            # Create sub-tabs for agricultural analysis (matching forest structure)
+            ag_tab1, ag_tab2, ag_tab3 = st.tabs([
+                "📊 Overview",
+                "🗺️ Geographic Distribution",
+                "🌡️ Climate Impact"
+            ])
 
-            with chart_col1:
-                # Main agricultural loss chart
-                fig = create_agricultural_loss_chart(ag_data)
-                if fig:
-                    fig.update_layout(height=600)  # Taller for wide layout
+            with ag_tab1:
+                st.markdown("#### 🌾 Agricultural Transition Overview")
+
+                if df_loss is not None and df_gain is not None:
+                    # Wide layout with main visualization and side metrics
+                    main_col, metrics_col = st.columns([4, 2])
+
+                    with main_col:
+                        # Show agricultural flow chart
+                        fig = create_agricultural_flow_chart(df_loss, df_gain)
+                        if fig:
+                            fig.update_layout(height=500)
+                            st.plotly_chart(fig, use_container_width=True)
+
+                    with metrics_col:
+                        # Key metrics in vertical layout
+                        total_loss = df_loss['total_acres'].sum()
+                        total_gain = df_gain['total_acres'].sum()
+                        net_change = total_gain - total_loss
+
+                        st.markdown("#### 📊 Agricultural Metrics")
+
+                        st.metric(
+                            "🔻 Total Agricultural Loss",
+                            f"{total_loss/1e6:.1f}M acres",
+                            help="Total agricultural land converted to other uses"
+                        )
+
+                        st.metric(
+                            "🔺 Total Agricultural Gain",
+                            f"{total_gain/1e6:.1f}M acres",
+                            help="Total land converted to agriculture"
+                        )
+
+                        st.metric(
+                            "📊 Net Change",
+                            f"{net_change/1e6:+.1f}M acres",
+                            delta=f"{(net_change/total_loss)*100:+.1f}%" if total_loss > 0 else "N/A",
+                            help="Net agricultural change across all scenarios"
+                        )
+
+                        # Quick insight box
+                        if net_change < 0:
+                            st.error(f"⚠️ Net agricultural loss of {abs(net_change/1e6):.1f}M acres projected")
+                        else:
+                            st.success(f"✅ Net agricultural gain of {net_change/1e6:.1f}M acres projected")
+
+                    # Detailed breakdowns in full width
+                    st.markdown("---")
+
+                    # Use three columns for detailed analysis
+                    detail_col1, detail_col2, detail_col3 = st.columns([2, 2, 2])
+
+                    with detail_col1:
+                        st.markdown("##### 🔻 Agricultural Loss Destinations")
+                        loss_summary = df_loss.groupby('to_landuse')['total_acres'].sum().sort_values(ascending=False)
+
+                        # Create a horizontal bar chart
+                        fig_loss = px.bar(
+                            x=loss_summary.values[:5],
+                            y=loss_summary.index[:5],
+                            orientation='h',
+                            title="Where Agricultural Land Goes",
+                            labels={'x': 'Acres', 'y': 'Land Use Type'},
+                            color_discrete_sequence=[RPA_COLORS['pink']]
+                        )
+                        fig_loss.update_layout(
+                            height=250,
+                            showlegend=False,
+                            xaxis_tickformat='.2s',
+                            margin=dict(t=30, b=0)
+                        )
+                        st.plotly_chart(fig_loss, use_container_width=True)
+
+                    with detail_col2:
+                        st.markdown("##### 🔺 Agricultural Gain Sources")
+                        gain_summary = df_gain.groupby('from_landuse')['total_acres'].sum().sort_values(ascending=False)
+
+                        # Create a horizontal bar chart
+                        fig_gain = px.bar(
+                            x=gain_summary.values[:5],
+                            y=gain_summary.index[:5],
+                            orientation='h',
+                            title="What Becomes Agricultural Land",
+                            labels={'x': 'Acres', 'y': 'Land Use Type'},
+                            color_discrete_sequence=[RPA_COLORS['medium_green']]
+                        )
+                        fig_gain.update_layout(
+                            height=250,
+                            showlegend=False,
+                            xaxis_tickformat='.2s',
+                            margin=dict(t=30, b=0)
+                        )
+                        st.plotly_chart(fig_gain, use_container_width=True)
+
+                    with detail_col3:
+                        st.markdown("##### 📈 Scenario Comparison")
+                        # Show RCP comparison
+                        rcp_loss = df_loss.groupby('rcp_scenario')['total_acres'].sum()
+                        rcp_gain = df_gain.groupby('rcp_scenario')['total_acres'].sum()
+
+                        comparison_df = pd.DataFrame({
+                            'Scenario': ['RCP4.5', 'RCP8.5'],
+                            'Loss (M acres)': [rcp_loss.get('rcp45', 0)/1e6, rcp_loss.get('rcp85', 0)/1e6],
+                            'Gain (M acres)': [rcp_gain.get('rcp45', 0)/1e6, rcp_gain.get('rcp85', 0)/1e6]
+                        })
+                        comparison_df['Net (M acres)'] = comparison_df['Gain (M acres)'] - comparison_df['Loss (M acres)']
+
+                        st.dataframe(
+                            comparison_df.round(1),
+                            use_container_width=True,
+                            hide_index=True
+                        )
+                else:
+                    st.info("📊 No data available for agricultural transitions")
+
+            with ag_tab2:
+                st.markdown("#### 🗺️ Geographic Distribution of Agricultural Changes")
+
+                if df_states is not None and not df_states.empty:
+                    # State-level metrics
+                    col1, col2, col3 = st.columns(3)
+
+                    with col1:
+                        states_with_loss = len(df_states[df_states['net_change'] < 0])
+                        st.metric("States with Net Loss", states_with_loss)
+
+                    with col2:
+                        states_with_gain = len(df_states[df_states['net_change'] > 0])
+                        st.metric("States with Net Gain", states_with_gain)
+
+                    with col3:
+                        avg_change = df_states['net_change'].mean()
+                        st.metric("Average State Change", f"{avg_change/1e6:.2f}M acres")
+
+                    # Show top states table
+                    st.markdown("##### 🏆 Top 10 States by Total Agricultural Change")
+                    top_states = df_states.nlargest(10, 'total_loss')[['state_name', 'total_loss', 'total_gain', 'net_change']]
+                    top_states['Total Loss'] = top_states['total_loss'].apply(lambda x: f"{x/1e6:.2f}M")
+                    top_states['Total Gain'] = top_states['total_gain'].apply(lambda x: f"{x/1e6:.2f}M")
+                    top_states['Net Change'] = top_states['net_change'].apply(lambda x: f"{x/1e6:+.2f}M")
+                    display_df = top_states[['state_name', 'Total Loss', 'Total Gain', 'Net Change']]
+                    display_df.columns = ['State', 'Loss', 'Gain', 'Net']
+                    st.dataframe(display_df, use_container_width=True, hide_index=True)
+                else:
+                    st.info("📊 No geographic data available")
+
+            with ag_tab3:
+                st.markdown("#### 🌡️ Climate Impact on Agricultural Land")
+
+                if df_loss is not None and df_gain is not None:
+                    # RCP scenario comparison
+                    rcp_data = pd.DataFrame()
+
+                    for scenario in ['rcp45', 'rcp85']:
+                        loss_rcp = df_loss[df_loss['rcp_scenario'] == scenario]['total_acres'].sum()
+                        gain_rcp = df_gain[df_gain['rcp_scenario'] == scenario]['total_acres'].sum()
+
+                        rcp_data = pd.concat([rcp_data, pd.DataFrame({
+                            'Scenario': [scenario.upper()],
+                            'Loss': [loss_rcp],
+                            'Gain': [gain_rcp],
+                            'Net': [gain_rcp - loss_rcp]
+                        })])
+
+                    # Create comparison visualization
+                    fig = go.Figure()
+
+                    fig.add_trace(go.Bar(
+                        name='Loss',
+                        x=rcp_data['Scenario'],
+                        y=-rcp_data['Loss'],
+                        marker_color=RPA_COLORS['pink']
+                    ))
+
+                    fig.add_trace(go.Bar(
+                        name='Gain',
+                        x=rcp_data['Scenario'],
+                        y=rcp_data['Gain'],
+                        marker_color=RPA_COLORS['medium_green']
+                    ))
+
+                    fig.update_layout(
+                        title='Agricultural Changes by Climate Scenario',
+                        barmode='relative',
+                        height=400,
+                        yaxis_title='Acres',
+                        yaxis_tickformat='.2s',
+                        hovermode='x unified'
+                    )
+
                     st.plotly_chart(fig, use_container_width=True)
 
-            with chart_col2:
-                # Additional visualization - pie chart of RCP scenarios
-                rcp_counts = ag_data['rcp_scenario'].value_counts()
-                fig_pie = px.pie(
-                    values=rcp_counts.values,
-                    names=[s.upper() for s in rcp_counts.index],
-                    title="Distribution by Climate Pathway",
-                    color_discrete_map={'RCP45': '#2E86AB', 'RCP85': '#F24236'}
-                )
-                fig_pie.update_layout(height=300)
-                st.plotly_chart(fig_pie, use_container_width=True)
+                    # Summary insights
+                    st.markdown("##### 🔍 Climate Scenario Insights")
 
-                # Summary statistics
-                st.markdown("#### 📊 Summary Statistics")
-                total_loss = ag_data['total_acres_lost'].sum()
-                avg_loss = ag_data['total_acres_lost'].mean()
+                    rcp45_net = rcp_data[rcp_data['Scenario'] == 'RCP45']['Net'].iloc[0]
+                    rcp85_net = rcp_data[rcp_data['Scenario'] == 'RCP85']['Net'].iloc[0]
 
-                col1, col2 = st.columns(2)
-                with col1:
-                    st.metric("Total Loss", f"{total_loss/1e6:.1f}M acres")
-                with col2:
-                    st.metric("Avg per Scenario", f"{avg_loss/1e6:.1f}M acres")
+                    col1, col2 = st.columns(2)
+                    with col1:
+                        st.info(f"""
+                        **RCP4.5 (Moderate Emissions)**
+                        - Net Change: {rcp45_net/1e6:+.1f}M acres
+                        - Represents moderate climate action scenario
+                        """)
 
-            # Insights and data table in full width
-            st.markdown("---")
-
-            insight_col1, insight_col2, insight_col3 = st.columns([2, 2, 1])
-
-            with insight_col1:
-                st.markdown("#### 🔍 Key Insights")
-                if not ag_data.empty:
-                    top_scenario = ag_data.iloc[0]
-                    rcp85_count = len(ag_data[ag_data['rcp_scenario'] == 'rcp85'])
-                    total_scenarios = len(ag_data)
-
-                    st.info(f"""
-                    **Major Findings:**
-                    - **Highest Loss:** {top_scenario['scenario_name']} ({top_scenario['total_acres_lost']/1e6:.1f}M acres)
-                    - **RCP8.5 Dominance:** {rcp85_count}/{total_scenarios} scenarios ({rcp85_count/total_scenarios*100:.0f}%)
-                    - **Climate Impact:** Higher emissions → more agricultural loss
-                    """)
-
-            with insight_col2:
-                st.markdown("#### 📋 Top 5 Scenarios")
-                display_df = ag_data.head(5)[['scenario_name', 'rcp_scenario', 'ssp_scenario', 'total_acres_lost']].copy()
-                display_df['total_acres_lost'] = display_df['total_acres_lost'].apply(lambda x: f"{x/1e6:.2f}M")
-                display_df.columns = ['Scenario', 'RCP', 'SSP', 'Acres Lost']
-                st.dataframe(display_df, use_container_width=True, hide_index=True)
-
-            with insight_col3:
-                st.markdown("#### 🎯 Quick Actions")
-                if st.button("📥 Export Data", key="export_ag"):
-                    st.download_button(
-                        label="Download CSV",
-                        data=ag_data.to_csv(index=False),
-                        file_name="agricultural_loss_data.csv",
-                        mime="text/csv"
-                    )
-        else:
-            st.info("📊 No agricultural data available")
+                    with col2:
+                        st.warning(f"""
+                        **RCP8.5 (High Emissions)**
+                        - Net Change: {rcp85_net/1e6:+.1f}M acres
+                        - Represents business-as-usual scenario
+                        """)
+                else:
+                    st.info("📊 No climate scenario data available")
 
     with tab3:
         st.markdown("### 🌲 Forest Analysis")
