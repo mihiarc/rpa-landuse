@@ -75,33 +75,6 @@ def get_database_connection():
     except Exception as e:
         return None, f"Database connection error: {e}"
 
-@st.cache_data
-def load_summary_data():
-    """Load summary statistics for the dashboard"""
-    conn, error = get_database_connection()
-    if error:
-        return None, error
-
-    try:
-        # Basic dataset stats
-        stats = {}
-
-        # Use query method with appropriate TTL
-        counties_df = conn.query("SELECT COUNT(DISTINCT fips_code) as count FROM dim_geography", ttl=3600)
-        stats['total_counties'] = counties_df['count'].iloc[0]
-
-        scenarios_df = conn.query("SELECT COUNT(*) as count FROM dim_scenario", ttl=3600)
-        stats['total_scenarios'] = scenarios_df['count'].iloc[0]
-
-        transitions_df = conn.query("SELECT COUNT(*) as count FROM fact_landuse_transitions WHERE transition_type = 'change'", ttl=300)
-        stats['total_transitions'] = transitions_df['count'].iloc[0]
-
-        time_df = conn.query("SELECT COUNT(*) as count FROM dim_time", ttl=3600)
-        stats['time_periods'] = time_df['count'].iloc[0]
-
-        return stats, None
-    except Exception as e:
-        return None, f"Error loading summary data: {e}"
 
 @st.cache_data
 def load_agricultural_loss_data():
@@ -1192,97 +1165,11 @@ def show_enhanced_visualizations():
         else:
             st.info("No scenario data available")
 
-def show_summary_metrics():
-    """Display summary metrics cards in wide layout"""
-    stats, error = load_summary_data()
-
-    if error:
-        st.error(f"❌ {error}")
-        return
-
-    if stats:
-        # Create a container for metrics with custom styling
-        st.markdown("""
-        <style>
-        .metric-container {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 1.5rem;
-            border-radius: 12px;
-            color: white;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            text-align: center;
-            height: 100%;
-        }
-        .metric-value {
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-        }
-        .metric-label {
-            font-size: 1rem;
-            opacity: 0.9;
-        }
-        </style>
-        """, unsafe_allow_html=True)
-
-        # Use 6 columns for better wide layout distribution
-        col1, col2, col3, col4, col5, col6 = st.columns([2, 2, 2, 2, 2, 2])
-
-        with col1:
-            st.markdown(f"""
-            <div class="metric-container">
-                <div class="metric-value">{stats['total_counties']:,}</div>
-                <div class="metric-label">🏛️ US Counties</div>
-            </div>
-            """, unsafe_allow_html=True)
-
-        with col2:
-            st.markdown(f"""
-            <div class="metric-container">
-                <div class="metric-value">{stats['total_scenarios']}</div>
-                <div class="metric-label">🌡️ Climate Scenarios</div>
-            </div>
-            """, unsafe_allow_html=True)
-
-        with col3:
-            st.markdown(f"""
-            <div class="metric-container">
-                <div class="metric-value">{stats['total_transitions']/1000000:.1f}M</div>
-                <div class="metric-label">🔄 Land Transitions</div>
-            </div>
-            """, unsafe_allow_html=True)
-
-        with col4:
-            st.markdown(f"""
-            <div class="metric-container">
-                <div class="metric-value">{stats['time_periods']}</div>
-                <div class="metric-label">📅 Time Periods</div>
-            </div>
-            """, unsafe_allow_html=True)
-
-        with col5:
-            st.markdown("""
-            <div class="metric-container">
-                <div class="metric-value">2012-2100</div>
-                <div class="metric-label">📆 Year Range</div>
-            </div>
-            """, unsafe_allow_html=True)
-
-        with col6:
-            st.markdown("""
-            <div class="metric-container">
-                <div class="metric-value">5</div>
-                <div class="metric-label">🌍 Land Use Types</div>
-            </div>
-            """, unsafe_allow_html=True)
 
 def main():
     """Main analytics dashboard"""
     st.title("📊 RPA Assessment Analytics Dashboard")
     st.markdown("**Visualizations and insights from the USDA Forest Service 2020 RPA Assessment**")
-
-    # Show summary metrics
-    show_summary_metrics()
 
     st.markdown("---")
 
