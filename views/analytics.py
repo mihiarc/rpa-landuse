@@ -424,13 +424,13 @@ def create_forest_flow_chart(df_loss, df_gain):
     for landuse, acres in loss_by_type.items():
         x_labels.append(f"To {landuse}")
         y_values.append(-acres)
-        colors.append(f'{RPA_COLORS["pink"]}99')  # RPA pink for losses
+        colors.append('rgba(237, 170, 151, 0.6)')  # RPA pink for losses
 
     # Add gains (positive values)
     for landuse, acres in gain_by_type.items():
         x_labels.append(f"From {landuse}")
         y_values.append(acres)
-        colors.append(f'{RPA_COLORS["medium_green"]}99')  # RPA green for gains
+        colors.append('rgba(133, 177, 139, 0.6)')  # RPA green for gains
 
     # Create bar chart
     fig.add_trace(go.Bar(
