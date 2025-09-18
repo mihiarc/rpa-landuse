@@ -145,6 +145,30 @@ def main():
     st.title("💬 RPA Assessment Natural Language Chat")
     st.caption("AI-powered analysis of USDA Forest Service RPA Assessment data")
 
+    # Add RPA scenario context
+    with st.expander("📚 Understanding RPA Scenarios", expanded=False):
+        st.markdown("""
+        The 2020 RPA Assessment uses **four integrated scenarios** combining climate and socioeconomic pathways:
+
+        #### Climate Pathways (RCPs)
+        - **RCP 4.5**: Lower emissions (~2.5°C warming by 2100) - assumes climate policies
+        - **RCP 8.5**: High emissions (~4.5°C warming by 2100) - limited climate action
+
+        #### Socioeconomic Pathways (SSPs)
+        - **SSP1 - Sustainability**: Green growth, international cooperation
+        - **SSP2 - Middle of the Road**: Historical trends continue
+        - **SSP3 - Regional Rivalry**: Nationalism, resource competition
+        - **SSP5 - Fossil-fueled Development**: Rapid growth, high consumption
+
+        #### The Four RPA Scenarios
+        | Code | Name | Climate | Society | U.S. Growth |
+        |------|------|---------|---------|-------------|
+        | **LM** | Lower-Moderate | RCP4.5-SSP1 | Sustainable | GDP: 3.0x, Pop: 1.5x |
+        | **HL** | High-Low | RCP8.5-SSP3 | Regional rivalry | GDP: 1.9x, Pop: 1.0x |
+        | **HM** | High-Moderate | RCP8.5-SSP2 | Middle road | GDP: 2.8x, Pop: 1.4x |
+        | **HH** | High-High | RCP8.5-SSP5 | Fossil-fueled | GDP: 4.7x, Pop: 1.9x |
+        """)
+
     # Initialize session state
     initialize_session_state()
 
@@ -157,40 +181,20 @@ def main():
         return
 
     # Status bar with export functionality
-    col1, col2, col3, col4 = st.columns([3, 1, 1, 1])
+    col1, col2, col3 = st.columns([3, 1, 1])
     with col1:
         st.success("✅ Ready - Ask me anything about land use data!")
     with col2:
-        st.info(f"🤖 {agent.model_name.split('/')[-1]}")
-    with col3:
         # Export functionality restored
         if st.session_state.messages:
             chat_text = "\n\n".join([f"{m['role'].upper()}: {m['content']}" for m in st.session_state.messages])
             st.download_button("📥 Export", chat_text, "chat_history.txt", use_container_width=True)
-    with col4:
+    with col3:
         if st.button("🔄 Clear", use_container_width=True):
             st.session_state.messages = []
             st.session_state.show_welcome = True
             st.rerun()
 
-    # Quick queries section
-    with st.expander("💡 Quick Queries", expanded=False):
-        queries = [
-            "How much agricultural land is being lost?",
-            "Which states have the most urban expansion?",
-            "Compare forest loss between RCP45 and RCP85",
-            "Show crop to pasture transitions by state",
-            "What are the top 5 counties by land change?"
-        ]
-
-        cols = st.columns(2)
-        for i, query in enumerate(queries):
-            with cols[i % 2]:
-                if st.button(f"🔍 {query[:40]}...", key=f"quick_{i}", use_container_width=True):
-                    st.session_state.messages.append({"role": "user", "content": query})
-                    st.rerun()
-
-    st.divider()
 
     # Main chat area
     show_welcome_message()
