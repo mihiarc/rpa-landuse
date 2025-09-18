@@ -703,7 +703,8 @@ def load_sankey_data(from_landuse=None, to_landuse=None, scenario_filter=None):
     try:
         # Build dynamic WHERE clause with parameterized queries to prevent SQL injection
         where_conditions = ["f.transition_type = 'change'"]
-        where_conditions.append("fl.landuse_name != tl.landuse_name")  # Exclude self-loops
+        # Exclude self-loops where source equals target
+        where_conditions.append("fl.landuse_name != tl.landuse_name")
 
         # Validate inputs against allowed values
         allowed_landuses = ["Crop", "Pasture", "Forest", "Urban", "Rangeland"]
@@ -742,9 +743,9 @@ def load_sankey_data(from_landuse=None, to_landuse=None, scenario_filter=None):
         JOIN dim_landuse tl ON f.to_landuse_id = tl.landuse_id
         WHERE {where_clause}
         GROUP BY fl.landuse_name, tl.landuse_name
-        HAVING SUM(f.acres) > 500000  -- Lower threshold for better visualization
+        HAVING SUM(f.acres) > 500000
         ORDER BY value DESC
-        LIMIT 15  -- Reduced limit for cleaner diagram
+        LIMIT 15
         """
 
         df = conn.query(query, ttl=300)
