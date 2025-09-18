@@ -64,7 +64,7 @@ st.markdown("""
     }
 
     .map-type-selector {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #496f4a 0%, #85b18b 100%);
         color: white;
         padding: 1rem;
         border-radius: 8px;
@@ -76,12 +76,12 @@ st.markdown("""
 
     .map-type-selector:hover {
         transform: scale(1.05);
-        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        box-shadow: 0 4px 12px rgba(73, 111, 74, 0.4);
     }
 
     .example-query {
-        background: #e8f4f8;
-        border-left: 4px solid #0066cc;
+        background: #c8dfe5;
+        border-left: 4px solid #61a4b5;
         padding: 0.75rem 1rem;
         margin: 0.5rem 0;
         border-radius: 4px;

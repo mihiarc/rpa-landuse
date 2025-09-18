@@ -1,0 +1,40 @@
+Category	RBG, Hex code	CMYK print color
+
+RPA General Palette
+1-Dark Green   	73-111-75  #496f4a	0.34, 0.00, 0.33, 0.56
+2-Medium Green   	133-177-139  #85b18b	0.25, 0.00, 0.21, 0.31
+3-Medium Blue  	163-202-212  #a3cad4	0.23, 0.05, 0.00, 0.17
+4-Light Brown 	206-197-151  #cec597	0.00, 0.04, 0.27, 0.19
+5-Pink 	237-170-151 #edaa97	0.00, 0.28, 0.36, 0.07
+6-Dark Blue 	97-164-181  #61a4b5	0.46, 0.09, 0.00, 0.29
+7-Lighter Dark Green 	137-177-139  #89b18b	0.23, 0.00, 0.21, 0.31
+8-Lighter Medium Green	184-208-185  #b8d0b9	0.12, 0.00, 0.11, 0.18
+9-Lighter Medium Blue	200-223-229  #c8dfe5	0.13, 0.03, 0.00, 0.10
+10- Lighter Light Brown	226-220-193  #e2dcc1	0.00, 0.03, 0.15, 0.11
+
+RPA Regions Palette
+North	163-182-226 #a3b6e2	0.28, 0.19, 0.00, 0.11
+South 	225-148-124  #e1947c	0.00, 0.34, 0.45, 0.12
+Rocky Mountain	216-209-172  #d8d1ac	0.00, 0.03, 0.20, 0.15
+Pacific Coast	170-200-173  #aac8ad	0.15, 0.00, 0.13, 0.22
+National	73-111-75  #496f4b	0.34, 0.00, 0.32, 0.56
+
+RPA Scenarios
+LM              Medium Blue   	163-202-212   #a3cad4	0.23, 0.05, 0.00, 0.17
+HL               Pale Brown	241-219-165  #f1dba5	0.00, 0.09, 0.32, 0.05
+HM             Medium Brown	208-167-64  #d0a740	0.00, 0.20, 0.69, 0.18
+HH              Dark Brown	159-107-37  #9f6b25	0.00, 0.33, 0.77, 0.38
+
+RPA Climate Model Palette
+Wet	68-119-170  #4477aa	0.6, 0.3, 0, 0.33
+Dry 	237-194-21  #edc215	0, 0.18, 0.91, 0.07
+Hot	131-60-11  #833c0b	0, 0.54, 0.92, 0.49
+Least Warm	153-153-51  #999933	0, 0, 0.67, 0.4
+Middle	96-91-105  #605b69	0.09, 0.13, 0, 0.59
+
+
+
+
+ 
+
+ 

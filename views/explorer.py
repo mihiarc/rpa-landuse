@@ -556,19 +556,19 @@ def show_interactive_schema_browser():
                     # Add visual separation with theme-aware background
                     if 'fact' in table_name:
                         st.markdown(
-                            f'<div style="background: rgba(33, 150, 243, 0.1); padding: 0.5rem; margin: -0.5rem 0 1rem 0; border-radius: 0 0 8px 8px;">'
+                            f'<div style="background: rgba(163, 202, 212, 0.15); padding: 0.5rem; margin: -0.5rem 0 1rem 0; border-radius: 0 0 8px 8px;">'
                             f'<small>📦 Fact Table · {info["row_count"]:,} rows · {len(info["columns"])} columns</small></div>',
                             unsafe_allow_html=True
                         )
                     elif 'dim' in table_name:
                         st.markdown(
-                            f'<div style="background: rgba(156, 39, 176, 0.1); padding: 0.5rem; margin: -0.5rem 0 1rem 0; border-radius: 0 0 8px 8px;">'
+                            f'<div style="background: rgba(206, 197, 151, 0.15); padding: 0.5rem; margin: -0.5rem 0 1rem 0; border-radius: 0 0 8px 8px;">'
                             f'<small>🎯 Dimension Table · {info["row_count"]:,} rows · {len(info["columns"])} columns</small></div>',
                             unsafe_allow_html=True
                         )
                     else:
                         st.markdown(
-                            f'<div style="background: rgba(76, 175, 80, 0.1); padding: 0.5rem; margin: -0.5rem 0 1rem 0; border-radius: 0 0 8px 8px;">'
+                            f'<div style="background: rgba(184, 208, 185, 0.2); padding: 0.5rem; margin: -0.5rem 0 1rem 0; border-radius: 0 0 8px 8px;">'
                             f'<small>🗺️ Table · {info["row_count"]:,} rows · {len(info["columns"])} columns</small></div>',
                             unsafe_allow_html=True
                         )
@@ -911,7 +911,7 @@ def show_data_dictionary():
 def main():
     """Main data explorer interface with three-panel layout"""
 
-    st.title("🔍 Data Explorer")
+    st.title("🔍 RPA Assessment Data Explorer")
     st.markdown("**Interactive database exploration with live schema browser and SQL editor**")
 
     # Initialize session state

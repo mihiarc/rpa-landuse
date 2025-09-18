@@ -142,8 +142,8 @@ def main():
     </style>
     """, unsafe_allow_html=True)
 
-    st.title("💬 Natural Language Chat")
-    st.caption("AI-powered analysis of USDA Forest Service land use data")
+    st.title("💬 RPA Assessment Natural Language Chat")
+    st.caption("AI-powered analysis of USDA Forest Service RPA Assessment data")
 
     # Initialize session state
     initialize_session_state()

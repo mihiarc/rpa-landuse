@@ -383,7 +383,7 @@ def show_troubleshooting():
 
 def main():
     """Main settings interface"""
-    st.title("⚙️ Settings & Help")
+    st.title("⚙️ RPA Assessment Settings & Help")
     st.markdown("**Configuration, system status, and help information**")
 
     # Create tabs
