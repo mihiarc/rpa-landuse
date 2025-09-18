@@ -29,7 +29,7 @@ Navigate to the application and log in with your configured password.
 
 ### 4. Features
 
-- ✅ **Persistent Sessions**: Stay logged in across page refreshes
+- ✅ **Multi-User**: Allows multiple users to be logged in concurrently 
 - ✅ **Automatic Logout**: Sessions expire after 8 hours
 - ✅ **Secure Hashing**: SHA-256 password hashing
 - ✅ **Easy Configuration**: Simple secrets.toml setup
