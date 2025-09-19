@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-RPA Land Use Analytics is an AI-powered analytics tool for USDA Forest Service RPA Assessment data. Built with a modern data stack (DuckDB, LangChain, Claude/GPT-4), it processes county-level land use projections and enables users to ask questions in plain English about land use changes across different climate scenarios from the 2020 RPA Assessment.
+RPA Land Use Analytics is an AI-powered analytics tool for USDA Forest Service RPA Assessment data. Built with a modern data stack (DuckDB, LangChain, GPT-4), it processes county-level land use projections and enables users to ask questions in plain English about land use changes across different climate scenarios from the 2020 RPA Assessment.
 
 ## Key Commands
 
@@ -46,12 +46,11 @@ uv run python -m landuse.agents.test_landuse_agent
 
 ### Data Processing
 ```bash
-# Convert JSON to DuckDB star schema (modern approach)
+# Convert JSON to DuckDB star schema (optimized bulk loading)
 uv run python scripts/converters/convert_to_duckdb.py
 
-# Legacy SQLite converters
-uv run python scripts/converters/convert_landuse_to_db.py
-uv run python scripts/converters/convert_landuse_with_agriculture.py
+# With traditional insert method (for comparison/debugging)
+uv run python scripts/converters/convert_to_duckdb.py --no-bulk-copy
 ```
 
 ### Documentation
@@ -314,12 +313,11 @@ The application now uses a unified Pydantic-based configuration system with comp
 #### Environment Variables
 Create `config/.env` with LANDUSE_ prefixed variables:
 ```bash
-# Required API Keys
+# Required API Key
 OPENAI_API_KEY=your_openai_key
-ANTHROPIC_API_KEY=your_anthropic_key  # For Claude models
 
 # LLM Configuration (LANDUSE_LLM__ prefix)
-LANDUSE_LLM__MODEL_NAME=gpt-4o-mini        # or claude-3-5-sonnet-20241022
+LANDUSE_LLM__MODEL_NAME=gpt-4o-mini        # or gpt-4o, gpt-3.5-turbo
 LANDUSE_LLM__TEMPERATURE=0.1
 LANDUSE_LLM__MAX_TOKENS=4000
 
@@ -362,7 +360,7 @@ config = AppConfig()
 
 # Or create with overrides
 config = AppConfig.from_env(
-    llm__model_name='claude-3-5-sonnet-20241022',
+    llm__model_name='gpt-4o',
     agent__max_iterations=12,
     logging__level='DEBUG'
 )
@@ -418,6 +416,20 @@ db_manager = DatabaseManager(legacy_config) # Legacy config
 - **Conversion Modes**: Streaming, batch, parallel, and optimized bulk copy operations
 
 ## Development Patterns
+
+### Streamlit Development Guidelines
+
+**IMPORTANT: Use Streamlit Built-in Features**
+- Always prefer Streamlit's built-in functionality over custom solutions
+- Do NOT over-engineer custom implementations when Streamlit provides native support
+- Examples:
+  - Use Streamlit's built-in theme system (Settings menu) instead of custom theme toggles
+  - Use st.connection for database connections instead of custom connection managers
+  - Use st.cache_data and st.cache_resource instead of custom caching solutions
+  - Use st.session_state for state management instead of custom state handlers
+  - Use Streamlit's native widgets and layouts instead of custom HTML/CSS when possible
+- Only create custom solutions when Streamlit genuinely lacks the required functionality
+- This approach ensures better maintainability, compatibility, and performance
 
 ### Modern Architecture Development (2025)
 
@@ -677,6 +689,102 @@ def test_agent_backward_compatibility():
         assert agent is not None
 ```
 
+## Documentation Guidelines
+
+### Docstring Style
+This project uses **Google Style** docstrings for consistency and readability. Google style is preferred over NumPy style for general code due to its space efficiency and clarity.
+
+#### Function/Method Documentation
+```python
+def process_land_use_data(
+    input_file: Path,
+    scenario: str,
+    validate: bool = True
+) -> pd.DataFrame:
+    """Process land use transition data for a specific scenario.
+
+    Converts raw JSON data into normalized DataFrame format with proper
+    indexing and validation. Handles missing values and data type conversions.
+
+    Args:
+        input_file: Path to the input JSON file containing land use data.
+        scenario: Climate scenario identifier (e.g., 'RCP45_SSP2').
+        validate: Whether to validate data integrity. Defaults to True.
+
+    Returns:
+        DataFrame with normalized land use transitions indexed by county.
+
+    Raises:
+        ValueError: If scenario is not found in the input data.
+        IOError: If input file cannot be read.
+
+    Example:
+        >>> df = process_land_use_data(Path('data.json'), 'RCP45_SSP2')
+        >>> print(df.shape)
+        (3075, 15)
+    """
+```
+
+#### Class Documentation
+```python
+class LanduseDataConverter:
+    """Convert nested landuse JSON to normalized DuckDB database.
+
+    This converter handles the ETL process for transforming deeply nested
+    JSON land use projections into a star schema optimized for analytics.
+    Uses bulk loading techniques for optimal performance on large datasets.
+
+    Attributes:
+        input_file: Path to source JSON file.
+        output_file: Path to target DuckDB database.
+        use_bulk_copy: Whether to use optimized bulk COPY (5-10x faster).
+
+    Example:
+        >>> converter = LanduseDataConverter('input.json', 'output.db')
+        >>> converter.create_schema()
+        >>> converter.load_data()
+        >>> converter.close()
+    """
+```
+
+### Documentation Best Practices
+
+1. **Consistency**: Use Google style throughout the codebase. Don't mix styles.
+
+2. **Conciseness**: Keep line length to 72 characters for docstrings. Be clear but brief.
+
+3. **Type Hints**: Always include type hints in function signatures - they're part of the documentation.
+
+4. **Examples**: Include short examples for complex functions, especially those in public APIs.
+
+5. **Private Methods**: Document private methods with a single line unless complexity demands more.
+
+6. **Module Level**: Start each module with a brief description of its purpose.
+
+7. **Avoid Redundancy**: Don't repeat what's obvious from the code or type hints.
+
+### What to Document
+
+- **Public APIs**: All public functions, classes, and methods need comprehensive docstrings
+- **Complex Logic**: Any non-obvious algorithm or business logic
+- **Data Structures**: Expected formats, schemas, and transformations
+- **Side Effects**: File I/O, database changes, external API calls
+- **Error Conditions**: What exceptions are raised and when
+- **Performance Notes**: For optimized code paths or known bottlenecks
+
+### What NOT to Document
+
+- **Obvious Code**: Don't document getters/setters unless they have side effects
+- **Implementation Details**: Focus on *what* not *how* in public APIs
+- **TODO Comments**: Use issue tracking instead of TODO comments
+- **Commented-Out Code**: Remove it, don't document why it's there
+
+### Tools & Automation
+
+- **IDE Support**: VSCode/PyCharm can auto-generate Google style docstring templates
+- **Documentation Generation**: Use `mkdocs` with `mkdocstrings` for auto-generated API docs
+- **Validation**: Consider using `pydocstyle` with Google style configuration
+
 ## Testing Approach
 
 ### Interactive Testing
@@ -709,7 +817,7 @@ duckdb data/processed/landuse_analytics.duckdb
 1. **Home Page**: Feature overview with dataset statistics and navigation cards
 2. **Natural Language Chat** (`views/chat.py`): 
    - Real-time streaming responses with agent conversation
-   - Model selection (GPT-4o-mini, Claude 3.5 Sonnet)
+   - Model selection (GPT-4o-mini, GPT-4o, GPT-3.5 Turbo)
    - Conversation history with agent reasoning display
    - Error handling with rate limit detection
 3. **Analytics Dashboard** (`views/analytics.py`):
@@ -789,7 +897,7 @@ uv run python -m pytest tests/integration/   # Integration tests
 ## Dependencies
 
 Key packages (managed via `uv`):
-- **Core**: langchain, langchain-anthropic, langchain-community, langgraph
+- **Core**: langchain, langchain-openai, langchain-community, langgraph
 - **Modern Agent Framework**: langgraph (for state-based agents)
 - **Data**: pandas, duckdb (0.11.0+), pyarrow, ijson
 - **Web UI**: streamlit (1.40.0+), plotly  

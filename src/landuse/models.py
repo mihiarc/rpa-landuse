@@ -95,7 +95,7 @@ class AgentConfig(BaseModel):
 
     # Model configuration
     model_name: str = Field(
-        default="claude-3-5-sonnet-20241022",
+        default="gpt-4o-mini",
         description="LLM model to use"
     )
     temperature: float = Field(

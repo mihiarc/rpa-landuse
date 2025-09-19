@@ -38,7 +38,7 @@ import streamlit as st  # noqa: E402
 
 # Configure page settings - must be first Streamlit command
 st.set_page_config(
-    page_title="RPA Land Use Analytics",
+    page_title="USDA Forest Service RPA Assessment",
     page_icon="🌲",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -46,9 +46,9 @@ st.set_page_config(
         'Get Help': 'https://github.com/your-repo/rpa-landuse-analytics',
         'Report a bug': 'https://github.com/your-repo/rpa-landuse-analytics/issues',
         'About': """
-        # RPA Land Use Analytics
+        # USDA Forest Service RPA Assessment
 
-        AI-powered analytics tool for USDA Forest Service RPA Assessment data.
+        Resources Planning Act (RPA) Assessment Analytics Dashboard
 
         **Features:**
         - 🤖 Natural language querying with AI agents
@@ -114,7 +114,7 @@ except Exception as e:
     if "No secrets found" not in str(e):
         print(f"ERROR loading st.secrets: {e}")
 
-# Custom CSS for modern styling with wide layout optimization
+# Custom CSS for modern styling with theme-aware colors
 st.markdown("""
 <style>
     /* Wide layout optimizations */
@@ -143,6 +143,7 @@ st.markdown("""
         .feature-card {
             margin: 0.25rem;
             padding: 1.5rem;
+            min-height: auto;
         }
     }
 
@@ -154,9 +155,9 @@ st.markdown("""
         }
     }
 
-    /* Hero section styling */
+    /* Hero section styling - RPA Assessment branding colors */
     .hero-section {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #496f4a 0%, #85b18b 100%);
         padding: 3rem 2rem;
         border-radius: 15px;
         color: white;
@@ -175,15 +176,16 @@ st.markdown("""
         opacity: 0.95;
     }
 
-    /* Main app styling */
+    /* Main app styling - theme aware */
     .main-header {
         padding: 1rem 0;
-        border-bottom: 1px solid #e0e0e0;
+        border-bottom: 1px solid rgba(184, 208, 185, 0.3);
         margin-bottom: 2rem;
     }
 
+    /* Metric card - RPA color gradient for visual hierarchy */
     .metric-card {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #61a4b5 0%, #a3cad4 100%);
         padding: 1.5rem;
         border-radius: 10px;
         color: white;
@@ -206,21 +208,32 @@ st.markdown("""
         opacity: 0.9;
     }
 
+    /* Feature card - theme aware with RPA color backgrounds */
     .feature-card {
-        background: #ffffff;
-        border: 1px solid #e9ecef;
+        background: rgba(200, 223, 229, 0.15);
+        border: 1px solid rgba(163, 202, 212, 0.3);
         border-radius: 12px;
         padding: 2rem;
-        margin: 0.5rem;
+        margin: 0.5rem 0.5rem 1rem 0.5rem;
         transition: all 0.3s ease;
         box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        height: 420px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    .feature-card-container {
+        display: flex;
+        flex-direction: column;
         height: 100%;
     }
 
     .feature-card:hover {
         box-shadow: 0 8px 24px rgba(0,0,0,0.12);
         transform: translateY(-4px);
-        border-color: #667eea;
+        border-color: #496f4a;
+        background: rgba(73, 111, 74, 0.05);
     }
 
     .feature-icon {
@@ -232,16 +245,35 @@ st.markdown("""
         font-size: 1.3rem;
         font-weight: 600;
         margin-bottom: 1rem;
-        color: #2c3e50;
+        color: inherit;
     }
 
     .feature-description {
-        color: #5a6c7d;
+        color: inherit;
+        opacity: 0.8;
         line-height: 1.6;
+        margin-bottom: 1rem;
     }
 
+    .feature-content {
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+    }
 
-    /* Navigation improvements */
+    .feature-list {
+        margin-top: auto;
+        padding-left: 1.5rem;
+        list-style-type: disc;
+    }
+
+    .feature-list li {
+        margin-bottom: 0.5rem;
+        line-height: 1.5;
+        font-size: 0.95rem;
+    }
+
+    /* Navigation improvements - theme aware */
     .nav-link {
         display: flex;
         align-items: center;
@@ -253,16 +285,16 @@ st.markdown("""
     }
 
     .nav-link:hover {
-        background-color: #f8f9fa;
+        background-color: rgba(184, 208, 185, 0.2);
         transform: translateX(4px);
     }
 
-    /* Section styling */
+    /* Section styling - inherits theme colors */
     .section-header {
         font-size: 2rem;
         font-weight: 600;
         margin-bottom: 1.5rem;
-        color: #2c3e50;
+        color: inherit;
         display: flex;
         align-items: center;
     }
@@ -347,72 +379,14 @@ def show_welcome_page():
     # Hero Section with gradient background
     st.markdown("""
     <div class="hero-section">
-        <h1 class="hero-title">🌲 RPA Land Use Analytics</h1>
-        <p class="hero-subtitle">AI-powered analytics tool for USDA Forest Service RPA Assessment data</p>
+        <h1 class="hero-title">🌲 USDA Forest Service RPA Assessment</h1>
+        <p class="hero-subtitle">Resources Planning Act Assessment Analytics Dashboard</p>
         <p class="hero-subtitle">Explore county-level land use projections from 2012-2100 across 20 climate scenarios</p>
     </div>
     """, unsafe_allow_html=True)
 
-    # Dataset Overview section
-    # Quick Stats if database is available
+    # Add system check hint if there are issues
     checks, _ = check_environment()
-    if checks["database"]:
-        try:
-            import duckdb
-            db_path = os.getenv('LANDUSE_DB_PATH', 'data/processed/landuse_analytics.duckdb')
-            conn = duckdb.connect(str(db_path), read_only=True)
-
-            # Get basic stats
-            stats = {}
-            try:
-                stats["counties"] = conn.execute("SELECT COUNT(DISTINCT fips_code) FROM dim_geography").fetchone()[0]
-                stats["scenarios"] = conn.execute("SELECT COUNT(*) FROM dim_scenario").fetchone()[0]
-                stats["transitions"] = conn.execute("SELECT COUNT(*) FROM fact_landuse_transitions").fetchone()[0]
-                stats["time_periods"] = conn.execute("SELECT COUNT(*) FROM dim_time").fetchone()[0]
-
-                st.markdown("### 📊 Dataset Overview")
-
-                # Create a 2x2 grid for metrics
-                metric_col1, metric_col2 = st.columns(2)
-                with metric_col1:
-                    st.markdown(f"""
-                    <div class="metric-card">
-                        <div class="metric-value">{stats['counties']:,}</div>
-                        <div class="metric-label">US Counties</div>
-                    </div>
-                    """, unsafe_allow_html=True)
-
-                    st.markdown(f"""
-                    <div class="metric-card">
-                        <div class="metric-value">{stats['scenarios']}</div>
-                        <div class="metric-label">Climate Scenarios</div>
-                    </div>
-                    """, unsafe_allow_html=True)
-
-                with metric_col2:
-                    st.markdown(f"""
-                    <div class="metric-card">
-                        <div class="metric-value">{stats['transitions']/1000000:.1f}M</div>
-                        <div class="metric-label">Land Transitions</div>
-                    </div>
-                    """, unsafe_allow_html=True)
-
-                    st.markdown(f"""
-                    <div class="metric-card">
-                        <div class="metric-value">{stats['time_periods']}</div>
-                        <div class="metric-label">Time Periods</div>
-                    </div>
-                    """, unsafe_allow_html=True)
-
-            except Exception as e:
-                st.warning(f"Could not load dataset statistics: {e}")
-            finally:
-                conn.close()
-
-        except Exception as e:
-            st.error(f"Database connection error: {e}")
-
-    # Add system check hint
     if not all(checks.values()):
         st.info("💡 Check **Settings** to view system status and resolve any configuration issues.")
 
@@ -429,7 +403,7 @@ def show_welcome_page():
                 <div class="feature-icon">💬</div>
                 <h3 class="feature-title">Natural Language Queries</h3>
                 <p class="feature-description">Ask questions in plain English about land use changes. Our AI converts your questions to SQL and provides insights.</p>
-                <ul style="margin-top: 1rem; padding-left: 1.5rem;">
+                <ul class="feature-list">
                     <li>Agricultural land loss analysis</li>
                     <li>Climate scenario comparisons</li>
                     <li>Urban expansion patterns</li>
@@ -447,7 +421,7 @@ def show_welcome_page():
                 <div class="feature-icon">📊</div>
                 <h3 class="feature-title">Interactive Analytics</h3>
                 <p class="feature-description">Explore pre-built visualizations with real-time data from the RPA Assessment.</p>
-                <ul style="margin-top: 1rem; padding-left: 1.5rem;">
+                <ul class="feature-list">
                     <li>Climate impact dashboards</li>
                     <li>Geographic trend maps</li>
                     <li>Time series analysis</li>
@@ -468,7 +442,7 @@ def show_welcome_page():
                 <div class="feature-icon">🔍</div>
                 <h3 class="feature-title">Data Explorer</h3>
                 <p class="feature-description">Advanced tools for data scientists to directly query and analyze the database.</p>
-                <ul style="margin-top: 1rem; padding-left: 1.5rem;">
+                <ul class="feature-list">
                     <li>Schema browser</li>
                     <li>SQL query interface</li>
                     <li>Export capabilities</li>
@@ -486,7 +460,7 @@ def show_welcome_page():
                 <div class="feature-icon">🗺️</div>
                 <h3 class="feature-title">Enhanced Visualizations</h3>
                 <p class="feature-description">Rich maps, flow diagrams, and advanced analytics for deeper insights.</p>
-                <ul style="margin-top: 1rem; padding-left: 1.5rem;">
+                <ul class="feature-list">
                     <li>Choropleth maps</li>
                     <li>Sankey flow diagrams</li>
                     <li>Animated timelines</li>
@@ -537,17 +511,17 @@ def create_pages():
         icon=":material/download:"
     )
 
-    # Settings page
-    settings_page = st.Page(
+    # Help & Documentation page
+    help_page = st.Page(
         "views/settings.py",
-        title="Settings & Help",
-        icon=":material/settings:"
+        title="Help & Documentation",
+        icon=":material/help:"
     )
 
     return {
         "Main": [home_page],
         "Analysis": [chat_page, analytics_page, explorer_page, extraction_page],
-        "Configuration": [settings_page]
+        "Help": [help_page]
     }
 
 # Main navigation using modern st.navigation
@@ -620,10 +594,10 @@ def main():
     # Add footer with attribution
     st.markdown("---")
     st.markdown("""
-    <div style='text-align: center; color: #666666; padding: 20px;'>
-        <p><strong>RPA Land Use Analytics</strong></p>
-        <p>Data source: <a href='https://www.fs.usda.gov/research/rpa' target='_blank'>USDA Forest Service 2020 RPA Assessment</a></p>
-        <p style='font-size: 0.9em;'>Transforming America's land use data into actionable insights</p>
+    <div style='text-align: center; color: #496f4a; padding: 20px;'>
+        <p><strong>USDA Forest Service Resources Planning Act Assessment</strong></p>
+        <p>Data source: <a href='https://www.fs.usda.gov/research/inventory/rpaa' target='_blank'>USDA Forest Service 2020 RPA Assessment</a></p>
+        <p style='font-size: 0.9em;'>Analyzing America's forests and rangelands for sustainable resource management</p>
     </div>
     """, unsafe_allow_html=True)
 

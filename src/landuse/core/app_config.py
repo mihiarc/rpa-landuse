@@ -87,12 +87,8 @@ class LLMConfig(BaseModel):
     @classmethod
     def validate_model_name(cls, v: str) -> str:
         """Validate model name and check API key availability."""
-        if v.lower().startswith('claude'):
-            if not os.getenv('ANTHROPIC_API_KEY'):
-                raise ConfigurationError("ANTHROPIC_API_KEY required for Claude models")
-        elif v.lower().startswith('gpt') or v.lower().startswith('o1'):
-            if not os.getenv('OPENAI_API_KEY'):
-                raise ConfigurationError("OPENAI_API_KEY required for OpenAI models")
+        if not os.getenv('OPENAI_API_KEY'):
+            raise ConfigurationError("OPENAI_API_KEY required for OpenAI models")
         return v
 
 
@@ -170,10 +166,6 @@ class FeatureConfig(BaseModel):
     enable_map_generation: bool = Field(
         default=True,
         description="Enable map generation capabilities"
-    )
-    enable_knowledge_base: bool = Field(
-        default=False,
-        description="Enable RPA knowledge base integration"
     )
     enable_streaming: bool = Field(
         default=True,
@@ -364,7 +356,6 @@ class AppConfig(BaseSettings):
 
             # Features
             'enable_map_generation': self.features.enable_map_generation,
-            'enable_knowledge_base': self.features.enable_knowledge_base,
             'map_output_dir': self.features.map_output_dir,
 
             # Logging

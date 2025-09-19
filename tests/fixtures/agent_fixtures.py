@@ -11,20 +11,6 @@ import pytest
 
 
 @pytest.fixture
-def mock_anthropic_llm():
-    """Mock Anthropic Claude LLM for testing"""
-    mock = Mock()
-    mock.model = "claude-3-5-sonnet-20241022"
-    mock.temperature = 0.1
-    mock.max_tokens = 2000
-
-    # Default response for invoke
-    mock.invoke.return_value = Mock(content="SELECT COUNT(*) FROM dim_scenario")
-
-    return mock
-
-
-@pytest.fixture
 def mock_openai_llm():
     """Mock OpenAI GPT LLM for testing"""
     mock = Mock()
@@ -190,7 +176,6 @@ def agent_test_config():
     return {
         "database_path": "tests/fixtures/test_landuse.duckdb",
         "openai_api_key": "test-key-1234567890",
-        "anthropic_api_key": "test-ant-key-1234567890",
         "temperature": 0.1,
         "max_tokens": 1000,
         "max_query_limit": 100,

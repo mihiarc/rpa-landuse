@@ -41,7 +41,25 @@
       "Bash(gh api:*)",
       "Bash(gh run view:*)",
       "Bash(gh run list:*)",
-      "Bash(gh run watch:*)"
+      "Bash(gh run watch:*)",
+      "WebFetch(domain:github.com)",
+      "Bash(gh pr view:*)",
+      "Bash(gh pr comment:*)",
+      "Bash(gh pr checks:*)",
+      "Bash(awk:*)",
+      "WebSearch",
+      "Bash(gh pr create:*)",
+      "Bash(gh pr diff:*)",
+      "Bash(git branch:*)",
+      "Bash(git log:*)",
+      "Bash(xargs cat:*)",
+      "WebFetch(domain:docs.streamlit.io)",
+      "WebFetch(domain:discuss.streamlit.io)",
+      "Bash(gh pr merge:*)",
+      "Read(//private/tmp/**)",
+      "Bash(git pull:*)",
+      "Bash(gh pr checkout:*)",
+      "Bash(gh issue:*)"
     ],
     "deny": []
   }

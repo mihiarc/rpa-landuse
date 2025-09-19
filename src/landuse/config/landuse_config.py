@@ -88,16 +88,6 @@ class LanduseConfig:
         default_factory=lambda: os.getenv('LANDUSE_ENABLE_DYNAMIC_PROMPTS', 'true').lower() == 'true'
     )
 
-    # Knowledge Base Configuration
-    enable_knowledge_base: bool = field(
-        default_factory=lambda: os.getenv('LANDUSE_ENABLE_KNOWLEDGE_BASE', 'false').lower() == 'true'
-    )
-    knowledge_base_path: str = field(
-        default_factory=lambda: os.getenv('LANDUSE_KNOWLEDGE_BASE_PATH', 'src/landuse/docs')
-    )
-    chroma_persist_dir: str = field(
-        default_factory=lambda: os.getenv('LANDUSE_CHROMA_PERSIST_DIR', 'data/chroma_db')
-    )
 
     # Streamlit Configuration
     streamlit_cache_ttl: int = field(
@@ -208,13 +198,12 @@ class LanduseConfig:
 
     def __repr__(self) -> str:
         """Clean string representation for debugging"""
-        masked_keys = ['ANTHROPIC_API_KEY', 'OPENAI_API_KEY']
+        masked_keys = ['OPENAI_API_KEY']
 
         # Create a copy of the dict with masked sensitive values
         config_dict = self.to_dict()
 
         # Mask API keys if they would be visible in repr
-        api_key_anthropic = os.getenv('ANTHROPIC_API_KEY', '')
         api_key_openai = os.getenv('OPENAI_API_KEY', '')
 
         repr_lines = [f"{self.__class__.__name__}("]

@@ -50,7 +50,7 @@ class LLMManager(LLMInterface):
         legacy_config.db_path = app_config.database.path
 
         # Map LLM settings
-        legacy_config.model = app_config.llm.model_name  # Note: model_name in AppConfig vs model in legacy
+        legacy_config.model_name = app_config.llm.model_name
         legacy_config.temperature = app_config.llm.temperature
         legacy_config.max_tokens = app_config.llm.max_tokens
 
@@ -77,8 +77,7 @@ class LLMManager(LLMInterface):
         Raises:
             ValueError: If required API keys are missing
         """
-        model_name = self.config.model_name
-
+        model_name = "gpt-4o-mini"
         self.console.print(f"[blue]Initializing LLM: {model_name}[/blue]")
 
         if "bedrock" == model_name.lower():
@@ -87,21 +86,6 @@ class LLMManager(LLMInterface):
             return self._create_anthropic_llm(model_name)
         else:
             return self._create_openai_llm(model_name)
-
-    def _create_anthropic_llm(self, model_name: str) -> ChatAnthropic:
-        """Create Anthropic Claude LLM instance."""
-        api_key = os.getenv('ANTHROPIC_API_KEY')
-        self.console.print(f"[dim]Using Anthropic API key: {self._mask_api_key(api_key)}[/dim]")
-
-        if not api_key:
-            raise APIKeyError("ANTHROPIC_API_KEY environment variable is required for Claude models", model_name)
-
-        return ChatAnthropic(
-            model=model_name,
-            anthropic_api_key=api_key,
-            temperature=self.config.temperature,
-            max_tokens=self.config.max_tokens,
-        )
 
     def _create_openai_llm(self, model_name: str) -> ChatOpenAI:
         """Create OpenAI LLM instance."""
@@ -181,7 +165,7 @@ class LLMManager(LLMInterface):
 
     def get_model_name(self) -> str:
         """Get the current model name."""
-        return self.config.model_name
+        return "gpt-4o-mini"
 
     def validate_api_key(self) -> bool:
         """Validate API key is available and valid."""
