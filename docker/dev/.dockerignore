@@ -1,0 +1,127 @@
+# Python virtual environments
+.venv/
+venv/
+env/
+ENV/
+.env/
+
+# Python cache and compiled files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# pyenv
+.python-version
+
+# pipenv
+Pipfile.lock
+
+# poetry
+poetry.lock
+
+# Development tools
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# IDEs and editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Git
+.git/
+.gitignore
+
+# Docker
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+.terraform.lock.hcl
+terraform.tfvars
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+
+# Documentation
+README.md
+docs/
+*.md
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+tmp/
+temp/
+.tmp/
+
+# OS generated files
+Thumbs.db
+.DS_Store
+*.tmp
+
+# Archive files
+*.zip
+*.tar
+*.tar.gz
+*.rar
+
+# Large data files (uncomment if you have large datasets)
+# *.csv
+# *.parquet
+# *.pkl
+# *.h5
+
+# Environment files (keep .env.example, ignore actual .env files)
+.env
+.env.local
+.env.*.local

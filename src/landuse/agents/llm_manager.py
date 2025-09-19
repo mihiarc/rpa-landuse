@@ -77,7 +77,8 @@ class LLMManager(LLMInterface):
         Raises:
             ValueError: If required API keys are missing
         """
-        model_name = "gpt-4o-mini"
+        # model_name = "gpt-4o-mini"
+        model_name = "bedrock"
         self.console.print(f"[blue]Initializing LLM: {model_name}[/blue]")
 
         if "bedrock" == model_name.lower():
