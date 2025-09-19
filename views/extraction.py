@@ -394,58 +394,71 @@ def show_predefined_extracts():
         col1, col2 = st.columns(2)
 
         with col1:
-            if st.button("👁️ Preview Data", use_container_width=True, key="template_preview_data"):
-                with st.spinner("Loading preview..."):
-                    query = build_extraction_query(template['type'], template['filters'])
-                    df, error, total_rows = execute_extraction_query(query, limit=preview_rows)
-
-                    if error:
-                        st.error(f"❌ {error}")
-                    elif df is not None:
-                        st.success(f"✅ Preview showing {len(df)} of {total_rows:,} total rows")
-                        st.dataframe(df, use_container_width=True, hide_index=True)
+            preview_clicked = st.button("👁️ Preview Data", use_container_width=True, key="template_preview_data")
 
         with col2:
-            if st.button("📥 Export Data", type="primary", use_container_width=True, key="template_export_data"):
-                with st.spinner(f"Preparing {export_format} export..."):
-                    query = build_extraction_query(template['type'], template['filters'])
-                    df, error, total_rows = execute_extraction_query(query, limit=export_limit)
+            export_clicked = st.button("📥 Export Data", type="primary", use_container_width=True, key="template_export_data")
 
-                    if error:
-                        st.error(f"❌ {error}")
-                    elif df is not None:
-                        # Convert to selected format
-                        file_data = convert_to_format(df, export_format)
+        # Handle preview - display outside columns for full width
+        if preview_clicked:
+            with st.spinner("Loading preview..."):
+                query = build_extraction_query(template['type'], template['filters'])
+                df, error, total_rows = execute_extraction_query(query, limit=preview_rows)
 
-                        # Set appropriate file extension and MIME type
-                        file_extensions = {
-                            "CSV": "csv",
-                            "Excel": "xlsx",
-                            "JSON": "json",
-                            "Parquet": "parquet"
-                        }
+                if error:
+                    st.error(f"❌ {error}")
+                elif df is not None:
+                    st.success(f"✅ Preview showing {len(df)} of {total_rows:,} total rows")
+                    # Display dataframe with full width and dynamic height
+                    display_height = min(600, 35 * len(df) + 50)  # Dynamic height based on rows
+                    st.dataframe(
+                        df,
+                        use_container_width=True,
+                        hide_index=True,
+                        height=display_height
+                    )
 
-                        mime_types = {
-                            "CSV": "text/csv",
-                            "Excel": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                            "JSON": "application/json",
-                            "Parquet": "application/octet-stream"
-                        }
+        # Handle export
+        if export_clicked:
+            with st.spinner(f"Preparing {export_format} export..."):
+                query = build_extraction_query(template['type'], template['filters'])
+                df, error, total_rows = execute_extraction_query(query, limit=export_limit)
 
-                        # Generate filename
-                        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-                        filename = f"landuse_{selected_template.lower().replace(' ', '_')}_{timestamp}.{file_extensions[export_format]}"
+                if error:
+                    st.error(f"❌ {error}")
+                elif df is not None:
+                    # Convert to selected format
+                    file_data = convert_to_format(df, export_format)
 
-                        # Download button
-                        st.download_button(
-                            label=f"💾 Download {export_format} ({len(df):,} rows)",
-                            data=file_data,
-                            file_name=filename,
-                            mime=mime_types[export_format]
-                        )
+                    # Set appropriate file extension and MIME type
+                    file_extensions = {
+                        "CSV": "csv",
+                        "Excel": "xlsx",
+                        "JSON": "json",
+                        "Parquet": "parquet"
+                    }
 
-                        if len(df) < total_rows:
-                            st.warning(f"⚠️ Exported {len(df):,} of {total_rows:,} total rows (limited by export settings)")
+                    mime_types = {
+                        "CSV": "text/csv",
+                        "Excel": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                        "JSON": "application/json",
+                        "Parquet": "application/octet-stream"
+                    }
+
+                    # Generate filename
+                    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                    filename = f"landuse_{selected_template.lower().replace(' ', '_')}_{timestamp}.{file_extensions[export_format]}"
+
+                    # Download button
+                    st.download_button(
+                        label=f"💾 Download {export_format} ({len(df):,} rows)",
+                        data=file_data,
+                        file_name=filename,
+                        mime=mime_types[export_format]
+                    )
+
+                    if len(df) < total_rows:
+                        st.warning(f"⚠️ Exported {len(df):,} of {total_rows:,} total rows (limited by export settings)")
 
 def show_custom_extraction():
     """Show custom data extraction interface"""
@@ -484,32 +497,90 @@ def show_custom_extraction():
         # Scenario filters
         st.markdown("##### Climate Scenarios")
 
+        # Parse RCP and SSP from scenario names
+        all_scenarios = filters['scenarios']['scenario_name'].tolist()
+
+        # Extract unique RCP values from scenario names
+        rcp_values = sorted(list(set([
+            'RCP4.5' if 'rcp45' in s else 'RCP8.5' if 'rcp85' in s else None
+            for s in all_scenarios if s
+        ])))
+        rcp_values = [v for v in rcp_values if v]  # Remove None values
+
+        # Extract unique SSP values from scenario names
+        ssp_values = sorted(list(set([
+            'SSP1' if 'ssp1' in s else
+            'SSP2' if 'ssp2' in s else
+            'SSP3' if 'ssp3' in s else
+            'SSP5' if 'ssp5' in s else None
+            for s in all_scenarios if s
+        ])))
+        ssp_values = [v for v in ssp_values if v]  # Remove None values
+
+        # Extract unique climate models
+        model_values = sorted(list(set([
+            s.split('_')[0] + '_' + s.split('_')[1] if '_' in s else s
+            for s in all_scenarios if s
+        ])))
+
         # RCP filter
-        rcp_options = filters['scenarios']['rcp_scenario'].unique()
         selected_rcp = st.multiselect(
             "RCP Scenarios:",
-            rcp_options,
-            help="Select RCP scenarios to include"
+            rcp_values,
+            help="Representative Concentration Pathways (RCP4.5 = moderate emissions, RCP8.5 = high emissions)"
         )
 
         # SSP filter
-        ssp_options = filters['scenarios']['ssp_scenario'].unique()
         selected_ssp = st.multiselect(
             "SSP Scenarios:",
-            ssp_options,
-            help="Select SSP scenarios to include"
+            ssp_values,
+            help="Shared Socioeconomic Pathways (SSP1 = sustainability, SSP2 = middle road, SSP3 = regional rivalry, SSP5 = fossil-fueled)"
         )
 
-        # Filter scenarios based on RCP/SSP selection
-        if selected_rcp or selected_ssp:
-            scenario_mask = True
-            if selected_rcp:
-                scenario_mask &= filters['scenarios']['rcp_scenario'].isin(selected_rcp)
-            if selected_ssp:
-                scenario_mask &= filters['scenarios']['ssp_scenario'].isin(selected_ssp)
+        # Climate model filter
+        selected_models = st.multiselect(
+            "Climate Models:",
+            model_values,
+            help="Select specific climate models to include"
+        )
 
-            filtered_scenarios = filters['scenarios'][scenario_mask]['scenario_name'].tolist()
-            selected_filters['scenarios'] = filtered_scenarios
+        # Filter scenarios based on selections
+        if selected_rcp or selected_ssp or selected_models:
+            filtered_scenarios = []
+            for scenario in all_scenarios:
+                include = True
+
+                # Check RCP
+                if selected_rcp:
+                    has_rcp = any(
+                        ('rcp45' in scenario and 'RCP4.5' in selected_rcp) or
+                        ('rcp85' in scenario and 'RCP8.5' in selected_rcp)
+                    )
+                    if not has_rcp:
+                        include = False
+
+                # Check SSP
+                if include and selected_ssp:
+                    has_ssp = any(
+                        ('ssp1' in scenario and 'SSP1' in selected_ssp) or
+                        ('ssp2' in scenario and 'SSP2' in selected_ssp) or
+                        ('ssp3' in scenario and 'SSP3' in selected_ssp) or
+                        ('ssp5' in scenario and 'SSP5' in selected_ssp)
+                    )
+                    if not has_ssp:
+                        include = False
+
+                # Check climate model
+                if include and selected_models:
+                    model_prefix = '_'.join(scenario.split('_')[:2]) if '_' in scenario else scenario
+                    if model_prefix not in selected_models:
+                        include = False
+
+                if include:
+                    filtered_scenarios.append(scenario)
+
+            if filtered_scenarios:
+                selected_filters['scenarios'] = filtered_scenarios
 
         # Time period filter
         st.markdown("##### Time Periods")
@@ -572,6 +643,25 @@ def show_custom_extraction():
         if selected_to:
             selected_filters['to_landuse'] = selected_to
 
+    # Show selected filters summary
+    if selected_filters:
+        st.markdown("#### 🎯 Active Filters")
+        filter_summary = []
+        if 'scenarios' in selected_filters:
+            filter_summary.append(f"**Scenarios:** {len(selected_filters['scenarios'])} selected")
+        if 'time_periods' in selected_filters:
+            filter_summary.append(f"**Time Periods:** {', '.join(selected_filters['time_periods'])}")
+        if 'states' in selected_filters:
+            filter_summary.append(f"**States:** {len(selected_filters['states'])} selected")
+        if 'from_landuse' in selected_filters:
+            filter_summary.append(f"**From Land Use:** {', '.join(selected_filters['from_landuse'])}")
+        if 'to_landuse' in selected_filters:
+            filter_summary.append(f"**To Land Use:** {', '.join(selected_filters['to_landuse'])}")
+        if 'transition_type' in selected_filters:
+            filter_summary.append(f"**Transition Type:** {selected_filters['transition_type']}")
+
+        st.info(" | ".join(filter_summary))
+
     # Export options
     st.markdown("#### 📤 Export Options")
 
@@ -610,24 +700,40 @@ def show_custom_extraction():
     col1, col2, col3 = st.columns(3)
 
     with col1:
-        if st.button("🔍 Preview Query", use_container_width=True, key="custom_preview_query"):
-            query = build_extraction_query(extract_type, selected_filters)
-            st.code(query, language='sql')
+        query_clicked = st.button("🔍 Preview Query", use_container_width=True, key="custom_preview_query")
 
     with col2:
-        if st.button("👁️ Preview Data", use_container_width=True, key="custom_preview_data"):
-            with st.spinner("Loading preview..."):
-                query = build_extraction_query(extract_type, selected_filters)
-                df, error, total_rows = execute_extraction_query(query, limit=preview_limit)
-
-                if error:
-                    st.error(f"❌ {error}")
-                elif df is not None:
-                    st.success(f"✅ Preview showing {len(df)} of {total_rows:,} total rows")
-                    st.dataframe(df, use_container_width=True, hide_index=True)
+        preview_clicked = st.button("👁️ Preview Data", use_container_width=True, key="custom_preview_data")
 
     with col3:
-        if st.button("📥 Export Data", type="primary", use_container_width=True, key="custom_export_data"):
+        export_clicked = st.button("📥 Export Data", type="primary", use_container_width=True, key="custom_export_data")
+
+    # Handle query preview - display outside columns
+    if query_clicked:
+        query = build_extraction_query(extract_type, selected_filters)
+        st.code(query, language='sql')
+
+    # Handle data preview - display outside columns for full width
+    if preview_clicked:
+        with st.spinner("Loading preview..."):
+            query = build_extraction_query(extract_type, selected_filters)
+            df, error, total_rows = execute_extraction_query(query, limit=preview_limit)
+
+            if error:
+                st.error(f"❌ {error}")
+            elif df is not None:
+                st.success(f"✅ Preview showing {len(df)} of {total_rows:,} total rows")
+                # Display dataframe with full width and dynamic height
+                display_height = min(600, 35 * len(df) + 50)  # Dynamic height based on rows
+                st.dataframe(
+                    df,
+                    use_container_width=True,
+                    hide_index=True,
+                    height=display_height
+                )
+
+    # Handle export
+    if export_clicked:
             with st.spinner(f"Preparing {export_format} export..."):
                 query = build_extraction_query(extract_type, selected_filters)
                 df, error, total_rows = execute_extraction_query(query, limit=export_limit)
@@ -668,27 +774,109 @@ def show_custom_extraction():
                     if len(df) < total_rows:
                         st.warning(f"⚠️ Exported {len(df):,} of {total_rows:,} total rows (limited by export settings)")
 
+@st.cache_data(ttl=3600)
+def get_bulk_dataset_info():
+    """Get row and column counts for bulk export datasets"""
+    conn, error = get_database_connection()
+    if error:
+        return None, error
+
+    dataset_info = {}
+
+    # Complete Transitions Dataset
+    try:
+        count_query = "SELECT COUNT(*) as rows FROM fact_landuse_transitions"
+        result = conn.query(count_query)
+        dataset_info["transitions"] = {
+            "rows": result['rows'].iloc[0],
+            "columns": 18  # All joined columns
+        }
+    except:
+        pass
+
+    # State Summaries
+    try:
+        count_query = """
+            SELECT COUNT(*) as rows FROM (
+                SELECT DISTINCT g.state_code, g.state_name, s.scenario_name,
+                       t.year_range, fl.landuse_name, tl.landuse_name
+                FROM fact_landuse_transitions f
+                JOIN dim_scenario s ON f.scenario_id = s.scenario_id
+                JOIN dim_time t ON f.time_id = t.time_id
+                JOIN dim_geography g ON f.geography_id = g.geography_id
+                JOIN dim_landuse fl ON f.from_landuse_id = fl.landuse_id
+                JOIN dim_landuse tl ON f.to_landuse_id = tl.landuse_id
+                WHERE f.transition_type = 'change'
+            ) as subquery
+        """
+        result = conn.query(count_query)
+        dataset_info["state_summaries"] = {
+            "rows": result['rows'].iloc[0],
+            "columns": 9
+        }
+    except:
+        pass
+
+    # Scenario summaries
+    try:
+        count_query = """
+            SELECT COUNT(*) as rows FROM (
+                SELECT DISTINCT s.scenario_name, fl.landuse_name, tl.landuse_name
+                FROM fact_landuse_transitions f
+                JOIN dim_scenario s ON f.scenario_id = s.scenario_id
+                JOIN dim_landuse fl ON f.from_landuse_id = fl.landuse_id
+                JOIN dim_landuse tl ON f.to_landuse_id = tl.landuse_id
+                WHERE f.transition_type = 'change'
+            ) as subquery
+        """
+        result = conn.query(count_query)
+        dataset_info["scenario_summaries"] = {
+            "rows": result['rows'].iloc[0],
+            "columns": 9
+        }
+    except:
+        pass
+
+    # Dimension tables
+    dim_counts = {
+        "dim_scenario": (20, 5),
+        "dim_time": (6, 4),
+        "dim_geography": (3075, 5),
+        "dim_landuse": (5, 3)
+    }
+
+    for table, (rows, cols) in dim_counts.items():
+        dataset_info[table] = {"rows": rows, "columns": cols}
+
+    return dataset_info, None
+
 def show_bulk_export():
     """Show bulk export options"""
     st.markdown("### 📚 Bulk Data Export")
     st.markdown("**Export complete datasets or multiple extracts at once**")
 
+    # Get dataset info for display
+    dataset_info, error = get_bulk_dataset_info()
+
     # Bulk export options
     bulk_options = {
         "Complete Transitions Dataset": {
             "description": "Export the entire fact table with all dimension data joined",
+            "size_info": "~5.4 million rows × 18 columns",
             "queries": {
                 "transitions": build_extraction_query("transitions", {})
             }
         },
         "All State Summaries": {
             "description": "Export summaries for all states across all scenarios",
+            "size_info": "~60,000 rows × 9 columns",
             "queries": {
                 "state_summaries": build_extraction_query("summary_by_state", {})
             }
         },
         "Scenario Comparison Package": {
             "description": "Export comparison data for all scenarios",
+            "size_info": "3 datasets with ~400 total rows",
             "queries": {
                 "scenario_summaries": build_extraction_query("summary_by_scenario", {}),
                 "rcp_comparison": """
@@ -721,6 +909,7 @@ def show_bulk_export():
         },
         "Reference Data": {
             "description": "Export all dimension tables for reference",
+            "size_info": "4 tables: Scenarios (20 rows), Time (6 rows), Geography (3,075 rows), Land Use (5 rows)",
             "queries": {
                 "dim_scenario": "SELECT * FROM dim_scenario",
                 "dim_time": "SELECT * FROM dim_time",
@@ -740,44 +929,149 @@ def show_bulk_export():
 
     if selected_bulk:
         option = bulk_options[selected_bulk]
+
+        # Display description
         st.info(f"**Description:** {option['description']}")
 
-        # Export format
-        col1, col2 = st.columns(2)
+        # Show detailed dataset information if available
+        if dataset_info and not error:
+            with st.expander("📊 Detailed Dataset Information"):
+                info_cols = st.columns(len(option['queries']))
+                for idx, (dataset_name, query) in enumerate(option['queries'].items()):
+                    with info_cols[idx % len(info_cols)]:
+                        if dataset_name in dataset_info:
+                            info = dataset_info[dataset_name]
+                            st.markdown(f"**{dataset_name}**")
+                            st.markdown(f"- Rows: {info['rows']:,}")
+                            st.markdown(f"- Columns: {info['columns']}")
 
-        with col1:
-            export_format = st.selectbox(
-                "Export format:",
-                ["CSV (ZIP)", "Excel", "Parquet (ZIP)"],
-                help="Choose the format for bulk export",
-                key="bulk_export_format"
-            )
+        # Special state filter for "All State Summaries"
+        state_filter = None
+        if selected_bulk == "All State Summaries":
+            st.markdown("#### 🗺️ State Selection")
 
-        with col2:
-            row_limit = st.number_input(
-                "Row limit per dataset:",
-                min_value=10000,
-                max_value=10000000,
-                value=1000000,
-                step=100000,
-                help="Maximum rows per dataset",
-                key="bulk_row_limit"
-            )
+            # Get state options
+            filters, filter_error = get_filter_options()
+            if filters and not filter_error:
+                states_df = filters['states']
+                state_names = states_df['state_name'].tolist()
+
+                # State selection type
+                state_selection_type = st.radio(
+                    "Select states to include:",
+                    ["All States", "Single State", "Custom Selection"],
+                    horizontal=True,
+                    key="state_selection_type"
+                )
+
+                if state_selection_type == "Single State":
+                    selected_state = st.selectbox(
+                        "Choose a state:",
+                        state_names,
+                        key="single_state_select"
+                    )
+                    # Get state code
+                    state_code = states_df[states_df['state_name'] == selected_state]['state_code'].iloc[0]
+                    state_filter = [state_code]
+                    st.info(f"📍 Will export data for: **{selected_state}**")
+
+                elif state_selection_type == "Custom Selection":
+                    selected_states = st.multiselect(
+                        "Choose states:",
+                        state_names,
+                        default=[],
+                        key="multi_state_select"
+                    )
+                    if selected_states:
+                        # Get state codes
+                        state_codes = states_df[states_df['state_name'].isin(selected_states)]['state_code'].tolist()
+                        state_filter = state_codes
+                        st.info(f"📍 Will export data for **{len(selected_states)} states**: {', '.join(selected_states[:5])}{' ...' if len(selected_states) > 5 else ''}")
+                else:  # All States
+                    st.info("📍 Will export data for **all 50+ states and territories**")
+
+        # Export format selector only (no row limit)
+        export_format = st.selectbox(
+            "Export format:",
+            ["CSV (ZIP)", "Excel", "Parquet (ZIP)"],
+            help="Choose the format for bulk export",
+            key="bulk_export_format"
+        )
+
+        # Show estimated file sizes
+        if selected_bulk == "Complete Transitions Dataset":
+            st.warning("⚠️ **Large Dataset Warning**: The complete transitions dataset contains ~5.4 million rows. "
+                      "Export may take several minutes. Estimated file sizes: "
+                      "CSV ~800MB, Excel ~600MB, Parquet ~150MB (compressed).")
 
         # Export button
         if st.button("📦 Generate Bulk Export", type="primary", use_container_width=True, key="bulk_generate_export"):
-            with st.spinner("Preparing bulk export..."):
+            with st.spinner("Preparing bulk export (this may take a few minutes for large datasets)..."):
                 try:
+                    # Modify queries based on state filter if applicable
+                    queries_to_execute = option['queries'].copy()
+
+                    if selected_bulk == "All State Summaries" and state_filter is not None:
+                        # Update the state_summaries query with state filter
+                        base_query = queries_to_execute['state_summaries']
+                        state_list = "', '".join(state_filter)
+                        # Add WHERE clause or modify existing one
+                        if "WHERE" in base_query:
+                            queries_to_execute['state_summaries'] = base_query.replace(
+                                "WHERE f.transition_type = 'change'",
+                                f"WHERE f.transition_type = 'change' AND g.state_code IN ('{state_list}')"
+                            )
+                        else:
+                            queries_to_execute['state_summaries'] = base_query + f" WHERE g.state_code IN ('{state_list}')"
+
                     if export_format == "CSV (ZIP)":
                         # Create ZIP file with CSV files
                         zip_buffer = io.BytesIO()
                         with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
-                            for dataset_name, query in option['queries'].items():
-                                df, error, _ = execute_extraction_query(query, limit=row_limit)
+                            # Special handling for state summaries with multiple states
+                            if selected_bulk == "All State Summaries" and state_filter is not None:
+                                # Execute query once and get all data
+                                query = queries_to_execute['state_summaries']
+                                df, error, _ = execute_extraction_query(query, limit=None)
+
                                 if df is not None:
-                                    csv_data = df.to_csv(index=False)
-                                    zip_file.writestr(f"{dataset_name}.csv", csv_data)
-                                    st.success(f"✅ Added {dataset_name} ({len(df):,} rows)")
+                                    # Get state information for naming
+                                    filters, _ = get_filter_options()
+                                    states_df = filters['states'] if filters else None
+
+                                    # Create a mapping of state codes to names
+                                    state_name_map = {}
+                                    if states_df is not None:
+                                        state_name_map = dict(zip(states_df['state_code'], states_df['state_name']))
+
+                                    # Create a separate CSV for each state
+                                    for state_code in state_filter:
+                                        # Filter data for this state
+                                        state_data = df[df['state_code'] == state_code] if 'state_code' in df.columns else df
+
+                                        if not state_data.empty:
+                                            # Get state name for file name
+                                            state_name = state_name_map.get(state_code, state_code)
+                                            clean_state_name = state_name.replace(' ', '_')
+
+                                            # Write to ZIP
+                                            csv_data = state_data.to_csv(index=False)
+                                            zip_file.writestr(f"{clean_state_name}.csv", csv_data)
+                                            st.success(f"✅ Added {state_name}.csv ({len(state_data):,} rows)")
+
+                                    # Also add a summary file with all states
+                                    if len(state_filter) > 1:
+                                        csv_data = df.to_csv(index=False)
+                                        zip_file.writestr("all_states_summary.csv", csv_data)
+                                        st.success(f"✅ Added all_states_summary.csv ({len(df):,} total rows)")
+                            else:
+                                # Default behavior for other bulk exports
+                                for dataset_name, query in queries_to_execute.items():
+                                    df, error, _ = execute_extraction_query(query, limit=None)
+                                    if df is not None:
+                                        csv_data = df.to_csv(index=False)
+                                        zip_file.writestr(f"{dataset_name}.csv", csv_data)
+                                        st.success(f"✅ Added {dataset_name} ({len(df):,} rows)")
 
                         # Download ZIP
                         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -792,13 +1086,49 @@ def show_bulk_export():
                         # Create Excel file with multiple sheets
                         excel_buffer = io.BytesIO()
                         with pd.ExcelWriter(excel_buffer, engine='xlsxwriter') as writer:
-                            for dataset_name, query in option['queries'].items():
-                                df, error, _ = execute_extraction_query(query, limit=row_limit)
+                            # Special handling for state summaries with multiple states
+                            if selected_bulk == "All State Summaries" and state_filter is not None:
+                                # Execute query once and get all data
+                                query = queries_to_execute['state_summaries']
+                                df, error, _ = execute_extraction_query(query, limit=None)
+
                                 if df is not None:
-                                    # Excel sheet names have a 31 character limit
-                                    sheet_name = dataset_name[:31]
-                                    df.to_excel(writer, sheet_name=sheet_name, index=False)
-                                    st.success(f"✅ Added {dataset_name} ({len(df):,} rows)")
+                                    # Get state information for naming
+                                    filters, _ = get_filter_options()
+                                    states_df = filters['states'] if filters else None
+
+                                    # Create a mapping of state codes to names
+                                    state_name_map = {}
+                                    if states_df is not None:
+                                        state_name_map = dict(zip(states_df['state_code'], states_df['state_name']))
+
+                                    # Create a separate tab for each state
+                                    for state_code in state_filter:
+                                        # Filter data for this state
+                                        state_data = df[df['state_code'] == state_code] if 'state_code' in df.columns else df
+
+                                        if not state_data.empty:
+                                            # Get state name for sheet name (31 char limit)
+                                            state_name = state_name_map.get(state_code, state_code)
+                                            sheet_name = state_name[:31]
+
+                                            # Write to Excel
+                                            state_data.to_excel(writer, sheet_name=sheet_name, index=False)
+                                            st.success(f"✅ Added tab for {state_name} ({len(state_data):,} rows)")
+
+                                    # Also add a summary sheet with all states
+                                    if len(state_filter) > 1:
+                                        df.to_excel(writer, sheet_name="All States Summary", index=False)
+                                        st.success(f"✅ Added summary tab with all selected states ({len(df):,} total rows)")
+                            else:
+                                # Default behavior for other bulk exports
+                                for dataset_name, query in queries_to_execute.items():
+                                    df, error, _ = execute_extraction_query(query, limit=None)
+                                    if df is not None:
+                                        # Excel sheet names have a 31 character limit
+                                        sheet_name = dataset_name[:31]
+                                        df.to_excel(writer, sheet_name=sheet_name, index=False)
+                                        st.success(f"✅ Added {dataset_name} ({len(df):,} rows)")
 
                         # Download Excel
                         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -813,13 +1143,53 @@ def show_bulk_export():
                         # Create ZIP file with Parquet files
                         zip_buffer = io.BytesIO()
                         with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
-                            for dataset_name, query in option['queries'].items():
-                                df, error, _ = execute_extraction_query(query, limit=row_limit)
+                            # Special handling for state summaries with multiple states
+                            if selected_bulk == "All State Summaries" and state_filter is not None:
+                                # Execute query once and get all data
+                                query = queries_to_execute['state_summaries']
+                                df, error, _ = execute_extraction_query(query, limit=None)
+
                                 if df is not None:
-                                    parquet_buffer = io.BytesIO()
-                                    df.to_parquet(parquet_buffer, index=False)
-                                    zip_file.writestr(f"{dataset_name}.parquet", parquet_buffer.getvalue())
-                                    st.success(f"✅ Added {dataset_name} ({len(df):,} rows)")
+                                    # Get state information for naming
+                                    filters, _ = get_filter_options()
+                                    states_df = filters['states'] if filters else None
+
+                                    # Create a mapping of state codes to names
+                                    state_name_map = {}
+                                    if states_df is not None:
+                                        state_name_map = dict(zip(states_df['state_code'], states_df['state_name']))
+
+                                    # Create a separate Parquet for each state
+                                    for state_code in state_filter:
+                                        # Filter data for this state
+                                        state_data = df[df['state_code'] == state_code] if 'state_code' in df.columns else df
+
+                                        if not state_data.empty:
+                                            # Get state name for file name
+                                            state_name = state_name_map.get(state_code, state_code)
+                                            clean_state_name = state_name.replace(' ', '_')
+
+                                            # Write to ZIP
+                                            parquet_buffer = io.BytesIO()
+                                            state_data.to_parquet(parquet_buffer, index=False)
+                                            zip_file.writestr(f"{clean_state_name}.parquet", parquet_buffer.getvalue())
+                                            st.success(f"✅ Added {state_name}.parquet ({len(state_data):,} rows)")
+
+                                    # Also add a summary file with all states
+                                    if len(state_filter) > 1:
+                                        parquet_buffer = io.BytesIO()
+                                        df.to_parquet(parquet_buffer, index=False)
+                                        zip_file.writestr("all_states_summary.parquet", parquet_buffer.getvalue())
+                                        st.success(f"✅ Added all_states_summary.parquet ({len(df):,} total rows)")
+                            else:
+                                # Default behavior for other bulk exports
+                                for dataset_name, query in queries_to_execute.items():
+                                    df, error, _ = execute_extraction_query(query, limit=None)
+                                    if df is not None:
+                                        parquet_buffer = io.BytesIO()
+                                        df.to_parquet(parquet_buffer, index=False)
+                                        zip_file.writestr(f"{dataset_name}.parquet", parquet_buffer.getvalue())
+                                        st.success(f"✅ Added {dataset_name} ({len(df):,} rows)")
 
                         # Download ZIP
                         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")

@@ -56,7 +56,8 @@
       "WebFetch(domain:docs.streamlit.io)",
       "WebFetch(domain:discuss.streamlit.io)",
       "Bash(gh pr merge:*)",
-      "Read(//private/tmp/**)"
+      "Read(//private/tmp/**)",
+      "Bash(git pull:*)"
     ],
     "deny": []
   }
