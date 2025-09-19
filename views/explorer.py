@@ -472,14 +472,12 @@ def show_query_editor():
             st.caption(f"📝 {template_descriptions[template]}")
 
         if template == "Basic SELECT":
-            st.session_state.query_text = """-- View agricultural land use types
-SELECT *
+            st.session_state.query_text = """SELECT *
 FROM dim_landuse
 WHERE landuse_category = 'Agriculture'
 LIMIT 10;"""
         elif template == "JOIN tables":
-            st.session_state.query_text = """-- Total acres by scenario and time period
-SELECT
+            st.session_state.query_text = """SELECT
     s.scenario_name,
     t.year_range,
     SUM(f.acres) as total_acres
@@ -489,8 +487,7 @@ JOIN dim_time t ON f.time_id = t.time_id
 GROUP BY s.scenario_name, t.year_range
 LIMIT 10;"""
         elif template == "Aggregation":
-            st.session_state.query_text = """-- Count land use types by category
-SELECT
+            st.session_state.query_text = """SELECT
     landuse_name,
     COUNT(*) as count,
     landuse_category
@@ -498,8 +495,7 @@ FROM dim_landuse
 GROUP BY landuse_name, landuse_category
 ORDER BY count DESC;"""
         elif template == "Time series":
-            st.session_state.query_text = """-- Total land transitions over years
-SELECT
+            st.session_state.query_text = """SELECT
     t.start_year,
     SUM(f.acres) as total_acres
 FROM fact_landuse_transitions f
