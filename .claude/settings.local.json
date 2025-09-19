@@ -55,7 +55,8 @@
       "Bash(xargs cat:*)",
       "WebFetch(domain:docs.streamlit.io)",
       "WebFetch(domain:discuss.streamlit.io)",
-      "Bash(gh pr merge:*)"
+      "Bash(gh pr merge:*)",
+      "Read(//private/tmp/**)"
     ],
     "deny": []
   }

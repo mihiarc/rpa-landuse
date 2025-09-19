@@ -73,12 +73,13 @@ class DatabaseSecurity:
     ])
 
     # Disallowed SQL keywords and patterns
+    # Note: Comment syntax (--,/*,*/) removed as comments are stripped before validation
     DANGEROUS_KEYWORDS: FrozenSet[str] = frozenset([
         'DROP', 'DELETE', 'UPDATE', 'INSERT', 'ALTER', 'CREATE',
         'TRUNCATE', 'REPLACE', 'MERGE', 'UPSERT', 'COPY',
         'GRANT', 'REVOKE', 'COMMIT', 'ROLLBACK',
         'EXEC', 'EXECUTE', 'CALL', 'EVAL',
-        '--', '/*', '*/', ';--', 'xp_', 'sp_'
+        ';--', 'xp_', 'sp_'
     ])
 
     @classmethod
@@ -147,6 +148,27 @@ class DatabaseSecurity:
         return column_name
 
     @classmethod
+    def remove_sql_comments(cls, query: str) -> str:
+        """
+        Remove SQL comments from query for security validation.
+
+        Args:
+            query: SQL query with potential comments
+
+        Returns:
+            Query with comments removed
+        """
+        import re
+
+        # Remove -- style comments (to end of line)
+        query = re.sub(r'--[^\n]*', '', query)
+
+        # Remove /* */ style comments
+        query = re.sub(r'/\*.*?\*/', '', query, flags=re.DOTALL)
+
+        return query
+
+    @classmethod
     def scan_query_for_dangerous_content(cls, query: str) -> List[str]:
         """
         Scan SQL query for dangerous keywords and patterns.
@@ -157,9 +179,12 @@ class DatabaseSecurity:
         Returns:
             List of dangerous patterns found
         """
+        # Remove comments before checking for dangerous patterns
+        query_without_comments = cls.remove_sql_comments(query)
         dangerous_patterns = []
-        query_upper = query.upper()
+        query_upper = query_without_comments.upper()
 
+        # Check for dangerous keywords
         for keyword in cls.DANGEROUS_KEYWORDS:
             if keyword in query_upper:
                 dangerous_patterns.append(keyword)
