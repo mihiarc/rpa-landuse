@@ -577,12 +577,14 @@ def display_query_results(df: pd.DataFrame, query: str):
         format_numbers = st.checkbox("Format numbers", value=True)
 
     with col3:
+        # Adjust min_value based on actual data
+        min_rows = min(10, len(df)) if len(df) > 0 else 1
         max_rows = st.number_input(
             "Display rows:",
-            min_value=10,
+            min_value=min_rows,
             max_value=min(MAX_DISPLAY_ROWS, len(df)),
             value=min(DEFAULT_DISPLAY_ROWS, len(df)),
-            step=10
+            step=min(10, len(df))
         )
 
     # Format display dataframe
