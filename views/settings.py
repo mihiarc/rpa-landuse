@@ -252,46 +252,67 @@ LANDUSE_RATE_LIMIT_WINDOW=60
 
 def show_help_documentation():
     """Display help and documentation"""
-    st.markdown("### 📚 Help & Documentation")
 
     # Quick start
-    st.markdown("#### 🚀 Quick Start Guide")
+    st.markdown("## 🚀 Quick Start Guide")
     with st.expander("Getting Started", expanded=True):
         st.markdown("""
-        **1. Check System Status**
-        - Ensure database and API keys are configured above
+        **Welcome to the RPA Land Use Analytics Platform!**
 
-        **2. Try the Chat Interface**
-        - Navigate to the "Natural Language Chat" page
-        - Ask questions like: "How much agricultural land is being lost?"
+        This platform provides AI-powered analytics for USDA Forest Service RPA Assessment land use data.
 
-        **3. Explore Analytics**
-        - Visit the "Analytics Dashboard" for pre-built visualizations
-        - View trends across different climate scenarios
+        **1. Start with Natural Language Chat**
+        - Navigate to the "💬 Natural Language Chat" page
+        - Ask questions in plain English like: "How much agricultural land is being lost?"
+        - The AI will interpret your question and provide data-driven insights
 
-        **4. Advanced Analysis**
-        - Use the "Data Explorer" for custom SQL queries
-        - Browse database schema and run example queries
+        **2. Explore Pre-built Analytics**
+        - Visit the "📊 Analytics Dashboard" for interactive visualizations
+        - View trends across different climate scenarios and time periods
+        - Compare land use transitions between states and regions
+
+        **3. Extract Custom Data**
+        - Use the "🔄 Data Extraction" page to export specific datasets
+        - Choose from predefined extracts or create custom filters
+        - Export data in CSV, Excel, or Parquet formats
+
+        **4. Advanced SQL Analysis**
+        - For technical users: Use the "🔍 Data Explorer" for custom SQL queries
+        - Browse the database schema and run complex queries
+        - Export query results for further analysis
         """)
 
     # Feature overview
-    st.markdown("#### ✨ Feature Overview")
+    st.markdown("## ✨ Feature Overview")
 
     features = {
-        "💬 Natural Language Chat": "Ask questions in plain English about land use data",
-        "📊 Analytics Dashboard": "Pre-built visualizations and insights",
-        "🔍 Data Explorer": "Custom SQL queries and database browsing",
-        "⚙️ Settings & Help": "Configuration and troubleshooting"
+        "💬 Natural Language Chat": {
+            "description": "Ask questions in plain English about land use data",
+            "details": "Our AI assistant understands natural language queries and converts them to data analysis. Perfect for quick insights without needing SQL knowledge."
+        },
+        "📊 Analytics Dashboard": {
+            "description": "Interactive visualizations and pre-built insights",
+            "details": "Explore 6 different visualization types including agricultural impact analysis, forest transitions, climate comparisons, and geographic patterns."
+        },
+        "🔄 Data Extraction": {
+            "description": "Export land use data in multiple formats",
+            "details": "Access predefined extracts, create custom filters, or bulk export entire datasets. Supports CSV, Excel, and Parquet formats."
+        },
+        "🔍 Data Explorer": {
+            "description": "Advanced SQL queries for technical users",
+            "details": "Direct database access with schema browser, example queries, and export capabilities for custom analysis."
+        }
     }
 
-    for feature, description in features.items():
-        st.markdown(f"**{feature}**")
-        st.caption(description)
-        st.markdown("")
+    for feature, info in features.items():
+        with st.expander(f"{feature}"):
+            st.markdown(f"**{info['description']}**")
+            st.markdown(info['details'])
+            st.markdown("")
 
     # Example queries
-    st.markdown("#### 💡 Example Queries")
-    with st.expander("Natural Language Examples"):
+    st.markdown("## 💡 Example Queries")
+    with st.expander("Natural Language Examples", expanded=False):
         st.markdown("""
         **Agricultural Analysis:**
         - "How much agricultural land is being lost?"
@@ -313,8 +334,8 @@ def show_help_documentation():
         """)
 
     # Data information
-    st.markdown("#### 📊 About the Data")
-    with st.expander("Dataset Information"):
+    st.markdown("## 📊 About the Data")
+    with st.expander("Dataset Information", expanded=False):
         st.markdown("""
         **Source:** USDA Forest Service RPA 2020 Assessment
 
@@ -383,36 +404,19 @@ def show_troubleshooting():
 
 def main():
     """Main settings interface"""
-    st.title("⚙️ RPA Assessment Settings & Help")
-    st.markdown("**Configuration, system status, and help information**")
+    st.title("📚 RPA Assessment Help & Documentation")
+    st.markdown("**User guide and documentation for the RPA Land Use Analytics platform**")
 
-    # Create tabs
-    tab1, tab2, tab3, tab4 = st.tabs([
-        "🔧 System Status",
-        "⚙️ Configuration",
-        "📚 Help & Docs",
-        "🔧 Troubleshooting"
-    ])
-
-    with tab1:
-        show_system_status()
-
-    with tab2:
-        show_configuration()
-
-    with tab3:
-        show_help_documentation()
-
-    with tab4:
-        show_troubleshooting()
+    # Only show Help & Documentation for production deployment
+    show_help_documentation()
 
     # Footer
     st.markdown("---")
     st.markdown("""
     **🆘 Need more help?**
-    - Check the project documentation in the `docs/` directory
-    - Run `uv run python quickstart.py` for environment verification
-    - Visit the GitHub repository for issues and updates
+    - Contact your system administrator for assistance
+    - Report issues through the feedback form
+    - Check for platform updates and announcements
     """)
 
 if __name__ == "__main__":
