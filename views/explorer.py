@@ -460,30 +460,37 @@ def show_query_editor():
         )
 
         if template == "Basic SELECT":
-            st.session_state.query_text = "SELECT *\nFROM table_name\nWHERE condition\nLIMIT 10;"
+            st.session_state.query_text = """SELECT *
+FROM dim_landuse
+WHERE landuse_category = 'Agriculture'
+LIMIT 10;"""
         elif template == "JOIN tables":
             st.session_state.query_text = """SELECT
-    t1.column1,
-    t2.column2
-FROM table1 t1
-JOIN table2 t2 ON t1.id = t2.id
+    s.scenario_name,
+    t.year_range,
+    SUM(f.acres) as total_acres
+FROM fact_landuse_transitions f
+JOIN dim_scenario s ON f.scenario_id = s.scenario_id
+JOIN dim_time t ON f.time_id = t.time_id
+GROUP BY s.scenario_name, t.year_range
 LIMIT 10;"""
         elif template == "Aggregation":
             st.session_state.query_text = """SELECT
-    group_column,
+    landuse_name,
     COUNT(*) as count,
-    SUM(value) as total
-FROM table_name
-GROUP BY group_column
+    landuse_category
+FROM dim_landuse
+GROUP BY landuse_name, landuse_category
 ORDER BY count DESC;"""
         elif template == "Time series":
             st.session_state.query_text = """SELECT
-    time_column,
-    SUM(value) as total
-FROM table_name
-WHERE time_column BETWEEN '2012-01-01' AND '2070-12-31'
-GROUP BY time_column
-ORDER BY time_column;"""
+    t.start_year,
+    SUM(f.acres) as total_acres
+FROM fact_landuse_transitions f
+JOIN dim_time t ON f.time_id = t.time_id
+WHERE t.start_year BETWEEN 2012 AND 2070
+GROUP BY t.start_year
+ORDER BY t.start_year;"""
 
     # Query input
     query = st.text_area(
