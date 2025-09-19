@@ -652,7 +652,7 @@ def display_query_results(df: pd.DataFrame, query: str):
 
     # Export options
     st.markdown("#### 📥 Export Options")
-    export_col1, export_col2, export_col3, export_col4 = st.columns(4)
+    export_col1, export_col2, export_col3 = st.columns(3)
 
     with export_col1:
         csv = df.to_csv(index=False)
@@ -684,10 +684,6 @@ def display_query_results(df: pd.DataFrame, query: str):
             mime="application/octet-stream",
             use_container_width=True
         )
-
-    with export_col4:
-        if st.button("📋 Copy Query", use_container_width=True):
-            st.code(query, language='sql')
 
     # Statistics for numeric columns
     numeric_cols = df.select_dtypes(include=['int64', 'float64']).columns.tolist()
