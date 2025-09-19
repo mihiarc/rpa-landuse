@@ -313,12 +313,20 @@ def execute_query(query: str, ttl: int = 60):
     """
     conn = get_database_connection()
 
-    # Add safety limit if not present
-    query_upper = query.upper().strip()
+    # Add safety limit if not present (skip if query has UNION)
+    query_trimmed = query.strip().rstrip(';')
+    query_upper = query_trimmed.upper()
+
+    # Only add LIMIT if:
+    # 1. It's a SELECT query
+    # 2. Doesn't already have LIMIT
+    # 3. Doesn't have UNION (which may have its own limits)
     if (query_upper.startswith('SELECT') and
-        not query_upper.endswith(')') and
-        'LIMIT' not in query_upper.split(')')[-1]):
-        query = f"{query.rstrip(';')} LIMIT {MAX_DISPLAY_ROWS}"
+        'LIMIT' not in query_upper and
+        'UNION' not in query_upper):
+        query = f"{query_trimmed} LIMIT {MAX_DISPLAY_ROWS}"
+    else:
+        query = query_trimmed
 
     try:
         return conn.query(query, ttl=ttl)
