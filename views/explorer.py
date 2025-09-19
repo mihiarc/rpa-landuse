@@ -517,7 +517,7 @@ ORDER BY t.start_year;"""
     st.session_state.query_text = query
 
     # Query controls
-    col1, col2, col3 = st.columns([1, 1, 1])
+    col1, col2 = st.columns([1, 1])
 
     with col1:
         run_query = st.button(
@@ -531,20 +531,6 @@ ORDER BY t.start_year;"""
         if st.button("🗑️ Clear", use_container_width=True):
             st.session_state.query_text = ""
             st.rerun()
-
-    with col3:
-        format_sql = st.button("📄 Format SQL", use_container_width=True)
-
-    if format_sql and query:
-        # Simple SQL formatting
-        import re
-        formatted = query
-        for keyword in ['SELECT', 'FROM', 'WHERE', 'JOIN', 'LEFT JOIN', 'RIGHT JOIN',
-                       'INNER JOIN', 'GROUP BY', 'ORDER BY', 'HAVING', 'LIMIT']:
-            pattern = r'\b' + keyword.replace(' ', r'\s+') + r'\b'
-            formatted = re.sub(pattern, '\n' + keyword, formatted, flags=re.IGNORECASE)
-        st.session_state.query_text = formatted.strip()
-        st.rerun()
 
     # Execute query
     if run_query and query.strip():
