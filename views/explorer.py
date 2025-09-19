@@ -348,6 +348,43 @@ def execute_query(query: str, ttl: int = 60):
 
 def show_schema_browser():
     """Display interactive schema browser with enhanced features"""
+
+    # Educational info box about star schema
+    with st.expander("📚 Understanding the Star Schema", expanded=False):
+        st.markdown("""
+        ### What is a Star Schema?
+
+        This database uses a **star schema** design - a simple and efficient structure for analytical queries:
+
+        **🌟 Center (Fact Table)**
+        - `fact_landuse_transitions` - Contains the actual land use change data (measurements)
+        - Each row represents a specific land use transition with measurable values (acres)
+
+        **⭐ Points (Dimension Tables)**
+        Surrounding tables that provide context:
+        - `dim_scenario` - Climate and socioeconomic scenarios (RCP/SSP combinations)
+        - `dim_geography` - Location information (counties, states, regions)
+        - `dim_time` - Time periods (year ranges from 2012-2100)
+        - `dim_landuse` - Land use categories (Crop, Forest, Urban, etc.)
+
+        **How to Use It:**
+        1. Start with the fact table for measurements
+        2. JOIN dimension tables to add context
+        3. Filter and aggregate to answer specific questions
+
+        **Example Pattern:**
+        ```sql
+        SELECT
+            g.state_name,
+            s.scenario_name,
+            SUM(f.acres) as total_acres
+        FROM fact_landuse_transitions f
+        JOIN dim_geography g ON f.geography_id = g.geography_id
+        JOIN dim_scenario s ON f.scenario_id = s.scenario_id
+        GROUP BY g.state_name, s.scenario_name
+        ```
+        """)
+
     schema_info = get_table_schema()
 
     if not schema_info:
@@ -774,8 +811,6 @@ def main():
         show_query_editor()
 
     with tabs[1]:
-        st.markdown("### 🗺️ Database Schema Browser")
-        st.markdown("Explore the database structure and preview data.")
         show_schema_browser()
 
     with tabs[2]:
