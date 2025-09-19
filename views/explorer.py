@@ -450,22 +450,36 @@ def show_query_editor():
     if 'query_text' not in st.session_state:
         st.session_state.query_text = "SELECT * FROM dim_landuse LIMIT 10;"
 
-    # Query templates
+    # Query templates with descriptions
+    template_descriptions = {
+        "": "",
+        "Basic SELECT": "View agricultural land use types (simple filtering example)",
+        "JOIN tables": "Total acres by scenario and time period (demonstrates table joins)",
+        "Aggregation": "Count land use types by category (grouping and counting)",
+        "Time series": "Total land transitions over years (temporal analysis)"
+    }
+
     col1, col2 = st.columns([3, 1])
     with col2:
         template = st.selectbox(
             "Quick templates:",
-            ["", "Basic SELECT", "JOIN tables", "Aggregation", "Time series"],
-            help="Load a query template"
+            list(template_descriptions.keys()),
+            help="Load a query template to get started"
         )
 
+        # Show description of selected template
+        if template and template_descriptions[template]:
+            st.caption(f"📝 {template_descriptions[template]}")
+
         if template == "Basic SELECT":
-            st.session_state.query_text = """SELECT *
+            st.session_state.query_text = """-- View agricultural land use types
+SELECT *
 FROM dim_landuse
 WHERE landuse_category = 'Agriculture'
 LIMIT 10;"""
         elif template == "JOIN tables":
-            st.session_state.query_text = """SELECT
+            st.session_state.query_text = """-- Total acres by scenario and time period
+SELECT
     s.scenario_name,
     t.year_range,
     SUM(f.acres) as total_acres
@@ -475,7 +489,8 @@ JOIN dim_time t ON f.time_id = t.time_id
 GROUP BY s.scenario_name, t.year_range
 LIMIT 10;"""
         elif template == "Aggregation":
-            st.session_state.query_text = """SELECT
+            st.session_state.query_text = """-- Count land use types by category
+SELECT
     landuse_name,
     COUNT(*) as count,
     landuse_category
@@ -483,7 +498,8 @@ FROM dim_landuse
 GROUP BY landuse_name, landuse_category
 ORDER BY count DESC;"""
         elif template == "Time series":
-            st.session_state.query_text = """SELECT
+            st.session_state.query_text = """-- Total land transitions over years
+SELECT
     t.start_year,
     SUM(f.acres) as total_acres
 FROM fact_landuse_transitions f
