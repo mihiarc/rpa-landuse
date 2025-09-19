@@ -511,17 +511,17 @@ def create_pages():
         icon=":material/download:"
     )
 
-    # Settings page
-    settings_page = st.Page(
+    # Help & Documentation page
+    help_page = st.Page(
         "views/settings.py",
-        title="Settings & Help",
-        icon=":material/settings:"
+        title="Help & Documentation",
+        icon=":material/help:"
     )
 
     return {
         "Main": [home_page],
         "Analysis": [chat_page, analytics_page, explorer_page, extraction_page],
-        "Configuration": [settings_page]
+        "Help": [help_page]
     }
 
 # Main navigation using modern st.navigation
