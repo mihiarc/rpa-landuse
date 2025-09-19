@@ -611,15 +611,12 @@ def display_query_results(df: pd.DataFrame, query: str):
     st.markdown("### 📄 Query Results")
 
     # Display options
-    col1, col2, col3 = st.columns([2, 2, 3])
+    col1, col2 = st.columns([1, 2])
 
     with col1:
-        show_index = st.checkbox("Show index", value=False)
-
-    with col2:
         format_numbers = st.checkbox("Format numbers", value=True)
 
-    with col3:
+    with col2:
         # Adjust min_value based on actual data
         min_rows = min(10, len(df)) if len(df) > 0 else 1
         max_rows = st.number_input(
@@ -642,11 +639,11 @@ def display_query_results(df: pd.DataFrame, query: str):
                 else:
                     display_df[col] = display_df[col].apply(lambda x: f"{x:,.2f}")
 
-    # Display data
+    # Display data (always hide index)
     st.dataframe(
         display_df,
         use_container_width=True,
-        hide_index=not show_index,
+        hide_index=True,
         height=min(600, max(100, len(display_df) * 35 + 50))
     )
 
