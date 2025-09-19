@@ -708,17 +708,17 @@ def show_query_examples():
                 with st.expander(f"🔍 {name}"):
                     st.code(query, language="sql")
 
-                    col1, col2 = st.columns([3, 1])
+                    col1, col2 = st.columns([1, 1])
                     with col1:
-                        if st.button("Load Query", key=f"load_{category}_{name}", use_container_width=True):
-                            st.session_state.query_text = query
-                            st.session_state.active_tab = 0  # Switch to SQL Editor
-                            st.rerun()
-                    with col2:
-                        if st.button("Run Now", key=f"run_{category}_{name}", type="primary", use_container_width=True):
+                        if st.button("▶️ Run Now", key=f"run_{category}_{name}", type="primary", use_container_width=True):
                             with st.spinner("Executing query..."):
                                 df = execute_query(query, ttl=60)
                             display_query_results(df, query)
+                    with col2:
+                        if st.button("📝 Load in Editor", key=f"load_{category}_{name}", use_container_width=True, help="Copy this query to the SQL Editor tab where you can modify it"):
+                            st.session_state.query_text = query
+                            st.session_state.active_tab = 0  # Switch to SQL Editor
+                            st.rerun()
 
 
 def show_data_dictionary():
