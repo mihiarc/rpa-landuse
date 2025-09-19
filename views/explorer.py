@@ -827,7 +827,6 @@ def main():
     - Use the **Schema Browser** to explore table structures
     - Copy **Example Queries** as templates for your analysis
     - Query results are automatically limited to 1,000 rows
-    - Use Ctrl+Enter (or Cmd+Enter on Mac) in the SQL editor for quick execution
     """)
 
 
