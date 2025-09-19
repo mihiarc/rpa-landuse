@@ -73,12 +73,13 @@ class DatabaseSecurity:
     ])
 
     # Disallowed SQL keywords and patterns
+    # Note: Comment syntax (--,/*,*/) removed as comments are stripped before validation
     DANGEROUS_KEYWORDS: FrozenSet[str] = frozenset([
         'DROP', 'DELETE', 'UPDATE', 'INSERT', 'ALTER', 'CREATE',
         'TRUNCATE', 'REPLACE', 'MERGE', 'UPSERT', 'COPY',
         'GRANT', 'REVOKE', 'COMMIT', 'ROLLBACK',
         'EXEC', 'EXECUTE', 'CALL', 'EVAL',
-        '--', '/*', '*/', ';--', 'xp_', 'sp_'
+        ';--', 'xp_', 'sp_'
     ])
 
     @classmethod
@@ -183,11 +184,8 @@ class DatabaseSecurity:
         dangerous_patterns = []
         query_upper = query_without_comments.upper()
 
-        # Check for dangerous keywords, excluding comment syntax
+        # Check for dangerous keywords
         for keyword in cls.DANGEROUS_KEYWORDS:
-            # Skip comment syntax checks since we've already removed comments
-            if keyword in ['--', '/*', '*/']:
-                continue
             if keyword in query_upper:
                 dangerous_patterns.append(keyword)
 
