@@ -17,6 +17,7 @@ Automated deployment script for deploying the RPA Land Use Analytics application
 ```bash
 
 aws ecr get-login-password --region us-east-1 --profile afrancis-cds | docker login --username AWS --password-stdin 810875545305.dkr.ecr.us-east-1.amazonaws.com
+aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 810875545305.dkr.ecr.us-east-1.amazonaws.com
 
 # EC2 instance status verification
 aws ec2 describe-instances --instance-ids <instance-id> --query 'Reservations[0].Instances[0].State.Name'

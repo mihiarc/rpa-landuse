@@ -41,7 +41,7 @@ resource "aws_security_group" "rpa_landuse_sg" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["65.190.52.97/32"]
+    cidr_blocks = ["65.190.52.97/32", "172.59.220.148/32"]
   }
 
   # HTTP access - all IPs
