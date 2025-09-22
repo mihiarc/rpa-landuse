@@ -535,6 +535,12 @@ def main():
         if not require_authentication():
             return  # Show login page, don't proceed with app
         
+        # Add RTI logo to the top of the sidebar before navigation
+        st.logo(
+            image="assets/rti.svg",
+            size="large"
+        )
+        
         # Create navigation structure
         pages = create_pages()
 

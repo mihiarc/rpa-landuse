@@ -3,7 +3,12 @@ services:
     build:
       context: ../..
       dockerfile: docker/dev/dockerfile.yml
-    command: python -m streamlit run landuse_app.py
+    command: >
+      python -m streamlit run landuse_app.py
+      --server.fileWatcherType=poll
+      --server.runOnSave=true
+      --server.allowRunOnSave=true
+      --logger.level=debug
     ports:
       - "80:8501"
     env_file:
@@ -15,6 +20,7 @@ services:
       - ../../views:/app/views
       - ../../data:/app/data
       - ../../config:/app/config
+      - ../../assets:/app/assets
 
   terraform-dev:
     build:
