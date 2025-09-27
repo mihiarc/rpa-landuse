@@ -522,6 +522,11 @@ class LanduseCombinedScenarioConverter:
             for combined_scenario, gcm_scenarios in scenario_groups.items():
                 aggregated[combined_scenario] = {}
 
+                # Skip if no scenarios to aggregate
+                if not gcm_scenarios:
+                    progress.update(task, advance=1)
+                    continue
+
                 # Get all time periods from the first GCM scenario
                 sample_scenario = data[gcm_scenarios[0]]
                 time_periods = list(sample_scenario.keys())
