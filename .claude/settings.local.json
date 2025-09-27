@@ -60,7 +60,11 @@
       "Bash(git pull:*)",
       "Bash(gh pr checkout:*)",
       "Bash(gh issue:*)",
-      "Bash(git remote get-url:*)"
+      "Bash(git remote get-url:*)",
+      "Bash(git lfs track:*)",
+      "Bash(git lfs:*)",
+      "Bash(sha256sum:*)",
+      "Bash(cat:*)"
     ],
     "deny": []
   }

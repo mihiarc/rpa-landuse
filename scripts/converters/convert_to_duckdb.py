@@ -40,6 +40,8 @@ project_root = Path(__file__).parent.parent.parent
 src_path = project_root / "src"
 sys.path.insert(0, str(src_path))
 
+from landuse.database.schema_version import SchemaVersion, SchemaVersionManager
+
 console = Console()
 
 class LanduseCombinedScenarioConverter:
@@ -1051,6 +1053,20 @@ class LanduseCombinedScenarioConverter:
         file_size = self.output_file.stat().st_size / (1024 * 1024)  # MB
         console.print(f"\n📁 Database file size: [bold cyan]{file_size:.2f} MB[/bold cyan]")
 
+    def apply_schema_version(self):
+        """Apply schema version tracking to the database.
+
+        Marks the database with the current schema version to track
+        database evolution and ensure compatibility checking.
+        """
+        try:
+            version_manager = SchemaVersionManager(self.conn)
+            # Apply version 2.2.0 for combined scenarios with versioning
+            version_manager.apply_version('2.2.0', applied_by='convert_to_duckdb')
+            console.print(f"[green]✓ Applied schema version 2.2.0[/green]")
+        except Exception as e:
+            console.print(f"[yellow]⚠ Could not apply schema version: {e}[/yellow]")
+
     def close(self):
         """Close database connection and clean up temporary files.
 
@@ -1060,9 +1076,10 @@ class LanduseCombinedScenarioConverter:
         ideally in a finally block or context manager.
 
         The cleanup process:
-            1. Closes the DuckDB connection if open
-            2. Recursively removes the temporary directory and all contents
-            3. Logs any cleanup failures as warnings (non-fatal)
+            1. Applies schema version to the database
+            2. Closes the DuckDB connection if open
+            3. Recursively removes the temporary directory and all contents
+            4. Logs any cleanup failures as warnings (non-fatal)
 
         Note:
             Cleanup failures are logged but don't raise exceptions to ensure
@@ -1077,6 +1094,8 @@ class LanduseCombinedScenarioConverter:
             ...     converter.close()
         """
         if self.conn:
+            # Apply schema version before closing
+            self.apply_schema_version()
             self.conn.close()
 
         if self.temp_dir and os.path.exists(self.temp_dir):
