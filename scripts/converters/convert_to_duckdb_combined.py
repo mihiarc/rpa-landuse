@@ -96,6 +96,31 @@ class LanduseCombinedScenarioConverter:
     }
 
     def __init__(self, input_file: str, output_file: str, use_bulk_copy: bool = True):
+        """Initialize the combined scenario converter with validated paths.
+
+        Sets up the converter to aggregate multiple GCM projections into combined
+        RCP-SSP scenarios. Validates input/output paths for security and creates
+        a temporary directory for Parquet files during bulk loading.
+
+        Args:
+            input_file: Path to the source JSON file containing nested land use projections.
+                Must be a valid JSON file with proper structure.
+            output_file: Path where the DuckDB database will be created. Parent directory
+                must exist and file extension should be .db, .duckdb, or .duck.
+            use_bulk_copy: Whether to use optimized COPY from Parquet (5-10x faster)
+                instead of traditional INSERT statements. Defaults to True.
+
+        Raises:
+            ValueError: If paths contain directory traversal patterns, file is too large,
+                or file extensions are invalid.
+            FileNotFoundError: If input file doesn't exist or output directory is missing.
+
+        Example:
+            >>> converter = LanduseCombinedScenarioConverter(
+            ...     'data/raw/projections.json',
+            ...     'data/processed/analytics.duckdb'
+            ... )
+        """
         # Validate and resolve paths securely
         self.input_file = self._validate_input_path(input_file)
         self.output_file = self._validate_output_path(output_file)
@@ -159,12 +184,23 @@ class LanduseCombinedScenarioConverter:
     def create_schema(self):
         """Create star schema with dimension and fact tables for combined scenarios.
 
-        Creates:
-            - dim_scenario: Combined climate scenarios (4 RCP/SSP combinations)
-            - dim_time: Time periods (e.g., 2015-2020)
-            - dim_geography: US counties with FIPS codes
+        Establishes a normalized star schema design optimized for analytical queries.
+        Creates dimension tables for scenarios, time, geography, and land use types,
+        plus a fact table for transition data. Also creates performance indexes.
+
+        The schema includes:
+            - dim_scenario: Combined climate scenarios (5 total: 4 RCP/SSP + 1 OVERALL)
+            - dim_time: Time periods with year ranges (e.g., 2015-2020)
+            - dim_geography: US counties with FIPS codes and geographic metadata
             - dim_landuse: Land use categories (crop, forest, urban, etc.)
-            - fact_landuse_transitions: Main fact table with aggregated transitions
+            - fact_landuse_transitions: Main fact table with aggregated transitions,
+                including statistical measures (mean, std_dev, min, max)
+
+        Raises:
+            duckdb.Error: If database connection fails or table creation encounters errors.
+
+        Note:
+            Existing tables are dropped and recreated. All data will be lost.
         """
         console.print(Panel.fit("🏗️ [bold blue]Creating DuckDB Schema (Combined Scenarios)[/bold blue]", border_style="blue"))
 
@@ -186,7 +222,11 @@ class LanduseCombinedScenarioConverter:
         console.print("✅ [green]Schema created successfully[/green]")
 
     def _create_scenario_dim(self):
-        """Create scenario dimension table for combined scenarios"""
+        """Create scenario dimension table for combined scenarios.
+
+        Creates the dimension table for climate scenarios with metadata about
+        aggregation methods and constituent GCM models.
+        """
         self.conn.execute("DROP TABLE IF EXISTS dim_scenario")
         self.conn.execute("""
             CREATE TABLE dim_scenario (
@@ -203,7 +243,11 @@ class LanduseCombinedScenarioConverter:
         """)
 
     def _create_time_dim(self):
-        """Create time dimension table"""
+        """Create time dimension table.
+
+        Creates the dimension table for time periods with year ranges and
+        period length calculations.
+        """
         self.conn.execute("DROP TABLE IF EXISTS dim_time")
         self.conn.execute("""
             CREATE TABLE dim_time (
@@ -217,7 +261,11 @@ class LanduseCombinedScenarioConverter:
         """)
 
     def _create_geography_dim(self):
-        """Create geography dimension table"""
+        """Create geography dimension table.
+
+        Creates the dimension table for geographic entities (counties) with
+        FIPS codes and geographic hierarchy (county, state, region).
+        """
         self.conn.execute("DROP TABLE IF EXISTS dim_geography")
         self.conn.execute("""
             CREATE TABLE dim_geography (
@@ -232,7 +280,12 @@ class LanduseCombinedScenarioConverter:
         """)
 
     def _create_landuse_dim(self):
-        """Create landuse dimension table"""
+        """Create land use dimension table.
+
+        Creates and populates the dimension table for land use types with
+        codes, names, and categories. Automatically inserts the 5 standard
+        land use types (crop, pasture, rangeland, forest, urban).
+        """
         self.conn.execute("DROP TABLE IF EXISTS dim_landuse")
         self.conn.execute("""
             CREATE TABLE dim_landuse (
@@ -254,7 +307,12 @@ class LanduseCombinedScenarioConverter:
             """, (i, code, name, category, f"{name} land use type"))
 
     def _create_landuse_transitions_fact(self):
-        """Create the main fact table for aggregated landuse transitions"""
+        """Create the main fact table for aggregated land use transitions.
+
+        Creates the fact table with foreign keys to all dimension tables and
+        columns for transition metrics including statistical measures from
+        GCM aggregation (mean, std_dev, min, max).
+        """
         self.conn.execute("DROP TABLE IF EXISTS fact_landuse_transitions")
         self.conn.execute("""
             CREATE TABLE fact_landuse_transitions (
@@ -280,7 +338,12 @@ class LanduseCombinedScenarioConverter:
         """)
 
     def _create_indexes(self):
-        """Create performance indexes"""
+        """Create performance indexes for optimized query execution.
+
+        Creates single-column and composite indexes on commonly queried
+        columns to improve query performance, especially for joins and
+        filtering operations.
+        """
         indexes = [
             "CREATE INDEX idx_scenario_name ON dim_scenario(scenario_name)",
             "CREATE INDEX idx_time_range ON dim_time(year_range)",
@@ -330,7 +393,28 @@ class LanduseCombinedScenarioConverter:
         return None
 
     def load_data(self):
-        """Load JSON data and populate all database tables with aggregated scenarios."""
+        """Load JSON data and populate all database tables with aggregated scenarios.
+
+        Performs the complete ETL pipeline: reads the JSON file, extracts dimension
+        data (time periods, geographies), loads dimension tables, aggregates GCM
+        projections by RCP-SSP combination, and populates the fact table with
+        aggregated transition data.
+
+        The aggregation process:
+            1. Groups 5 GCMs for each RCP-SSP combination
+            2. Calculates mean values across GCMs
+            3. Stores statistical measures (std_dev, min, max)
+            4. Creates an OVERALL scenario with all GCM data combined
+
+        Raises:
+            FileNotFoundError: If the input JSON file cannot be read.
+            json.JSONDecodeError: If the JSON file is malformed.
+            duckdb.Error: If database operations fail during loading.
+            ValueError: If data exceeds security limits or has invalid structure.
+
+        Note:
+            Progress is displayed via Rich console with estimated completion time.
+        """
         console.print(Panel.fit("📊 [bold yellow]Loading and Aggregating Data[/bold yellow]", border_style="yellow"))
 
         # Load JSON data
@@ -354,7 +438,12 @@ class LanduseCombinedScenarioConverter:
         console.print("✅ [green]Data loaded and aggregated successfully[/green]")
 
     def _load_combined_scenarios(self):
-        """Load the 4 combined scenarios into the dimension table"""
+        """Load the combined RCP-SSP scenarios into the dimension table.
+
+        Populates dim_scenario with the 5 combined scenarios (4 RCP-SSP
+        combinations plus 1 OVERALL) including their metadata, descriptions,
+        and aggregation methods.
+        """
         console.print("📥 Loading combined scenarios...")
 
         scenario_data = []
@@ -390,14 +479,28 @@ class LanduseCombinedScenarioConverter:
                 """, tuple(scenario.values()))
 
     def _extract_time_periods(self, data: dict) -> list[str]:
-        """Extract unique time period strings across all scenarios."""
+        """Extract unique time period strings across all scenarios.
+
+        Args:
+            data: Raw JSON data dictionary.
+
+        Returns:
+            List of unique time period strings (e.g., ['2015-2020', '2020-2025']).
+        """
         time_periods = set()
         for scenario_data in data.values():
             time_periods.update(scenario_data.keys())
         return list(time_periods)
 
     def _extract_geographies(self, data: dict) -> list[str]:
-        """Extract unique county FIPS codes from all data branches."""
+        """Extract unique county FIPS codes from all data branches.
+
+        Args:
+            data: Raw JSON data dictionary.
+
+        Returns:
+            List of unique FIPS codes representing all counties in the dataset.
+        """
         fips_codes = set()
         for scenario_data in data.values():
             for time_data in scenario_data.values():
@@ -405,7 +508,14 @@ class LanduseCombinedScenarioConverter:
         return list(fips_codes)
 
     def _load_time_periods(self, time_periods: list[str]):
-        """Load time dimension data"""
+        """Load time periods into the time dimension table.
+
+        Parses time period strings to extract start/end years and period
+        lengths, then loads them into dim_time.
+
+        Args:
+            time_periods: List of time period strings (e.g., ['2015-2020']).
+        """
         time_data = []
         for i, period in enumerate(time_periods):
             start_year, end_year = map(int, period.split('-'))
@@ -431,7 +541,14 @@ class LanduseCombinedScenarioConverter:
             """)
 
     def _load_geographies(self, fips_codes: list[str]):
-        """Load geography dimension data"""
+        """Load geographic entities into the geography dimension table.
+
+        Creates geography records for each FIPS code with state extraction.
+        County names and regions are left for later enrichment.
+
+        Args:
+            fips_codes: List of county FIPS codes.
+        """
         geo_data = []
         for i, fips in enumerate(fips_codes):
             state_code = fips[:2]
@@ -459,7 +576,13 @@ class LanduseCombinedScenarioConverter:
     def _load_aggregated_transitions(self, data: dict):
         """Load fact table with aggregated land use transitions.
 
-        Aggregates multiple GCM projections for each RCP-SSP combination.
+        Performs the main ETL operation: aggregates multiple GCM projections
+        for each RCP-SSP combination and loads the results into the fact table.
+        Creates lookup dictionaries for dimension IDs and delegates to either
+        bulk copy or traditional loading methods.
+
+        Args:
+            data: Raw JSON data with nested land use projections.
         """
         console.print("🔄 [cyan]Aggregating transitions across GCMs...[/cyan]")
 
@@ -487,9 +610,28 @@ class LanduseCombinedScenarioConverter:
     def _aggregate_by_scenario(self, data: dict) -> dict:
         """Aggregate GCM-specific data into combined RCP-SSP scenarios.
 
+        Groups projections from multiple Global Climate Models (GCMs) by their
+        RCP-SSP combination and calculates statistical measures across models.
+        Also creates an OVERALL scenario combining all GCMs and pathways.
+
+        The aggregation process:
+            1. Groups scenarios by RCP-SSP combination (e.g., all RCP4.5-SSP1 GCMs)
+            2. For each land use transition, calculates mean across GCMs
+            3. Stores additional statistics (std_dev, min, max) for analysis
+            4. Creates OVERALL scenario using all available GCM data
+
+        Args:
+            data: Nested dictionary with structure:
+                {scenario: {time: {fips: [{transitions}]}}}
+
         Returns:
-            Dictionary with structure: {combined_scenario: {time: {fips: {from_lu: {to_lu: stats}}}}}
-            where stats includes mean, std_dev, min, max of acres across GCMs
+            Dictionary with aggregated data structure:
+                {combined_scenario: {time: {fips: [{from_lu, to_lu, acres, stats}]}}}
+            where stats includes mean, std_dev, min, max of acres across GCMs.
+
+        Note:
+            Progress is displayed during aggregation as this is a time-consuming
+            operation with millions of data points.
         """
         console.print("🔄 Aggregating across GCMs...")
         aggregated = {}
@@ -675,7 +817,22 @@ class LanduseCombinedScenarioConverter:
 
     def _load_transitions_traditional(self, data: dict, scenario_lookup: dict, time_lookup: dict,
                                      geography_lookup: dict, landuse_lookup: dict):
-        """Traditional batch insert method for aggregated transitions"""
+        """Load transitions using traditional SQL INSERT statements.
+
+        Alternative to bulk copy method, uses batch INSERT statements.
+        Slower but more compatible with different DuckDB configurations.
+
+        Args:
+            data: Aggregated transition data from _aggregate_by_scenario.
+            scenario_lookup: Mapping of scenario names to IDs.
+            time_lookup: Mapping of time periods to IDs.
+            geography_lookup: Mapping of FIPS codes to IDs.
+            landuse_lookup: Mapping of land use codes to IDs.
+
+        Note:
+            This method is primarily for compatibility and testing.
+            Bulk copy method is preferred for production use.
+        """
         console.print("🐌 [yellow]Using traditional INSERT method...[/yellow]")
 
         # Similar to bulk copy but using executemany
@@ -725,7 +882,27 @@ class LanduseCombinedScenarioConverter:
                 temp_file.unlink()
 
     def create_views(self):
-        """Create analytical views for common query patterns with combined scenarios."""
+        """Create analytical views for common query patterns with combined scenarios.
+
+        Creates pre-defined views that simplify common analytical queries by joining
+        dimension and fact tables. These views provide business-friendly column names
+        and pre-calculated metrics for easier analysis.
+
+        Views created:
+            - v_default_transitions: Uses OVERALL scenario as default for queries
+            - v_scenario_summary: Simplified view of all available scenarios
+            - v_agriculture_transitions: Focuses on agricultural land changes
+            - v_net_changes: Pre-calculated net gains/losses by land use type
+
+        Each view includes descriptive names instead of codes and joins all necessary
+        dimension tables for complete context.
+
+        Raises:
+            duckdb.Error: If view creation fails due to missing tables or SQL errors.
+
+        Note:
+            Views are recreated if they already exist (CREATE OR REPLACE behavior).
+        """
         console.print(Panel.fit("📊 [bold green]Creating Analytical Views[/bold green]", border_style="green"))
 
         # Default view using OVERALL scenario
@@ -818,7 +995,24 @@ class LanduseCombinedScenarioConverter:
         console.print("✅ [green]Views created successfully[/green]")
 
     def generate_summary(self):
-        """Display database statistics and record counts."""
+        """Display database statistics and record counts.
+
+        Generates a comprehensive summary of the converted database including table
+        row counts, scenario details, and file size. Output is formatted as a Rich
+        table for clear presentation in the terminal.
+
+        The summary includes:
+            - Row counts for all dimension and fact tables
+            - List of combined scenarios with descriptions
+            - Total database file size in MB
+
+        Raises:
+            duckdb.Error: If database queries fail when gathering statistics.
+
+        Note:
+            This method is typically called after successful data loading to confirm
+            the conversion completed successfully.
+        """
         console.print(Panel.fit("📈 [bold magenta]Database Summary (Combined Scenarios)[/bold magenta]", border_style="magenta"))
 
         # Create summary table
@@ -857,7 +1051,30 @@ class LanduseCombinedScenarioConverter:
         console.print(f"\n📁 Database file size: [bold cyan]{file_size:.2f} MB[/bold cyan]")
 
     def close(self):
-        """Close connection and remove temporary files."""
+        """Close database connection and clean up temporary files.
+
+        Ensures proper resource cleanup by closing the DuckDB connection and
+        removing the temporary directory used for Parquet files during bulk loading.
+        This method should always be called when the converter is no longer needed,
+        ideally in a finally block or context manager.
+
+        The cleanup process:
+            1. Closes the DuckDB connection if open
+            2. Recursively removes the temporary directory and all contents
+            3. Logs any cleanup failures as warnings (non-fatal)
+
+        Note:
+            Cleanup failures are logged but don't raise exceptions to ensure
+            the connection is always closed properly.
+
+        Example:
+            >>> converter = LanduseCombinedScenarioConverter(input_file, output_file)
+            >>> try:
+            ...     converter.create_schema()
+            ...     converter.load_data()
+            ... finally:
+            ...     converter.close()
+        """
         if self.conn:
             self.conn.close()
 
