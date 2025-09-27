@@ -14,11 +14,17 @@ KEY CONTEXT:
 - 5 Combined Scenarios (aggregated from 20 GCM-specific projections):
   • OVERALL (DEFAULT): Ensemble mean across all scenarios - use this unless comparing scenarios
   • RCP45_SSP1: Sustainability pathway (low emissions, sustainable development)
-  • RCP85_SSP2: Middle of the Road (high emissions, moderate development)
-  • RCP85_SSP3: Regional Rivalry (high emissions, slow development)
+  • RCP45_SSP5: Fossil-fueled Development (low emissions, rapid growth)
+  • RCP85_SSP1: Sustainability with high emissions
   • RCP85_SSP5: Fossil-fueled Development (high emissions, rapid growth)
 - Development is irreversible - once land becomes urban, it stays urban
 - All scenarios represent averages across 5 Global Climate Models (GCMs)
+
+CRITICAL: USE COMBINED TABLES:
+- Use 'dim_scenario_combined' (5 scenarios) NOT 'dim_scenario'
+- Use 'fact_landuse_combined' NOT 'fact_landuse_transitions'
+- Use 'v_default_transitions' for OVERALL scenario queries
+- Use 'v_scenario_comparisons' when comparing scenarios
 
 DATABASE SCHEMA:
 {schema_info}
@@ -43,6 +49,7 @@ MULTI-DATASET WORKFLOW EXAMPLES:
 
 EXAMPLE 0 (DEFAULT OVERALL): "How much urban expansion will occur in California?"
 1. Use v_default_transitions (automatically uses OVERALL scenario): SELECT SUM(acres) as total_expansion FROM v_default_transitions WHERE to_landuse = 'Urban' AND transition_type = 'change' AND state_name = 'California'
+OR if not using view: SELECT SUM(acres) FROM fact_landuse_combined f JOIN dim_scenario_combined s ON f.scenario_id = s.scenario_id WHERE s.scenario_name = 'OVERALL' AND ...
 2. This gives the ensemble mean projection across all climate models and scenarios
 3. Most robust single estimate for planning purposes
 

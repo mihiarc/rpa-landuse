@@ -85,7 +85,7 @@ class DatabaseManager(DatabaseInterface):
 
         self.console.print(f"[green]✓ Found {table_count} tables in database[/green]")
 
-        # Get schema information
+        # Get schema information - prioritize combined tables
         schema_query = """
         SELECT
             table_name,
@@ -94,7 +94,23 @@ class DatabaseManager(DatabaseInterface):
             is_nullable
         FROM information_schema.columns
         WHERE table_schema = 'main'
-        ORDER BY table_name, ordinal_position
+        -- Exclude original tables if combined versions exist
+        AND table_name NOT IN ('dim_scenario_original', 'fact_landuse_transitions_original')
+        -- Prioritize combined tables by excluding originals when both exist
+        AND (
+            (table_name = 'dim_scenario_combined' OR table_name NOT LIKE 'dim_scenario')
+            AND (table_name = 'fact_landuse_combined' OR table_name NOT LIKE 'fact_landuse_transitions')
+        )
+        ORDER BY
+            -- Prioritize combined tables and views
+            CASE
+                WHEN table_name = 'dim_scenario_combined' THEN 1
+                WHEN table_name = 'fact_landuse_combined' THEN 2
+                WHEN table_name LIKE 'v_default_transitions' THEN 3
+                WHEN table_name LIKE 'v_scenario_comparisons' THEN 4
+                ELSE 5
+            END,
+            table_name, ordinal_position
         """
 
         result = conn.execute(schema_query).fetchall()
