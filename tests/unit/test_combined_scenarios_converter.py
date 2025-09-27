@@ -16,7 +16,7 @@ import numpy as np
 
 # Add scripts to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "scripts"))
-from converters.convert_to_duckdb_combined import LanduseCombinedScenarioConverter
+from converters.convert_to_duckdb import LanduseCombinedScenarioConverter
 
 
 class TestRCPSSPKeyExtraction:
