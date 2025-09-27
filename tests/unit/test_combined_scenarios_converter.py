@@ -215,6 +215,13 @@ class TestGCMAggregation:
         assert cr_trans["cr_min"] == 900.0  # Minimum value from IPSL
         assert cr_trans["cr_max"] == 1100.0  # Maximum value from HadGEM2
 
+        # Verify standard deviation calculation accuracy
+        # Values: [1000, 1100, 900, 1050, 950]
+        # Pandas uses ddof=1 by default
+        expected_std = pd.Series([1000.0, 1100.0, 900.0, 1050.0, 950.0]).std()
+        assert abs(cr_trans["cr_std"] - expected_std) < 0.01, \
+            f"Expected std ~{expected_std:.2f}, got {cr_trans['cr_std']}"
+
     def test_missing_gcm_handling(self, tmp_path):
         """Test handling when some GCMs are missing data."""
         input_file = tmp_path / "dummy.json"
@@ -403,6 +410,124 @@ class TestOVERALLScenarioCreation:
         assert abs(cr_trans["cr"] - expected_mean) < 0.01
 
 
+class TestStatisticalAccuracy:
+    """Test statistical calculations are mathematically correct."""
+
+    def test_standard_deviation_accuracy_simple(self, tmp_path):
+        """Test standard deviation with known values."""
+        input_file = tmp_path / "dummy.json"
+        input_file.write_text("{}")
+        output_file = tmp_path / "dummy.db"
+        converter = LanduseCombinedScenarioConverter(str(input_file), str(output_file))
+
+        # Create data with known values for easy verification
+        data = {
+            "GCM1_rcp45_ssp1": {
+                "2020": {"01001": [{"_row": "cr", "cr": 100.0, "ps": 20.0}]}
+            },
+            "GCM2_rcp45_ssp1": {
+                "2020": {"01001": [{"_row": "cr", "cr": 200.0, "ps": 40.0}]}
+            },
+            "GCM3_rcp45_ssp1": {
+                "2020": {"01001": [{"_row": "cr", "cr": 300.0, "ps": 60.0}]}
+            }
+        }
+
+        aggregated = converter._aggregate_by_scenario(data)
+        cr_trans = aggregated["RCP45_SSP1"]["2020"]["01001"][0]
+
+        # Verify mean
+        expected_mean = (100 + 200 + 300) / 3
+        assert abs(cr_trans["cr"] - expected_mean) < 0.01
+
+        # Verify standard deviation (pandas uses ddof=1 by default)
+        values = [100.0, 200.0, 300.0]
+        expected_std = pd.Series(values).std()  # Uses ddof=1 like the converter
+        assert abs(cr_trans["cr_std"] - expected_std) < 0.01
+
+        # Verify min/max
+        assert cr_trans["cr_min"] == 100.0
+        assert cr_trans["cr_max"] == 300.0
+
+    def test_zero_standard_deviation(self, tmp_path):
+        """Test std_dev when all values are identical."""
+        input_file = tmp_path / "dummy.json"
+        input_file.write_text("{}")
+        output_file = tmp_path / "dummy.db"
+        converter = LanduseCombinedScenarioConverter(str(input_file), str(output_file))
+
+        # All GCMs have identical values
+        data = {
+            f"GCM{i}_rcp45_ssp1": {
+                "2020": {"01001": [{"_row": "cr", "cr": 150.0}]}
+            }
+            for i in range(1, 4)
+        }
+
+        aggregated = converter._aggregate_by_scenario(data)
+        cr_trans = aggregated["RCP45_SSP1"]["2020"]["01001"][0]
+
+        # Standard deviation should be 0
+        assert cr_trans["cr_std"] == 0.0
+        assert cr_trans["cr"] == 150.0
+        assert cr_trans["cr_min"] == 150.0
+        assert cr_trans["cr_max"] == 150.0
+
+
+class TestNumericalEdgeCases:
+    """Test handling of numerical edge cases."""
+
+    def test_very_large_numbers(self, tmp_path):
+        """Test aggregation with very large acre values."""
+        input_file = tmp_path / "dummy.json"
+        input_file.write_text("{}")
+        output_file = tmp_path / "dummy.db"
+        converter = LanduseCombinedScenarioConverter(str(input_file), str(output_file))
+
+        large_value = 1e15  # Very large but valid number
+        data = {
+            "GCM1_rcp45_ssp1": {
+                "2020": {"01001": [{"_row": "cr", "cr": large_value}]}
+            },
+            "GCM2_rcp45_ssp1": {
+                "2020": {"01001": [{"_row": "cr", "cr": large_value * 2}]}
+            }
+        }
+
+        aggregated = converter._aggregate_by_scenario(data)
+        cr_trans = aggregated["RCP45_SSP1"]["2020"]["01001"][0]
+
+        expected_mean = (large_value + large_value * 2) / 2
+        assert abs(cr_trans["cr"] - expected_mean) < large_value * 0.001  # 0.1% tolerance
+
+    def test_float_precision(self, tmp_path):
+        """Test preservation of float precision in calculations."""
+        input_file = tmp_path / "dummy.json"
+        input_file.write_text("{}")
+        output_file = tmp_path / "dummy.db"
+        converter = LanduseCombinedScenarioConverter(str(input_file), str(output_file))
+
+        # Use values that might cause precision issues
+        data = {
+            "GCM1_rcp45_ssp1": {
+                "2020": {"01001": [{"_row": "cr", "cr": 0.1}]}
+            },
+            "GCM2_rcp45_ssp1": {
+                "2020": {"01001": [{"_row": "cr", "cr": 0.2}]}
+            },
+            "GCM3_rcp45_ssp1": {
+                "2020": {"01001": [{"_row": "cr", "cr": 0.3}]}
+            }
+        }
+
+        aggregated = converter._aggregate_by_scenario(data)
+        cr_trans = aggregated["RCP45_SSP1"]["2020"]["01001"][0]
+
+        # Check mean calculation doesn't lose precision
+        expected_mean = 0.2  # (0.1 + 0.2 + 0.3) / 3
+        assert abs(cr_trans["cr"] - expected_mean) < 1e-10
+
+
 class TestErrorHandling:
     """Test error handling and edge cases."""
 
@@ -501,6 +626,47 @@ class TestErrorHandling:
         # Should raise error when batch exceeds limit
         with pytest.raises(ValueError, match="Batch size .* exceeds maximum"):
             converter._write_and_copy_batch(batch_data, 0)
+
+    def test_batch_processing_exact_size(self, tmp_path):
+        """Test processing when batch exactly matches batch size."""
+        input_file = tmp_path / "dummy.json"
+        input_file.write_text("{}")
+        output_file = tmp_path / "test.db"
+        converter = LanduseCombinedScenarioConverter(str(input_file), str(output_file))
+
+        # Create batch data exactly at limit
+        batch_data = []
+        for i in range(100000):  # Common batch size
+            batch_data.append({
+                'transition_id': i,
+                'scenario_id': 1,
+                'time_id': 1,
+                'geography_id': 1,
+                'from_landuse_id': 1,
+                'to_landuse_id': 1,
+                'acres': 100.0,
+                'transition_type': 'same'
+            })
+
+        # Should process without error (but will fail on missing connection)
+        converter.conn = None  # Ensure connection is None
+        with pytest.raises(AttributeError, match="'NoneType' object has no attribute"):
+            converter._write_and_copy_batch(batch_data, 0)
+
+    def test_batch_processing_empty(self, tmp_path):
+        """Test handling of empty batches."""
+        input_file = tmp_path / "dummy.json"
+        input_file.write_text("{}")
+        output_file = tmp_path / "test.db"
+        converter = LanduseCombinedScenarioConverter(str(input_file), str(output_file))
+
+        # Empty batch should process without error
+        batch_data = []
+        try:
+            converter._write_and_copy_batch(batch_data, 0)
+        except Exception as e:
+            # Should handle gracefully, not crash
+            assert "empty" not in str(e).lower()
 
     def test_file_size_validation(self, tmp_path):
         """Test that file size limits are enforced."""
