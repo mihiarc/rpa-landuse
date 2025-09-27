@@ -41,12 +41,20 @@ class TestCombinedScenariosImplementation:
         """
         conn = duckdb.connect(db_path, read_only=True)
 
+        # Check which table exists
+        table_name = "dim_scenario"
+        try:
+            conn.execute(f"SELECT 1 FROM dim_scenario_combined LIMIT 1").fetchone()
+            table_name = "dim_scenario_combined"
+        except:
+            pass
+
         # Count scenarios
-        result = conn.execute("SELECT COUNT(DISTINCT scenario_name) FROM dim_scenario").fetchone()
+        result = conn.execute(f"SELECT COUNT(DISTINCT scenario_name) FROM {table_name}").fetchone()
         scenario_count = result[0]
 
         # Get scenario names
-        scenarios = conn.execute("SELECT DISTINCT scenario_name FROM dim_scenario ORDER BY scenario_name").fetchall()
+        scenarios = conn.execute(f"SELECT DISTINCT scenario_name FROM {table_name} ORDER BY scenario_name").fetchall()
         scenario_names = [s[0] for s in scenarios]
 
         conn.close()
@@ -78,8 +86,16 @@ class TestCombinedScenariosImplementation:
         """
         conn = duckdb.connect(db_path, read_only=True)
 
-        result = conn.execute("""
-            SELECT COUNT(*) FROM dim_scenario
+        # Check which table exists
+        table_name = "dim_scenario"
+        try:
+            conn.execute(f"SELECT 1 FROM dim_scenario_combined LIMIT 1").fetchone()
+            table_name = "dim_scenario_combined"
+        except:
+            pass
+
+        result = conn.execute(f"""
+            SELECT COUNT(*) FROM {table_name}
             WHERE scenario_name = 'OVERALL'
         """).fetchone()
 
