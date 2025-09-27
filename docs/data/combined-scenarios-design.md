@@ -217,11 +217,11 @@ The combined scenarios align with the 2020 RPA Assessment's approach:
 
 ## Implementation
 
-Run the combined scenario converter:
+Run the converter:
 ```bash
-uv run python scripts/converters/convert_to_duckdb_combined.py \
+uv run python scripts/converters/convert_to_duckdb.py \
   --input data/raw/county_landuse_projections_RPA.json \
-  --output data/processed/landuse_analytics_combined.duckdb
+  --output data/processed/landuse_analytics.duckdb
 ```
 
 This creates a database with:
