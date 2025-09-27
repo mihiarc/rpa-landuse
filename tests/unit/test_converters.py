@@ -11,7 +11,7 @@ import duckdb
 import pytest
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "scripts"))
-from converters.convert_to_duckdb import LanduseDataConverter
+from converters.convert_to_duckdb import LanduseCombinedScenarioConverter as LanduseDataConverter
 
 
 class TestLanduseDataConverter:
@@ -39,6 +39,9 @@ class TestLanduseDataConverter:
         input_file = tmp_path / "input.json"
         output_file = tmp_path / "output.duckdb"
 
+        # Create dummy input file
+        input_file.write_text("{}")
+
         converter = LanduseDataConverter(str(input_file), str(output_file))
 
         assert converter.input_file == input_file
@@ -48,8 +51,13 @@ class TestLanduseDataConverter:
 
     def test_schema_creation(self, tmp_path):
         """Test database schema is created correctly"""
+        input_file = tmp_path / "input.json"
         output_file = tmp_path / "test.duckdb"
-        converter = LanduseDataConverter("dummy.json", str(output_file))
+
+        # Create dummy input file
+        input_file.write_text("{}")
+
+        converter = LanduseDataConverter(str(input_file), str(output_file))
 
         converter.create_schema()
 
@@ -81,7 +89,13 @@ class TestLanduseDataConverter:
 
     def test_landuse_category_assignment(self, tmp_path):
         """Test correct assignment of landuse categories"""
-        converter = LanduseDataConverter("dummy.json", "dummy.db")
+        input_file = tmp_path / "input.json"
+        output_file = tmp_path / "output.db"
+
+        # Create dummy input file
+        input_file.write_text("{}")
+
+        converter = LanduseDataConverter(str(input_file), str(output_file))
 
         assert converter._get_landuse_category("Crop") == "Agriculture"
         assert converter._get_landuse_category("Pasture") == "Agriculture"
