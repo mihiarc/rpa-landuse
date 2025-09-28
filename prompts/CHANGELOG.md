@@ -8,6 +8,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 - Features and improvements in development
 
+## [1.0.1] - 2025-09-28
+
+### Bug Fixes
+- Fixed SQL column name errors in prompt examples
+  - Corrected `to_landuse` to `to_landuse_id` with proper JOIN to dim_landuse
+  - Corrected `from_landuse` to `from_landuse_id` with proper JOIN to dim_landuse
+- Fixed references to non-existent tables
+  - Removed references to `fact_landuse_combined` (doesn't exist)
+  - Removed references to `dim_scenario_combined` (doesn't exist)
+  - Updated examples to use actual table names: `fact_landuse_transitions` and `dim_scenario`
+- Updated SQL query examples to use proper JOINs for landuse name lookups
+
+### Technical Impact
+- Resolves production error: "Table 'f' does not have a column named 'to_landuse'"
+- Ensures all SQL examples in prompt generate valid, executable queries
+- Maintains backward compatibility with existing agent functionality
+
 ## [1.0.0] - 2025-09-28
 
 ### Initial Release
