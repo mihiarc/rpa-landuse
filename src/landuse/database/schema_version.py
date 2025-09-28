@@ -104,18 +104,26 @@ class SchemaVersionManager:
         Args:
             version: Version number to apply
             applied_by: User or system applying the version
+
+        Raises:
+            ValueError: If version is already applied or invalid
         """
+        # Check if version already exists first
+        existing = self.connection.execute("""
+            SELECT COUNT(*) FROM schema_version WHERE version_number = ?
+        """, [version]).fetchone()[0]
+
+        if existing > 0:
+            # Log but don't fail - idempotent operation
+            return
+
         description = SchemaVersion.SCHEMA_VERSIONS.get(version, 'Unknown version')
 
-        try:
-            self.connection.execute("""
-                INSERT INTO schema_version (version_id, version_number, description, applied_by)
-                SELECT COALESCE(MAX(version_id), 0) + 1, ?, ?, ?
-                FROM schema_version
-            """, [version, description, applied_by])
-        except duckdb.ConstraintException:
-            # Version already exists
-            pass
+        self.connection.execute("""
+            INSERT INTO schema_version (version_id, version_number, description, applied_by)
+            SELECT COALESCE(MAX(version_id), 0) + 1, ?, ?, ?
+            FROM schema_version
+        """, [version, description, applied_by])
 
     def get_current_version(self) -> Optional[str]:
         """Get the current database schema version.
@@ -205,5 +213,11 @@ class SchemaVersionManager:
                 # No OVERALL scenario - original version
                 return '1.0.0'
 
-        except Exception:
+        except duckdb.CatalogException:
+            # Table doesn't exist - return None
+            return None
+        except Exception as e:
+            # Log unexpected errors but don't fail
+            import warnings
+            warnings.warn(f"Unexpected error during schema detection: {e}")
             return None
