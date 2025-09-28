@@ -1,0 +1,290 @@
+# Benchmark queries for testing prompt versions
+# Each query tests specific functionality and expected behaviors
+
+basic_queries:
+  - name: "Forest area in California"
+    query: "How much forest area is in California?"
+    expected_sql_contains:
+      - "California"
+      - "Forest"
+      - "SUM"
+      - "acres"
+    expected_response_contains:
+      - "acres"
+      - "forest"
+    should_return_data: true
+    critical: true
+
+  - name: "Urban expansion by state"
+    query: "Which states have the most urban expansion?"
+    expected_sql_contains:
+      - "Urban"
+      - "state"
+      - "GROUP BY"
+      - "ORDER BY"
+    expected_response_contains:
+      - "acres"
+      - "urban"
+      - "expansion"
+      - "California"  # Should be in top states
+      - "Texas"       # Should be in top states
+    should_return_data: true
+    critical: true
+
+  - name: "Agricultural land loss"
+    query: "How much agricultural land will be lost?"
+    expected_sql_contains:
+      - "from_landuse_id"
+      - "to_landuse_id"
+      - "SUM"
+    expected_response_contains:
+      - "agricultural"
+      - "acres"
+    should_return_data: true
+
+  - name: "Total forest to urban conversion"
+    query: "How many acres of forest are converting to urban development?"
+    expected_sql_contains:
+      - "Forest"
+      - "Urban"
+      - "from_landuse_id"
+      - "to_landuse_id"
+    expected_response_contains:
+      - "forest"
+      - "urban"
+      - "acres"
+    should_return_data: true
+    critical: true
+
+  - name: "Crop to pasture transitions"
+    query: "Show crop to pasture land transitions"
+    expected_sql_contains:
+      - "Crop"
+      - "Pasture"
+      - "transition"
+    expected_response_contains:
+      - "crop"
+      - "pasture"
+      - "acres"
+    should_return_data: true
+
+  - name: "Net forest change"
+    query: "What is the net change in forest area?"
+    expected_sql_contains:
+      - "Forest"
+      - "landuse"
+      - "SUM"
+    expected_response_contains:
+      - "forest"
+      - "acres"
+      - ["loss", "decrease", "reduction", "decline"]
+    should_return_data: true
+
+scenario_comparisons:
+  - name: "RCP scenario comparison"
+    query: "Compare forest loss between RCP45 and RCP85 scenarios"
+    expected_sql_contains:
+      - "RCP45"
+      - "RCP85"
+      - "scenario"
+      - "Forest"
+    expected_response_contains:
+      - "RCP45"
+      - "RCP85"
+      - "comparison"
+      - "forest"
+    should_return_data: true
+
+  - name: "SSP scenario analysis"
+    query: "What's the difference between SSP1 and SSP5 scenarios?"
+    expected_sql_contains:
+      - "SSP1"
+      - "SSP5"
+      - "scenario"
+    expected_response_contains:
+      - "SSP1"
+      - "SSP5"
+      - "sustainable"
+    should_return_data: true
+
+geographic_queries:
+  - name: "Texas urbanization"
+    query: "Show urbanization trends in Texas"
+    expected_sql_contains:
+      - "Texas"
+      - "Urban"
+      - "to_landuse_id"
+    expected_response_contains:
+      - "Texas"
+      - "urban"
+      - "acres"
+    should_return_data: true
+
+  - name: "County-level analysis"
+    query: "Which counties in Florida have the most development?"
+    expected_sql_contains:
+      - "Florida"
+      - "county"
+      - "Urban"
+    expected_response_contains:
+      - "Florida"
+      - "county"
+      - "development"
+    should_return_data: true
+
+temporal_queries:
+  - name: "Future projections"
+    query: "What will happen to forests by 2050?"
+    expected_sql_contains:
+      - "2050"
+      - "Forest"
+      - "time"
+    expected_response_contains:
+      - "2050"
+      - "forest"
+      - "projection"
+    should_return_data: true
+
+  - name: "Long-term trends"
+    query: "Show land use changes from 2025 to 2070"
+    expected_sql_contains:
+      - "2025"
+      - "2070"
+      - "transition"
+    expected_response_contains:
+      - "2025"
+      - "2070"
+      - "change"
+    should_return_data: true
+
+edge_cases:
+  - name: "Invalid state name"
+    query: "Show data for Atlantis state"
+    should_handle_gracefully: true
+    should_not_error: true
+    expected_response_contains:
+      - ["no data", "not found", "doesn't exist", "no results"]
+
+  - name: "Ambiguous query"
+    query: "Show me the data"
+    should_handle_gracefully: true
+    should_not_error: true
+    can_ask_clarification: true
+
+  - name: "Future year beyond range"
+    query: "What happens in year 2200?"
+    should_handle_gracefully: true
+    should_not_error: true
+    expected_response_contains:
+      - ["2100", "beyond", "available data", "projection"]
+
+off_topic_queries:
+  - name: "Stock market query"
+    query: "What's the current price of Apple stock?"
+    should_handle_gracefully: true
+    should_not_error: true
+    expected_response_contains:
+      - ["land use", "RPA", "cannot", "outside", "scope", "don't have", "not able"]
+    should_reject: true
+
+  - name: "General knowledge question"
+    query: "What is 2 + 2?"
+    should_handle_gracefully: true
+    should_not_error: true
+    expected_response_contains:
+      - ["land use", "RPA", "cannot", "outside", "scope", "don't have", "not able"]
+    should_reject: true
+
+  - name: "Programming question"
+    query: "How do I write a for loop in Python?"
+    should_handle_gracefully: true
+    should_not_error: true
+    expected_response_contains:
+      - ["land use", "RPA", "cannot", "outside", "scope", "don't have", "not able"]
+    should_reject: true
+
+data_validation:
+  - name: "State with known high urbanization"
+    query: "How much urban expansion in California and Texas combined?"
+    expected_response_contains:
+      - "California"
+      - "Texas"
+      - "acres"
+      - "urban"
+    should_return_data: true
+    # These states should have > 1 million acres combined based on test results
+    expected_numeric_range:
+      min: 1000000
+      max: 5000000
+    critical: true
+
+  - name: "Forest loss magnitude check"
+    query: "Total forest loss across all scenarios"
+    expected_response_contains:
+      - "forest"
+      - "loss"
+      - "acres"
+    should_return_data: true
+    # Forest loss should be significant but not impossible
+    expected_numeric_range:
+      min: 100000    # At least 100k acres
+      max: 100000000 # Less than 100M acres
+
+  - name: "Percentage calculation validation"
+    query: "What percentage of land transitions are to urban?"
+    expected_response_contains:
+      - "percent"
+      - "urban"
+    should_return_data: true
+    expected_numeric_range:
+      min: 1    # At least 1%
+      max: 50   # Less than 50%
+
+  - name: "County count validation"
+    query: "How many counties are in the database?"
+    expected_response_contains:
+      - "counties"
+    should_return_data: true
+    expected_numeric_range:
+      min: 3000   # Around 3075 counties
+      max: 3200
+
+complex_queries:
+  - name: "Multi-factor analysis"
+    query: "Which areas converting from forest to urban are largest in RCP85 scenarios?"
+    expected_sql_contains:
+      - "Forest"
+      - "Urban"
+      - "RCP85"
+      - "from_landuse_id"
+      - "to_landuse_id"
+    expected_response_contains:
+      - "forest"
+      - "urban"
+      - "RCP85"
+    should_return_data: true
+
+  - name: "Aggregation query"
+    query: "Total land use change across all scenarios"
+    expected_sql_contains:
+      - "SUM"
+      - "transition_type"
+      - "change"
+    expected_response_contains:
+      - "total"
+      - "acres"
+      - "change"
+    should_return_data: true
+
+# Special test cases that validate critical fixes
+regression_tests:
+  - name: "Column name fix validation (v1.0.1)"
+    query: "Show urban expansion in California"
+    expected_sql_contains:
+      - "to_landuse_id"  # Must use _id suffix
+      - "dim_landuse"     # Must join with landuse table
+    expected_sql_not_contains:
+      - "to_landuse ="   # Old broken pattern
+      - "fact_landuse_combined"  # Non-existent table
+    should_return_data: true
+    critical: true  # Marks this as a critical regression test
