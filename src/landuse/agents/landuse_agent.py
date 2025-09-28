@@ -17,6 +17,18 @@ from landuse.agents.graph_builder import GraphBuilder
 from landuse.agents.llm_manager import LLMManager
 from landuse.agents.prompts import get_system_prompt
 from landuse.agents.query_executor import QueryExecutor
+
+# Import PromptManager for versioned prompts
+import sys
+from pathlib import Path
+# Add prompts directory to path if needed
+project_root = Path(__file__).parent.parent.parent.parent
+sys.path.insert(0, str(project_root))
+try:
+    from prompts.prompt_manager import PromptManager
+except ImportError:
+    # Fallback if PromptManager not available
+    PromptManager = None
 from landuse.agents.state import AgentState
 from landuse.config.landuse_config import LanduseConfig
 from landuse.exceptions import GraphExecutionError, LanduseError, ToolExecutionError, wrap_exception
@@ -61,12 +73,33 @@ class LanduseAgent:
 
         # Create tools and system prompt
         self.tools = self._create_tools()
-        self.system_prompt = get_system_prompt(
-            include_maps=self.config.enable_map_generation,
-            analysis_style=self.config.analysis_style,
-            domain_focus=None if self.config.domain_focus == 'none' else self.config.domain_focus,
-            schema_info=self.schema
-        )
+
+        # Use PromptManager if available, otherwise fall back to legacy
+        if PromptManager is not None:
+            try:
+                self.prompt_manager = PromptManager()
+                self.system_prompt = self.prompt_manager.get_prompt_with_schema(
+                    schema_info=self.schema
+                )
+                # Log which version is being used
+                self.console.print(f"[green]✓ Using prompt version: {self.prompt_manager.active_version}[/green]")
+            except Exception as e:
+                # Fall back to legacy if PromptManager fails
+                self.console.print(f"[yellow]⚠ PromptManager not available, using legacy prompts: {e}[/yellow]")
+                self.system_prompt = get_system_prompt(
+                    include_maps=self.config.enable_map_generation,
+                    analysis_style=self.config.analysis_style,
+                    domain_focus=None if self.config.domain_focus == 'none' else self.config.domain_focus,
+                    schema_info=self.schema
+                )
+        else:
+            # Legacy prompt system
+            self.system_prompt = get_system_prompt(
+                include_maps=self.config.enable_map_generation,
+                analysis_style=self.config.analysis_style,
+                domain_focus=None if self.config.domain_focus == 'none' else self.config.domain_focus,
+                schema_info=self.schema
+            )
 
         # Initialize graph builder
         self.graph_builder = GraphBuilder(
