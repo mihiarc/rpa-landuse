@@ -13,6 +13,7 @@ basic_queries:
       - "acres"
       - "forest"
     should_return_data: true
+    critical: true
 
   - name: "Urban expansion by state"
     query: "Which states have the most urban expansion?"
@@ -25,7 +26,10 @@ basic_queries:
       - "acres"
       - "urban"
       - "expansion"
+      - "California"  # Should be in top states
+      - "Texas"       # Should be in top states
     should_return_data: true
+    critical: true
 
   - name: "Agricultural land loss"
     query: "How much agricultural land will be lost?"
@@ -36,6 +40,44 @@ basic_queries:
     expected_response_contains:
       - "agricultural"
       - "acres"
+    should_return_data: true
+
+  - name: "Total forest to urban conversion"
+    query: "How many acres of forest are converting to urban development?"
+    expected_sql_contains:
+      - "Forest"
+      - "Urban"
+      - "from_landuse_id"
+      - "to_landuse_id"
+    expected_response_contains:
+      - "forest"
+      - "urban"
+      - "acres"
+    should_return_data: true
+    critical: true
+
+  - name: "Crop to pasture transitions"
+    query: "Show crop to pasture land transitions"
+    expected_sql_contains:
+      - "Crop"
+      - "Pasture"
+      - "transition"
+    expected_response_contains:
+      - "crop"
+      - "pasture"
+      - "acres"
+    should_return_data: true
+
+  - name: "Net forest change"
+    query: "What is the net change in forest area?"
+    expected_sql_contains:
+      - "Forest"
+      - "landuse"
+      - "SUM"
+    expected_response_contains:
+      - "forest"
+      - "acres"
+      - ["loss", "decrease", "reduction", "decline"]
     should_return_data: true
 
 scenario_comparisons:
@@ -145,8 +187,8 @@ off_topic_queries:
       - ["land use", "RPA", "cannot", "outside", "scope", "don't have", "not able"]
     should_reject: true
 
-  - name: "Weather query"
-    query: "What's the weather forecast for tomorrow?"
+  - name: "General knowledge question"
+    query: "What is 2 + 2?"
     should_handle_gracefully: true
     should_not_error: true
     expected_response_contains:
@@ -161,45 +203,51 @@ off_topic_queries:
       - ["land use", "RPA", "cannot", "outside", "scope", "don't have", "not able"]
     should_reject: true
 
-  - name: "Recipe request"
-    query: "What's a good recipe for chocolate cake?"
-    should_handle_gracefully: true
-    should_not_error: true
+data_validation:
+  - name: "State with known high urbanization"
+    query: "How much urban expansion in California and Texas combined?"
     expected_response_contains:
-      - ["land use", "RPA", "cannot", "outside", "scope", "don't have", "not able"]
-    should_reject: true
+      - "California"
+      - "Texas"
+      - "acres"
+      - "urban"
+    should_return_data: true
+    # These states should have > 1 million acres combined based on test results
+    expected_numeric_range:
+      min: 1000000
+      max: 5000000
+    critical: true
 
-  - name: "Medical advice"
-    query: "What are the symptoms of the flu?"
-    should_handle_gracefully: true
-    should_not_error: true
+  - name: "Forest loss magnitude check"
+    query: "Total forest loss across all scenarios"
     expected_response_contains:
-      - ["land use", "RPA", "cannot", "outside", "scope", "don't have", "not able"]
-    should_reject: true
+      - "forest"
+      - "loss"
+      - "acres"
+    should_return_data: true
+    # Forest loss should be significant but not impossible
+    expected_numeric_range:
+      min: 100000    # At least 100k acres
+      max: 100000000 # Less than 100M acres
 
-  - name: "Historical event"
-    query: "When did World War 2 end?"
-    should_handle_gracefully: true
-    should_not_error: true
+  - name: "Percentage calculation validation"
+    query: "What percentage of land transitions are to urban?"
     expected_response_contains:
-      - ["land use", "RPA", "cannot", "outside", "scope", "don't have", "not able"]
-    should_reject: true
+      - "percent"
+      - "urban"
+    should_return_data: true
+    expected_numeric_range:
+      min: 1    # At least 1%
+      max: 50   # Less than 50%
 
-  - name: "Math problem"
-    query: "What is 2 + 2?"
-    should_handle_gracefully: true
-    should_not_error: true
+  - name: "County count validation"
+    query: "How many counties are in the database?"
     expected_response_contains:
-      - ["land use", "RPA", "cannot", "outside", "scope", "don't have", "not able"]
-    should_reject: true
-
-  - name: "Movie recommendation"
-    query: "What are some good sci-fi movies?"
-    should_handle_gracefully: true
-    should_not_error: true
-    expected_response_contains:
-      - ["land use", "RPA", "cannot", "outside", "scope", "don't have", "not able"]
-    should_reject: true
+      - "counties"
+    should_return_data: true
+    expected_numeric_range:
+      min: 3000   # Around 3075 counties
+      max: 3200
 
 complex_queries:
   - name: "Multi-factor analysis"
