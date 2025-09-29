@@ -21,7 +21,7 @@
 
 ```bash
 cd docker/dev && docker-compose up -d terraform-dev
-docker-compose exec terraform-dev bash
+docker exec -it rpa-terraform-dev /bin/bash
 cd /workspace && terraform init && terraform apply
 ```
 

@@ -275,6 +275,28 @@ data "aws_ami" "amazon_linux" {
   }
 }
 
+# Create Route53 hosted zone
+resource "aws_route53_zone" "rpa_landuse_zone" {
+  name = var.domain_name
+
+  tags = {
+    Name        = "${var.project_name}-hosted-zone"
+    Environment = var.environment
+    Project     = var.project_name
+  }
+}
+
+# Create A record pointing to EC2 instance
+resource "aws_route53_record" "rpa_landuse_a_record" {
+  zone_id = aws_route53_zone.rpa_landuse_zone.zone_id
+  name    = var.domain_name
+  type    = "A"
+  ttl     = 300
+  records = [aws_instance.rpa_app_server.public_ip]
+
+  depends_on = [aws_instance.rpa_app_server]
+}
+
 # Create EC2 instance
 resource "aws_instance" "rpa_app_server" {
   ami                    = data.aws_ami.amazon_linux.id

@@ -82,3 +82,10 @@ variable "volume_type" {
   type        = string
   default     = "gp3"
 }
+
+# DNS Configuration
+variable "domain_name" {
+  description = "Domain name for Route53 hosted zone"
+  type        = string
+  default     = "rpalanduse.org"
+}
