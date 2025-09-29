@@ -20,7 +20,7 @@ import pytest
 sys.path.append(str(Path(__file__).parent.parent.parent / "src"))
 
 from landuse.agents.landuse_agent import LanduseAgent
-from landuse.config.landuse_config import LanduseConfig
+from landuse.core.app_config import AppConfig
 
 
 def check_database_has_combined_scenarios(db_path: str) -> bool:
@@ -54,11 +54,10 @@ class TestCombinedScenariosAgent:
         if not Path(db_path).exists():
             pytest.skip(f"Database not found at {db_path}")
 
-        return LanduseConfig(
-            db_path=db_path,
-            max_iterations=5,
-            enable_memory=False,
-            verbose=False
+        return AppConfig(
+            database={'path': db_path},
+            agent={'max_iterations': 5, 'enable_memory': False},
+            logging={'level': 'WARNING'}
         )
 
     @pytest.fixture
@@ -75,7 +74,7 @@ class TestCombinedScenariosAgent:
         of asking the user which scenario to use.
         """
         # Check if database has combined scenarios
-        has_combined = check_database_has_combined_scenarios(agent_config.db_path)
+        has_combined = check_database_has_combined_scenarios(agent_config.database.path)
 
         # Query without specifying a scenario
         response = agent.query("How much urban expansion occurs in California by 2050?")
@@ -100,7 +99,7 @@ class TestCombinedScenariosAgent:
         RCP-SSP combinations and not include the OVERALL scenario in
         the comparison (if combined scenarios are implemented).
         """
-        has_combined = check_database_has_combined_scenarios(agent_config.db_path)
+        has_combined = check_database_has_combined_scenarios(agent_config.database.path)
 
         response = agent.query(
             "Compare forest loss across all climate scenarios between 2020 and 2070"
@@ -329,11 +328,10 @@ class TestEndToEndWorkflow:
         if not Path(db_path).exists():
             pytest.skip(f"Database not found at {db_path}")
 
-        config = LanduseConfig(
-            db_path=db_path,
-            max_iterations=8,
-            enable_memory=True,
-            verbose=False
+        config = AppConfig(
+            database={'path': db_path},
+            agent={'max_iterations': 8, 'enable_memory': True},
+            logging={'level': 'WARNING'}
         )
 
         with LanduseAgent(config) as agent:

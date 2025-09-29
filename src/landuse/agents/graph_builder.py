@@ -1,6 +1,6 @@
 """LangGraph workflow construction extracted from monolithic agent class."""
 
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional
 
 from langchain_core.language_models import BaseChatModel
 from langchain_core.messages import AIMessage, BaseMessage, HumanMessage
@@ -11,7 +11,6 @@ from langgraph.prebuilt import ToolNode
 from rich.console import Console
 
 from landuse.agents.state import AgentState
-from landuse.config.landuse_config import LanduseConfig
 from landuse.core.app_config import AppConfig
 
 
@@ -25,7 +24,7 @@ class GraphBuilder:
 
     def __init__(
         self,
-        config: Union[LanduseConfig, AppConfig],
+        config: AppConfig,
         llm: BaseChatModel,
         tools: List[BaseTool],
         system_prompt: str,
@@ -35,19 +34,13 @@ class GraphBuilder:
         Initialize graph builder.
 
         Args:
-            config: Configuration object (AppConfig or legacy LanduseConfig)
+            config: Configuration object
             llm: Language model instance
             tools: List of available tools
             system_prompt: System prompt for the agent
             console: Rich console for logging (optional)
         """
-        if isinstance(config, AppConfig):
-            self.app_config = config
-            self.config = self._convert_to_legacy_config(config)
-        else:
-            self.config = config
-            self.app_config = None
-
+        self.config = config
         self.llm = llm
         self.tools = tools
         self.system_prompt = system_prompt
@@ -91,7 +84,7 @@ class GraphBuilder:
         workflow.add_edge("human_review", "agent")
 
         # Compile with memory if enabled
-        if self.config.enable_memory:
+        if self.config.agent.enable_memory:
             return workflow.compile(checkpointer=self.memory)
         else:
             return workflow.compile()
@@ -167,7 +160,7 @@ Focus on:
         last_message = messages[-1]
 
         # Check iteration limit
-        if state.get("iteration_count", 0) >= self.config.max_iterations:
+        if state.get("iteration_count", 0) >= self.config.agent.max_iterations:
             return "end"
 
         # Check if tools were called
@@ -234,31 +227,3 @@ Focus on:
         subgraph.add_edge("specialized_tools", END)
 
         return subgraph.compile()
-
-    def _convert_to_legacy_config(self, app_config: AppConfig) -> LanduseConfig:
-        """Convert AppConfig to legacy LanduseConfig for backward compatibility."""
-        # Create legacy config bypassing validation for now
-        from landuse.config.landuse_config import LanduseConfig
-
-        # Create instance without validation to avoid API key issues during conversion
-        legacy_config = object.__new__(LanduseConfig)
-
-        # Map database settings
-        legacy_config.db_path = app_config.database.path
-
-        # Map LLM settings
-        legacy_config.model = app_config.llm.model_name  # Note: model_name in AppConfig vs model in legacy
-        legacy_config.temperature = app_config.llm.temperature
-        legacy_config.max_tokens = app_config.llm.max_tokens
-
-        # Map agent execution settings
-        legacy_config.max_iterations = app_config.agent.max_iterations
-        legacy_config.max_execution_time = app_config.agent.max_execution_time
-        legacy_config.max_query_rows = app_config.agent.max_query_rows
-        legacy_config.default_display_limit = app_config.agent.default_display_limit
-
-        # Map debugging settings
-        legacy_config.debug = app_config.logging.level == 'DEBUG'
-        legacy_config.enable_memory = app_config.agent.enable_memory
-
-        return legacy_config

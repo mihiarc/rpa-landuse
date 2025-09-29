@@ -1,13 +1,12 @@
 """LLM management functionality extracted from monolithic agent class."""
 
 import os
-from typing import Optional, Union
+from typing import Optional
 
 from langchain_core.language_models import BaseChatModel
 from langchain_openai import ChatOpenAI
 from rich.console import Console
 
-from landuse.config.landuse_config import LanduseConfig
 from landuse.core.app_config import AppConfig, LLMConfig
 from landuse.core.interfaces import LLMInterface
 from landuse.exceptions import APIKeyError, LLMError
@@ -23,45 +22,10 @@ class LLMManager(LLMInterface):
     Implements LLMInterface for dependency injection compatibility.
     """
 
-    def __init__(self, config: Optional[Union[LanduseConfig, AppConfig]] = None, console: Optional[Console] = None):
+    def __init__(self, config: Optional[AppConfig] = None, console: Optional[Console] = None):
         """Initialize LLM manager with configuration."""
-        if isinstance(config, AppConfig):
-            # Use new AppConfig
-            self.app_config = config
-            self.config = self._convert_to_legacy_config(config)
-        else:
-            # Use legacy LanduseConfig
-            self.config = config or LanduseConfig()
-            self.app_config = None
+        self.config = config or AppConfig()
         self.console = console or Console()
-
-    def _convert_to_legacy_config(self, app_config: AppConfig) -> LanduseConfig:
-        """Convert AppConfig to legacy LanduseConfig for backward compatibility."""
-        # Create legacy config bypassing validation for now
-        from landuse.config.landuse_config import LanduseConfig
-
-        # Create instance without validation to avoid API key issues during conversion
-        legacy_config = object.__new__(LanduseConfig)
-
-        # Map database settings
-        legacy_config.db_path = app_config.database.path
-
-        # Map LLM settings
-        legacy_config.model_name = app_config.llm.model_name
-        legacy_config.temperature = app_config.llm.temperature
-        legacy_config.max_tokens = app_config.llm.max_tokens
-
-        # Map agent execution settings
-        legacy_config.max_iterations = app_config.agent.max_iterations
-        legacy_config.max_execution_time = app_config.agent.max_execution_time
-        legacy_config.max_query_rows = app_config.agent.max_query_rows
-        legacy_config.default_display_limit = app_config.agent.default_display_limit
-
-        # Map debugging settings
-        legacy_config.debug = app_config.logging.level == 'DEBUG'
-        legacy_config.enable_memory = app_config.agent.enable_memory
-
-        return legacy_config
 
     @time_llm_operation("create_llm", track_tokens=False)
     def create_llm(self) -> BaseChatModel:
@@ -89,8 +53,8 @@ class LLMManager(LLMInterface):
         return ChatOpenAI(
             model=model_name,
             openai_api_key=api_key,
-            temperature=self.config.temperature,
-            max_tokens=self.config.max_tokens,
+            temperature=self.config.llm.temperature,
+            max_tokens=self.config.llm.max_tokens,
         )
 
     def _mask_api_key(self, api_key: Optional[str]) -> str:

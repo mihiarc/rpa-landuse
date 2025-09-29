@@ -30,12 +30,10 @@ except ImportError:
     # Fallback if PromptManager not available
     PromptManager = None
 from landuse.agents.state import AgentState
-from landuse.config.landuse_config import LanduseConfig
 from landuse.core.app_config import AppConfig
 from landuse.exceptions import GraphExecutionError, LanduseError, ToolExecutionError, wrap_exception
 from landuse.tools.common_tools import create_analysis_tool, create_execute_query_tool, create_schema_tool
 from landuse.tools.state_lookup_tool import create_state_lookup_tool
-from typing import Union
 
 
 class LanduseAgent:
@@ -51,27 +49,17 @@ class LanduseAgent:
     - GraphBuilder: Constructs LangGraph workflows
     """
 
-    def __init__(self, config: Optional[Union[LanduseConfig, AppConfig]] = None):
+    def __init__(self, config: Optional[AppConfig] = None):
         """Initialize the landuse agent with configuration using dependency injection."""
-        # Handle both AppConfig and LanduseConfig
-        if isinstance(config, AppConfig):
-            # Convert AppConfig to LanduseConfig for backward compatibility
-            self.app_config = config
-            self.config = self._convert_to_legacy_config(config)
-            self.debug = config.logging.level == 'DEBUG'
-        else:
-            # Use legacy LanduseConfig
-            self.config = config or LanduseConfig()
-            self.app_config = None
-            self.debug = getattr(self.config, 'debug', False)
-
+        self.config = config or AppConfig()
+        self.debug = self.config.logging.level == 'DEBUG'
         self.console = Console()
 
         # Initialize component managers
         self.llm_manager = LLMManager(self.config, self.console)
         self.database_manager = DatabaseManager(self.config, self.console)
         self.conversation_manager = ConversationManager(
-            max_history_length=20,
+            max_history_length=self.config.agent.conversation_history_limit,
             console=self.console
         )
 
@@ -82,7 +70,6 @@ class LanduseAgent:
 
         # Initialize query executor
         self.query_executor = QueryExecutor(self.config, self.db_connection, self.console)
-
 
         # Create tools and system prompt
         self.tools = self._create_tools()
@@ -100,17 +87,17 @@ class LanduseAgent:
                 # Fall back to legacy if PromptManager fails
                 self.console.print(f"[yellow]⚠ PromptManager not available, using legacy prompts: {e}[/yellow]")
                 self.system_prompt = get_system_prompt(
-                    include_maps=self.config.enable_map_generation,
-                    analysis_style=self.config.analysis_style,
-                    domain_focus=None if self.config.domain_focus == 'none' else self.config.domain_focus,
+                    include_maps=self.config.features.enable_map_generation,
+                    analysis_style='detailed',
+                    domain_focus=None,
                     schema_info=self.schema
                 )
         else:
             # Legacy prompt system
             self.system_prompt = get_system_prompt(
-                include_maps=self.config.enable_map_generation,
-                analysis_style=self.config.analysis_style,
-                domain_focus=None if self.config.domain_focus == 'none' else self.config.domain_focus,
+                include_maps=self.config.features.enable_map_generation,
+                analysis_style='detailed',
+                domain_focus=None,
                 schema_info=self.schema
             )
 
@@ -124,32 +111,6 @@ class LanduseAgent:
         )
         self.graph = None
 
-
-
-    def _convert_to_legacy_config(self, app_config: AppConfig) -> LanduseConfig:
-        """Convert AppConfig to legacy LanduseConfig for backward compatibility."""
-        # Create legacy config bypassing validation for now
-        legacy_config = object.__new__(LanduseConfig)
-
-        # Map database settings
-        legacy_config.db_path = app_config.database.path
-
-        # Map LLM settings
-        legacy_config.model_name = app_config.llm.model_name
-        legacy_config.temperature = app_config.llm.temperature
-        legacy_config.max_tokens = app_config.llm.max_tokens
-
-        # Map agent execution settings
-        legacy_config.max_iterations = app_config.agent.max_iterations
-        legacy_config.max_execution_time = app_config.agent.max_execution_time
-        legacy_config.max_query_rows = app_config.agent.max_query_rows
-        legacy_config.default_display_limit = app_config.agent.default_display_limit
-
-        # Map debugging settings
-        legacy_config.debug = app_config.logging.level == 'DEBUG'
-        legacy_config.enable_memory = app_config.agent.enable_memory
-
-        return legacy_config
 
     def _create_tools(self) -> list[BaseTool]:
         """Create tools for the agent."""
@@ -392,12 +353,12 @@ class LanduseAgent:
                 "messages": initial_messages,
                 "context": {},
                 "iteration_count": 0,
-                "max_iterations": self.config.max_iterations
+                "max_iterations": self.config.agent.max_iterations
             }
 
             # Prepare config with thread_id for memory
             config = {}
-            if thread_id and self.config.enable_memory:
+            if thread_id and self.config.agent.enable_memory:
                 config = {"configurable": {"thread_id": thread_id}}
 
             # Execute the graph
@@ -489,12 +450,12 @@ class LanduseAgent:
             "messages": [HumanMessage(content=question)],
             "context": {},
             "iteration_count": 0,
-            "max_iterations": self.config.max_iterations
+            "max_iterations": self.config.agent.max_iterations
         }
 
         # Prepare config
         config = {}
-        if thread_id and self.config.enable_memory:
+        if thread_id and self.config.agent.enable_memory:
             config = {"configurable": {"thread_id": thread_id}}
         elif not thread_id:
             config = {"configurable": {"thread_id": f"landuse-stream-{int(time.time())}"}}
@@ -554,7 +515,7 @@ class LanduseAgent:
             table.add_column(col, style="cyan", no_wrap=False)
 
         # Add rows (limit display)
-        display_limit = min(len(results), self.config.default_display_limit)
+        display_limit = min(len(results), self.config.agent.default_display_limit)
         for row in results[:display_limit]:
             table.add_row(*[str(val) for val in row])
 
@@ -629,7 +590,7 @@ class LanduseAgent:
     @property
     def model_name(self) -> str:
         """Get the model name from configuration."""
-        return self.config.model_name
+        return self.config.llm.model_name
 
     def _get_schema_help(self) -> str:
         """Get user-friendly schema information for display in the UI."""

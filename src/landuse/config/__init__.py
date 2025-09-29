@@ -1,4 +1,4 @@
 # Configuration module for landuse agents
-from .landuse_config import LanduseConfig
+# Legacy LanduseConfig removed - use landuse.core.app_config.AppConfig instead
 
-__all__ = ['LanduseConfig']
+__all__ = []

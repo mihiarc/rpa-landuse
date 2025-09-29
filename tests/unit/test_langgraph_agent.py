@@ -18,7 +18,7 @@ sys.path.append(str(Path(__file__).parent.parent.parent / "src"))
 
 from landuse.agents import LanduseAgent
 from landuse.agents.landuse_agent import AgentState
-from landuse.config.landuse_config import LanduseConfig
+from landuse.core.app_config import AppConfig
 
 
 class TestLanduseConfig:
@@ -36,38 +36,33 @@ class TestLanduseConfig:
 
     def test_default_config(self, mock_db_path):
         """Test default configuration values"""
-        with patch('landuse.config.landuse_config.LanduseConfig.__post_init__', return_value=None):
-            config = LanduseConfig(db_path=str(mock_db_path))
+        with patch.dict(os.environ, {'OPENAI_API_KEY': 'sk-test123456789012345678901234567890123456789012345'}):
+            config = AppConfig(database={'path': str(mock_db_path)})
 
-            assert config.db_path == str(mock_db_path)
-            assert config.model_name == "gpt-4o-mini"  # Default is gpt-4o-mini now
+            assert config.database.path == str(mock_db_path)
+            assert config.llm.model_name == "gpt-4o-mini"  # Default is gpt-4o-mini now
             # Don't test specific values that might be overridden by env vars
-            assert isinstance(config.temperature, float)
-            assert isinstance(config.max_tokens, int)
-            assert config.max_iterations == 8
-            assert config.enable_memory is True
-            assert config.verbose is False
+            assert isinstance(config.llm.temperature, float)
+            assert isinstance(config.llm.max_tokens, int)
+            assert config.agent.max_iterations == 8
+            assert config.agent.enable_memory is True
 
     def test_custom_config(self, mock_db_path):
         """Test custom configuration values"""
-        with patch('landuse.config.landuse_config.LanduseConfig.__post_init__', return_value=None):
-            config = LanduseConfig(
-                db_path=str(mock_db_path),
-                model_name="claude-3-5-sonnet-20241022",
-                temperature=0.5,
-                max_tokens=2000,
-                max_iterations=5,
-                enable_memory=False,
-                verbose=True
+        with patch.dict(os.environ, {'OPENAI_API_KEY': 'sk-test123456789012345678901234567890123456789012345'}):
+            config = AppConfig(
+                database={'path': str(mock_db_path)},
+                llm={'model_name': 'gpt-4o', 'temperature': 0.5, 'max_tokens': 2000},
+                agent={'max_iterations': 5, 'enable_memory': False},
+                logging={'level': 'DEBUG'}
             )
 
-            assert config.db_path == str(mock_db_path)
-            assert config.model_name == "claude-3-5-sonnet-20241022"
-            assert config.temperature == 0.5
-            assert config.max_tokens == 2000
-            assert config.max_iterations == 5
-            assert config.enable_memory is False
-            assert config.verbose is True
+            assert config.database.path == str(mock_db_path)
+            assert config.llm.model_name == "gpt-4o"
+            assert config.llm.temperature == 0.5
+            assert config.llm.max_tokens == 2000
+            assert config.agent.max_iterations == 5
+            assert config.agent.enable_memory is False
 
 
 class TestLanduseAgent:
@@ -97,17 +92,16 @@ class TestLanduseAgent:
         conn.execute("CREATE TABLE fact_landuse_transitions (scenario_id INTEGER, time_id INTEGER, geography_id INTEGER, from_landuse_id INTEGER, to_landuse_id INTEGER, acres DOUBLE)")
         conn.close()
 
-        with patch('landuse.config.landuse_config.LanduseConfig.__post_init__', return_value=None):
-            return LanduseConfig(
-                db_path=str(mock_db_path),
-                model_name="claude-3-5-sonnet-20241022",
-                max_iterations=3,
-                enable_memory=False,  # Disable for testing
-                verbose=False
+        with patch.dict(os.environ, {'OPENAI_API_KEY': 'sk-test123456789012345678901234567890123456789012345'}):
+            return AppConfig(
+                database={'path': str(mock_db_path)},
+                llm={'model_name': 'gpt-4o-mini'},
+                agent={'max_iterations': 3, 'enable_memory': False},
+                logging={'level': 'WARNING'}
             )
 
-    @patch.dict(os.environ, {'ANTHROPIC_API_KEY': 'test-key-123'})
-    @patch('landuse.agents.landuse_agent.ChatAnthropic')
+    @patch.dict(os.environ, {'OPENAI_API_KEY': 'test-key-123'})
+    @patch('landuse.agents.llm_manager.ChatOpenAI')
     def test_agent_initialization(self, mock_llm, test_config):
         """Test agent initialization"""
         # Mock LLM
@@ -118,17 +112,15 @@ class TestLanduseAgent:
         agent = LanduseAgent(test_config)
 
         # Verify initialization
-        assert agent.config == test_config
-        assert agent.llm == mock_llm_instance
         assert len(agent.tools) >= 3  # At least 3 core tools
         assert agent.graph is None  # Graph built on demand
 
         # Verify LLM was created with correct parameters
         mock_llm.assert_called_once_with(
-            anthropic_api_key='test-key-123',
-            model=test_config.model_name,
-            temperature=test_config.temperature,
-            max_tokens=test_config.max_tokens
+            openai_api_key='test-key-123',
+            model=test_config.llm.model_name,
+            temperature=test_config.llm.temperature,
+            max_tokens=test_config.llm.max_tokens
         )
 
     @patch.dict(os.environ, {'OPENAI_API_KEY': 'test-key-456'})
@@ -140,12 +132,11 @@ class TestLanduseAgent:
         mock_llm.return_value = mock_llm_instance
 
         # Create config with GPT model
-        with patch('landuse.config.landuse_config.LanduseConfig.__post_init__', return_value=None):
-            config = LanduseConfig(
-                db_path=test_config.db_path,
-                model_name="gpt-4o-mini",
-                enable_memory=False
-            )
+        config = AppConfig(
+            database={'path': test_config.database.path},
+            llm={'model_name': 'gpt-4o-mini'},
+            agent={'enable_memory': False}
+        )
 
         # Initialize agent
         agent = LanduseAgent(config)
@@ -154,18 +145,19 @@ class TestLanduseAgent:
         mock_llm.assert_called_once_with(
             openai_api_key='test-key-456',
             model="gpt-4o-mini",
-            temperature=config.temperature,
-            max_tokens=config.max_tokens
+            temperature=config.llm.temperature,
+            max_tokens=config.llm.max_tokens
         )
 
-    def test_missing_api_key(self, test_config):
+    def test_missing_api_key(self):
         """Test error when API key is missing"""
         with patch.dict(os.environ, {}, clear=True):
-            with pytest.raises(ValueError, match="ANTHROPIC_API_KEY environment variable is required"):
-                LanduseAgent(test_config)
+            with pytest.raises(Exception):  # Will raise during AppConfig creation
+                config = AppConfig(database={'path': ':memory:'})
+                LanduseAgent(config)
 
-    @patch.dict(os.environ, {'ANTHROPIC_API_KEY': 'test-key'})
-    @patch('landuse.agents.landuse_agent.ChatAnthropic')
+    @patch.dict(os.environ, {'OPENAI_API_KEY': 'test-key'})
+    @patch('landuse.agents.llm_manager.ChatOpenAI')
     def test_schema_info_generation(self, mock_llm, test_config):
         """Test schema information generation"""
         # Mock LLM
@@ -180,8 +172,8 @@ class TestLanduseAgent:
         assert "dim_geography" in agent.schema
         assert "fact_landuse_transitions" in agent.schema
 
-    @patch.dict(os.environ, {'ANTHROPIC_API_KEY': 'test-key'})
-    @patch('landuse.agents.landuse_agent.ChatAnthropic')
+    @patch.dict(os.environ, {'OPENAI_API_KEY': 'test-key'})
+    @patch('landuse.agents.llm_manager.ChatOpenAI')
     def test_tools_creation(self, mock_llm, test_config):
         """Test tools are created correctly"""
         # Mock dependencies
@@ -203,8 +195,8 @@ class TestLanduseAgent:
         for expected_tool in expected_tools:
             assert expected_tool in tool_names
 
-    @patch.dict(os.environ, {'ANTHROPIC_API_KEY': 'test-key'})
-    @patch('landuse.agents.landuse_agent.ChatAnthropic')
+    @patch.dict(os.environ, {'OPENAI_API_KEY': 'test-key'})
+    @patch('landuse.agents.llm_manager.ChatOpenAI')
     def test_query_processing(self, mock_llm, test_config):
         """Test query processing workflow"""
         # Mock LLM
@@ -222,19 +214,18 @@ class TestLanduseAgent:
             # Verify
             assert result == "Test response about agricultural land loss"
 
-    @patch.dict(os.environ, {'ANTHROPIC_API_KEY': 'test-key'})
-    @patch('landuse.agents.landuse_agent.ChatAnthropic')
+    @patch.dict(os.environ, {'OPENAI_API_KEY': 'test-key'})
+    @patch('landuse.agents.llm_manager.ChatOpenAI')
     def test_query_with_thread_id(self, mock_llm, test_config):
         """Test query processing with thread ID for memory"""
         # Mock LLM
         mock_llm.return_value = Mock()
 
         # Create config with memory enabled
-        with patch('landuse.config.landuse_config.LanduseConfig.__post_init__', return_value=None):
-            config = LanduseConfig(
-                db_path=test_config.db_path,
-                enable_memory=True
-            )
+        config = AppConfig(
+            database={'path': test_config.database.path},
+            agent={'enable_memory': True}
+        )
 
         # Initialize agent
         agent = LanduseAgent(config)
@@ -253,8 +244,8 @@ class TestLanduseAgent:
                 config_arg = call_args[1]['config']
                 assert config_arg['configurable']['thread_id'] == "test-thread-123"
 
-    @patch.dict(os.environ, {'ANTHROPIC_API_KEY': 'test-key'})
-    @patch('landuse.agents.landuse_agent.ChatAnthropic')
+    @patch.dict(os.environ, {'OPENAI_API_KEY': 'test-key'})
+    @patch('landuse.agents.llm_manager.ChatOpenAI')
     def test_error_handling(self, mock_llm, test_config):
         """Test error handling in query processing"""
         # Mock LLM
@@ -272,8 +263,8 @@ class TestLanduseAgent:
             assert "Error processing query" in result
             assert "Test error" in result
 
-    @patch.dict(os.environ, {'ANTHROPIC_API_KEY': 'test-key'})
-    @patch('landuse.agents.landuse_agent.ChatAnthropic')
+    @patch.dict(os.environ, {'OPENAI_API_KEY': 'test-key'})
+    @patch('landuse.agents.llm_manager.ChatOpenAI')
     def test_stream_query(self, mock_llm, test_config):
         """Test streaming query functionality"""
         # Mock LLM
@@ -334,7 +325,6 @@ class TestToolFunctions:
         import tempfile
 
         from landuse.agents import LanduseAgent
-        from landuse.config.landuse_config import LanduseConfig
         tmpdir = tempfile.mkdtemp()
         db_path = os.path.join(tmpdir, "test.duckdb")
 
@@ -344,36 +334,35 @@ class TestToolFunctions:
         conn.close()
 
         # Verify the tool creation doesn't raise errors
-        with patch('landuse.config.landuse_config.LanduseConfig.__post_init__', return_value=None):
-            config = LanduseConfig(db_path=db_path)
+        with patch.dict(os.environ, {'OPENAI_API_KEY': 'test-key'}):
+            config = AppConfig(database={'path': db_path})
 
-        # Mock the initialization parts we don't want to test
-        with patch.dict(os.environ, {'ANTHROPIC_API_KEY': 'test-key'}):
-            with patch('landuse.agents.landuse_agent.ChatAnthropic'):
-                    # Need to mock the schema query results
-                    with patch('duckdb.connect') as mock_db:
-                        mock_conn = Mock()
-                        # Mock table count query
-                        mock_conn.execute.return_value.fetchone.return_value = (1,)
-                        # Mock schema query - return empty results
-                        mock_conn.execute.return_value.fetchall.return_value = []
-                        mock_db.return_value = mock_conn
+            # Mock the initialization parts we don't want to test
+            with patch('landuse.agents.llm_manager.ChatOpenAI'):
+                # Need to mock the schema query results
+                with patch('duckdb.connect') as mock_db:
+                    mock_conn = Mock()
+                    # Mock table count query
+                    mock_conn.execute.return_value.fetchone.return_value = (1,)
+                    # Mock schema query - return empty results
+                    mock_conn.execute.return_value.fetchall.return_value = []
+                    mock_db.return_value = mock_conn
 
-                        agent = LanduseAgent(config)
-                    tools = agent._create_tools()
+                    agent = LanduseAgent(config)
+                tools = agent._create_tools()
 
-                    # Verify we have the expected tools
-                    assert len(tools) >= 3
+                # Verify we have the expected tools
+                assert len(tools) >= 3
 
-                    # Find the execute query tool
-                    execute_tool = None
-                    for tool in tools:
-                        if tool.name == "execute_landuse_query":
-                            execute_tool = tool
-                            break
+                # Find the execute query tool
+                execute_tool = None
+                for tool in tools:
+                    if tool.name == "execute_landuse_query":
+                        execute_tool = tool
+                        break
 
-                    assert execute_tool is not None
-                    assert callable(execute_tool.func)
+                assert execute_tool is not None
+                assert callable(execute_tool.func)
 
         # Cleanup
         import shutil

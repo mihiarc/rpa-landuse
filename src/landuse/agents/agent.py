@@ -12,7 +12,7 @@ from typing import Optional
 from rich.console import Console
 
 from landuse.agents.landuse_agent import LanduseAgent
-from landuse.config.landuse_config import LanduseConfig
+from landuse.core.app_config import AppConfig
 
 
 def main() -> None:
@@ -99,28 +99,28 @@ For more information, visit: https://github.com/yourusername/rpa-landuse
         # Create configuration with overrides
         config_overrides = {}
         if args.model:
-            config_overrides["model_name"] = args.model
+            config_overrides["llm__model_name"] = args.model
         if args.temperature is not None:
-            config_overrides["temperature"] = args.temperature
+            config_overrides["llm__temperature"] = args.temperature
         if args.max_iterations:
-            config_overrides["max_iterations"] = args.max_iterations
+            config_overrides["agent__max_iterations"] = args.max_iterations
         if args.verbose:
-            config_overrides["verbose"] = True
+            config_overrides["agent__verbose"] = True
         if args.debug:
-            config_overrides["debug"] = True
+            config_overrides["agent__debug"] = True
         if args.db_path:
-            config_overrides["db_path"] = args.db_path
+            config_overrides["database__path"] = args.db_path
 
         # Create agent configuration
-        config = LanduseConfig.from_env(**config_overrides)
+        config = AppConfig.from_env(**config_overrides)
 
         # Initialize and start the agent
         with LanduseAgent(config=config) as agent:
             if args.verbose:
                 console.print("[green]Starting RPA Land Use Analytics Agent...[/green]")
-                console.print(f"Model: {config.model_name}")
-                console.print(f"Database: {config.db_path}")
-                console.print(f"Max iterations: {config.max_iterations}")
+                console.print(f"Model: {config.llm.model_name}")
+                console.print(f"Database: {config.database.path}")
+                console.print(f"Max iterations: {config.agent.max_iterations}")
                 console.print()
 
             agent.chat()

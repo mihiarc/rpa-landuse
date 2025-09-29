@@ -1,13 +1,12 @@
 """Database management functionality extracted from monolithic agent class."""
 
-from typing import Optional, Union
+from typing import Optional
 import warnings
 
 import duckdb
 import pandas as pd
 from rich.console import Console
 
-from landuse.config.landuse_config import LanduseConfig
 from landuse.core.app_config import AppConfig
 from landuse.core.interfaces import DatabaseInterface
 from landuse.database.schema_version import SchemaVersion, SchemaVersionManager
@@ -23,15 +22,9 @@ class DatabaseManager(DatabaseInterface):
     Handles database connection creation, schema retrieval, and connection management.
     """
 
-    def __init__(self, config: Optional[Union[LanduseConfig, AppConfig]] = None, console: Optional[Console] = None):
+    def __init__(self, config: Optional[AppConfig] = None, console: Optional[Console] = None):
         """Initialize database manager with configuration."""
-        if isinstance(config, AppConfig):
-            self.app_config = config
-            self.config = self._convert_to_legacy_config(config)
-        else:
-            self.config = config or LanduseConfig()
-            self.app_config = None
-
+        self.config = config or AppConfig()
         self.console = console or Console()
         self._connection: Optional[duckdb.DuckDBPyConnection] = None
         self._schema: Optional[str] = None
@@ -56,7 +49,7 @@ class DatabaseManager(DatabaseInterface):
         Returns:
             DuckDB connection in read-only mode
         """
-        connection = duckdb.connect(database=self.config.db_path, read_only=True)
+        connection = duckdb.connect(database=self.config.database.path, read_only=True)
         self._check_schema_version(connection)
         return connection
 
@@ -87,7 +80,7 @@ class DatabaseManager(DatabaseInterface):
         table_count = result[0] if result else 0
 
         if table_count == 0:
-            raise ValueError(f"No tables found in database at {self.config.db_path}")
+            raise ValueError(f"No tables found in database at {self.config.database.path}")
 
         self.console.print(f"[green]✓ Found {table_count} tables in database[/green]")
 
@@ -159,34 +152,6 @@ class DatabaseManager(DatabaseInterface):
     def __exit__(self, exc_type, exc_val, exc_tb):
         """Context manager exit - clean up connection."""
         self.close()
-
-    def _convert_to_legacy_config(self, app_config: AppConfig) -> LanduseConfig:
-        """Convert AppConfig to legacy LanduseConfig for backward compatibility."""
-        # Create legacy config bypassing validation for now
-        from landuse.config.landuse_config import LanduseConfig
-
-        # Create instance without validation to avoid API key issues during conversion
-        legacy_config = object.__new__(LanduseConfig)
-
-        # Map database settings
-        legacy_config.db_path = app_config.database.path
-
-        # Map LLM settings
-        legacy_config.model = app_config.llm.model_name  # Note: model_name in AppConfig vs model in legacy
-        legacy_config.temperature = app_config.llm.temperature
-        legacy_config.max_tokens = app_config.llm.max_tokens
-
-        # Map agent execution settings
-        legacy_config.max_iterations = app_config.agent.max_iterations
-        legacy_config.max_execution_time = app_config.agent.max_execution_time
-        legacy_config.max_query_rows = app_config.agent.max_query_rows
-        legacy_config.default_display_limit = app_config.agent.default_display_limit
-
-        # Map debugging settings
-        legacy_config.debug = app_config.logging.level == 'DEBUG'
-        legacy_config.enable_memory = app_config.agent.enable_memory
-
-        return legacy_config
 
     @time_database_operation("execute_query")
     def execute_query(self, query: str, **kwargs) -> pd.DataFrame:
