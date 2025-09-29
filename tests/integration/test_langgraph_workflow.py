@@ -12,7 +12,7 @@ import pytest
 from langchain_core.messages import AIMessage, HumanMessage, ToolMessage
 
 from landuse.agents import LanduseAgent
-from landuse.config.landuse_config import LanduseConfig
+from landuse.core.app_config import AppConfig
 
 
 class TestLangGraphWorkflow:
@@ -106,14 +106,12 @@ class TestLangGraphWorkflow:
     @pytest.fixture
     def agent(self, test_db):
         """Create an agent with test database."""
-        with patch('landuse.config.landuse_config.LanduseConfig.__post_init__', return_value=None):
-            config = LanduseConfig(
-                db_path=test_db,
-                enable_memory=True,
-                max_iterations=5
+        with patch.dict(os.environ, {'OPENAI_API_KEY': 'test-key'}):
+            config = AppConfig(
+                database={'path': test_db},
+                agent={'enable_memory': True, 'max_iterations': 5}
             )
 
-        with patch.dict(os.environ, {'OPENAI_API_KEY': 'test-key'}):
             with patch('landuse.agents.llm_manager.ChatOpenAI') as mock_llm:
                 # Create a mock LLM that returns reasonable responses
                 mock_llm_instance = Mock()

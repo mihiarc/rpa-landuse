@@ -279,16 +279,16 @@ class TestImplementationReadiness:
             pytest.skip("OpenAI API key required for agent testing")
 
         from landuse.agents.landuse_agent import LanduseAgent
-        from landuse.config.landuse_config import LanduseConfig
+        from landuse.core.app_config import AppConfig
 
         db_path = os.getenv('LANDUSE_DB_PATH', 'data/processed/landuse_analytics.duckdb')
         if not Path(db_path).exists():
             pytest.skip(f"Database not found at {db_path}")
 
-        config = LanduseConfig(
-            db_path=db_path,
-            max_iterations=3,
-            verbose=False
+        config = AppConfig(
+            database={'path': db_path},
+            agent={'max_iterations': 3},
+            logging={'level': 'WARNING'}
         )
 
         with LanduseAgent(config) as agent:

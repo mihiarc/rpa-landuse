@@ -22,9 +22,9 @@ def get_agent():
     """Get cached agent instance"""
     try:
         from landuse.agents import LanduseAgent
-        from landuse.config import LanduseConfig
+        from landuse.core.app_config import AppConfig
 
-        config = LanduseConfig.for_agent_type('streamlit', debug=False)
+        config = AppConfig()
         agent = LanduseAgent(config)
         return agent, None
     except Exception as e:

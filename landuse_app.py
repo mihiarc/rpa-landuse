@@ -364,7 +364,7 @@ def check_environment():
 
     # Check landuse module
     try:
-        from landuse.config import LanduseConfig
+        from landuse.core.app_config import AppConfig
         checks["landuse_module"] = True
         debug_info.append("Landuse module OK")
     except Exception as e:

@@ -24,7 +24,7 @@ import streamlit as st  # noqa: E402
 
 # Import state mappings and connection
 from landuse.agents.constants import STATE_NAMES  # noqa: E402
-from landuse.config import LanduseConfig  # noqa: E402
+from landuse.core.app_config import AppConfig  # noqa: E402
 from landuse.connections import DuckDBConnection  # noqa: E402
 
 
@@ -33,12 +33,12 @@ def get_database_connection():
     """Get cached database connection using st.connection"""
     try:
         # Use unified config system
-        config = LanduseConfig.for_agent_type('streamlit')
+        config = AppConfig()
 
         conn = st.connection(
             name="landuse_db",
             type=DuckDBConnection,
-            database=config.db_path,
+            database=config.database.path,
             read_only=True
         )
         return conn, None
