@@ -8,6 +8,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 - Features and improvements in development
 
+## [1.1.0] - 2025-09-29
+
+### New Features
+- Added domain scope limitation instructions to maintain agent focus
+- Implemented off-topic query rejection mechanism
+- Agent now politely declines questions unrelated to land use/RPA data
+
+### Changes
+- Added IMPORTANT SCOPE LIMITATION section at the beginning of the prompt
+- Defined explicit lists of allowed and prohibited topic areas
+- Added standard rejection message for off-topic queries
+- Included examples of appropriate vs off-topic questions
+
+### Technical Impact
+- Resolves Issue #99: Agent no longer responds to unrelated queries (stocks, weather, math, etc.)
+- All off-topic query tests now pass (100% success rate)
+- Maintains full compatibility with existing land use query functionality
+- Improves user experience by setting clear boundaries on agent capabilities
+
+### Testing
+- Verified with prompt testing framework: `uv run python prompts/test_prompt.py --category off_topic_queries`
+- All 3 off-topic query tests pass successfully
+- No regression in existing land use query functionality
+
 ## [1.0.1] - 2025-09-28
 
 ### Bug Fixes
