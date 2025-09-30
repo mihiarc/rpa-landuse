@@ -402,6 +402,77 @@ def show_troubleshooting():
             for solution in details['solutions']:
                 st.markdown(f"- {solution}")
 
+def show_feedback_form():
+    """Display feedback form for users to submit questions or issues"""
+    st.markdown("### 📝 Submit Feedback")
+    st.markdown("Have questions, suggestions, or found a bug? Let us know!")
+
+    with st.form("feedback_form", clear_on_submit=True):
+        # Feedback type
+        feedback_type = st.selectbox(
+            "Feedback Type",
+            ["Question", "Bug Report", "Feature Request", "General Feedback"]
+        )
+
+        # User contact (optional)
+        user_email = st.text_input(
+            "Your Email (optional)",
+            placeholder="your.email@example.com",
+            help="Provide your email if you'd like a response"
+        )
+
+        # Subject
+        subject = st.text_input(
+            "Subject",
+            placeholder="Brief description of your feedback"
+        )
+
+        # Message
+        message = st.text_area(
+            "Message",
+            placeholder="Please provide details...",
+            height=150
+        )
+
+        # Submit button
+        submitted = st.form_submit_button("Submit Feedback")
+
+        if submitted:
+            if not subject or not message:
+                st.error("Please fill in both subject and message fields.")
+            else:
+                # Create GitHub issue URL with pre-filled content
+                github_issue_url = "https://github.com/mihiarc/rpa-landuse/issues/new"
+                issue_title = f"[{feedback_type}] {subject}"
+                issue_body = f"""**Feedback Type:** {feedback_type}
+
+**Contact:** {user_email if user_email else 'Not provided'}
+
+**Description:**
+{message}
+
+---
+*Submitted via RPA Land Use Analytics feedback form*
+"""
+
+                # Encode parameters for URL
+                import urllib.parse
+                params = urllib.parse.urlencode({
+                    'title': issue_title,
+                    'body': issue_body
+                })
+                full_url = f"{github_issue_url}?{params}"
+
+                st.success("✅ Thank you for your feedback!")
+                st.markdown(f"""
+                Your feedback has been prepared. Please click the button below to submit it to GitHub:
+
+                [🐛 Create GitHub Issue]({full_url})
+
+                *Note: You'll need a GitHub account to submit the issue. If you don't have one,
+                please contact the project maintainer directly.*
+                """)
+
 def main():
     """Main settings interface"""
     st.title("📚 RPA Assessment Help & Documentation")
@@ -410,13 +481,29 @@ def main():
     # Only show Help & Documentation for production deployment
     show_help_documentation()
 
-    # Footer
+    # Feedback form section
+    st.markdown("---")
+    show_feedback_form()
+
+    # Footer with updated contact information
     st.markdown("---")
     st.markdown("""
     **🆘 Need more help?**
-    - Contact your system administrator for assistance
-    - Report issues through the feedback form
-    - Check for platform updates and announcements
+
+    **📧 Contact & Support:**
+    - **GitHub Issues:** [Report bugs or request features](https://github.com/mihiarc/rpa-landuse/issues)
+    - **Project Repository:** [mihiarc/rpa-landuse](https://github.com/mihiarc/rpa-landuse)
+    - **Discussions:** [Ask questions in GitHub Discussions](https://github.com/mihiarc/rpa-landuse/discussions)
+
+    **📚 Resources:**
+    - **Documentation:** [Project README and Wiki](https://github.com/mihiarc/rpa-landuse/blob/main/README.md)
+    - **Releases & Updates:** [View changelog and announcements](https://github.com/mihiarc/rpa-landuse/releases)
+    - **USDA RPA Assessment:** [Learn more about the data source](https://www.fs.usda.gov/rds/archive/catalog/RDS-2023-0026)
+
+    **💡 Quick Actions:**
+    - Use the feedback form above to submit questions or issues
+    - Check the troubleshooting guide for common problems
+    - Review system status for configuration details
     """)
 
 if __name__ == "__main__":
