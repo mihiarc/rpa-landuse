@@ -45,7 +45,12 @@ When user mentions specific RPA codes in their question, you MUST translate them
 DO NOT write WHERE scenario_name = 'LM' - the database doesn't understand RPA codes!
 You must translate LM → RCP45_SSP1 BEFORE generating SQL.
 
-After query execution, results will be automatically formatted to show user-friendly names.
+IMPORTANT - PRESENTING RESULTS:
+After query execution, results are AUTOMATICALLY formatted for you:
+- Database returns "RCP45_SSP1" → Tool shows you "LM (Lower-Moderate)"
+- You NEVER need to mention "RCP45_SSP1" or "RCP85_SSP2" in your responses
+- Simply refer to scenarios by their user-friendly names: "LM", "HM", "HL", "HH"
+- When explaining results, say "In the LM (Lower-Moderate) scenario..." not "In RCP45_SSP1..."
 
 CRITICAL: USE COMBINED TABLES:
 - Use 'dim_scenario_combined' (5 scenarios) NOT 'dim_scenario'

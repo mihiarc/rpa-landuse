@@ -7,6 +7,7 @@ from langchain_core.tools import tool
 from pydantic import BaseModel, Field
 
 from landuse.agents.formatting import clean_sql_query, format_raw_query_results
+from landuse.agents.response_formatter import ResponseFormatter
 from landuse.core.app_config import AppConfig
 from landuse.utils.retry_decorators import database_retry
 
@@ -103,8 +104,12 @@ def _execute_with_retry(db_connection: duckdb.DuckDBPyConnection, query: str) ->
 
 
 def _format_success_response(result: dict[str, Any], config: AppConfig) -> str:
-    """Format successful query results."""
+    """Format successful query results with user-friendly scenario names."""
     formatted = format_raw_query_results(result["results"], result["columns"])
+
+    # Replace technical scenario names with user-friendly names in the formatted output
+    # This ensures users see "LM (Lower-Moderate)" instead of "RCP45_SSP1"
+    formatted = ResponseFormatter.format_scenario_in_text(formatted, format='full')
 
     # Add row count information if truncated
     if result["row_count"] >= config.agent.max_query_rows:

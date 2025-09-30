@@ -10,10 +10,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.3.0] - 2025-09-30
 
-### Critical Fix
+### Critical Fixes
 - Added explicit SQL generation examples for specific scenario queries
 - Fixed agent's inability to handle queries like "compare between HL and HH"
 - Agent now correctly translates RPA codes to database names BEFORE generating SQL
+- **Added automatic response formatting to hide technical database codes from users**
+- Tool responses now automatically show "LM (Lower-Moderate)" instead of "RCP45_SSP1"
 
 ### New Features
 - Added EXAMPLE 2A: Detailed pattern for comparing two specific scenarios
@@ -26,6 +28,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added TRANSLATION REFERENCE table (LM→RCP45_SSP1, HM→RCP85_SSP2, HL→RCP85_SSP3, HH→RCP85_SSP5)
 - Updated QUERY PATTERNS with specific scenario query examples
 - Emphasized: Agent must translate RPA codes to DB names BEFORE SQL generation
+- Added IMPORTANT - PRESENTING RESULTS section instructing agent to use formatted names
+- Integrated ResponseFormatter into common_tools.py for automatic response formatting
 
 ### Technical Impact
 - Resolves issue where agent couldn't understand "compare X between HL and HH"
