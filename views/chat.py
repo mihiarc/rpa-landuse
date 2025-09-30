@@ -39,8 +39,6 @@ def initialize_session_state():
         st.session_state.show_welcome = True
     if "first_visit" not in st.session_state:
         st.session_state.first_visit = True
-    if "show_scenario_guide" not in st.session_state:
-        st.session_state.show_scenario_guide = False
 
 
 @st.dialog("🌍 Understanding RPA Scenarios")
@@ -98,21 +96,15 @@ def show_scenario_guide():
 
 def show_first_time_onboarding():
     """Show engaging onboarding for first-time users"""
-    st.markdown("""
-    <div style='background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                padding: 24px; border-radius: 12px; color: white; margin-bottom: 20px;'>
-        <h3 style='margin: 0 0 10px 0;'>🌍 Welcome to RPA Land Use Analytics</h3>
-        <p style='margin: 0; opacity: 0.95;'>
-            Understanding climate scenarios helps you ask better questions and interpret results accurately.
-            Take 2 minutes to learn about RPA scenarios, or dive right in!
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
+    # Use native Streamlit components instead of unsafe HTML
+    with st.container():
+        st.info("🌍 **Welcome to RPA Land Use Analytics**\n\n"
+                "Understanding climate scenarios helps you ask better questions and interpret results accurately. "
+                "Take 2 minutes to learn about RPA scenarios, or dive right in!")
 
     col1, col2, col3 = st.columns([2, 2, 1])
     with col1:
         if st.button("📚 Quick Scenario Guide (2 min)", type="primary", use_container_width=True):
-            st.session_state.show_scenario_guide = True
             show_scenario_guide()
     with col2:
         with st.popover("🎯 Quick Reference", use_container_width=True):
@@ -137,15 +129,9 @@ def show_first_time_onboarding():
 
 def show_persistent_context_bar():
     """Show always-visible minimal context bar"""
-    st.markdown("""
-    <div style='background: #f0f2f6; padding: 12px 16px; border-radius: 8px;
-                margin: 10px 0; border-left: 4px solid #667eea;'>
-        <b>📍 Quick Reference:</b>
-        RCP4.5 = Lower emissions (2.5°C) | RCP8.5 = High emissions (4.5°C) |
-        <a href='#' style='color: #667eea; text-decoration: none;'>
-        4 scenarios: LM (sustainable), HL (rivalry), HM (middle), HH (fossil-fuel)</a>
-    </div>
-    """, unsafe_allow_html=True)
+    # Use native Streamlit components instead of unsafe HTML
+    st.caption("📍 **Quick Reference:** RCP4.5 = Lower emissions (2.5°C) | RCP8.5 = High emissions (4.5°C) | "
+               "4 scenarios: LM (sustainable), HL (rivalry), HM (middle), HH (fossil-fuel)")
 
 
 def show_smart_example_queries():
@@ -325,6 +311,7 @@ def main():
         if st.button("🔄 Clear", use_container_width=True):
             st.session_state.messages = []
             st.session_state.show_welcome = True
+            st.session_state.first_visit = True  # Reset onboarding for fresh start
             st.rerun()
 
     # Show smart example queries (educational prompts)
