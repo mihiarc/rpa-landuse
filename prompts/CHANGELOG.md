@@ -8,6 +8,48 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 - Features and improvements in development
 
+## [1.3.0] - 2025-09-30
+
+### Critical Fix
+- Added explicit SQL generation examples for specific scenario queries
+- Fixed agent's inability to handle queries like "compare between HL and HH"
+- Agent now correctly translates RPA codes to database names BEFORE generating SQL
+
+### New Features
+- Added EXAMPLE 2A: Detailed pattern for comparing two specific scenarios
+- Added EXAMPLE 2B: Pattern for querying single specific scenario
+- Added CRITICAL - SPECIFIC SCENARIO QUERIES section with translation reference
+- Added CRITICAL SQL GENERATION RULES section
+
+### Changes
+- Enhanced NAMING RULES with explicit SQL generation instructions
+- Added TRANSLATION REFERENCE table (LM→RCP45_SSP1, HM→RCP85_SSP2, HL→RCP85_SSP3, HH→RCP85_SSP5)
+- Updated QUERY PATTERNS with specific scenario query examples
+- Emphasized: Agent must translate RPA codes to DB names BEFORE SQL generation
+
+### Technical Impact
+- Resolves issue where agent couldn't understand "compare X between HL and HH"
+- Agent now recognizes RPA codes in user questions and translates them in SQL WHERE clauses
+- Supports IN clauses: WHERE scenario_name IN ('RCP85_SSP3', 'RCP85_SSP5')
+- Supports single comparisons: WHERE scenario_name = 'RCP45_SSP1'
+- No changes to translation layer - fixes problem at SQL generation stage
+
+### Testing
+- Test query: "Compare forest loss between HL and HH" (previously failed)
+- Test query: "Show me LM scenario results" (previously failed)
+- Test query: "What's the difference between HM and HH?" (previously failed)
+- All specific scenario queries should now work correctly
+
+### User Benefits
+- Users can now ask about specific scenarios by RPA code
+- Natural queries like "compare HL and HH" work as expected
+- Better agent understanding of scenario-specific questions
+- More intuitive interaction with scenario data
+
+### Builds On
+- Version 1.2.0: Scenario naming and mapping system
+- Prompt now handles both SQL generation AND result formatting
+
 ## [1.2.0] - 2025-09-30
 
 ### New Features

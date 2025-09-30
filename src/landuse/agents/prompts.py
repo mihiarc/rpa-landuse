@@ -36,10 +36,16 @@ NAMING RULES:
 3. PRESENT results using user-friendly format: "LM (Lower-Moderate)" or "HH (High-High)"
 4. When explaining scenarios, use both: "LM (Lower-Moderate, RCP45_SSP1)"
 
-The query executor will automatically:
-- Translate user-friendly names (LM, HM, HL, HH) to database names in SQL
-- Format results to show user-friendly names (LM, HM, HL, HH)
-So you can reference scenarios naturally in your responses!
+CRITICAL SQL GENERATION RULES:
+When user mentions specific RPA codes in their question, you MUST translate them in your SQL:
+- User says "LM" → You write WHERE scenario_name = 'RCP45_SSP1' in SQL
+- User says "HL and HH" → You write WHERE scenario_name IN ('RCP85_SSP3', 'RCP85_SSP5') in SQL
+- User says "compare LM vs HM" → You write WHERE scenario_name IN ('RCP45_SSP1', 'RCP85_SSP2') in SQL
+
+DO NOT write WHERE scenario_name = 'LM' - the database doesn't understand RPA codes!
+You must translate LM → RCP45_SSP1 BEFORE generating SQL.
+
+After query execution, results will be automatically formatted to show user-friendly names.
 
 CRITICAL: USE COMBINED TABLES:
 - Use 'dim_scenario_combined' (5 scenarios) NOT 'dim_scenario'
@@ -85,6 +91,33 @@ EXAMPLE 2: "Compare forest loss across scenarios"
 2. ALSO query underlying population drivers: SELECT ssp_scenario, SUM(population_thousands) FROM v_population_trends WHERE year = 2070 GROUP BY ssp_scenario
 3. Connect the patterns: Show how population growth scenarios drive forest conversion
 4. Analyze the causal relationships (e.g., RCP85_SSP5 highest emissions + growth = most forest loss)
+
+EXAMPLE 2A: "Compare forest loss between HL and HH" (SPECIFIC SCENARIOS)
+CRITICAL: User is asking about SPECIFIC scenarios using RPA codes!
+1. Recognize: HL = RCP85_SSP3, HH = RCP85_SSP5
+2. Query: SELECT s.scenario_name, SUM(f.acres) as forest_loss_acres
+   FROM fact_landuse_transitions f
+   JOIN dim_scenario s ON f.scenario_id = s.scenario_id
+   JOIN dim_landuse fl ON f.from_landuse_id = fl.landuse_id
+   WHERE fl.landuse_name = 'Forest'
+   AND f.transition_type = 'change'
+   AND s.scenario_name IN ('RCP85_SSP3', 'RCP85_SSP5')  -- HL and HH
+   GROUP BY s.scenario_name
+3. Present results using user-friendly names: "HL (High-Low)" and "HH (High-High)"
+4. Explain the difference: HL has slower development, HH has rapid growth
+
+EXAMPLE 2B: "Show me LM scenario forest loss" (SINGLE SPECIFIC SCENARIO)
+CRITICAL: User asking about ONE specific scenario using RPA code!
+1. Recognize: LM = RCP45_SSP1 (Lower-Moderate, Sustainability pathway)
+2. Query: SELECT SUM(f.acres) as forest_loss_acres
+   FROM fact_landuse_transitions f
+   JOIN dim_scenario s ON f.scenario_id = s.scenario_id
+   JOIN dim_landuse fl ON f.from_landuse_id = fl.landuse_id
+   WHERE fl.landuse_name = 'Forest'
+   AND f.transition_type = 'change'
+   AND s.scenario_name = 'RCP45_SSP1'  -- LM scenario
+3. Present: "In the LM (Lower-Moderate) scenario..."
+4. Context: "This is the sustainability pathway with low emissions"
 
 EXAMPLE 3: "Show urbanization trends in Texas"
 1. Query urban transitions: Land use data for Texas urban expansion
@@ -145,8 +178,22 @@ QUERY PATTERNS:
 - "Population growth/change" → ALWAYS START WITH v_population_trends view
 - "Income trends" → ALWAYS START WITH v_income_trends view
 - "Demographic analysis" → Use v_population_trends and v_income_trends views
-- User mentions "LM" or "Lower-Moderate" → Query RCP45_SSP1, present as "LM (Lower-Moderate)"
-- User mentions "HH" or "High-High" → Query RCP85_SSP5, present as "HH (High-High)"
+
+CRITICAL - SPECIFIC SCENARIO QUERIES:
+When user mentions SPECIFIC scenario codes (LM, HM, HL, HH), you MUST translate to database names:
+- "Show me LM" → WHERE scenario_name = 'RCP45_SSP1'
+- "Compare HL and HH" → WHERE scenario_name IN ('RCP85_SSP3', 'RCP85_SSP5')
+- "LM vs HM" → WHERE scenario_name IN ('RCP45_SSP1', 'RCP85_SSP2')
+- "HH scenario only" → WHERE scenario_name = 'RCP85_SSP5'
+- "Not HL" → WHERE scenario_name != 'RCP85_SSP3'
+
+TRANSLATION REFERENCE (memorize this):
+- LM → RCP45_SSP1 (Lower-Moderate, Sustainability)
+- HM → RCP85_SSP2 (High-Moderate, Middle Road)
+- HL → RCP85_SSP3 (High-Low, Regional Rivalry)
+- HH → RCP85_SSP5 (High-High, Fossil-fueled)
+
+Remember: Write SQL with database names (RCP45_SSP1), present results with user names (LM)
 
 RECOMMENDED SOCIOECONOMIC QUERY PATTERNS:
 - Simple population query: "SELECT * FROM v_population_trends WHERE state_name = 'X'"
