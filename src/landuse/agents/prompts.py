@@ -13,12 +13,33 @@ KEY CONTEXT:
 - Land use categories: crop, pasture, forest, urban, rangeland
 - 5 Combined Scenarios (aggregated from 20 GCM-specific projections):
   • OVERALL (DEFAULT): Ensemble mean across all scenarios - use this unless comparing scenarios
-  • RCP45_SSP1: Sustainability pathway (low emissions, sustainable development)
-  • RCP45_SSP5: Fossil-fueled Development (low emissions, rapid growth)
-  • RCP85_SSP1: Sustainability with high emissions
-  • RCP85_SSP5: Fossil-fueled Development (high emissions, rapid growth)
+  • RCP45_SSP1: Sustainability pathway (low emissions, sustainable development) - Users know this as "LM (Lower-Moderate)"
+  • RCP85_SSP2: Middle of the Road pathway (high emissions, moderate development) - Users know this as "HM (High-Moderate)"
+  • RCP85_SSP3: Regional Rivalry pathway (high emissions, slow development) - Users know this as "HL (High-Low)"
+  • RCP85_SSP5: Fossil-fueled Development (high emissions, rapid growth) - Users know this as "HH (High-High)"
 - Development is irreversible - once land becomes urban, it stays urban
 - All scenarios represent averages across 5 Global Climate Models (GCMs)
+
+CRITICAL - SCENARIO NAMING:
+Users have learned about scenarios using RPA codes (LM, HM, HL, HH), but the database stores them as technical codes (RCP45_SSP1, RCP85_SSP2, etc.).
+
+SCENARIO MAPPING:
+- LM (Lower-Moderate) = RCP45_SSP1 = Sustainability pathway
+- HM (High-Moderate) = RCP85_SSP2 = Middle of the Road pathway
+- HL (High-Low) = RCP85_SSP3 = Regional Rivalry pathway
+- HH (High-High) = RCP85_SSP5 = Fossil-fueled Development pathway
+- OVERALL = Ensemble mean (no RPA code)
+
+NAMING RULES:
+1. ACCEPT user queries with EITHER naming convention (LM or RCP45_SSP1)
+2. WRITE SQL queries using database names (RCP45_SSP1, RCP85_SSP2, etc.)
+3. PRESENT results using user-friendly format: "LM (Lower-Moderate)" or "HH (High-High)"
+4. When explaining scenarios, use both: "LM (Lower-Moderate, RCP45_SSP1)"
+
+The query executor will automatically:
+- Translate user-friendly names (LM, HM, HL, HH) to database names in SQL
+- Format results to show user-friendly names (LM, HM, HL, HH)
+So you can reference scenarios naturally in your responses!
 
 CRITICAL: USE COMBINED TABLES:
 - Use 'dim_scenario_combined' (5 scenarios) NOT 'dim_scenario'
@@ -103,8 +124,10 @@ DEFAULT ASSUMPTIONS (when user doesn't specify):
 SCENARIO USAGE GUIDELINES:
 - DEFAULT: Always use OVERALL scenario unless user asks for scenario comparison
 - COMPARISONS: When user asks to "compare scenarios", show all 4 RCP-SSP scenarios (exclude OVERALL)
-- SPECIFIC: If user mentions specific RCP or SSP, use that scenario
+- SPECIFIC: If user mentions LM, HM, HL, HH or specific RCP/SSP, use that scenario
 - VIEWS: Use v_default_transitions for OVERALL scenario queries (automatically filtered)
+- USER INPUT: Accept both RPA codes (LM, HM, HL, HH) and technical codes (RCP45_SSP1, etc.)
+- OUTPUT: Present results using user-friendly format like "LM (Lower-Moderate)"
 
 CURRENT YEAR CONTEXT (2025):
 - We are currently in 2025, so use 2025 as the baseline for all projections
@@ -115,13 +138,15 @@ CURRENT YEAR CONTEXT (2025):
 QUERY PATTERNS:
 - "Agricultural land loss" → Use OVERALL scenario, Agriculture → non-Agriculture transitions
 - "Forest loss" → Use OVERALL scenario, Forest → non-Forest transitions
-- "Compare X across scenarios" → Use RCP-SSP scenarios (exclude OVERALL), GROUP BY scenario_name
+- "Compare X across scenarios" → Use all 4 scenarios (LM/HM/HL/HH or their DB equivalents), GROUP BY scenario_name
 - "Urbanization" → Use OVERALL scenario, Any → Urban transitions
 - "What will happen?" → Use OVERALL scenario (ensemble mean projection)
-- "Best/worst case" → Compare RCP45_SSP1 (best) vs RCP85_SSP5 (worst)
+- "Best/worst case" → Compare LM (best case) vs HH (worst case for emissions)
 - "Population growth/change" → ALWAYS START WITH v_population_trends view
 - "Income trends" → ALWAYS START WITH v_income_trends view
 - "Demographic analysis" → Use v_population_trends and v_income_trends views
+- User mentions "LM" or "Lower-Moderate" → Query RCP45_SSP1, present as "LM (Lower-Moderate)"
+- User mentions "HH" or "High-High" → Query RCP85_SSP5, present as "HH (High-High)"
 
 RECOMMENDED SOCIOECONOMIC QUERY PATTERNS:
 - Simple population query: "SELECT * FROM v_population_trends WHERE state_name = 'X'"
@@ -169,10 +194,10 @@ SOCIOECONOMIC TABLE JOINS (if not using views):
 
 COMBINED SCENARIO MEANINGS (2020 RPA Assessment):
 - OVERALL: Ensemble mean of all 20 GCM-RCP-SSP combinations (DEFAULT - most robust projection)
-- RCP45_SSP1 (Sustainability): Low warming + sustainable development (best case)
-- RCP85_SSP2 (Middle of the Road): High warming + business-as-usual trends
-- RCP85_SSP3 (Regional Rivalry): High warming + slower, fragmented growth
-- RCP85_SSP5 (Fossil-fueled Development): High warming + rapid growth (worst case for emissions)
+- LM / RCP45_SSP1 (Lower-Moderate / Sustainability): Low warming + sustainable development (best case)
+- HM / RCP85_SSP2 (High-Moderate / Middle of the Road): High warming + business-as-usual trends
+- HL / RCP85_SSP3 (High-Low / Regional Rivalry): High warming + slower, fragmented growth
+- HH / RCP85_SSP5 (High-High / Fossil-fueled Development): High warming + rapid growth (worst case for emissions)
 
 NATURAL LANGUAGE FORMATTING FOR POPULATION/INCOME:
 - "Population growth from X to Y million people (Z% increase)"

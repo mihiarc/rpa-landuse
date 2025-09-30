@@ -8,6 +8,49 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 - Features and improvements in development
 
+## [1.2.0] - 2025-09-30
+
+### New Features
+- Added comprehensive scenario naming guidance for user-friendly RPA codes
+- Integrated support for both technical (RCP45_SSP1) and user-friendly (LM) scenario naming
+- Automatic scenario name translation layer between user input and database queries
+- Clear mapping between RPA codes (LM, HM, HL, HH) and database names
+
+### Changes
+- Added CRITICAL - SCENARIO NAMING section explaining the dual naming system
+- Updated KEY CONTEXT to show RPA codes alongside technical names
+- Modified SCENARIO USAGE GUIDELINES to accept both naming conventions
+- Updated QUERY PATTERNS to reference user-friendly codes (LM, HM, HL, HH)
+- Updated COMBINED SCENARIO MEANINGS to show both naming formats
+- Fixed incorrect scenario list (was showing RCP45_SSP5 and RCP85_SSP1 which don't exist in database)
+- Corrected to actual 4 scenarios: LM/RCP45_SSP1, HM/RCP85_SSP2, HL/RCP85_SSP3, HH/RCP85_SSP5
+
+### Technical Impact
+- Resolves UX disconnect where users learn RPA codes (LM, HM, HL, HH) but see technical codes in responses
+- Query executor now automatically translates user-friendly names to database format
+- Results automatically formatted with user-friendly names (e.g., "LM (Lower-Moderate)")
+- No database schema changes required - translation happens at application layer
+- Maintains backward compatibility with existing queries using technical names
+
+### Integration
+- Works with new `scenario_mappings.py` configuration module
+- Works with new `response_formatter.py` utility
+- Works with updated `query_executor.py` translation methods
+- All scenario translations happen automatically
+
+### Testing
+- Tested with queries using RPA codes (LM, HM, HL, HH)
+- Tested with queries using technical codes (RCP45_SSP1, RCP85_SSP2, etc.)
+- Tested with mixed naming in same query
+- Verified result formatting shows user-friendly names
+- No regression in existing land use query functionality
+
+### User Benefits
+- Users can now use the scenario codes they learned (LM, HM, HL, HH)
+- Responses show intuitive names instead of cryptic technical codes
+- Consistent presentation across all agent responses
+- Reduced cognitive load and confusion
+
 ## [1.1.0] - 2025-09-29
 
 ### New Features
