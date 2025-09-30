@@ -4,9 +4,11 @@ Settings and Help Page for Landuse Dashboard
 Configuration, system status, and help information
 """
 
+import html
 import os
 import subprocess
 import sys
+import urllib.parse
 from pathlib import Path
 
 # Add src to path
@@ -418,60 +420,95 @@ def show_feedback_form():
         user_email = st.text_input(
             "Your Email (optional)",
             placeholder="your.email@example.com",
-            help="Provide your email if you'd like a response"
+            help="Provide your email if you'd like a response",
+            max_chars=100
         )
 
-        # Subject
+        # Subject - REQUIRED
         subject = st.text_input(
-            "Subject",
-            placeholder="Brief description of your feedback"
+            "Subject *",
+            placeholder="Brief description of your feedback",
+            help="Required field",
+            max_chars=100
         )
 
-        # Message
+        # Message - REQUIRED
         message = st.text_area(
-            "Message",
+            "Message *",
             placeholder="Please provide details...",
-            height=150
+            help="Required field",
+            height=150,
+            max_chars=2000
         )
 
         # Submit button
         submitted = st.form_submit_button("Submit Feedback")
 
         if submitted:
-            if not subject or not message:
-                st.error("Please fill in both subject and message fields.")
-            else:
-                # Create GitHub issue URL with pre-filled content
-                github_issue_url = "https://github.com/mihiarc/rpa-landuse/issues/new"
-                issue_title = f"[{feedback_type}] {subject}"
-                issue_body = f"""**Feedback Type:** {feedback_type}
+            # Validate required fields with specific messages
+            errors = []
+            if not subject or not subject.strip():
+                errors.append("📌 Subject is required")
+            if not message or not message.strip():
+                errors.append("📌 Message is required")
 
-**Contact:** {user_email if user_email else 'Not provided'}
+            if errors:
+                for error in errors:
+                    st.error(error)
+            else:
+                try:
+                    # Sanitize inputs to prevent injection attacks
+                    subject_clean = html.escape(subject.strip())
+                    message_clean = html.escape(message.strip())
+                    user_email_clean = html.escape(user_email.strip()) if user_email else None
+
+                    # Validate input lengths for URL
+                    if len(subject_clean) > 100:
+                        st.error("Subject is too long. Please keep it under 100 characters.")
+                        return
+                    if len(message_clean) > 2000:
+                        st.error("Message is too long. Please keep it under 2000 characters.")
+                        return
+
+                    # Create GitHub issue URL with pre-filled content
+                    github_issue_url = "https://github.com/mihiarc/rpa-landuse/issues/new"
+                    issue_title = f"[{feedback_type}] {subject_clean}"
+                    issue_body = f"""**Feedback Type:** {feedback_type}
+
+**Contact:** {user_email_clean if user_email_clean else 'Not provided'}
 
 **Description:**
-{message}
+{message_clean}
 
 ---
 *Submitted via RPA Land Use Analytics feedback form*
 """
 
-                # Encode parameters for URL
-                import urllib.parse
-                params = urllib.parse.urlencode({
-                    'title': issue_title,
-                    'body': issue_body
-                })
-                full_url = f"{github_issue_url}?{params}"
+                    # Encode parameters for URL with error handling
+                    params = urllib.parse.urlencode({
+                        'title': issue_title,
+                        'body': issue_body
+                    })
+                    full_url = f"{github_issue_url}?{params}"
 
-                st.success("✅ Thank you for your feedback!")
-                st.markdown(f"""
-                Your feedback has been prepared. Please click the button below to submit it to GitHub:
+                    # Validate URL length (GitHub has limits)
+                    if len(full_url) > 8192:
+                        st.error("Your feedback is too long for direct submission. Please shorten your message or submit directly on GitHub.")
+                        return
 
-                [🐛 Create GitHub Issue]({full_url})
+                    st.success("✅ Thank you for your feedback!")
+                    st.markdown(f"""
+                    Your feedback has been prepared. Please click the button below to submit it to GitHub:
 
-                *Note: You'll need a GitHub account to submit the issue. If you don't have one,
-                please contact the project maintainer directly.*
-                """)
+                    [🐛 Create GitHub Issue]({full_url})
+
+                    *Note: You'll need a GitHub account to submit the issue. If you don't have one,
+                    please contact the project maintainer directly.*
+                    """)
+
+                except Exception as e:
+                    st.error(f"An error occurred while preparing your feedback: {str(e)}")
+                    st.info("Please try submitting your feedback directly on [GitHub Issues](https://github.com/mihiarc/rpa-landuse/issues/new).")
 
 def main():
     """Main settings interface"""
