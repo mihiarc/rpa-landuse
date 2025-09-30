@@ -8,6 +8,95 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 - Features and improvements in development
 
+## [1.3.0] - 2025-09-30
+
+### Critical Fixes
+- Added explicit SQL generation examples for specific scenario queries
+- Fixed agent's inability to handle queries like "compare between HL and HH"
+- Agent now correctly translates RPA codes to database names BEFORE generating SQL
+- **Added automatic response formatting to hide technical database codes from users**
+- Tool responses now automatically show "LM (Lower-Moderate)" instead of "RCP45_SSP1"
+
+### New Features
+- Added EXAMPLE 2A: Detailed pattern for comparing two specific scenarios
+- Added EXAMPLE 2B: Pattern for querying single specific scenario
+- Added CRITICAL - SPECIFIC SCENARIO QUERIES section with translation reference
+- Added CRITICAL SQL GENERATION RULES section
+
+### Changes
+- Enhanced NAMING RULES with explicit SQL generation instructions
+- Added TRANSLATION REFERENCE table (LM→RCP45_SSP1, HM→RCP85_SSP2, HL→RCP85_SSP3, HH→RCP85_SSP5)
+- Updated QUERY PATTERNS with specific scenario query examples
+- Emphasized: Agent must translate RPA codes to DB names BEFORE SQL generation
+- Added IMPORTANT - PRESENTING RESULTS section instructing agent to use formatted names
+- Integrated ResponseFormatter into common_tools.py for automatic response formatting
+
+### Technical Impact
+- Resolves issue where agent couldn't understand "compare X between HL and HH"
+- Agent now recognizes RPA codes in user questions and translates them in SQL WHERE clauses
+- Supports IN clauses: WHERE scenario_name IN ('RCP85_SSP3', 'RCP85_SSP5')
+- Supports single comparisons: WHERE scenario_name = 'RCP45_SSP1'
+- No changes to translation layer - fixes problem at SQL generation stage
+
+### Testing
+- Test query: "Compare forest loss between HL and HH" (previously failed)
+- Test query: "Show me LM scenario results" (previously failed)
+- Test query: "What's the difference between HM and HH?" (previously failed)
+- All specific scenario queries should now work correctly
+
+### User Benefits
+- Users can now ask about specific scenarios by RPA code
+- Natural queries like "compare HL and HH" work as expected
+- Better agent understanding of scenario-specific questions
+- More intuitive interaction with scenario data
+
+### Builds On
+- Version 1.2.0: Scenario naming and mapping system
+- Prompt now handles both SQL generation AND result formatting
+
+## [1.2.0] - 2025-09-30
+
+### New Features
+- Added comprehensive scenario naming guidance for user-friendly RPA codes
+- Integrated support for both technical (RCP45_SSP1) and user-friendly (LM) scenario naming
+- Automatic scenario name translation layer between user input and database queries
+- Clear mapping between RPA codes (LM, HM, HL, HH) and database names
+
+### Changes
+- Added CRITICAL - SCENARIO NAMING section explaining the dual naming system
+- Updated KEY CONTEXT to show RPA codes alongside technical names
+- Modified SCENARIO USAGE GUIDELINES to accept both naming conventions
+- Updated QUERY PATTERNS to reference user-friendly codes (LM, HM, HL, HH)
+- Updated COMBINED SCENARIO MEANINGS to show both naming formats
+- Fixed incorrect scenario list (was showing RCP45_SSP5 and RCP85_SSP1 which don't exist in database)
+- Corrected to actual 4 scenarios: LM/RCP45_SSP1, HM/RCP85_SSP2, HL/RCP85_SSP3, HH/RCP85_SSP5
+
+### Technical Impact
+- Resolves UX disconnect where users learn RPA codes (LM, HM, HL, HH) but see technical codes in responses
+- Query executor now automatically translates user-friendly names to database format
+- Results automatically formatted with user-friendly names (e.g., "LM (Lower-Moderate)")
+- No database schema changes required - translation happens at application layer
+- Maintains backward compatibility with existing queries using technical names
+
+### Integration
+- Works with new `scenario_mappings.py` configuration module
+- Works with new `response_formatter.py` utility
+- Works with updated `query_executor.py` translation methods
+- All scenario translations happen automatically
+
+### Testing
+- Tested with queries using RPA codes (LM, HM, HL, HH)
+- Tested with queries using technical codes (RCP45_SSP1, RCP85_SSP2, etc.)
+- Tested with mixed naming in same query
+- Verified result formatting shows user-friendly names
+- No regression in existing land use query functionality
+
+### User Benefits
+- Users can now use the scenario codes they learned (LM, HM, HL, HH)
+- Responses show intuitive names instead of cryptic technical codes
+- Consistent presentation across all agent responses
+- Reduced cognitive load and confusion
+
 ## [1.1.0] - 2025-09-29
 
 ### New Features

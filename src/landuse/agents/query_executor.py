@@ -7,6 +7,8 @@ import pandas as pd
 from rich.console import Console
 
 from landuse.agents.formatting import clean_sql_query, format_query_results
+from landuse.agents.response_formatter import ResponseFormatter
+from landuse.config.scenario_mappings import ScenarioMapping
 from landuse.core.app_config import AppConfig
 from landuse.exceptions import DatabaseError, QueryValidationError, wrap_exception
 from landuse.infrastructure.performance import time_database_operation
@@ -39,10 +41,47 @@ class QueryExecutor:
         self.db_connection = db_connection
         self.console = console or Console()
 
+    def translate_scenario_in_query(self, query: str) -> str:
+        """
+        Translate user-friendly scenario names to database names in SQL queries.
+
+        Handles RPA codes (LM, HM, HL, HH) and scenario names, converting them
+        to database format (RCP45_SSP1, RCP85_SSP2, etc.) for query execution.
+
+        Args:
+            query: SQL query possibly containing user-friendly scenario names
+
+        Returns:
+            Query with database scenario names
+
+        Example:
+            >>> executor.translate_scenario_in_query("WHERE scenario_name = 'LM'")
+            "WHERE scenario_name = 'RCP45_SSP1'"
+        """
+        if not query:
+            return query
+
+        modified_query = query
+
+        # Replace RPA codes with database names (but not OVERALL, which stays the same)
+        for rpa_code, db_name in ScenarioMapping.RPA_TO_DB.items():
+            if rpa_code == 'OVERALL' or rpa_code not in modified_query:
+                continue
+
+            # Replace in single quotes
+            modified_query = modified_query.replace(f"'{rpa_code}'", f"'{db_name}'")
+            # Replace in double quotes
+            modified_query = modified_query.replace(f'"{rpa_code}"', f'"{db_name}"')
+
+        return modified_query
+
     @time_database_operation("execute_query_with_formatting")
     def execute_query(self, query: str) -> Dict[str, Any]:
         """
         Execute a SQL query with standard error handling and formatting.
+
+        Automatically translates user-friendly scenario names to database names
+        and formats results with user-friendly names.
 
         Args:
             query: SQL query string to execute
@@ -51,6 +90,9 @@ class QueryExecutor:
             Dictionary with execution results including success status, data, and formatting
         """
         cleaned_query = clean_sql_query(query)
+
+        # Translate scenario names from user-friendly to database format
+        cleaned_query = self.translate_scenario_in_query(cleaned_query)
 
         debug_mode = self.config.logging.level == 'DEBUG'
         if debug_mode:
@@ -79,6 +121,15 @@ class QueryExecutor:
             # Convert to DataFrame for formatting
             df = pd.DataFrame(result, columns=columns)
 
+            # Format scenario names in DataFrame if present
+            if 'scenario_name' in df.columns:
+                df = ResponseFormatter.format_dataframe_scenarios(
+                    df,
+                    scenario_column='scenario_name',
+                    format='full',
+                    sort=True
+                )
+
             # Format results
             formatted_results = format_query_results(df, cleaned_query)
 
@@ -88,7 +139,8 @@ class QueryExecutor:
                 "results": result,
                 "columns": columns,
                 "formatted": formatted_results,
-                "row_count": len(result)
+                "row_count": len(result),
+                "dataframe": df  # Include formatted DataFrame
             }
 
         except (duckdb.Error, duckdb.CatalogException, duckdb.SyntaxException, duckdb.BinderException) as e:
