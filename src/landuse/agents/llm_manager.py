@@ -47,8 +47,6 @@ class LLMManager(LLMInterface):
 
         if "bedrock" == model_name.lower():
             return self._create_bedrock_llm(model_name)
-        elif "claude" in model_name.lower():
-            return self._create_anthropic_llm(model_name)
         else:
             return self._create_openai_llm(model_name)
 
@@ -101,8 +99,8 @@ class LLMManager(LLMInterface):
                 model_id=aws_model,
                 region_name=aws_region,  # Explicitly pass region to ChatBedrock
                 model_kwargs={
-                    "max_tokens": self.config.max_tokens,
-                    "temperature": self.config.temperature,
+                    "max_tokens": 4000,
+                    "temperature": 0.1,
                 }
             )
             
