@@ -22,7 +22,7 @@ import plotly.graph_objects as go  # noqa: E402
 import streamlit as st  # noqa: E402
 from plotly.subplots import make_subplots  # noqa: E402
 
-from landuse.config import LanduseConfig  # noqa: E402
+from landuse.core.app_config import AppConfig  # noqa: E402
 from landuse.connections import DuckDBConnection  # noqa: E402
 
 # Import state mappings and connection
@@ -63,12 +63,12 @@ def get_database_connection():
     """Get cached database connection using st.connection"""
     try:
         # Use unified config system
-        config = LanduseConfig.for_agent_type('streamlit')
+        config = AppConfig()
 
         conn = st.connection(
             name="landuse_db_analytics",
             type=DuckDBConnection,
-            database=config.db_path,
+            database=config.database.path,
             read_only=True
         )
         return conn, None

@@ -1,10 +1,10 @@
 # Configuration
 
-Learn how to customize the RPA Land Use Analytics system using the unified `LanduseConfig` system.
+Learn how to customize the RPA Land Use Analytics system using the unified `AppConfig` system.
 
 ## Overview
 
-The system uses a modern dataclass-based configuration system (`LanduseConfig`) that provides type-safe, validated configuration with environment variable support and agent-specific presets.
+The system uses a modern Pydantic-based configuration system (`AppConfig`) that provides type-safe, validated configuration with environment variable support and component-specific sections.
 
 ## Environment Variables
 
@@ -21,87 +21,85 @@ ANTHROPIC_API_KEY=sk-ant-...your-key...      # For Claude models
 ### Core Configuration Variables
 
 ```bash
-# Database Configuration
-LANDUSE_DB_PATH=data/processed/landuse_analytics.duckdb
+# LLM Configuration (LANDUSE_LLM__ prefix)
+LANDUSE_LLM__MODEL_NAME=gpt-4o-mini    # Model name
+LANDUSE_LLM__TEMPERATURE=0.1           # Model temperature (0.0-2.0)
+LANDUSE_LLM__MAX_TOKENS=4000           # Maximum response tokens
 
-# Model Configuration  
-LANDUSE_MODEL=gpt-4o-mini        # Model name (gpt-4o-mini, claude-3-sonnet-20240229, etc.)
-TEMPERATURE=0.2                  # Model temperature (0.0-2.0)
-MAX_TOKENS=4000                  # Maximum response tokens
+# Agent Configuration (LANDUSE_AGENT__ prefix)
+LANDUSE_AGENT__MAX_ITERATIONS=8              # Maximum agent iterations
+LANDUSE_AGENT__MAX_EXECUTION_TIME=120        # Maximum execution time (seconds)
+LANDUSE_AGENT__MAX_QUERY_ROWS=1000           # Maximum query result rows
+LANDUSE_AGENT__DEFAULT_DISPLAY_LIMIT=50      # Default display limit
+LANDUSE_AGENT__ENABLE_MEMORY=true            # Enable conversation memory
+LANDUSE_AGENT__CONVERSATION_HISTORY_LIMIT=20 # Max conversation messages
 
-# Agent Behavior
-LANDUSE_MAX_ITERATIONS=8         # Maximum agent iterations
-LANDUSE_MAX_EXECUTION_TIME=120   # Maximum execution time (seconds)
-LANDUSE_MAX_QUERY_ROWS=1000      # Maximum query result rows
-LANDUSE_DEFAULT_DISPLAY_LIMIT=50 # Default display limit
+# Database Configuration (LANDUSE_DATABASE__ prefix)
+LANDUSE_DATABASE__PATH=data/processed/landuse_analytics.duckdb
+LANDUSE_DATABASE__MAX_CONNECTIONS=10         # Connection pool size
+LANDUSE_DATABASE__CACHE_TTL=3600            # Query cache TTL in seconds
 
-# Features
-LANDUSE_ENABLE_MEMORY=true       # Enable conversation memory
-LANDUSE_ENABLE_MAPS=true         # Enable map generation
+# Security Configuration (LANDUSE_SECURITY__ prefix)
+LANDUSE_SECURITY__ENABLE_SQL_VALIDATION=true
+LANDUSE_SECURITY__STRICT_TABLE_VALIDATION=true
+LANDUSE_SECURITY__RATE_LIMIT_CALLS=60        # Max calls per time window
+LANDUSE_SECURITY__RATE_LIMIT_WINDOW=60       # Time window in seconds
 
-# Performance
-LANDUSE_RATE_LIMIT_CALLS=60      # API calls per window
-LANDUSE_RATE_LIMIT_WINDOW=60     # Rate limit window (seconds)
+# Logging Configuration (LANDUSE_LOGGING__ prefix)
+LANDUSE_LOGGING__LEVEL=INFO                  # DEBUG, INFO, WARNING, ERROR, CRITICAL
+LANDUSE_LOGGING__LOG_FILE=logs/landuse.log   # File path (None for console only)
+LANDUSE_LOGGING__ENABLE_PERFORMANCE_LOGGING=false
 
-# Debugging
-VERBOSE=false                    # Enable verbose output
-DEBUG=false                      # Enable debug mode
-
-# Map Generation Settings
-LANDUSE_MAP_OUTPUT_DIR=maps/agent_generated  # Output directory for maps
-
-
-# Streamlit Settings
-STREAMLIT_CACHE_TTL=300          # Cache time-to-live (seconds)
-
-# Domain Configuration
-LANDUSE_ANALYSIS_STYLE=standard  # Analysis style (standard, detailed, brief)
-LANDUSE_DOMAIN_FOCUS=none        # Domain focus (agriculture, forest, urban, none)
+# Feature Toggles (LANDUSE_FEATURES__ prefix)
+LANDUSE_FEATURES__ENABLE_MAP_GENERATION=true
+LANDUSE_FEATURES__ENABLE_CONVERSATION_MEMORY=true
+LANDUSE_FEATURES__MAP_OUTPUT_DIR=maps/agent_generated
 ```
 
-## Using LanduseConfig
+## Using AppConfig
 
 ### Basic Usage
 
 ```python
-from landuse.config.landuse_config import LanduseConfig
+from landuse.core.app_config import AppConfig
 
 # Create default configuration
-config = LanduseConfig()
+config = AppConfig()
 
 # Create configuration with overrides
-config = LanduseConfig.from_env(
-    model_name="claude-3-sonnet-20240229",
-    temperature=0.1,
-    enable_map_generation=True
+config = AppConfig.from_env(
+    llm__model_name="claude-3-sonnet-20240229",
+    llm__temperature=0.1,
+    features__enable_map_generation=True
 )
 ```
 
-### Agent-Specific Configurations
+### Component-Specific Configurations
 
-The system provides pre-configured setups for different agent types:
+The system provides component-specific configuration sections:
 
 ```python
-from landuse.config.landuse_config import get_basic_config, get_map_config, get_streamlit_config
+from landuse.core.app_config import AppConfig
 
-# Basic agent (minimal features)
-basic_config = get_basic_config()
+# Basic agent configuration
+config = AppConfig()
+print(f"Using model: {config.llm.model_name}")
+print(f"Database: {config.database.path}")
+print(f"Max iterations: {config.agent.max_iterations}")
 
-# Map-enabled agent (includes visualization)
-map_config = get_map_config(verbose=True)
-
-# Streamlit application config
-streamlit_config = get_streamlit_config(enable_memory=False)
+# Access specific components
+print(f"Security enabled: {config.security.enable_sql_validation}")
+print(f"Logging level: {config.logging.level}")
 ```
 
 ### Configuration Validation
 
-The `LanduseConfig` system includes automatic validation:
+The `AppConfig` system includes automatic Pydantic validation:
 
-- **Database path validation**: Ensures the database file exists
-- **API key validation**: Checks for required API keys based on model
-- **Numeric range validation**: Validates temperature, token limits, etc.
-- **Directory creation**: Automatically creates output directories
+- **Type checking**: Ensures all config values match expected types
+- **Range validation**: Validates temperature, token limits, etc.
+- **Required fields**: Checks for required configuration values
+- **Nested validation**: Validates all component-specific sections
 
 ## Model Selection
 
@@ -176,16 +174,16 @@ STREAMLIT_CACHE_TTL=300                      # Cache time-to-live (seconds)
 ### Creating Custom Configurations
 
 ```python
-from landuse.config.landuse_config import LanduseConfig
+from landuse.core.app_config import AppConfig
 
 # Create a custom configuration
-custom_config = LanduseConfig.from_env(
-    model_name="gpt-4o",
-    temperature=0.0,
-    max_iterations=10,
-    enable_map_generation=True,
-    verbose=True,
-    max_query_rows=2000
+custom_config = AppConfig.from_env(
+    llm__model_name="gpt-4o",
+    llm__temperature=0.0,
+    agent__max_iterations=10,
+    features__enable_map_generation=True,
+    logging__level="DEBUG",
+    agent__max_query_rows=2000
 )
 
 # Use with an agent
@@ -200,28 +198,28 @@ with LanduseAgent(config=custom_config) as agent:
 
 ```python
 # Development configuration - fast and cheap
-dev_config = LanduseConfig.for_agent_type('basic',
-    model_name="gpt-4o-mini",
-    temperature=0.1,
-    max_iterations=5,
-    verbose=True
+dev_config = AppConfig.from_env(
+    llm__model_name="gpt-4o-mini",
+    llm__temperature=0.1,
+    agent__max_iterations=5,
+    logging__level="DEBUG"
 )
 
 # Production configuration - accurate and robust
-prod_config = LanduseConfig.for_agent_type('map',
-    model_name="gpt-4o",
-    temperature=0.0,
-    max_iterations=8,
-    enable_map_generation=True,
-    verbose=False
+prod_config = AppConfig.from_env(
+    llm__model_name="gpt-4o",
+    llm__temperature=0.0,
+    agent__max_iterations=8,
+    features__enable_map_generation=True,
+    logging__level="WARNING"
 )
 
 # Analysis configuration - optimized for complex queries
-analysis_config = LanduseConfig.from_env(
-    model_name="claude-3-sonnet-20240229",
-    temperature=0.0,
-    max_query_rows=5000,
-    max_execution_time=300,
+analysis_config = AppConfig.from_env(
+    llm__model_name="claude-3-sonnet-20240229",
+    llm__temperature=0.0,
+    agent__max_query_rows=5000,
+    agent__max_execution_time=300
 )
 ```
 
@@ -229,12 +227,12 @@ analysis_config = LanduseConfig.from_env(
 
 ### Query Limits
 
-Configure query result limits through `LanduseConfig`:
+Configure query result limits through `AppConfig`:
 
 ```python
-config = LanduseConfig.from_env(
-    max_query_rows=2000,           # Maximum rows returned
-    default_display_limit=100      # Default display limit
+config = AppConfig.from_env(
+    agent__max_query_rows=2000,           # Maximum rows returned
+    agent__default_display_limit=100      # Default display limit
 )
 ```
 
@@ -408,14 +406,14 @@ Load appropriate config:
 
 ```python
 from dotenv import load_dotenv
-from landuse.config.landuse_config import LanduseConfig
+from landuse.core.app_config import AppConfig
 
 # Load environment-specific config
 env = os.getenv("ENVIRONMENT", "development")
 load_dotenv(f"config/.env.{env}")
 
 # Create configuration
-config = LanduseConfig.from_env()
+config = AppConfig.from_env()
 ```
 
 ## Next Steps

@@ -7,7 +7,8 @@ from langchain_core.tools import tool
 from pydantic import BaseModel, Field
 
 from landuse.agents.formatting import clean_sql_query, format_raw_query_results
-from landuse.config.landuse_config import LanduseConfig
+from landuse.agents.response_formatter import ResponseFormatter
+from landuse.core.app_config import AppConfig
 from landuse.utils.retry_decorators import database_retry
 
 
@@ -17,7 +18,7 @@ class QueryInput(BaseModel):
 
 
 def create_execute_query_tool(
-    config: LanduseConfig,
+    config: AppConfig,
     db_connection: duckdb.DuckDBPyConnection,
     schema: str
 ) -> Any:
@@ -64,7 +65,7 @@ def create_execute_query_tool(
         try:
             # Apply row limit if not present
             if "limit" not in cleaned_query.lower():
-                cleaned_query = f"{cleaned_query.rstrip(';')} LIMIT {config.max_query_rows}"
+                cleaned_query = f"{cleaned_query.rstrip(';')} LIMIT {config.agent.max_query_rows}"
 
             # Execute query with retry logic
             result = _execute_with_retry(db_connection, cleaned_query)
@@ -102,13 +103,17 @@ def _execute_with_retry(db_connection: duckdb.DuckDBPyConnection, query: str) ->
         }
 
 
-def _format_success_response(result: dict[str, Any], config: LanduseConfig) -> str:
-    """Format successful query results."""
+def _format_success_response(result: dict[str, Any], config: AppConfig) -> str:
+    """Format successful query results with user-friendly scenario names."""
     formatted = format_raw_query_results(result["results"], result["columns"])
 
+    # Replace technical scenario names with user-friendly names in the formatted output
+    # This ensures users see "LM (Lower-Moderate)" instead of "RCP45_SSP1"
+    formatted = ResponseFormatter.format_scenario_in_text(formatted, format='full')
+
     # Add row count information if truncated
-    if result["row_count"] >= config.max_query_rows:
-        formatted += f"\n\n(Note: Results limited to {config.max_query_rows} rows)"
+    if result["row_count"] >= config.agent.max_query_rows:
+        formatted += f"\n\n(Note: Results limited to {config.agent.max_query_rows} rows)"
 
     return formatted
 

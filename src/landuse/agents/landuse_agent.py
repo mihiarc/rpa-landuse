@@ -17,8 +17,20 @@ from landuse.agents.graph_builder import GraphBuilder
 from landuse.agents.llm_manager import LLMManager
 from landuse.agents.prompts import get_system_prompt
 from landuse.agents.query_executor import QueryExecutor
+
+# Import PromptManager for versioned prompts
+import sys
+from pathlib import Path
+# Add prompts directory to path if needed
+project_root = Path(__file__).parent.parent.parent.parent
+sys.path.insert(0, str(project_root))
+try:
+    from prompts.prompt_manager import PromptManager
+except ImportError:
+    # Fallback if PromptManager not available
+    PromptManager = None
 from landuse.agents.state import AgentState
-from landuse.config.landuse_config import LanduseConfig
+from landuse.core.app_config import AppConfig
 from landuse.exceptions import GraphExecutionError, LanduseError, ToolExecutionError, wrap_exception
 from landuse.tools.common_tools import create_analysis_tool, create_execute_query_tool, create_schema_tool
 from landuse.tools.state_lookup_tool import create_state_lookup_tool
@@ -37,16 +49,17 @@ class LanduseAgent:
     - GraphBuilder: Constructs LangGraph workflows
     """
 
-    def __init__(self, config: Optional[LanduseConfig] = None):
+    def __init__(self, config: Optional[AppConfig] = None):
         """Initialize the landuse agent with configuration using dependency injection."""
-        self.config = config or LanduseConfig()
+        self.config = config or AppConfig()
+        self.debug = self.config.logging.level == 'DEBUG'
         self.console = Console()
 
         # Initialize component managers
         self.llm_manager = LLMManager(self.config, self.console)
         self.database_manager = DatabaseManager(self.config, self.console)
         self.conversation_manager = ConversationManager(
-            max_history_length=20,
+            max_history_length=self.config.agent.conversation_history_limit,
             console=self.console
         )
 
@@ -58,15 +71,35 @@ class LanduseAgent:
         # Initialize query executor
         self.query_executor = QueryExecutor(self.config, self.db_connection, self.console)
 
-
         # Create tools and system prompt
         self.tools = self._create_tools()
-        self.system_prompt = get_system_prompt(
-            include_maps=self.config.enable_map_generation,
-            analysis_style=self.config.analysis_style,
-            domain_focus=None if self.config.domain_focus == 'none' else self.config.domain_focus,
-            schema_info=self.schema
-        )
+
+        # Use PromptManager if available, otherwise fall back to legacy
+        if PromptManager is not None:
+            try:
+                self.prompt_manager = PromptManager()
+                self.system_prompt = self.prompt_manager.get_prompt_with_schema(
+                    schema_info=self.schema
+                )
+                # Log which version is being used
+                self.console.print(f"[green]✓ Using prompt version: {self.prompt_manager.active_version}[/green]")
+            except Exception as e:
+                # Fall back to legacy if PromptManager fails
+                self.console.print(f"[yellow]⚠ PromptManager not available, using legacy prompts: {e}[/yellow]")
+                self.system_prompt = get_system_prompt(
+                    include_maps=self.config.features.enable_map_generation,
+                    analysis_style='detailed',
+                    domain_focus=None,
+                    schema_info=self.schema
+                )
+        else:
+            # Legacy prompt system
+            self.system_prompt = get_system_prompt(
+                include_maps=self.config.features.enable_map_generation,
+                analysis_style='detailed',
+                domain_focus=None,
+                schema_info=self.schema
+            )
 
         # Initialize graph builder
         self.graph_builder = GraphBuilder(
@@ -77,7 +110,6 @@ class LanduseAgent:
             self.console
         )
         self.graph = None
-
 
 
     def _create_tools(self) -> list[BaseTool]:
@@ -124,7 +156,7 @@ class LanduseAgent:
             response = self.llm.bind_tools(self.tools).invoke(messages)
             messages.append(response)
 
-            if self.config.debug:
+            if self.debug:
                 print(f"DEBUG: Initial response type: {type(response)}")
                 print(f"DEBUG: Has tool calls: {hasattr(response, 'tool_calls') and bool(response.tool_calls)}")
                 if hasattr(response, 'content'):
@@ -153,13 +185,13 @@ class LanduseAgent:
                     for tool in self.tools:
                         if tool.name == tool_name:
                             try:
-                                if self.config.debug:
+                                if self.debug:
                                     print(f"\nDEBUG: Executing tool '{tool_name}'")
                                     print(f"DEBUG: Tool args: {tool_args}")
 
                                 tool_result = tool.invoke(tool_args)
 
-                                if self.config.debug:
+                                if self.debug:
                                     result_str = str(tool_result)
                                     print(f"DEBUG: Tool result length: {len(result_str)} chars")
 
@@ -190,13 +222,13 @@ class LanduseAgent:
                                 break
                             except ToolExecutionError as e:
                                 error_msg = f"Tool execution error: {str(e)}"
-                                if self.config.debug:
+                                if self.debug:
                                     print(f"DEBUG: Tool execution error: {error_msg}")
                                 tool_result = error_msg
                             except Exception as e:
                                 wrapped_error = wrap_exception(e, f"Tool '{tool_name}' execution")
                                 error_msg = f"Tool error: {str(wrapped_error)}"
-                                if self.config.debug:
+                                if self.debug:
                                     print(f"DEBUG: Tool error: {error_msg}")
                                     import traceback
                                     traceback.print_exc()
@@ -215,14 +247,14 @@ class LanduseAgent:
                 response = self.llm.bind_tools(self.tools).invoke(messages)
                 messages.append(response)
 
-                if self.config.debug:
+                if self.debug:
                     print(f"DEBUG: Response after tool execution: {type(response)}")
                     if hasattr(response, 'content'):
                         print(f"DEBUG: Response content type: {type(response.content)}")
                         print(f"DEBUG: Response content: {response.content[:200] if response.content else 'None'}")
 
             # Extract the final text content from the response
-            if self.config.debug:
+            if self.debug:
                 print("\nDEBUG: Extracting final content from response")
                 print(f"DEBUG: Response type: {type(response)}")
                 print(f"DEBUG: Has content attr: {hasattr(response, 'content')}")
@@ -231,7 +263,7 @@ class LanduseAgent:
             final_content = ""
             if hasattr(response, 'content'):
                 content = response.content
-                if self.config.debug:
+                if self.debug:
                     print(f"DEBUG: Content type: {type(content)}")
                     print(f"DEBUG: Content value: {content[:200] if content else 'None'}")
 
@@ -240,7 +272,7 @@ class LanduseAgent:
                     # Extract text from list of content blocks
                     text_parts = []
                     for i, item in enumerate(content):
-                        if self.config.debug:
+                        if self.debug:
                             print(f"DEBUG: Content item {i}: type={type(item)}, value={str(item)[:100]}")
                         if isinstance(item, dict) and item.get('type') == 'text':
                             text_parts.append(item.get('text', ''))
@@ -259,7 +291,7 @@ class LanduseAgent:
 
             # If we still have no content, check if we have tool results we can summarize
             if not final_content.strip() and (query_results or analysis_results):
-                if self.config.debug:
+                if self.debug:
                     print("\nDEBUG: Final content is empty, checking tool results")
                     print(f"DEBUG: Query results count: {len(query_results)}")
                     print(f"DEBUG: Analysis results count: {len(analysis_results)}")
@@ -280,7 +312,7 @@ class LanduseAgent:
             self.conversation_manager.add_conversation(question, final_content)
 
             # Return clean final content without any special formatting
-            if self.config.debug:
+            if self.debug:
                 print(f"\nDEBUG: Final content length: {len(final_content)}")
                 print(f"DEBUG: Final content preview: {final_content[:200]}...")
                 print("DEBUG: === End of simple_query execution ===")
@@ -321,12 +353,12 @@ class LanduseAgent:
                 "messages": initial_messages,
                 "context": {},
                 "iteration_count": 0,
-                "max_iterations": self.config.max_iterations
+                "max_iterations": self.config.agent.max_iterations
             }
 
             # Prepare config with thread_id for memory
             config = {}
-            if thread_id and self.config.enable_memory:
+            if thread_id and self.config.agent.enable_memory:
                 config = {"configurable": {"thread_id": thread_id}}
 
             # Execute the graph
@@ -365,7 +397,7 @@ class LanduseAgent:
 
         except GraphExecutionError as e:
             error_msg = f"Graph execution error: {str(e)}"
-            if self.config.debug:
+            if self.debug:
                 self.console.print(f"[red]DEBUG: {error_msg}[/red]")
             error_response = f"I encountered a workflow error: {str(e)}"
             self.conversation_manager.add_conversation(question, error_response)
@@ -373,7 +405,7 @@ class LanduseAgent:
         except Exception as e:
             wrapped_error = wrap_exception(e, "Graph query execution")
             error_msg = f"Unexpected error in graph execution: {str(wrapped_error)}"
-            if self.config.debug:
+            if self.debug:
                 import traceback
                 self.console.print(f"[red]DEBUG: {error_msg}[/red]")
                 self.console.print(f"[red]{traceback.format_exc()}[/red]")
@@ -418,12 +450,12 @@ class LanduseAgent:
             "messages": [HumanMessage(content=question)],
             "context": {},
             "iteration_count": 0,
-            "max_iterations": self.config.max_iterations
+            "max_iterations": self.config.agent.max_iterations
         }
 
         # Prepare config
         config = {}
-        if thread_id and self.config.enable_memory:
+        if thread_id and self.config.agent.enable_memory:
             config = {"configurable": {"thread_id": thread_id}}
         elif not thread_id:
             config = {"configurable": {"thread_id": f"landuse-stream-{int(time.time())}"}}
@@ -483,7 +515,7 @@ class LanduseAgent:
             table.add_column(col, style="cyan", no_wrap=False)
 
         # Add rows (limit display)
-        display_limit = min(len(results), self.config.default_display_limit)
+        display_limit = min(len(results), self.config.agent.default_display_limit)
         for row in results[:display_limit]:
             table.add_row(*[str(val) for val in row])
 
@@ -558,7 +590,7 @@ class LanduseAgent:
     @property
     def model_name(self) -> str:
         """Get the model name from configuration."""
-        return self.config.model_name
+        return self.config.llm.model_name
 
     def _get_schema_help(self) -> str:
         """Get user-friendly schema information for display in the UI."""

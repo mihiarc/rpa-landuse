@@ -10,7 +10,7 @@ import duckdb
 from rich.console import Console
 from rich.progress import BarColumn, Progress, SpinnerColumn, TextColumn, TimeRemainingColumn
 
-from landuse.config.landuse_config import LanduseConfig
+from landuse.core.app_config import AppConfig
 from landuse.connections.duckdb_connection import DuckDBConnection
 from landuse.utils.retry_decorators import database_retry
 
@@ -22,7 +22,7 @@ class BaseConverter(ABC):
         self,
         input_path: Optional[Path] = None,
         output_path: Optional[Path] = None,
-        config: Optional[LanduseConfig] = None
+        config: Optional[AppConfig] = None
     ):
         """
         Initialize the converter.
@@ -32,12 +32,13 @@ class BaseConverter(ABC):
             output_path: Path to output database or file
             config: Configuration object
         """
-        self.config = config or LanduseConfig()
+        self.config = config or AppConfig()
         self.console = Console()
 
         # Set default paths if not provided
-        self.input_path = input_path or Path(self.config.base_dir) / "data/raw/state_landuse_county.json"
-        self.output_path = output_path or Path(self.config.duckdb_path)
+        base_dir = Path(__file__).parent.parent.parent.parent  # Root of the project
+        self.input_path = input_path or base_dir / "data/raw/state_landuse_county.json"
+        self.output_path = output_path or Path(self.config.database.path)
 
         # Ensure paths exist
         if not self.input_path.exists():

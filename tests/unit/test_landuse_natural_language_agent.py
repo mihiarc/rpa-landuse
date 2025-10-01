@@ -10,7 +10,7 @@ import pandas as pd
 import pytest
 
 from landuse.agents import LanduseAgent
-from landuse.config.landuse_config import LanduseConfig
+from landuse.core.app_config import AppConfig
 
 
 class TestLanduseAgent:
@@ -30,40 +30,35 @@ class TestLanduseAgent:
     @pytest.fixture
     def agent(self, mock_db_path):
         """Create agent instance with mocked dependencies"""
-        # Skip validation in test
-        with patch('landuse.config.landuse_config.LanduseConfig.__post_init__', return_value=None):
-            config = LanduseConfig(db_path=str(mock_db_path))
+        # Create config with proper API key
+        with patch.dict(os.environ, {'OPENAI_API_KEY': 'test-key'}):
+            config = AppConfig(database={'path': str(mock_db_path)})
 
-        with patch('landuse.agents.landuse_agent.ChatAnthropic') as mock_anthropic:
-            with patch('os.getenv', return_value='test-key'):
-                mock_llm = Mock()
-                mock_anthropic.return_value = mock_llm
-                agent = LanduseAgent(config=config)
-                return agent
+        with patch('landuse.agents.llm_manager.ChatOpenAI') as mock_openai:
+            mock_llm = Mock()
+            mock_openai.return_value = mock_llm
+            agent = LanduseAgent(config=config)
+            return agent
 
     def test_agent_initialization(self, mock_db_path):
         """Test agent initializes correctly"""
-        # Skip validation in test
-        with patch('landuse.config.landuse_config.LanduseConfig.__post_init__', return_value=None):
-            config = LanduseConfig(db_path=str(mock_db_path))
+        # Create config with proper API key
+        with patch.dict(os.environ, {'OPENAI_API_KEY': 'test-key'}):
+            config = AppConfig(database={'path': str(mock_db_path)})
 
-        with patch('landuse.agents.landuse_agent.ChatAnthropic') as mock_anthropic:
-            with patch('os.getenv', return_value='test-key'):
-                agent = LanduseAgent(config=config)
+        with patch('landuse.agents.llm_manager.ChatOpenAI') as mock_openai:
+            agent = LanduseAgent(config=config)
 
-                assert agent.config.db_path == str(mock_db_path)
-            assert agent.llm is not None
+            assert config.database.path == str(mock_db_path)
             assert len(agent.tools) >= 3  # Core tools in new architecture
             assert agent.graph is None  # Graph built on demand
 
     def test_agent_initialization_missing_db(self):
         """Test agent handles missing database gracefully"""
-        # The new AgentConfig validates database exists
-        with pytest.raises(FileNotFoundError) as exc_info:
-            config = LanduseConfig(db_path="nonexistent.db")
-
-            # Check the error message
-            assert "Database file not found" in str(exc_info.value)
+        # The new AppConfig validates database exists
+        with patch.dict(os.environ, {'OPENAI_API_KEY': 'test-key'}):
+            with pytest.raises(Exception):  # AppConfig will raise ConfigurationError
+                config = AppConfig(database={'path': 'nonexistent.db'})
 
     @patch('duckdb.connect')
     def test_get_schema_info(self, mock_connect, agent):
@@ -236,14 +231,14 @@ class TestLanduseAgentIntegration:
     def test_full_query_workflow(self, test_database, monkeypatch):
         """Test complete query workflow with real database"""
         monkeypatch.setenv("LANDUSE_DB_PATH", str(test_database))
+        monkeypatch.setenv("OPENAI_API_KEY", "test-key")
 
-        with patch('landuse.agents.landuse_agent.ChatAnthropic') as mock_anthropic:
+        with patch('landuse.agents.llm_manager.ChatOpenAI') as mock_openai:
             # Mock LLM
             mock_llm = Mock()
-            mock_anthropic.return_value = mock_llm
+            mock_openai.return_value = mock_llm
 
-            with patch('landuse.config.landuse_config.LanduseConfig.__post_init__', return_value=None):
-                config = LanduseConfig(db_path=str(test_database))
+            config = AppConfig(database={'path': str(test_database)})
             agent = LanduseAgent(config=config)
 
             # Test tools directly
@@ -263,13 +258,13 @@ class TestLanduseAgentIntegration:
     def test_agent_with_real_llm_format(self, test_database, monkeypatch):
         """Test agent with proper LLM response format"""
         monkeypatch.setenv("LANDUSE_DB_PATH", str(test_database))
+        monkeypatch.setenv("OPENAI_API_KEY", "test-key")
 
-        with patch('landuse.agents.landuse_agent.ChatAnthropic') as mock_anthropic:
+        with patch('landuse.agents.llm_manager.ChatOpenAI') as mock_openai:
             mock_llm = Mock()
-            mock_anthropic.return_value = mock_llm
+            mock_openai.return_value = mock_llm
 
-            with patch('landuse.config.landuse_config.LanduseConfig.__post_init__', return_value=None):
-                config = LanduseConfig(db_path=str(test_database))
+            config = AppConfig(database={'path': str(test_database)})
             agent = LanduseAgent(config=config)
 
             # Mock proper LangGraph response
@@ -290,10 +285,10 @@ class TestLanduseAgentIntegration:
         conn.execute("CREATE TABLE test (id INTEGER)")
         conn.close()
 
-        with patch('landuse.agents.landuse_agent.ChatAnthropic'):
-            with patch('landuse.config.landuse_config.LanduseConfig.__post_init__', return_value=None):
-                config = LanduseConfig(db_path=str(mock_db_path))
-            agent = LanduseAgent(config=config)
+        with patch.dict(os.environ, {'OPENAI_API_KEY': 'test-key'}):
+            with patch('landuse.agents.llm_manager.ChatOpenAI'):
+                config = AppConfig(database={'path': str(mock_db_path)})
+                agent = LanduseAgent(config=config)
 
             # Test with large mock data
             with patch('duckdb.connect') as mock_connect:

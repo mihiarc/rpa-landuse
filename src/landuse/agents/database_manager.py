@@ -1,14 +1,15 @@
 """Database management functionality extracted from monolithic agent class."""
 
-from typing import Optional, Union
+from typing import Optional
+import warnings
 
 import duckdb
 import pandas as pd
 from rich.console import Console
 
-from landuse.config.landuse_config import LanduseConfig
 from landuse.core.app_config import AppConfig
 from landuse.core.interfaces import DatabaseInterface
+from landuse.database.schema_version import SchemaVersion, SchemaVersionManager
 from landuse.infrastructure.performance import time_database_operation
 from landuse.utils.retry_decorators import database_retry
 
@@ -21,18 +22,14 @@ class DatabaseManager(DatabaseInterface):
     Handles database connection creation, schema retrieval, and connection management.
     """
 
-    def __init__(self, config: Optional[Union[LanduseConfig, AppConfig]] = None, console: Optional[Console] = None):
+    def __init__(self, config: Optional[AppConfig] = None, console: Optional[Console] = None):
         """Initialize database manager with configuration."""
-        if isinstance(config, AppConfig):
-            self.app_config = config
-            self.config = self._convert_to_legacy_config(config)
-        else:
-            self.config = config or LanduseConfig()
-            self.app_config = None
-
+        self.config = config or AppConfig()
         self.console = console or Console()
         self._connection: Optional[duckdb.DuckDBPyConnection] = None
         self._schema: Optional[str] = None
+        self._version_manager: Optional[SchemaVersionManager] = None
+        self._db_version: Optional[str] = None
 
     def get_connection(self) -> duckdb.DuckDBPyConnection:
         """
@@ -47,12 +44,14 @@ class DatabaseManager(DatabaseInterface):
 
     def create_connection(self) -> duckdb.DuckDBPyConnection:
         """
-        Create a new database connection.
+        Create a new database connection and check schema version.
 
         Returns:
             DuckDB connection in read-only mode
         """
-        return duckdb.connect(database=self.config.db_path, read_only=True)
+        connection = duckdb.connect(database=self.config.database.path, read_only=True)
+        self._check_schema_version(connection)
+        return connection
 
     @database_retry(max_attempts=3)
     @time_database_operation("get_schema", track_row_count=False)
@@ -81,11 +80,11 @@ class DatabaseManager(DatabaseInterface):
         table_count = result[0] if result else 0
 
         if table_count == 0:
-            raise ValueError(f"No tables found in database at {self.config.db_path}")
+            raise ValueError(f"No tables found in database at {self.config.database.path}")
 
         self.console.print(f"[green]✓ Found {table_count} tables in database[/green]")
 
-        # Get schema information
+        # Get schema information - prioritize combined tables
         schema_query = """
         SELECT
             table_name,
@@ -94,7 +93,23 @@ class DatabaseManager(DatabaseInterface):
             is_nullable
         FROM information_schema.columns
         WHERE table_schema = 'main'
-        ORDER BY table_name, ordinal_position
+        -- Exclude original tables if combined versions exist
+        AND table_name NOT IN ('dim_scenario_original', 'fact_landuse_transitions_original')
+        -- Prioritize combined tables by excluding originals when both exist
+        AND (
+            (table_name = 'dim_scenario_combined' OR table_name NOT LIKE 'dim_scenario')
+            AND (table_name = 'fact_landuse_combined' OR table_name NOT LIKE 'fact_landuse_transitions')
+        )
+        ORDER BY
+            -- Prioritize combined tables and views
+            CASE
+                WHEN table_name = 'dim_scenario_combined' THEN 1
+                WHEN table_name = 'fact_landuse_combined' THEN 2
+                WHEN table_name LIKE 'v_default_transitions' THEN 3
+                WHEN table_name LIKE 'v_scenario_comparisons' THEN 4
+                ELSE 5
+            END,
+            table_name, ordinal_position
         """
 
         result = conn.execute(schema_query).fetchall()
@@ -138,34 +153,6 @@ class DatabaseManager(DatabaseInterface):
         """Context manager exit - clean up connection."""
         self.close()
 
-    def _convert_to_legacy_config(self, app_config: AppConfig) -> LanduseConfig:
-        """Convert AppConfig to legacy LanduseConfig for backward compatibility."""
-        # Create legacy config bypassing validation for now
-        from landuse.config.landuse_config import LanduseConfig
-
-        # Create instance without validation to avoid API key issues during conversion
-        legacy_config = object.__new__(LanduseConfig)
-
-        # Map database settings
-        legacy_config.db_path = app_config.database.path
-
-        # Map LLM settings
-        legacy_config.model = app_config.llm.model_name  # Note: model_name in AppConfig vs model in legacy
-        legacy_config.temperature = app_config.llm.temperature
-        legacy_config.max_tokens = app_config.llm.max_tokens
-
-        # Map agent execution settings
-        legacy_config.max_iterations = app_config.agent.max_iterations
-        legacy_config.max_execution_time = app_config.agent.max_execution_time
-        legacy_config.max_query_rows = app_config.agent.max_query_rows
-        legacy_config.default_display_limit = app_config.agent.default_display_limit
-
-        # Map debugging settings
-        legacy_config.debug = app_config.logging.level == 'DEBUG'
-        legacy_config.enable_memory = app_config.agent.enable_memory
-
-        return legacy_config
-
     @time_database_operation("execute_query")
     def execute_query(self, query: str, **kwargs) -> pd.DataFrame:
         """Execute SQL query and return DataFrame (DatabaseInterface implementation)."""
@@ -186,3 +173,67 @@ class DatabaseManager(DatabaseInterface):
             return result[0] > 0 if result else False
         except Exception:
             return False
+
+    def _check_schema_version(self, connection: duckdb.DuckDBPyConnection) -> None:
+        """Check and log database schema version on connection.
+
+        Args:
+            connection: DuckDB connection to check
+        """
+        try:
+            # Create version manager (read-only safe - only creates table structure if missing)
+            self._version_manager = SchemaVersionManager(connection)
+
+            # Get current database version
+            self._db_version = self._version_manager.get_current_version()
+
+            if self._db_version is None:
+                # Try to detect version from schema structure
+                detected_version = self._version_manager.detect_schema_version()
+                if detected_version:
+                    self._db_version = detected_version
+                    self.console.print(
+                        f"[yellow]⚠ Database schema version not set. Detected as v{detected_version}[/yellow]"
+                    )
+                else:
+                    self.console.print(
+                        "[yellow]⚠ Database schema version unknown. Consider running version migration.[/yellow]"
+                    )
+            else:
+                self.console.print(f"[green]✓ Database schema version: {self._db_version}[/green]")
+
+            # Check compatibility
+            is_compatible, current_version = self._version_manager.check_compatibility()
+            if not is_compatible:
+                warnings.warn(
+                    f"Database version {current_version} may not be fully compatible with "
+                    f"application version {SchemaVersion.CURRENT_VERSION}. "
+                    f"Some features may not work as expected.",
+                    UserWarning
+                )
+                self.console.print(
+                    f"[yellow]⚠ Version compatibility warning: Database v{current_version} "
+                    f"with application v{SchemaVersion.CURRENT_VERSION}[/yellow]"
+                )
+
+        except Exception as e:
+            # Don't fail connection, just log warning
+            self.console.print(f"[yellow]⚠ Could not check schema version: {str(e)}[/yellow]")
+
+    def get_database_version(self) -> Optional[str]:
+        """Get the current database schema version.
+
+        Returns:
+            Version string or None if not versioned
+        """
+        return self._db_version
+
+    def get_version_history(self) -> list:
+        """Get database version history.
+
+        Returns:
+            List of version records or empty list
+        """
+        if self._version_manager:
+            return self._version_manager.get_version_history()
+        return []

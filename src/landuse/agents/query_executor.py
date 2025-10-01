@@ -1,13 +1,14 @@
 """Query execution functionality extracted from monolithic agent class."""
 
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, Optional
 
 import duckdb
 import pandas as pd
 from rich.console import Console
 
 from landuse.agents.formatting import clean_sql_query, format_query_results
-from landuse.config.landuse_config import LanduseConfig
+from landuse.agents.response_formatter import ResponseFormatter
+from landuse.config.scenario_mappings import ScenarioMapping
 from landuse.core.app_config import AppConfig
 from landuse.exceptions import DatabaseError, QueryValidationError, wrap_exception
 from landuse.infrastructure.performance import time_database_operation
@@ -24,7 +25,7 @@ class QueryExecutor:
 
     def __init__(
         self,
-        config: Union[LanduseConfig, AppConfig],
+        config: AppConfig,
         db_connection: duckdb.DuckDBPyConnection,
         console: Optional[Console] = None
     ):
@@ -32,24 +33,55 @@ class QueryExecutor:
         Initialize query executor.
 
         Args:
-            config: Configuration object (AppConfig or legacy LanduseConfig)
+            config: Configuration object
             db_connection: Database connection
             console: Rich console for logging (optional)
         """
-        if isinstance(config, AppConfig):
-            self.app_config = config
-            self.config = self._convert_to_legacy_config(config)
-        else:
-            self.config = config
-            self.app_config = None
-
+        self.config = config
         self.db_connection = db_connection
         self.console = console or Console()
+
+    def translate_scenario_in_query(self, query: str) -> str:
+        """
+        Translate user-friendly scenario names to database names in SQL queries.
+
+        Handles RPA codes (LM, HM, HL, HH) and scenario names, converting them
+        to database format (RCP45_SSP1, RCP85_SSP2, etc.) for query execution.
+
+        Args:
+            query: SQL query possibly containing user-friendly scenario names
+
+        Returns:
+            Query with database scenario names
+
+        Example:
+            >>> executor.translate_scenario_in_query("WHERE scenario_name = 'LM'")
+            "WHERE scenario_name = 'RCP45_SSP1'"
+        """
+        if not query:
+            return query
+
+        modified_query = query
+
+        # Replace RPA codes with database names (but not OVERALL, which stays the same)
+        for rpa_code, db_name in ScenarioMapping.RPA_TO_DB.items():
+            if rpa_code == 'OVERALL' or rpa_code not in modified_query:
+                continue
+
+            # Replace in single quotes
+            modified_query = modified_query.replace(f"'{rpa_code}'", f"'{db_name}'")
+            # Replace in double quotes
+            modified_query = modified_query.replace(f'"{rpa_code}"', f'"{db_name}"')
+
+        return modified_query
 
     @time_database_operation("execute_query_with_formatting")
     def execute_query(self, query: str) -> Dict[str, Any]:
         """
         Execute a SQL query with standard error handling and formatting.
+
+        Automatically translates user-friendly scenario names to database names
+        and formats results with user-friendly names.
 
         Args:
             query: SQL query string to execute
@@ -59,7 +91,11 @@ class QueryExecutor:
         """
         cleaned_query = clean_sql_query(query)
 
-        if self.config.debug:
+        # Translate scenario names from user-friendly to database format
+        cleaned_query = self.translate_scenario_in_query(cleaned_query)
+
+        debug_mode = self.config.logging.level == 'DEBUG'
+        if debug_mode:
             print("\nDEBUG execute_query: Executing SQL query")
             print(f"DEBUG execute_query: Query: {cleaned_query}")
 
@@ -69,12 +105,12 @@ class QueryExecutor:
 
             # Add row limit if not present for safety
             if "limit" not in cleaned_query.lower():
-                cleaned_query = f"{cleaned_query.rstrip(';')} LIMIT {self.config.max_query_rows}"
+                cleaned_query = f"{cleaned_query.rstrip(';')} LIMIT {self.config.agent.max_query_rows}"
 
             result = self.db_connection.execute(cleaned_query).fetchall()
             columns = [desc[0] for desc in self.db_connection.description] if self.db_connection.description else []
 
-            if self.config.debug:
+            if debug_mode:
                 print(f"DEBUG execute_query: Result row count: {len(result)}")
                 print(f"DEBUG execute_query: Columns: {columns}")
                 if result and len(result) > 0:
@@ -85,6 +121,15 @@ class QueryExecutor:
             # Convert to DataFrame for formatting
             df = pd.DataFrame(result, columns=columns)
 
+            # Format scenario names in DataFrame if present
+            if 'scenario_name' in df.columns:
+                df = ResponseFormatter.format_dataframe_scenarios(
+                    df,
+                    scenario_column='scenario_name',
+                    format='full',
+                    sort=True
+                )
+
             # Format results
             formatted_results = format_query_results(df, cleaned_query)
 
@@ -94,14 +139,15 @@ class QueryExecutor:
                 "results": result,
                 "columns": columns,
                 "formatted": formatted_results,
-                "row_count": len(result)
+                "row_count": len(result),
+                "dataframe": df  # Include formatted DataFrame
             }
 
         except (duckdb.Error, duckdb.CatalogException, duckdb.SyntaxException, duckdb.BinderException) as e:
             error_msg = str(e)
             suggestion = self._get_error_suggestion(error_msg)
 
-            if self.config.debug:
+            if debug_mode:
                 print(f"DEBUG execute_query: DuckDB Error: {error_msg}")
                 print(f"DEBUG execute_query: Suggestion: {suggestion}")
 
@@ -114,7 +160,7 @@ class QueryExecutor:
         except ValueError as e:
             # Security validation or other validation errors
             error_msg = str(e)
-            if self.config.debug:
+            if debug_mode:
                 print(f"DEBUG execute_query: Validation Error: {error_msg}")
 
             return {
@@ -128,7 +174,7 @@ class QueryExecutor:
             wrapped_error = wrap_exception(e, "Query execution")
             error_msg = str(wrapped_error)
 
-            if self.config.debug:
+            if debug_mode:
                 print(f"DEBUG execute_query: Unexpected Error: {error_msg}")
                 import traceback
                 traceback.print_exc()
@@ -163,30 +209,3 @@ class QueryExecutor:
         else:
             return "Check the query syntax and ensure all table/column names match the schema exactly."
 
-    def _convert_to_legacy_config(self, app_config: AppConfig) -> LanduseConfig:
-        """Convert AppConfig to legacy LanduseConfig for backward compatibility."""
-        # Create legacy config bypassing validation for now
-        from landuse.config.landuse_config import LanduseConfig
-
-        # Create instance without validation to avoid API key issues during conversion
-        legacy_config = object.__new__(LanduseConfig)
-
-        # Map database settings
-        legacy_config.db_path = app_config.database.path
-
-        # Map LLM settings
-        legacy_config.model = app_config.llm.model_name  # Note: model_name in AppConfig vs model in legacy
-        legacy_config.temperature = app_config.llm.temperature
-        legacy_config.max_tokens = app_config.llm.max_tokens
-
-        # Map agent execution settings
-        legacy_config.max_iterations = app_config.agent.max_iterations
-        legacy_config.max_execution_time = app_config.agent.max_execution_time
-        legacy_config.max_query_rows = app_config.agent.max_query_rows
-        legacy_config.default_display_limit = app_config.agent.default_display_limit
-
-        # Map debugging settings
-        legacy_config.debug = app_config.logging.level == 'DEBUG'
-        legacy_config.enable_memory = app_config.agent.enable_memory
-
-        return legacy_config

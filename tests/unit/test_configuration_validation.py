@@ -12,7 +12,6 @@ from unittest.mock import patch
 import pytest
 from pydantic import ValidationError
 
-from landuse.config.landuse_config import LanduseConfig
 from landuse.core.app_config import AppConfig, LLMConfig
 from landuse.exceptions import ConfigurationError
 
@@ -33,14 +32,9 @@ class TestConfigurationValidation:
 
         for model in valid_models:
             with patch.dict(os.environ, {'OPENAI_API_KEY': 'sk-test123456789012345678901234567890123456789012345'}):
-                # Test with new AppConfig
+                # Test with AppConfig
                 llm_config = LLMConfig(model_name=model)
                 assert llm_config.model_name == model
-
-                # Test with legacy config
-                with patch('landuse.config.landuse_config.LanduseConfig.__post_init__', return_value=None):
-                    legacy_config = LanduseConfig(model_name=model)
-                    assert legacy_config.model_name == model
 
     def test_missing_openai_api_key_validation(self):
         """Test that missing OpenAI API key is caught during validation."""
@@ -61,11 +55,7 @@ class TestConfigurationValidation:
         for model in anthropic_models:
             with patch.dict(os.environ, {'OPENAI_API_KEY': 'sk-test123456789012345678901234567890123456789012345'}):
                 # Configuration should accept any model name, but validation happens at runtime
-                with patch('landuse.config.landuse_config.LanduseConfig.__post_init__', return_value=None):
-                    legacy_config = LanduseConfig(model_name=model)
-                    assert legacy_config.model_name == model
-
-                # New config should also accept but require OpenAI key
+                # AppConfig should also accept but require OpenAI key
                 llm_config = LLMConfig(model_name=model)
                 assert llm_config.model_name == model
 
@@ -160,68 +150,63 @@ class TestConfigurationValidation:
         with pytest.raises(ValidationError):
             AgentConfig(max_execution_time=0)  # Should be >= 1
 
-    def test_legacy_config_environment_integration(self):
-        """Test legacy config environment variable integration."""
+    def test_app_config_environment_integration(self):
+        """Test AppConfig environment variable integration."""
         test_env = {
-            'LANDUSE_MODEL': 'gpt-4o',
-            'TEMPERATURE': '0.3',
-            'MAX_TOKENS': '3000',
-            'LANDUSE_MAX_ITERATIONS': '10'
+            'OPENAI_API_KEY': 'sk-test123456789012345678901234567890123456789012345',
+            'LANDUSE_LLM__MODEL_NAME': 'gpt-4o',
+            'LANDUSE_LLM__TEMPERATURE': '0.3',
+            'LANDUSE_LLM__MAX_TOKENS': '3000',
+            'LANDUSE_AGENT__MAX_ITERATIONS': '10'
         }
 
         with patch.dict(os.environ, test_env):
-            with patch('landuse.config.landuse_config.LanduseConfig.__post_init__', return_value=None):
-                config = LanduseConfig()
+            config = AppConfig()
 
-                assert config.model_name == 'gpt-4o'
-                assert config.temperature == 0.3
-                assert config.max_tokens == 3000
-                assert config.max_iterations == 10
+            assert config.llm.model_name == 'gpt-4o'
+            assert config.llm.temperature == 0.3
+            assert config.llm.max_tokens == 3000
+            assert config.agent.max_iterations == 10
 
 
 class TestConfigurationMigration:
     """Test configuration migration and compatibility."""
 
-    def test_app_config_to_legacy_conversion(self):
-        """Test conversion from AppConfig to legacy config."""
+    def test_app_config_structure(self):
+        """Test AppConfig structure and nested configuration."""
         with patch.dict(os.environ, {'OPENAI_API_KEY': 'sk-test123456789012345678901234567890123456789012345'}):
             app_config = AppConfig(
                 llm={'model_name': 'gpt-4o', 'temperature': 0.5, 'max_tokens': 2000},
                 agent={'max_iterations': 12, 'enable_memory': True},
-                database={'path': 'test.duckdb'},
+                database={'path': ':memory:'},
                 logging={'level': 'INFO'}
             )
 
-            # This would typically be done by LLMManager
-            from landuse.agents.llm_manager import LLMManager
-            manager = LLMManager(app_config)
-            legacy_config = manager.config
+            # Verify nested structure
+            assert app_config.llm.model_name == 'gpt-4o'
+            assert app_config.llm.temperature == 0.5
+            assert app_config.llm.max_tokens == 2000
+            assert app_config.agent.max_iterations == 12
+            assert app_config.agent.enable_memory is True
+            assert app_config.database.path == ':memory:'
+            assert app_config.logging.level == 'INFO'
 
-            assert legacy_config.model_name == 'gpt-4o'
-            assert legacy_config.temperature == 0.5
-            assert legacy_config.max_tokens == 2000
-            assert legacy_config.max_iterations == 12
-            assert legacy_config.enable_memory is True
-            assert legacy_config.db_path == 'test.duckdb'
-            assert legacy_config.debug is False  # INFO level
-
-    def test_legacy_config_compatibility(self):
-        """Test that legacy configs work with new systems."""
-        with patch('landuse.config.landuse_config.LanduseConfig.__post_init__', return_value=None):
-            legacy_config = LanduseConfig(
-                model_name="gpt-4o-mini",
-                temperature=0.4,
-                max_iterations=6,
-                enable_memory=True
+    def test_app_config_with_managers(self):
+        """Test that AppConfig works with manager classes."""
+        with patch.dict(os.environ, {'OPENAI_API_KEY': 'sk-test123456789012345678901234567890123456789012345'}):
+            app_config = AppConfig(
+                llm={'model_name': 'gpt-4o-mini', 'temperature': 0.4},
+                agent={'max_iterations': 6, 'enable_memory': True}
             )
 
         # Should work with LLM manager
         from landuse.agents.llm_manager import LLMManager
-        manager = LLMManager(legacy_config)
+        manager = LLMManager(app_config)
 
-        assert manager.config.model_name == "gpt-4o-mini"
-        assert manager.config.temperature == 0.4
-        assert manager.config.max_iterations == 6
+        # Manager stores the AppConfig with nested properties
+        assert manager.config.llm.model_name == "gpt-4o-mini"
+        assert manager.config.llm.temperature == 0.4
+        assert manager.config.agent.max_iterations == 6
 
     def test_configuration_validation_edge_cases(self):
         """Test edge cases in configuration validation."""
