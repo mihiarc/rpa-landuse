@@ -177,8 +177,8 @@ def show_smart_example_queries():
 
     if "selected_model" not in st.session_state:
         # Default to OpenAI
-        # st.session_state.selected_model = "gpt-4o-mini"
-        st.session_state.selected_model = "bedrock"
+        st.session_state.selected_model = "gpt-4o-mini"
+        # st.session_state.selected_model = "bedrock"
 
 def show_welcome_message():
     """Show welcome message with example queries"""
