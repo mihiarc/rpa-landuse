@@ -40,15 +40,24 @@ nav:
   - Home: index.md
   - Getting Started:
     - Complete Setup Guide: getting-started/complete-setup.md
+    - Quick Start: getting-started/quickstart.md
+    - Configuration: getting-started/configuration.md
     - FAQ: getting-started/faq.md
     - Troubleshooting: getting-started/troubleshooting.md
     - Streamlit Issues:
       - Duplicate IDs: getting-started/streamlit-issues/duplicate-ids.md
       - Fragments Guide: getting-started/streamlit-issues/fragments-guide.md
   - RPA Assessment:
-    - Complete Assessment Reference: rpa/rpa-assessment-complete.md
+    - Overview: rpa/overview.md
+    - Methodology: LAND_USE_METHODOLOGY.md
+    - Scenarios: RPA_SCENARIOS.md
+    - Climate Models: rpa/climate-models.md
+    - Complete Reference: rpa/rpa-assessment-complete.md
   - Natural Language Queries:
     - Complete Query Guide: queries/complete-guide.md
+    - Query Examples: queries/examples.md
+    - Basic Queries: queries/basic-queries.md
+    - Advanced Queries: queries/advanced-queries.md
   - Agent System:
     - Complete Agent Guide: agents/complete-guide.md
     - API Reference:
@@ -57,6 +66,7 @@ nav:
       - LangGraph Integration: api/langgraph-agent.md
   - Data & Database:
     - Complete Database Reference: data/complete-reference.md
+    - Database Schema: data/duckdb-schema.md
     - Data Dictionary: data/data-dictionary.md
     - Data Sources: data/sources.md
     - Land Use Categories: data/categories.md
@@ -65,6 +75,8 @@ nav:
     - Data Processing: data/processing.md
   - Examples & Use Cases:
     - Complete Examples Guide: examples/complete-examples.md
+    - Workflows: examples/workflows.md
+    - Use Cases: examples/use-cases.md
   - API Reference:
     - Data Converters: api/converters.md
     - Tools & Utilities: api/tools.md
@@ -81,6 +93,14 @@ nav:
     - Security Policy: development/security-policy.md
     - DuckDB Optimization: development/duckdb-optimization.md
     - Streamlit Fragments: development/streamlit-fragments.md
+    - UX Improvements:
+      - Before & After: development/ux-improvements/UX_BEFORE_AFTER.md
+      - Summary: development/ux-improvements/UX_IMPROVEMENTS_SUMMARY.md
+  - Reference:
+    - Environment Variables: reference/environment-variables.md
+    - Scenario Mappings: reference/scenario-mappings.md
+    - Prompt Versioning: reference/prompt-versioning.md
+    - Schema Versioning: SCHEMA_VERSIONING.md
 
 strict: false
 
