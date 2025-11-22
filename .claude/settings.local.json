@@ -64,7 +64,8 @@
       "Bash(git lfs track:*)",
       "Bash(git lfs:*)",
       "Bash(sha256sum:*)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(docs/DATABASE_SCHEMA.md)"
     ],
     "deny": []
   }

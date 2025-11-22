@@ -94,7 +94,8 @@ def migrate(ctx, version, dry_run):
         db_path=Path(config.database.path),
         schema_dir=schema_dir,
         config=config,
-        console=console
+        console=console,
+        read_only=False  # Need write access for migrations
     )
 
     console.print(f"[bold]Migrating to version: {version}[/bold]")

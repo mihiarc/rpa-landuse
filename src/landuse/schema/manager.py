@@ -41,7 +41,8 @@ class SchemaManager:
         db_path: Path,
         schema_dir: Path,
         config: Optional[AppConfig] = None,
-        console: Optional[Console] = None
+        console: Optional[Console] = None,
+        read_only: bool = True
     ):
         """Initialize schema manager.
 
@@ -50,11 +51,13 @@ class SchemaManager:
             schema_dir: Directory containing schema definitions
             config: Application configuration
             console: Rich console for output
+            read_only: Whether to open database in read-only mode (default: True)
         """
         self.db_path = Path(db_path)
         self.schema_dir = Path(schema_dir)
         self.config = config or AppConfig()
         self.console = console or Console()
+        self.read_only = read_only
 
         # Create directories if they don't exist
         self.definitions_dir = self.schema_dir / "definitions"
@@ -77,7 +80,7 @@ class SchemaManager:
         if self._connection is None:
             self._connection = duckdb.connect(
                 str(self.db_path),
-                read_only=False  # Need write access for migrations
+                read_only=self.read_only
             )
         return self._connection
 
@@ -317,17 +320,26 @@ class SchemaManager:
         self.console.print(f"[green]Generated models at {models_path}[/green]")
         return models_path
 
-    def export_schema(self, format: str = "sql") -> str:
+    def export_schema(self, format: str = "sql", version: Optional[str] = None) -> str:
         """Export schema in specified format.
 
         Args:
             format: Export format (sql, markdown, json, mermaid)
+            version: Schema version to export (defaults to latest available)
 
         Returns:
             Exported schema string
         """
-        current_version = self.get_current_version() or "2.2.0"
-        schema_def = self.load_definition(current_version)
+        # If no version specified, use latest available schema definition
+        if version is None:
+            available_versions = sorted(self.definitions_dir.glob("v*.yaml"))
+            if available_versions:
+                # Get version from filename (e.g., "v2.2.0.yaml" -> "2.2.0")
+                version = available_versions[-1].stem[1:]  # Remove 'v' prefix from stem
+            else:
+                version = "2.2.0"  # Fallback
+
+        schema_def = self.load_definition(version)
 
         doc_generator = SchemaDocGenerator()
 
