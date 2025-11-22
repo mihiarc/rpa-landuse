@@ -33,6 +33,14 @@ class SchemaError(DatabaseError):
     pass
 
 
+class MigrationError(SchemaError):
+    """Schema migration errors."""
+
+    def __init__(self, message: str, migration_version: str = None, error_code: str = None):
+        super().__init__(message, error_code=error_code)
+        self.migration_version = migration_version
+
+
 class SecurityError(LanduseError):
     """Security-related errors."""
     pass
