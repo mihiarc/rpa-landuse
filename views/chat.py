@@ -214,7 +214,7 @@ def handle_user_input():
 
         # Generate and display response
         with st.chat_message("assistant"):
-            with st.spinner("Analyzing..."):
+            with st.spinner("Analyzing your question... This typically takes 30-60 seconds."):
                 try:
                     # Track query time
                     start_time = time.time()
