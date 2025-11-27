@@ -434,16 +434,18 @@ def create_agricultural_flow_chart(df_loss, df_gain):
     colors = []
 
     # Add losses (negative values)
+    # Colorblind-safe: blue for losses
     for landuse, acres in loss_by_type.items():
         x_labels.append(f"To {landuse}")
         y_values.append(-acres)
-        colors.append('rgba(237, 170, 151, 0.6)')  # RPA pink for losses
+        colors.append('rgba(33, 102, 172, 0.7)')  # Blue - colorblind safe for losses
 
     # Add gains (positive values)
+    # Colorblind-safe: orange for gains
     for landuse, acres in gain_by_type.items():
         x_labels.append(f"From {landuse}")
         y_values.append(acres)
-        colors.append('rgba(133, 177, 139, 0.6)')  # RPA green for gains
+        colors.append('rgba(217, 95, 2, 0.7)')  # Orange - colorblind safe for gains
 
     # Create bar chart
     fig.add_trace(go.Bar(
@@ -494,16 +496,18 @@ def create_forest_flow_chart(df_loss, df_gain):
     colors = []
 
     # Add losses (negative values)
+    # Colorblind-safe: blue for losses
     for landuse, acres in loss_by_type.items():
         x_labels.append(f"To {landuse}")
         y_values.append(-acres)
-        colors.append('rgba(237, 170, 151, 0.6)')  # RPA pink for losses
+        colors.append('rgba(33, 102, 172, 0.7)')  # Blue - colorblind safe for losses
 
     # Add gains (positive values)
+    # Colorblind-safe: orange for gains
     for landuse, acres in gain_by_type.items():
         x_labels.append(f"From {landuse}")
         y_values.append(acres)
-        colors.append('rgba(133, 177, 139, 0.6)')  # RPA green for gains
+        colors.append('rgba(217, 95, 2, 0.7)')  # Orange - colorblind safe for gains
 
     # Create bar chart
     fig.add_trace(go.Bar(
@@ -699,11 +703,14 @@ def create_forest_scenario_comparison(df_loss, df_gain):
 
     scenarios = ['rcp45', 'rcp85']
 
+    # Colorblind-safe palette: blue (#2166ac) for loss, orange (#d95f02) for gain
+    # These colors are distinguishable for deuteranopia, protanopia, and tritanopia
     fig.add_trace(go.Bar(
         name='Forest Loss',
         x=scenarios,
         y=[-loss_by_scenario.get(s, 0) for s in scenarios],
-        marker_color='rgba(255, 99, 71, 0.7)',
+        marker_color='rgba(33, 102, 172, 0.8)',  # Blue - colorblind safe
+        marker_pattern_shape='/',  # Add pattern for additional encoding
         text=[f"{abs(loss_by_scenario.get(s, 0)/1e6):.1f}M" for s in scenarios],
         textposition='outside'
     ))
@@ -712,7 +719,8 @@ def create_forest_scenario_comparison(df_loss, df_gain):
         name='Forest Gain',
         x=scenarios,
         y=[gain_by_scenario.get(s, 0) for s in scenarios],
-        marker_color='rgba(34, 139, 34, 0.7)',
+        marker_color='rgba(217, 95, 2, 0.8)',  # Orange - colorblind safe
+        marker_pattern_shape='',  # Solid fill for contrast with hatched pattern
         text=[f"{gain_by_scenario.get(s, 0)/1e6:.1f}M" for s in scenarios],
         textposition='outside'
     ))

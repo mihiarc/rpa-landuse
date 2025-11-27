@@ -38,7 +38,7 @@ class LLMManager(LLMInterface):
         Raises:
             ValueError: If required API keys are missing
         """
-        model_name = "gpt-4o-mini"
+        model_name = self.config.llm.model_name
         self.console.print(f"[blue]Initializing LLM: {model_name}[/blue]")
         return self._create_openai_llm(model_name)
 
@@ -73,7 +73,7 @@ class LLMManager(LLMInterface):
 
     def get_model_name(self) -> str:
         """Get the current model name."""
-        return "gpt-4o-mini"
+        return self.config.llm.model_name
 
     def validate_api_key(self) -> bool:
         """Validate API key is available and valid."""

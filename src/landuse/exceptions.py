@@ -1,4 +1,13 @@
-"""Custom exception hierarchy for the landuse application."""
+"""Custom exception hierarchy for the landuse application.
+
+Consolidated exception hierarchy with 6 main exception types:
+- LanduseError: Base exception for all landuse-related errors
+- DatabaseError: All database-related errors (connections, schema, migrations, queries)
+- ConfigurationError: Configuration and setup errors
+- AgentError: LLM, tool execution, graph execution, and conversation errors
+- SecurityError: Security-related errors
+- ValidationError: Data validation errors
+"""
 
 
 class LanduseError(Exception):
@@ -11,39 +20,21 @@ class LanduseError(Exception):
 
 
 class DatabaseError(LanduseError):
-    """Database-related errors."""
+    """Database-related errors including connections, schema, migrations, and queries.
+
+    Consolidates: ConnectionError, SchemaError, MigrationError, QueryValidationError
+    """
 
     def __init__(self, message: str, query: str = None, error_code: str = None):
         super().__init__(message, error_code)
         self.query = query
 
 
-class QueryValidationError(DatabaseError):
-    """SQL query validation errors."""
-    pass
-
-
-class ConnectionError(DatabaseError):
-    """Database connection errors."""
-    pass
-
-
-class SchemaError(DatabaseError):
-    """Database schema-related errors."""
-    pass
-
-
-class MigrationError(SchemaError):
-    """Schema migration errors."""
-
-    def __init__(self, message: str, migration_version: str = None, error_code: str = None):
-        super().__init__(message, error_code=error_code)
-        self.migration_version = migration_version
-
-
-class SecurityError(LanduseError):
-    """Security-related errors."""
-    pass
+# Backward compatibility aliases for DatabaseError subtypes
+DatabaseConnectionError = DatabaseError  # Renamed from ConnectionError to avoid shadowing builtin
+SchemaError = DatabaseError
+MigrationError = DatabaseError
+QueryValidationError = DatabaseError
 
 
 class ConfigurationError(LanduseError):
@@ -51,48 +42,30 @@ class ConfigurationError(LanduseError):
     pass
 
 
-class LLMError(LanduseError):
-    """Language model related errors."""
+class AgentError(LanduseError):
+    """Agent-related errors including LLM, tool execution, graph execution, and conversation.
 
-    def __init__(self, message: str, model_name: str = None, error_code: str = None):
+    Consolidates: LLMError, APIKeyError, ToolExecutionError, GraphExecutionError,
+                  ConversationError, MapGenerationError
+    """
+
+    def __init__(self, message: str, component: str = None, error_code: str = None):
         super().__init__(message, error_code)
-        self.model_name = model_name
+        self.component = component  # e.g., 'llm', 'tool', 'graph', 'conversation'
 
 
-class APIKeyError(LLMError):
-    """API key related errors."""
+# Backward compatibility aliases for AgentError subtypes
+LLMError = AgentError
+APIKeyError = AgentError
+ToolExecutionError = AgentError
+GraphExecutionError = AgentError
+ConversationError = AgentError
+MapGenerationError = AgentError
+
+
+class SecurityError(LanduseError):
+    """Security-related errors."""
     pass
-
-
-class ToolExecutionError(LanduseError):
-    """Tool execution errors."""
-
-    def __init__(self, message: str, tool_name: str = None, error_code: str = None):
-        super().__init__(message, error_code)
-        self.tool_name = tool_name
-
-
-class ConversationError(LanduseError):
-    """Conversation management errors."""
-    pass
-
-
-class GraphExecutionError(LanduseError):
-    """LangGraph execution errors."""
-    pass
-
-
-class MapGenerationError(ToolExecutionError):
-    """Map generation specific errors."""
-    pass
-
-
-class DataProcessingError(LanduseError):
-    """Data processing and conversion errors."""
-
-    def __init__(self, message: str, file_path: str = None, error_code: str = None):
-        super().__init__(message, error_code)
-        self.file_path = file_path
 
 
 class ValidationError(LanduseError):
@@ -103,38 +76,42 @@ class ValidationError(LanduseError):
         self.field_name = field_name
 
 
+# Backward compatibility alias
+DataProcessingError = ValidationError
+
+
 # Mapping of common exception types to our custom exceptions
 EXCEPTION_MAPPING = {
     # Database exceptions
     'duckdb.Error': DatabaseError,
-    'duckdb.CatalogException': SchemaError,
-    'duckdb.SyntaxException': QueryValidationError,
-    'duckdb.BinderException': QueryValidationError,
+    'duckdb.CatalogException': DatabaseError,
+    'duckdb.SyntaxException': DatabaseError,
+    'duckdb.BinderException': DatabaseError,
     'duckdb.ConversionException': DatabaseError,
     'sqlite3.Error': DatabaseError,
     'sqlite3.OperationalError': DatabaseError,
 
     # Network/API exceptions
-    'requests.exceptions.RequestException': LLMError,
-    'requests.exceptions.ConnectionError': ConnectionError,
-    'requests.exceptions.Timeout': LLMError,
-    'requests.exceptions.HTTPError': LLMError,
+    'requests.exceptions.RequestException': AgentError,
+    'requests.exceptions.ConnectionError': DatabaseError,
+    'requests.exceptions.Timeout': AgentError,
+    'requests.exceptions.HTTPError': AgentError,
 
     # File/IO exceptions
-    'FileNotFoundError': DataProcessingError,
-    'PermissionError': DataProcessingError,
-    'OSError': DataProcessingError,
-    'IOError': DataProcessingError,
+    'FileNotFoundError': ValidationError,
+    'PermissionError': ValidationError,
+    'OSError': ValidationError,
+    'IOError': ValidationError,
 
     # JSON/Data exceptions
-    'json.JSONDecodeError': DataProcessingError,
+    'json.JSONDecodeError': ValidationError,
     'ValueError': ValidationError,
     'KeyError': ValidationError,
     'TypeError': ValidationError,
 
     # LangChain exceptions
-    'langchain.schema.LLMError': LLMError,
-    'langchain_core.exceptions.LangChainException': LLMError,
+    'langchain.schema.LLMError': AgentError,
+    'langchain_core.exceptions.LangChainException': AgentError,
 }
 
 
@@ -191,8 +168,8 @@ def handle_database_exception(func):
             # Convert to our custom exception hierarchy
             if 'duckdb' in str(type(e)).lower():
                 raise wrap_exception(e, f"Database error in {func.__name__}")
-            elif isinstance(e, (ConnectionError, OSError)):
-                raise ConnectionError(f"Connection failed in {func.__name__}: {str(e)}")
+            elif isinstance(e, OSError):
+                raise DatabaseError(f"Connection failed in {func.__name__}: {str(e)}")
             else:
                 raise wrap_exception(e, f"Error in {func.__name__}")
 

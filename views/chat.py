@@ -214,61 +214,73 @@ def handle_user_input():
 
         # Generate and display response
         with st.chat_message("assistant"):
-            with st.spinner("Analyzing your question... This typically takes 30-60 seconds."):
-                try:
-                    # Track query time
-                    start_time = time.time()
+            start_time = time.time()
+
+            try:
+                # Use Streamlit's native spinner with processing time estimate
+                with st.spinner("🔍 Analyzing your question... (typically 5-15 seconds)"):
                     response = agent.query(prompt)
-                    query_time = time.time() - start_time
+                query_time = time.time() - start_time
 
-                    # Ensure response is a string
-                    if not isinstance(response, str):
-                        response = str(response)
+                # Ensure response is a string
+                if not isinstance(response, str):
+                    response = str(response)
 
-                    if not response or response.isspace():
-                        response = "I couldn't generate a response. Please try rephrasing your question."
+                if not response or response.isspace():
+                    response = "I couldn't generate a response. Please try rephrasing your question."
 
-                    st.markdown(response)
+                st.markdown(response)
 
-                    # Show performance feedback
-                    st.caption(f"⏱️ Response time: {query_time:.1f}s")
+                # Show performance feedback
+                st.caption(f"Response time: {query_time:.1f}s")
 
-                    # Add to history
-                    st.session_state.messages.append({
-                        "role": "assistant",
-                        "content": response
-                    })
+                # Add to history
+                st.session_state.messages.append({
+                    "role": "assistant",
+                    "content": response
+                })
 
-                except Exception as e:
-                    error_msg = str(e)
+            except Exception as e:
+                error_msg = str(e)
 
-                    # Simple error handling
-                    if "rate" in error_msg.lower() or "429" in error_msg:
-                        st.error("⏸️ **Rate limit reached.** Please wait a moment and try again.")
-                    elif "timeout" in error_msg.lower():
-                        st.error("⏱️ **Query timeout.** Try a simpler query.")
-                    else:
-                        st.error(f"❌ Error: {error_msg[:200]}")
+                # Simple error handling
+                if "rate" in error_msg.lower() or "429" in error_msg:
+                    st.error("**Rate limit reached.** Please wait a moment and try again.")
+                elif "timeout" in error_msg.lower():
+                    st.error("**Query timeout.** Try a simpler query.")
+                else:
+                    st.error(f"Error: {error_msg[:200]}")
 
-                    # Add error to history
-                    st.session_state.messages.append({
-                        "role": "assistant",
-                        "content": f"❌ Error: {error_msg[:200]}"
-                    })
+                # Add error to history
+                st.session_state.messages.append({
+                    "role": "assistant",
+                    "content": f"Error: {error_msg[:200]}"
+                })
 
 
 def main():
     """Main chat interface - simplified"""
-    # Minimal CSS for accessibility and mobile
+    # CSS for accessibility and mobile responsiveness
     st.markdown("""
     <style>
     /* Ensure minimum touch target size for mobile */
     .stButton > button { min-height: 44px; }
     /* Better spacing for chat messages */
     .stChatMessage { margin-bottom: 0.5rem; }
-    /* Responsive columns on mobile */
+    /* Responsive status bar - stack on mobile */
     @media (max-width: 768px) {
-        .stColumns { flex-direction: column; }
+        /* Force status bar columns to wrap into 2x2 grid on mobile */
+        div[data-testid="column"] {
+            min-width: 45% !important;
+            flex: 1 1 45% !important;
+        }
+    }
+    @media (max-width: 480px) {
+        /* Full width on very small screens */
+        div[data-testid="column"] {
+            min-width: 100% !important;
+            flex: 1 1 100% !important;
+        }
     }
     </style>
     """, unsafe_allow_html=True)
@@ -311,7 +323,7 @@ def main():
         if st.button("🔄 Clear", use_container_width=True):
             st.session_state.messages = []
             st.session_state.show_welcome = True
-            st.session_state.first_visit = True  # Reset onboarding for fresh start
+            # Note: Do NOT reset first_visit - users should not see onboarding again after clearing chat
             st.rerun()
 
     # Show smart example queries (educational prompts)

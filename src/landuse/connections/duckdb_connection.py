@@ -30,7 +30,7 @@ import duckdb
 import pandas as pd
 from pydantic import BaseModel, Field
 
-from ..exceptions import ConnectionError, DatabaseError, wrap_exception
+from ..exceptions import DatabaseConnectionError, DatabaseError, wrap_exception
 from ..models import QueryResult, SQLQuery
 from ..security.database_security import DatabaseSecurity
 from ..utils.retry_decorators import database_retry, network_retry
@@ -108,7 +108,7 @@ class DuckDBConnection(BaseConnection[duckdb.DuckDBPyConnection]):
             return duckdb.connect(database=db, read_only=read_only, **kwargs)
         except Exception as e:
             # Add context to connection errors
-            raise ConnectionError(f"Failed to connect to DuckDB at {db}: {e}") from e
+            raise DatabaseConnectionError(f"Failed to connect to DuckDB at {db}: {e}") from e
 
     def cursor(self) -> duckdb.DuckDBPyConnection:
         """Return a cursor (DuckDB connections are their own cursors)"""
