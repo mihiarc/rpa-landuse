@@ -156,8 +156,9 @@ st.markdown("""
     }
 
     /* Hero section styling - RPA Assessment branding colors */
+    /* WCAG AA compliant: Using darker gradient (#2d4a2e to #3d6b3f) for 4.5:1+ contrast with white text */
     .hero-section {
-        background: linear-gradient(135deg, #496f4a 0%, #85b18b 100%);
+        background: linear-gradient(135deg, #2d4a2e 0%, #3d6b3f 100%);
         padding: 3rem 2rem;
         border-radius: 15px;
         color: white;

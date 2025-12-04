@@ -147,9 +147,17 @@ Focus on:
         return {"messages": messages}
 
     def _human_review_node(self, state: AgentState) -> Dict[str, Any]:
-        """Human-in-the-loop node for complex queries."""
-        # In production, this would integrate with a UI
-        # For now, we'll auto-approve
+        """Human-in-the-loop node for complex queries.
+
+        TODO: Implement proper human-in-the-loop review when Streamlit UI integration
+        is complete. This should:
+        1. Pause execution and display query for user approval
+        2. Allow user to modify or reject the query
+        3. Log review decisions for audit trail
+        4. Support async approval via webhook for batch processing
+
+        Currently auto-approves all requests as a placeholder.
+        """
         if self.console:
             self.console.print("[yellow]Human review requested (auto-approved)[/yellow]")
         return {"messages": state["messages"]}

@@ -43,14 +43,16 @@ def get_database_connection():
         )
         return conn, None
     except Exception as e:
-        return None, f"Database connection error: {e}"
+        import traceback
+        error_details = f"Database connection error: {str(e)}\n{traceback.format_exc()}"
+        return None, error_details
 
 @st.cache_data
 def get_filter_options():
     """Get available filter options from the database"""
     conn, error = get_database_connection()
-    if error:
-        return None, error
+    if error or conn is None:
+        return None, error or "Connection is None"
 
     try:
         filters = {}
@@ -90,7 +92,9 @@ def get_filter_options():
 
         return filters, None
     except Exception as e:
-        return None, f"Error loading filters: {e}"
+        import traceback
+        error_details = f"Error loading filters: {str(e)}\n{traceback.format_exc()}"
+        return None, error_details
 
 def build_extraction_query(extract_type, filters):
     """Build SQL query based on extraction type and filters"""
@@ -467,8 +471,8 @@ def show_custom_extraction():
 
     # Load filter options
     filters, error = get_filter_options()
-    if error:
-        st.error(f"❌ {error}")
+    if error or filters is None:
+        st.error(f"❌ {error or 'Failed to load filter options'}")
         return
 
     # Extraction type selector
@@ -498,6 +502,11 @@ def show_custom_extraction():
         st.markdown("##### Climate Scenarios")
 
         # Parse RCP and SSP from scenario names
+        # Defensive check to ensure we have the data
+        if 'scenarios' not in filters or filters['scenarios'] is None or filters['scenarios'].empty:
+            st.warning("⚠️ No scenario data available")
+            return
+
         all_scenarios = filters['scenarios']['scenario_name'].tolist()
 
         # Extract unique RCP values from scenario names
@@ -552,21 +561,21 @@ def show_custom_extraction():
 
                 # Check RCP
                 if selected_rcp:
-                    has_rcp = any(
-                        ('rcp45' in scenario and 'RCP4.5' in selected_rcp) or
+                    has_rcp = any([
+                        ('rcp45' in scenario and 'RCP4.5' in selected_rcp),
                         ('rcp85' in scenario and 'RCP8.5' in selected_rcp)
-                    )
+                    ])
                     if not has_rcp:
                         include = False
 
                 # Check SSP
                 if include and selected_ssp:
-                    has_ssp = any(
-                        ('ssp1' in scenario and 'SSP1' in selected_ssp) or
-                        ('ssp2' in scenario and 'SSP2' in selected_ssp) or
-                        ('ssp3' in scenario and 'SSP3' in selected_ssp) or
+                    has_ssp = any([
+                        ('ssp1' in scenario and 'SSP1' in selected_ssp),
+                        ('ssp2' in scenario and 'SSP2' in selected_ssp),
+                        ('ssp3' in scenario and 'SSP3' in selected_ssp),
                         ('ssp5' in scenario and 'SSP5' in selected_ssp)
-                    )
+                    ])
                     if not has_ssp:
                         include = False
 
@@ -584,13 +593,16 @@ def show_custom_extraction():
 
         # Time period filter
         st.markdown("##### Time Periods")
-        selected_periods = st.multiselect(
-            "Time Periods:",
-            filters['time_periods']['year_range'].tolist(),
-            help="Select time periods to include"
-        )
-        if selected_periods:
-            selected_filters['time_periods'] = selected_periods
+        if 'time_periods' in filters and filters['time_periods'] is not None and not filters['time_periods'].empty:
+            selected_periods = st.multiselect(
+                "Time Periods:",
+                filters['time_periods']['year_range'].tolist(),
+                help="Select time periods to include"
+            )
+            if selected_periods:
+                selected_filters['time_periods'] = selected_periods
+        else:
+            st.warning("⚠️ No time period data available")
 
         # Transition type filter (for raw transitions)
         if extract_type == "transitions":
@@ -609,39 +621,45 @@ def show_custom_extraction():
         st.markdown("##### Geographic Filters")
 
         # State filter
-        state_options = filters['states']['state_name'].tolist()
-        selected_states = st.multiselect(
-            "States:",
-            state_options,
-            help="Select states to include"
-        )
-        if selected_states:
-            # Convert state names to codes
-            state_codes = filters['states'][filters['states']['state_name'].isin(selected_states)]['state_code'].tolist()
-            selected_filters['states'] = state_codes
+        if 'states' in filters and filters['states'] is not None and not filters['states'].empty:
+            state_options = filters['states']['state_name'].tolist()
+            selected_states = st.multiselect(
+                "States:",
+                state_options,
+                help="Select states to include"
+            )
+            if selected_states:
+                # Convert state names to codes
+                state_codes = filters['states'][filters['states']['state_name'].isin(selected_states)]['state_code'].tolist()
+                selected_filters['states'] = state_codes
+        else:
+            st.warning("⚠️ No state data available")
 
         # Land use filters
         st.markdown("##### Land Use Types")
 
-        landuse_options = filters['landuse_types']['landuse_name'].tolist()
+        if 'landuse_types' in filters and filters['landuse_types'] is not None and not filters['landuse_types'].empty:
+            landuse_options = filters['landuse_types']['landuse_name'].tolist()
 
-        # From land use
-        selected_from = st.multiselect(
-            "From Land Use:",
-            landuse_options,
-            help="Select source land use types"
-        )
-        if selected_from:
-            selected_filters['from_landuse'] = selected_from
+            # From land use
+            selected_from = st.multiselect(
+                "From Land Use:",
+                landuse_options,
+                help="Select source land use types"
+            )
+            if selected_from:
+                selected_filters['from_landuse'] = selected_from
 
-        # To land use
-        selected_to = st.multiselect(
-            "To Land Use:",
-            landuse_options,
-            help="Select destination land use types"
-        )
-        if selected_to:
-            selected_filters['to_landuse'] = selected_to
+            # To land use
+            selected_to = st.multiselect(
+                "To Land Use:",
+                landuse_options,
+                help="Select destination land use types"
+            )
+            if selected_to:
+                selected_filters['to_landuse'] = selected_to
+        else:
+            st.warning("⚠️ No land use type data available")
 
     # Show selected filters summary
     if selected_filters:

@@ -51,12 +51,23 @@ def fragment(func=None):
         return decorator(func)
 
 
+def dialog(title=None):
+    """Mock implementation of st.dialog decorator"""
+    def decorator(f):
+        @wraps(f)
+        def wrapper(*args, **kwargs):
+            return f(*args, **kwargs)
+        return wrapper
+    return decorator
+
+
 # Create mock streamlit module as a proper module
 mock_st = types.ModuleType('streamlit')
 mock_st.__file__ = __file__
 mock_st.cache_resource = cache_resource
 mock_st.cache_data = cache_data
 mock_st.fragment = fragment
+mock_st.dialog = dialog
 
 # Add common Streamlit functions
 mock_st.title = Mock()

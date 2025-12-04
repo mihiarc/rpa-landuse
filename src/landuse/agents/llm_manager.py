@@ -128,7 +128,7 @@ class LLMManager(LLMInterface):
 
     def get_model_name(self) -> str:
         """Get the current model name."""
-        return "gpt-4o-mini"
+        return self.config.llm.model_name
 
     def validate_api_key(self) -> bool:
         """Validate API key is available and valid."""

@@ -61,10 +61,10 @@ class TestLLMManager:
                     manager = LLMManager(config)
                     manager.create_llm()
 
-                    # Verify gpt-4o-mini is always used regardless of config
+                    # Verify the configured model is used
                     mock_openai.assert_called_once()
                     call_args = mock_openai.call_args
-                    assert call_args[1]['model'] == "gpt-4o-mini"
+                    assert call_args[1]['model'] == model_name
 
     def test_create_llm_missing_api_key(self):
         """Test error handling when OpenAI API key is missing."""
@@ -107,12 +107,12 @@ class TestLLMManager:
             assert manager.validate_api_key() is False
 
     def test_get_model_name(self):
-        """Test getting current model name - always gpt-4o-mini."""
+        """Test getting current model name from config."""
         with patch.dict(os.environ, {'OPENAI_API_KEY': 'sk-test123456789012345678901234567890123456789012345'}):
             config = AppConfig(llm={'model_name': 'gpt-4o'})
 
         manager = LLMManager(config)
-        assert manager.get_model_name() == "gpt-4o-mini"
+        assert manager.get_model_name() == "gpt-4o"
 
     def test_app_config_compatibility(self):
         """Test LLM Manager works with new AppConfig."""

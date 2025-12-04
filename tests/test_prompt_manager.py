@@ -18,7 +18,7 @@ def test_prompt_manager_initialization():
     manager = PromptManager()
 
     assert manager.prompts_dir == Path("prompts/")
-    assert manager.active_version == "v1.0.0"
+    assert manager.active_version == "v1.0.1"
     assert manager.versions_dir.exists()
 
 
