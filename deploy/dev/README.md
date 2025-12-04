@@ -55,7 +55,7 @@ docker/                 # Docker configuration
 ```bash
 # Create deployment archive excluding unnecessary files
 zip -r app-deployment.zip \
-  ../../landuse_app.py ../../requirements.txt ../../src/ ../../views/ ../../data/ ../../docker/prod \
+  ../../landuse_app.py ../../requirements.txt ../../assets/ ../../src/ ../../views/ ../../data/ ../../maps/ ../../docker/prod \
   --exclude="*.git*" "*.terraform*" "**/__pycache__*" "*.pyc"
 ```
 
@@ -64,18 +64,30 @@ zip -r app-deployment.zip \
 ```bash
 # Transfer application archive
 rsync -avz -e "ssh -i <key-file>.pem" app-deployment.zip ec2-user@<instance-ip>:~/landuse-app/2025-12-09
-rsync -avz -e "ssh -i ~/.ssh/rpa-landuse-key.pem" app-deployment.zip ec2-user@34.207.249.14:~/landuse-app/2025-12-09/
+rsync -avz -e "ssh -i ~/.ssh/rpa-landuse-key.pem" app-deployment.zip ec2-user@34.207.249.14:~/app/2025-19-10/
 
 # Remote deployment execution
 ssh -i <key-file>.pem ec2-user@<instance-ip> << 'EOF'
   # Extract application
-  unzip -o ~/landuse-app/2025-12-09/app-deployment.zip -d ~/app/
+  unzip -o ~/app/2025-19-10/app-deployment.zip -d ~/app/
 
   # Stop existing services
   cd ~/app && docker-compose down
 
   # Start new deployment
   docker-compose -f docker/dev/docker-compose.yml up -d --build
+EOF
+
+# Remote deployment execution
+ssh -i ~/.ssh/rpa-landuse-key.pem ec2-user@34.207.249.14 << 'EOF'
+  # Extract application
+  unzip -o ~/app/2025-19-10/app-deployment.zip -d ~/app/
+
+  # Stop existing services
+  cd ~/app && docker-compose down
+
+  # Start new deployment
+  docker compose -f docker/prod/docker-compose.yml up -d --build
 EOF
 ```
 
