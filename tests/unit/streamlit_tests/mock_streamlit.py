@@ -86,7 +86,8 @@ mock_st.json = Mock()
 mock_st.dataframe = Mock()
 mock_st.table = Mock()
 mock_st.metric = Mock()
-mock_st.columns = Mock(return_value=[Mock(), Mock(), Mock()])
+mock_st.caption = Mock()
+
 mock_st.container = Mock()
 mock_st.expander = Mock()
 mock_st.spinner = Mock()
@@ -179,3 +180,21 @@ mock_st.expander.return_value = MockContainer()
 mock_st.echo.return_value = MockContainer()
 mock_st.chat_message.return_value = MockContainer()
 mock_st.status.return_value = MockContainer()
+
+# Update smart_columns to return context managers
+def smart_columns_with_context(spec=None, gap="small", vertical_alignment="top"):
+    """Return mock columns that support context manager protocol"""
+    if spec is None:
+        spec = [1, 1]  # Default 2 columns
+    if isinstance(spec, int):
+        return [MockContainer() for _ in range(spec)]
+    return [MockContainer() for _ in spec]
+
+mock_st.columns = smart_columns_with_context
+
+# Update tabs to return context managers
+def smart_tabs(tab_names):
+    """Return mock tabs that support context manager protocol"""
+    return [MockContainer() for _ in tab_names]
+
+mock_st.tabs = smart_tabs
