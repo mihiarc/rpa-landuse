@@ -22,8 +22,9 @@ import plotly.graph_objects as go  # noqa: E402
 import streamlit as st  # noqa: E402
 from plotly.subplots import make_subplots  # noqa: E402
 
-from landuse.core.app_config import AppConfig  # noqa: E402
 from landuse.connections import DuckDBConnection  # noqa: E402
+from landuse.core.app_config import AppConfig  # noqa: E402
+from landuse.utilities.security import SQLSanitizer  # noqa: E402
 
 # Import state mappings and connection
 from landuse.utilities.state_mappings import StateMapper  # noqa: E402
@@ -876,32 +877,37 @@ def load_sankey_data(from_landuse=None, to_landuse=None, state_filter=None):
         return None, error
 
     try:
-        # Build dynamic WHERE clause with parameterized queries to prevent SQL injection
+        # Build dynamic WHERE clause with safe SQL construction
         where_conditions = ["f.transition_type = 'change'"]
         # Exclude self-loops where source equals target
         where_conditions.append("fl.landuse_name != tl.landuse_name")
 
-        # Validate inputs against allowed values
-        allowed_landuses = ["Crop", "Pasture", "Forest", "Urban", "Rangeland"]
-
+        # Use SQLSanitizer for safe value handling
         if from_landuse and from_landuse != "All":
-            if from_landuse in allowed_landuses:
-                # Use parameterized query format (DuckDB supports this)
-                where_conditions.append(f"fl.landuse_name = '{from_landuse}'")
-            else:
-                return None, f"Invalid land use type: {from_landuse}"
+            try:
+                # Validate and sanitize the land use type
+                SQLSanitizer.validate_landuse(from_landuse)
+                where_conditions.append(f"fl.landuse_name = {SQLSanitizer.safe_string(from_landuse)}")
+            except ValueError as e:
+                return None, str(e)
 
         if to_landuse and to_landuse != "All":
-            if to_landuse in allowed_landuses:
-                where_conditions.append(f"tl.landuse_name = '{to_landuse}'")
-            else:
-                return None, f"Invalid land use type: {to_landuse}"
+            try:
+                # Validate and sanitize the land use type
+                SQLSanitizer.validate_landuse(to_landuse)
+                where_conditions.append(f"tl.landuse_name = {SQLSanitizer.safe_string(to_landuse)}")
+            except ValueError as e:
+                return None, str(e)
 
         if state_filter and state_filter != "All":
             # Convert state name to FIPS code for database query
             state_fips = StateMapper.name_to_fips(state_filter)
             if state_fips:
-                where_conditions.append(f"g.state_code = '{state_fips}'")
+                try:
+                    SQLSanitizer.validate_state_code(state_fips)
+                    where_conditions.append(f"g.state_code = {SQLSanitizer.safe_string(state_fips)}")
+                except ValueError as e:
+                    return None, str(e)
             else:
                 return None, f"Invalid state: {state_filter}"
 
@@ -1208,8 +1214,12 @@ def create_scenario_spider_chart(selected_scenarios):
         return None, "No scenarios selected"
 
     try:
-        # Build query for selected scenarios
-        scenario_list = "', '".join(selected_scenarios)
+        # Build query with safe scenario list
+        try:
+            safe_scenario_clause = SQLSanitizer.safe_scenario_list(selected_scenarios)
+        except ValueError as e:
+            return None, f"Invalid scenario name: {e}"
+
         query = f"""
         WITH scenario_summary AS (
             SELECT
@@ -1220,7 +1230,7 @@ def create_scenario_spider_chart(selected_scenarios):
             JOIN dim_scenario s ON f.scenario_id = s.scenario_id
             JOIN dim_landuse tl ON f.to_landuse_id = tl.landuse_id
             WHERE f.transition_type = 'change'
-              AND s.scenario_name IN ('{scenario_list}')
+              AND s.scenario_name IN {safe_scenario_clause}
             GROUP BY s.scenario_name, tl.landuse_name
         )
         SELECT * FROM scenario_summary

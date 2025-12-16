@@ -337,6 +337,191 @@ def mask_api_key(api_key: str) -> str:
     return f"{api_key[:4]}...{api_key[-4:]}"
 
 
+# =============================================================================
+# SQL Value Sanitization Functions
+# =============================================================================
+
+class SQLSanitizer:
+    """SQL value sanitization utilities for safe query construction.
+
+    These functions help prevent SQL injection when building dynamic queries.
+    Always prefer parameterized queries when possible, but use these functions
+    when parameterized queries are not feasible (e.g., dynamic IN clauses).
+    """
+
+    # Allowlists for common domain values
+    ALLOWED_LANDUSE_TYPES = frozenset(["Crop", "Pasture", "Forest", "Urban", "Rangeland"])
+    ALLOWED_RCP_SCENARIOS = frozenset(["rcp45", "rcp85", "RCP4.5", "RCP8.5"])
+    ALLOWED_SSP_SCENARIOS = frozenset(["ssp1", "ssp2", "ssp3", "ssp5", "SSP1", "SSP2", "SSP3", "SSP5"])
+    ALLOWED_TRANSITION_TYPES = frozenset(["change", "same"])
+
+    # Valid time periods in the dataset
+    ALLOWED_TIME_PERIODS = frozenset([
+        "2012-2020", "2020-2030", "2030-2040",
+        "2040-2050", "2050-2060", "2060-2070"
+    ])
+
+    @classmethod
+    def escape_string(cls, value: str) -> str:
+        """
+        Escape a string value for safe SQL inclusion.
+
+        Escapes single quotes by doubling them, which is the SQL standard.
+        Also removes null bytes and other dangerous characters.
+
+        Args:
+            value: The string value to escape
+
+        Returns:
+            Escaped string safe for SQL inclusion (without surrounding quotes)
+
+        Example:
+            >>> SQLSanitizer.escape_string("O'Brien")
+            "O''Brien"
+        """
+        if not isinstance(value, str):
+            raise TypeError(f"Expected string, got {type(value).__name__}")
+
+        # Remove null bytes (can cause truncation)
+        value = value.replace('\x00', '')
+
+        # Escape single quotes by doubling them
+        value = value.replace("'", "''")
+
+        # Remove backslashes (can escape quotes in some databases)
+        value = value.replace("\\", "")
+
+        return value
+
+    @classmethod
+    def safe_string(cls, value: str) -> str:
+        """
+        Return a safely quoted string for SQL inclusion.
+
+        Args:
+            value: The string value to quote
+
+        Returns:
+            Quoted and escaped string ready for SQL
+
+        Example:
+            >>> SQLSanitizer.safe_string("O'Brien")
+            "'O''Brien'"
+        """
+        return f"'{cls.escape_string(value)}'"
+
+    @classmethod
+    def safe_in_clause(cls, values: list[str], allowlist: frozenset[str] | None = None) -> str:
+        """
+        Build a safe IN clause from a list of values.
+
+        Args:
+            values: List of string values
+            allowlist: Optional set of allowed values for validation
+
+        Returns:
+            SQL IN clause string like "('value1', 'value2')"
+
+        Raises:
+            ValueError: If any value is not in the allowlist (when provided)
+            ValueError: If values list is empty
+
+        Example:
+            >>> SQLSanitizer.safe_in_clause(["Forest", "Urban"], SQLSanitizer.ALLOWED_LANDUSE_TYPES)
+            "('Forest', 'Urban')"
+        """
+        if not values:
+            raise ValueError("Values list cannot be empty")
+
+        # Validate against allowlist if provided
+        if allowlist is not None:
+            invalid_values = set(values) - allowlist
+            if invalid_values:
+                raise ValueError(f"Invalid values: {invalid_values}. Allowed: {allowlist}")
+
+        # Escape each value and build the clause
+        escaped = [cls.safe_string(v) for v in values]
+        return f"({', '.join(escaped)})"
+
+    @classmethod
+    def validate_landuse(cls, value: str) -> str:
+        """Validate a land use type against the allowlist."""
+        if value not in cls.ALLOWED_LANDUSE_TYPES:
+            raise ValueError(f"Invalid land use type: {value}. Allowed: {cls.ALLOWED_LANDUSE_TYPES}")
+        return value
+
+    @classmethod
+    def validate_state_code(cls, value: str) -> str:
+        """
+        Validate a state FIPS code (2 digits).
+
+        Accepts both 2-digit state codes and 5-digit county FIPS codes.
+        """
+        # State codes should be 2 digits, county FIPS codes are 5 digits
+        if re.match(r'^\d{2}$', value):
+            return value
+        if re.match(r'^\d{5}$', value):
+            return value
+        raise ValueError(f"Invalid state/FIPS code: {value}")
+
+    @classmethod
+    def validate_scenario_name(cls, value: str) -> str:
+        """
+        Validate a scenario name format.
+
+        Expected format: MODEL_rcpXX_sspY (e.g., CNRM-CM5_rcp45_ssp1)
+        """
+        # Allow alphanumeric, underscores, and hyphens
+        if not re.match(r'^[A-Za-z0-9_-]+$', value):
+            raise ValueError(f"Invalid scenario name: {value}")
+        return value
+
+    @classmethod
+    def validate_time_period(cls, value: str) -> str:
+        """Validate a time period against the allowlist."""
+        if value not in cls.ALLOWED_TIME_PERIODS:
+            raise ValueError(f"Invalid time period: {value}. Allowed: {cls.ALLOWED_TIME_PERIODS}")
+        return value
+
+    @classmethod
+    def safe_scenario_list(cls, scenarios: list[str]) -> str:
+        """
+        Build a safe IN clause for scenario names.
+
+        Validates each scenario name format before including.
+        """
+        validated = [cls.validate_scenario_name(s) for s in scenarios]
+        return cls.safe_in_clause(validated)
+
+    @classmethod
+    def safe_state_list(cls, state_codes: list[str]) -> str:
+        """
+        Build a safe IN clause for state codes.
+
+        Validates each state code format before including.
+        """
+        validated = [cls.validate_state_code(s) for s in state_codes]
+        return cls.safe_in_clause(validated)
+
+    @classmethod
+    def safe_landuse_list(cls, landuse_types: list[str]) -> str:
+        """
+        Build a safe IN clause for land use types.
+
+        Validates against the allowlist.
+        """
+        return cls.safe_in_clause(landuse_types, cls.ALLOWED_LANDUSE_TYPES)
+
+    @classmethod
+    def safe_time_period_list(cls, periods: list[str]) -> str:
+        """
+        Build a safe IN clause for time periods.
+
+        Validates against the allowlist.
+        """
+        return cls.safe_in_clause(periods, cls.ALLOWED_TIME_PERIODS)
+
+
 # Example usage for testing
 if __name__ == "__main__":
     # Test SQL validation

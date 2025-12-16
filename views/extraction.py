@@ -24,8 +24,9 @@ import streamlit as st  # noqa: E402
 
 # Import state mappings and connection
 from landuse.agents.constants import STATE_NAMES  # noqa: E402
-from landuse.core.app_config import AppConfig  # noqa: E402
 from landuse.connections import DuckDBConnection  # noqa: E402
+from landuse.core.app_config import AppConfig  # noqa: E402
+from landuse.utilities.security import SQLSanitizer  # noqa: E402
 
 
 @st.cache_resource
@@ -196,33 +197,55 @@ def build_extraction_query(extract_type, filters):
     elif extract_type in ["summary_by_state", "summary_by_scenario", "time_series"]:
         where_conditions = ["f.transition_type = 'change'"]
 
-    # Add scenario filters
+    # Add scenario filters with safe SQL construction
     if filters.get('scenarios'):
-        scenario_list = "', '".join(filters['scenarios'])
-        where_conditions.append(f"s.scenario_name IN ('{scenario_list}')")
+        try:
+            safe_scenarios = SQLSanitizer.safe_scenario_list(filters['scenarios'])
+            where_conditions.append(f"s.scenario_name IN {safe_scenarios}")
+        except ValueError:
+            # Skip invalid scenarios silently
+            pass
 
-    # Add time period filters
+    # Add time period filters with safe SQL construction
     if filters.get('time_periods'):
-        time_list = "', '".join(filters['time_periods'])
-        where_conditions.append(f"t.year_range IN ('{time_list}')")
+        try:
+            safe_periods = SQLSanitizer.safe_time_period_list(filters['time_periods'])
+            where_conditions.append(f"t.year_range IN {safe_periods}")
+        except ValueError:
+            # Skip invalid periods silently
+            pass
 
-    # Add state filters
+    # Add state filters with safe SQL construction
     if filters.get('states'):
-        state_list = "', '".join(filters['states'])
-        where_conditions.append(f"g.state_code IN ('{state_list}')")
+        try:
+            safe_states = SQLSanitizer.safe_state_list(filters['states'])
+            where_conditions.append(f"g.state_code IN {safe_states}")
+        except ValueError:
+            # Skip invalid state codes silently
+            pass
 
-    # Add land use filters
+    # Add land use filters with safe SQL construction
     if filters.get('from_landuse'):
-        from_list = "', '".join(filters['from_landuse'])
-        where_conditions.append(f"fl.landuse_name IN ('{from_list}')")
+        try:
+            safe_from = SQLSanitizer.safe_landuse_list(filters['from_landuse'])
+            where_conditions.append(f"fl.landuse_name IN {safe_from}")
+        except ValueError:
+            # Skip invalid land use types silently
+            pass
 
     if filters.get('to_landuse'):
-        to_list = "', '".join(filters['to_landuse'])
-        where_conditions.append(f"tl.landuse_name IN ('{to_list}')")
+        try:
+            safe_to = SQLSanitizer.safe_landuse_list(filters['to_landuse'])
+            where_conditions.append(f"tl.landuse_name IN {safe_to}")
+        except ValueError:
+            # Skip invalid land use types silently
+            pass
 
-    # Add transition type filter
+    # Add transition type filter with validation
     if filters.get('transition_type'):
-        where_conditions.append(f"f.transition_type = '{filters['transition_type']}'")
+        transition_type = filters['transition_type']
+        if transition_type in SQLSanitizer.ALLOWED_TRANSITION_TYPES:
+            where_conditions.append(f"f.transition_type = {SQLSanitizer.safe_string(transition_type)}")
 
     # Combine WHERE conditions
     if where_conditions:
@@ -1030,17 +1053,21 @@ def show_bulk_export():
                     queries_to_execute = option['queries'].copy()
 
                     if selected_bulk == "All State Summaries" and state_filter is not None:
-                        # Update the state_summaries query with state filter
+                        # Update the state_summaries query with state filter using safe SQL
                         base_query = queries_to_execute['state_summaries']
-                        state_list = "', '".join(state_filter)
+                        try:
+                            safe_state_list = SQLSanitizer.safe_state_list(state_filter)
+                        except ValueError as e:
+                            st.error(f"Invalid state filter: {e}")
+                            return
                         # Add WHERE clause or modify existing one
                         if "WHERE" in base_query:
                             queries_to_execute['state_summaries'] = base_query.replace(
                                 "WHERE f.transition_type = 'change'",
-                                f"WHERE f.transition_type = 'change' AND g.state_code IN ('{state_list}')"
+                                f"WHERE f.transition_type = 'change' AND g.state_code IN {safe_state_list}"
                             )
                         else:
-                            queries_to_execute['state_summaries'] = base_query + f" WHERE g.state_code IN ('{state_list}')"
+                            queries_to_execute['state_summaries'] = base_query + f" WHERE g.state_code IN {safe_state_list}"
 
                     if export_format == "CSV (ZIP)":
                         # Create ZIP file with CSV files
