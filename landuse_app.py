@@ -43,8 +43,8 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded",
     menu_items={
-        'Get Help': 'https://github.com/your-repo/rpa-landuse-analytics',
-        'Report a bug': 'https://github.com/your-repo/rpa-landuse-analytics/issues',
+        'Get Help': 'https://github.com/mihiarc/rpa-landuse',
+        'Report a bug': 'https://github.com/mihiarc/rpa-landuse/issues',
         'About': """
         # USDA Forest Service RPA Assessment
 

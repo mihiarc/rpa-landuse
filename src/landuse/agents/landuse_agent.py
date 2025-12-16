@@ -31,7 +31,8 @@ except ImportError:
     PromptManager = None
 from landuse.agents.state import AgentState
 from landuse.core.app_config import AppConfig
-from landuse.exceptions import GraphExecutionError, LanduseError, ToolExecutionError, wrap_exception
+from landuse.exceptions import GraphExecutionError, LanduseError, RateLimitError, ToolExecutionError, wrap_exception
+from landuse.utilities.security import RateLimiter
 from landuse.tools.common_tools import create_analysis_tool, create_execute_query_tool, create_schema_tool
 from landuse.tools.state_lookup_tool import create_state_lookup_tool
 
@@ -54,6 +55,12 @@ class LanduseAgent:
         self.config = config or AppConfig()
         self.debug = self.config.logging.level == 'DEBUG'
         self.console = Console()
+
+        # Initialize rate limiter using security config
+        self.rate_limiter = RateLimiter(
+            max_calls=self.config.security.rate_limit_calls,
+            time_window=self.config.security.rate_limit_window
+        )
 
         # Initialize component managers
         self.llm_manager = LLMManager(self.config, self.console)
@@ -138,8 +145,20 @@ class LanduseAgent:
         # (Dynamic prompt selection was removed as specialized prompts were not effective)
         return self.system_prompt
 
+    def _check_rate_limit(self, identifier: str = "default") -> None:
+        """Check rate limit and raise RateLimitError if exceeded."""
+        allowed, error_msg = self.rate_limiter.check_rate_limit(identifier)
+        if not allowed:
+            raise RateLimitError(
+                message=f"Rate limit exceeded: {error_msg}",
+                retry_after=self.config.security.rate_limit_window
+            )
+
     def simple_query(self, question: str) -> str:
         """Execute a query using simple direct LLM interaction without LangGraph state management."""
+        # Check rate limit before processing
+        self._check_rate_limit()
+
         try:
             # Build conversation with history using conversation manager
             # Use dynamic prompt selection based on query content
@@ -333,6 +352,9 @@ class LanduseAgent:
 
     def _graph_query(self, question: str, thread_id: Optional[str] = None) -> str:
         """Execute a query using the LangGraph workflow."""
+        # Check rate limit before processing
+        self._check_rate_limit(thread_id or "default")
+
         try:
             # Build graph if not already built using graph builder
             if not self.graph:
@@ -442,6 +464,9 @@ class LanduseAgent:
         Yields:
             Streaming response chunks
         """
+        # Check rate limit before processing
+        self._check_rate_limit(thread_id or "default")
+
         if not self.graph:
             self.graph = self.graph_builder.build_graph()
 

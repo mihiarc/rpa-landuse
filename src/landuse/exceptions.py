@@ -1,10 +1,10 @@
 """Custom exception hierarchy for the landuse application.
 
-Consolidated exception hierarchy with 6 main exception types:
+Provides a comprehensive exception hierarchy with specific exception types:
 - LanduseError: Base exception for all landuse-related errors
-- DatabaseError: All database-related errors (connections, schema, migrations, queries)
+- DatabaseError: Database-related errors with specific subtypes
 - ConfigurationError: Configuration and setup errors
-- AgentError: LLM, tool execution, graph execution, and conversation errors
+- AgentError: Agent-related errors with specific subtypes
 - SecurityError: Security-related errors
 - ValidationError: Data validation errors
 """
@@ -19,54 +19,145 @@ class LanduseError(Exception):
         self.error_code = error_code
 
 
-class DatabaseError(LanduseError):
-    """Database-related errors including connections, schema, migrations, and queries.
+# =============================================================================
+# Database Exceptions
+# =============================================================================
 
-    Consolidates: ConnectionError, SchemaError, MigrationError, QueryValidationError
-    """
+class DatabaseError(LanduseError):
+    """Base class for database-related errors."""
 
     def __init__(self, message: str, query: str = None, error_code: str = None):
         super().__init__(message, error_code)
         self.query = query
 
 
-# Backward compatibility aliases for DatabaseError subtypes
-DatabaseConnectionError = DatabaseError  # Renamed from ConnectionError to avoid shadowing builtin
-SchemaError = DatabaseError
-MigrationError = DatabaseError
-QueryValidationError = DatabaseError
+class DatabaseConnectionError(DatabaseError):
+    """Database connection failures."""
 
+    def __init__(self, message: str, host: str = None, error_code: str = None):
+        super().__init__(message, error_code=error_code)
+        self.host = host
+
+
+class SchemaError(DatabaseError):
+    """Schema-related errors (missing tables, columns, etc.)."""
+
+    def __init__(self, message: str, table_name: str = None, error_code: str = None):
+        super().__init__(message, error_code=error_code)
+        self.table_name = table_name
+
+
+class MigrationError(DatabaseError):
+    """Database migration failures."""
+
+    def __init__(self, message: str, migration_version: str = None, error_code: str = None):
+        super().__init__(message, error_code=error_code)
+        self.migration_version = migration_version
+
+
+class QueryValidationError(DatabaseError):
+    """SQL query validation failures (security, syntax)."""
+
+    def __init__(self, message: str, query: str = None, validation_type: str = None, error_code: str = None):
+        super().__init__(message, query=query, error_code=error_code)
+        self.validation_type = validation_type
+
+
+# =============================================================================
+# Configuration Exceptions
+# =============================================================================
 
 class ConfigurationError(LanduseError):
     """Configuration-related errors."""
-    pass
 
+    def __init__(self, message: str, config_key: str = None, error_code: str = None):
+        super().__init__(message, error_code)
+        self.config_key = config_key
+
+
+# =============================================================================
+# Agent Exceptions
+# =============================================================================
 
 class AgentError(LanduseError):
-    """Agent-related errors including LLM, tool execution, graph execution, and conversation.
-
-    Consolidates: LLMError, APIKeyError, ToolExecutionError, GraphExecutionError,
-                  ConversationError, MapGenerationError
-    """
+    """Base class for agent-related errors."""
 
     def __init__(self, message: str, component: str = None, error_code: str = None):
         super().__init__(message, error_code)
-        self.component = component  # e.g., 'llm', 'tool', 'graph', 'conversation'
+        self.component = component
 
 
-# Backward compatibility aliases for AgentError subtypes
-LLMError = AgentError
-APIKeyError = AgentError
-ToolExecutionError = AgentError
-GraphExecutionError = AgentError
-ConversationError = AgentError
-MapGenerationError = AgentError
+class LLMError(AgentError):
+    """LLM API errors (rate limits, invalid responses, etc.)."""
 
+    def __init__(self, message: str, model_name: str = None, error_code: str = None):
+        super().__init__(message, component='llm', error_code=error_code)
+        self.model_name = model_name
+
+
+class APIKeyError(AgentError):
+    """API key validation errors."""
+
+    def __init__(self, message: str, key_type: str = None, error_code: str = None):
+        super().__init__(message, component='api_key', error_code=error_code)
+        self.key_type = key_type
+
+
+class ToolExecutionError(AgentError):
+    """Tool execution failures."""
+
+    def __init__(self, message: str, tool_name: str = None, error_code: str = None):
+        super().__init__(message, component='tool', error_code=error_code)
+        self.tool_name = tool_name
+
+
+class GraphExecutionError(AgentError):
+    """LangGraph workflow execution errors."""
+
+    def __init__(self, message: str, node_name: str = None, error_code: str = None):
+        super().__init__(message, component='graph', error_code=error_code)
+        self.node_name = node_name
+
+
+class ConversationError(AgentError):
+    """Conversation memory/history errors."""
+
+    def __init__(self, message: str, thread_id: str = None, error_code: str = None):
+        super().__init__(message, component='conversation', error_code=error_code)
+        self.thread_id = thread_id
+
+
+class MapGenerationError(AgentError):
+    """Map generation/visualization errors."""
+
+    def __init__(self, message: str, map_type: str = None, error_code: str = None):
+        super().__init__(message, component='map', error_code=error_code)
+        self.map_type = map_type
+
+
+# =============================================================================
+# Security Exceptions
+# =============================================================================
 
 class SecurityError(LanduseError):
-    """Security-related errors."""
-    pass
+    """Security-related errors (SQL injection, unauthorized access, etc.)."""
 
+    def __init__(self, message: str, security_context: str = None, error_code: str = None):
+        super().__init__(message, error_code)
+        self.security_context = security_context
+
+
+class RateLimitError(SecurityError):
+    """Rate limit exceeded errors."""
+
+    def __init__(self, message: str, retry_after: float = None, error_code: str = None):
+        super().__init__(message, security_context='rate_limit', error_code=error_code)
+        self.retry_after = retry_after
+
+
+# =============================================================================
+# Validation Exceptions
+# =============================================================================
 
 class ValidationError(LanduseError):
     """Data validation errors."""
@@ -76,30 +167,38 @@ class ValidationError(LanduseError):
         self.field_name = field_name
 
 
-# Backward compatibility alias
-DataProcessingError = ValidationError
+class DataProcessingError(ValidationError):
+    """Data processing/transformation errors."""
 
+    def __init__(self, message: str, data_type: str = None, error_code: str = None):
+        super().__init__(message, error_code=error_code)
+        self.data_type = data_type
+
+
+# =============================================================================
+# Exception Mapping and Utilities
+# =============================================================================
 
 # Mapping of common exception types to our custom exceptions
 EXCEPTION_MAPPING = {
     # Database exceptions
     'duckdb.Error': DatabaseError,
-    'duckdb.CatalogException': DatabaseError,
-    'duckdb.SyntaxException': DatabaseError,
-    'duckdb.BinderException': DatabaseError,
-    'duckdb.ConversionException': DatabaseError,
+    'duckdb.CatalogException': SchemaError,
+    'duckdb.SyntaxException': QueryValidationError,
+    'duckdb.BinderException': QueryValidationError,
+    'duckdb.ConversionException': ValidationError,
     'sqlite3.Error': DatabaseError,
-    'sqlite3.OperationalError': DatabaseError,
+    'sqlite3.OperationalError': DatabaseConnectionError,
 
     # Network/API exceptions
-    'requests.exceptions.RequestException': AgentError,
-    'requests.exceptions.ConnectionError': DatabaseError,
-    'requests.exceptions.Timeout': AgentError,
-    'requests.exceptions.HTTPError': AgentError,
+    'requests.exceptions.RequestException': LLMError,
+    'requests.exceptions.ConnectionError': DatabaseConnectionError,
+    'requests.exceptions.Timeout': LLMError,
+    'requests.exceptions.HTTPError': LLMError,
 
     # File/IO exceptions
     'FileNotFoundError': ValidationError,
-    'PermissionError': ValidationError,
+    'PermissionError': SecurityError,
     'OSError': ValidationError,
     'IOError': ValidationError,
 
@@ -110,7 +209,7 @@ EXCEPTION_MAPPING = {
     'TypeError': ValidationError,
 
     # LangChain exceptions
-    'langchain.schema.LLMError': AgentError,
+    'langchain.schema.LLMError': LLMError,
     'langchain_core.exceptions.LangChainException': AgentError,
 }
 
@@ -169,7 +268,7 @@ def handle_database_exception(func):
             if 'duckdb' in str(type(e)).lower():
                 raise wrap_exception(e, f"Database error in {func.__name__}")
             elif isinstance(e, OSError):
-                raise DatabaseError(f"Connection failed in {func.__name__}: {str(e)}")
+                raise DatabaseConnectionError(f"Connection failed in {func.__name__}: {str(e)}")
             else:
                 raise wrap_exception(e, f"Error in {func.__name__}")
 
