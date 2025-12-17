@@ -8,7 +8,7 @@ from typing import Any, Dict, Optional
 
 from langchain.tools import tool
 
-from landuse.utilities.state_mappings import StateMapper
+from landuse.utils.state_mappings import StateMapper
 
 
 @tool

@@ -32,7 +32,7 @@ except ImportError:
 from landuse.agents.state import AgentState
 from landuse.core.app_config import AppConfig
 from landuse.exceptions import GraphExecutionError, LanduseError, RateLimitError, ToolExecutionError, wrap_exception
-from landuse.utilities.security import RateLimiter
+from landuse.utils.security import RateLimiter
 from landuse.tools.common_tools import create_analysis_tool, create_execute_query_tool, create_schema_tool
 from landuse.tools.state_lookup_tool import create_state_lookup_tool
 

@@ -1523,7 +1523,7 @@ async def monitored_query(request: QueryRequest):
 ### Input Validation and Sanitization
 
 ```python
-from landuse.utilities.security import SecurityValidator
+from landuse.utils.security import SecurityValidator
 import re
 from typing import Optional
 

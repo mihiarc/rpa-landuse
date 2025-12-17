@@ -18,7 +18,7 @@ from langchain_core.tools import tool
 from pydantic import BaseModel, Field
 from shapely import wkt
 
-from landuse.utilities.state_mappings import StateMapper
+from landuse.utils.state_mappings import StateMapper
 
 matplotlib.use('Agg')  # Use non-GUI backend for threading safety
 import matplotlib.colors as mcolors

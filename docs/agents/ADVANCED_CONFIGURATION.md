@@ -576,7 +576,7 @@ def setup_production_secrets():
 
 ```python
 # config/security_config.py
-from landuse.utilities.security import SQLQueryValidator, RateLimiter
+from landuse.utils.security import SQLQueryValidator, RateLimiter
 from landuse.config.landuse_config import LanduseConfig
 
 class SecurityConfig:
@@ -845,7 +845,7 @@ import tempfile
 from pathlib import Path
 
 from landuse.config.landuse_config import LanduseConfig
-from landuse.utilities.security import SecureConfig
+from landuse.utils.security import SecureConfig
 
 class TestConfigurationValidation:
     """Test configuration validation across environments"""

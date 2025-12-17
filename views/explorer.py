@@ -22,7 +22,7 @@ import pandas as pd
 import streamlit as st
 
 from landuse.connections import DuckDBConnection
-from landuse.utilities.security import RateLimiter
+from landuse.utils.security import RateLimiter
 
 # Configuration constants
 MAX_DISPLAY_ROWS = 1000

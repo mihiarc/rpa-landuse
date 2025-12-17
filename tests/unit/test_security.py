@@ -9,7 +9,7 @@ from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 
-from landuse.utilities.security import (
+from landuse.utils.security import (
     InputValidator,
     RateLimiter,
     SecureConfig,

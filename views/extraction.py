@@ -26,7 +26,7 @@ import streamlit as st  # noqa: E402
 from landuse.agents.constants import STATE_NAMES  # noqa: E402
 from landuse.connections import DuckDBConnection  # noqa: E402
 from landuse.core.app_config import AppConfig  # noqa: E402
-from landuse.utilities.security import SQLSanitizer  # noqa: E402
+from landuse.utils.security import SQLSanitizer  # noqa: E402
 
 
 @st.cache_resource

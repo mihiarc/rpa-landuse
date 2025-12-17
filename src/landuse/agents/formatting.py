@@ -13,7 +13,7 @@ from rich.markdown import Markdown
 from rich.panel import Panel
 from rich.table import Table
 
-from landuse.utilities.state_mappings import StateMapper
+from landuse.utils.state_mappings import StateMapper
 
 
 def clean_sql_query(sql_query: str) -> str:

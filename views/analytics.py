@@ -24,10 +24,10 @@ from plotly.subplots import make_subplots  # noqa: E402
 
 from landuse.connections import DuckDBConnection  # noqa: E402
 from landuse.core.app_config import AppConfig  # noqa: E402
-from landuse.utilities.security import SQLSanitizer  # noqa: E402
+from landuse.utils.security import SQLSanitizer  # noqa: E402
 
 # Import state mappings and connection
-from landuse.utilities.state_mappings import StateMapper  # noqa: E402
+from landuse.utils.state_mappings import StateMapper  # noqa: E402
 
 # RPA Assessment Official Color Palette
 RPA_COLORS = {

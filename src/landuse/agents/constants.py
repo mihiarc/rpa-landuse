@@ -7,7 +7,7 @@ Contains common schema information, mappings, and query examples
 import os
 
 # Import state mappings from centralized module
-from landuse.utilities.state_mappings import STATE_NAMES
+from landuse.utils.state_mappings import STATE_NAMES
 
 # Database schema template
 SCHEMA_INFO_TEMPLATE = """

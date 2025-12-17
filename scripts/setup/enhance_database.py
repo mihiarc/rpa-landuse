@@ -15,7 +15,7 @@ project_root = Path(__file__).parent.parent.parent
 src_path = project_root / "src"
 sys.path.insert(0, str(src_path))
 
-from landuse.utilities.state_mappings import StateMapper  # noqa: E402
+from landuse.utils.state_mappings import StateMapper  # noqa: E402
 
 console = Console()
 

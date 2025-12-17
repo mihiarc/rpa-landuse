@@ -2,7 +2,7 @@
 
 import pytest
 
-from landuse.utilities.state_mappings import (
+from landuse.utils.state_mappings import (
     STATE_ABBREV,
     STATE_NAMES,
     StateMapper,

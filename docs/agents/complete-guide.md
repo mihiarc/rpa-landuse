@@ -382,7 +382,7 @@ agent = LanduseAgent(config=config)
 ### Security Configuration
 
 ```python
-from landuse.utilities.security import SecurityValidator, RateLimiter
+from landuse.utils.security import SecurityValidator, RateLimiter
 
 class SecurityConfig:
     """Security configuration for production"""

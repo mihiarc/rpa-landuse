@@ -17,7 +17,7 @@ sys.path.insert(0, str(src_path))
 
 import streamlit as st  # noqa: E402
 
-from landuse.utilities.security import RateLimiter  # noqa: E402
+from landuse.utils.security import RateLimiter  # noqa: E402
 
 # Rate limiting configuration: 20 AI queries per minute per session
 CHAT_RATE_LIMIT_CALLS = 20
