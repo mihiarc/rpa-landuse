@@ -166,14 +166,14 @@ def get_summary_statistics(df: pd.DataFrame) -> Optional[str]:
     return None
 
 
-def create_welcome_panel(db_path: str, model_name: str, api_key_masked: str) -> Panel:
+def create_welcome_panel(db_path: str, model_name: str, api_key_status: str = "Configured") -> Panel:
     """
     Create welcome panel for chat interface
 
     Args:
         db_path: Path to database
         model_name: Model being used
-        api_key_masked: Masked API key for display
+        api_key_status: API key status (e.g., "Configured" or "Not configured")
 
     Returns:
         Rich Panel object
@@ -188,12 +188,14 @@ def create_welcome_panel(db_path: str, model_name: str, api_key_masked: str) -> 
     except Exception:
         pass  # Optional logo, safe to skip
 
+    # Use checkmark or X based on status
+    status_icon = "✓" if api_key_status == "Configured" else "✗"
     content = (
         f"{logo_content}"
         "🌲 [bold green]RPA Land Use Analytics[/bold green]\n"
         "[yellow]AI-powered analysis of USDA Forest Service RPA Assessment data[/yellow]\n\n"
         f"[dim]Database: {db_path}[/dim]\n"
-        f"[dim]Model: {model_name} | API Key: {api_key_masked}[/dim]"
+        f"[dim]Model: {model_name} | API Key: {status_icon} {api_key_status}[/dim]"
     )
     return Panel.fit(content, border_style="green")
 

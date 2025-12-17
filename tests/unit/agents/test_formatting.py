@@ -190,11 +190,13 @@ class TestUIComponents:
         panel = create_welcome_panel(
             "test.db",
             "gpt-4",
-            "sk-...xyz"
+            "Configured"
         )
 
         assert isinstance(panel, Panel)
         assert panel.renderable is not None
+        # Verify API key status is shown without revealing actual key
+        assert "Configured" in str(panel.renderable)
 
     def test_create_examples_panel(self):
         """Test examples panel creation"""

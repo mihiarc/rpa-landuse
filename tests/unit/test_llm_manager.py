@@ -74,23 +74,19 @@ class TestLLMManager:
                 config = AppConfig(llm={'model_name': 'gpt-4o-mini'})
 
 
-    def test_api_key_masking(self):
-        """Test API key masking for security."""
+    def test_api_key_status(self):
+        """Test API key status reporting for security (no key content revealed)."""
         with patch.dict(os.environ, {'OPENAI_API_KEY': 'sk-test123456789012345678901234567890123456789012345'}):
             config = AppConfig()
         manager = LLMManager(config)
 
-        # Test various API key formats
-        test_cases = [
-            ("sk-1234567890123456789012345678901234567890123456", "sk-12345...3456"),
-            ("sk-abc", "***"),  # Too short
-            (None, "NOT_SET"),
-            ("", "NOT_SET")
-        ]
+        # Test with API key set
+        with patch.dict(os.environ, {'OPENAI_API_KEY': 'sk-test123'}):
+            assert manager.get_api_key_status() == "Configured"
 
-        for api_key, expected_masked in test_cases:
-            masked = manager._mask_api_key(api_key)
-            assert masked == expected_masked
+        # Test without API key
+        with patch.dict(os.environ, {}, clear=True):
+            assert manager.get_api_key_status() == "Not configured"
 
     def test_validate_api_key(self):
         """Test API key validation."""

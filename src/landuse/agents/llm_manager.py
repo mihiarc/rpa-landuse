@@ -45,10 +45,11 @@ class LLMManager(LLMInterface):
     def _create_openai_llm(self, model_name: str) -> ChatOpenAI:
         """Create OpenAI LLM instance."""
         api_key = os.getenv('OPENAI_API_KEY')
-        self.console.print(f"[dim]Using OpenAI API key: {self._mask_api_key(api_key)}[/dim]")
 
         if not api_key:
             raise APIKeyError("OPENAI_API_KEY environment variable is required for OpenAI models", model_name)
+
+        self.console.print("[dim]Using OpenAI API key: ✓ Configured[/dim]")
 
         return ChatOpenAI(
             model=model_name,
@@ -57,19 +58,17 @@ class LLMManager(LLMInterface):
             max_tokens=self.config.llm.max_tokens,
         )
 
-    def _mask_api_key(self, api_key: Optional[str]) -> str:
+    def get_api_key_status(self) -> str:
         """
-        Safely mask API key for logging purposes.
-
-        Args:
-            api_key: The API key to mask
+        Get API key configuration status without revealing any key content.
 
         Returns:
-            Masked API key string
+            Status string indicating if API key is configured
         """
+        api_key = os.getenv('OPENAI_API_KEY')
         if not api_key:
-            return "NOT_SET"
-        return f"{api_key[:8]}...{api_key[-4:]}" if len(api_key) > 12 else "***"
+            return "Not configured"
+        return "Configured"
 
     def get_model_name(self) -> str:
         """Get the current model name."""
