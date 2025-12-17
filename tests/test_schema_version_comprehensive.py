@@ -9,9 +9,9 @@ from unittest.mock import Mock, patch
 import duckdb
 import pytest
 
-from landuse.database.schema_version import SchemaVersion, SchemaVersionManager
 from landuse.agents.database_manager import DatabaseManager
 from landuse.core.app_config import AppConfig
+from landuse.database.schema_version import SchemaVersion, SchemaVersionManager
 
 
 class TestSchemaVersionEdgeCases:

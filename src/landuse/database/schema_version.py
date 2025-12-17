@@ -1,9 +1,10 @@
 """Schema versioning system for database evolution tracking."""
 
 from datetime import datetime
-from typing import Dict, Optional, Tuple
-import duckdb
 from pathlib import Path
+from typing import Dict, Optional, Tuple
+
+import duckdb
 
 
 class SchemaVersion:
@@ -219,5 +220,5 @@ class SchemaVersionManager:
         except Exception as e:
             # Log unexpected errors but don't fail
             import warnings
-            warnings.warn(f"Unexpected error during schema detection: {e}")
+            warnings.warn(f"Unexpected error during schema detection: {e}", stacklevel=2)
             return None

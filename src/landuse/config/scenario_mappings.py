@@ -9,7 +9,7 @@ Version: 1.0.0
 Created: 2025-09-30
 """
 
-from typing import Dict, Optional, NamedTuple
+from typing import Dict, NamedTuple, Optional
 
 
 class ScenarioDisplay(NamedTuple):

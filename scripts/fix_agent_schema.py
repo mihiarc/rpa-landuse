@@ -3,8 +3,10 @@
 Quick fix to help agent use combined scenarios by creating proper aliases.
 """
 
-import duckdb
 import sys
+
+import duckdb
+
 
 def fix_agent_schema():
     """Create aliases so agent uses combined scenarios."""

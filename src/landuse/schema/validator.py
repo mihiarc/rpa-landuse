@@ -1,20 +1,14 @@
 """Schema validation system for database consistency checks."""
 
 import re
-from typing import Dict, List, Set, Optional
+from typing import Dict, List, Optional, Set
 
 import duckdb
 from rich.console import Console
 
 from landuse.exceptions import ValidationError
 
-from .models import (
-    SchemaDefinition,
-    TableDefinition,
-    ValidationResult,
-    ValidationIssue,
-    ValidationLevel
-)
+from .models import SchemaDefinition, TableDefinition, ValidationIssue, ValidationLevel, ValidationResult
 
 
 class SchemaValidator:
@@ -106,7 +100,7 @@ class SchemaValidator:
                     category="schema",
                     message=f"Table missing: {table_name}",
                     table=table_name,
-                    suggestion=f"Create table using migration or schema sync"
+                    suggestion="Create table using migration or schema sync"
                 ))
             else:
                 # Validate table structure

@@ -533,27 +533,27 @@ def show_custom_extraction():
         all_scenarios = filters['scenarios']['scenario_name'].tolist()
 
         # Extract unique RCP values from scenario names
-        rcp_values = sorted(list(set([
+        rcp_values = sorted({
             'RCP4.5' if 'rcp45' in s else 'RCP8.5' if 'rcp85' in s else None
             for s in all_scenarios if s
-        ])))
+        })
         rcp_values = [v for v in rcp_values if v]  # Remove None values
 
         # Extract unique SSP values from scenario names
-        ssp_values = sorted(list(set([
+        ssp_values = sorted({
             'SSP1' if 'ssp1' in s else
             'SSP2' if 'ssp2' in s else
             'SSP3' if 'ssp3' in s else
             'SSP5' if 'ssp5' in s else None
             for s in all_scenarios if s
-        ])))
+        })
         ssp_values = [v for v in ssp_values if v]  # Remove None values
 
         # Extract unique climate models
-        model_values = sorted(list(set([
+        model_values = sorted({
             s.split('_')[0] + '_' + s.split('_')[1] if '_' in s else s
             for s in all_scenarios if s
-        ])))
+        })
 
         # RCP filter
         selected_rcp = st.multiselect(

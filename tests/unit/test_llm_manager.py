@@ -14,7 +14,7 @@ from langchain_openai import ChatOpenAI
 
 from landuse.agents.llm_manager import LLMManager
 from landuse.core.app_config import AppConfig
-from landuse.exceptions import APIKeyError, LLMError
+from landuse.exceptions import APIKeyError, ConfigurationError, LLMError
 
 
 class TestLLMManager:
@@ -70,7 +70,7 @@ class TestLLMManager:
         """Test error handling when OpenAI API key is missing."""
         # Remove API key from environment - this should fail at config creation
         with patch.dict(os.environ, {}, clear=True):
-            with pytest.raises(Exception):  # AppConfig will raise ConfigurationError
+            with pytest.raises(ConfigurationError):
                 config = AppConfig(llm={'model_name': 'gpt-4o-mini'})
 
 

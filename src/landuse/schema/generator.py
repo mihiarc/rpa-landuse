@@ -655,7 +655,7 @@ class ModelGenerator:
 
         if col['default'] is not None:
             if col['default'] == 'CURRENT_TIMESTAMP':
-                field_def = f"Field(default_factory=datetime.utcnow)"
+                field_def = "Field(default_factory=datetime.utcnow)"
             elif col['default'] in ('NULL', 'null'):
                 field_def = "Field(default=None)"
             else:

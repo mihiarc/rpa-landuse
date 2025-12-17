@@ -2,9 +2,9 @@
 
 import hashlib
 import json
-from pathlib import Path
-from typing import Dict, Optional, List, Any
 import warnings
+from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 import duckdb
 import yaml
@@ -16,17 +16,10 @@ from landuse.exceptions import SchemaError
 from landuse.infrastructure.cache import InMemoryCache
 from landuse.infrastructure.performance import time_database_operation
 
-from .models import (
-    SchemaDefinition,
-    TableDefinition,
-    ViewDefinition,
-    ValidationResult,
-    MigrationPlan,
-    MigrationResult
-)
+from .generator import ModelGenerator, SchemaDocGenerator
 from .migration import MigrationEngine
+from .models import MigrationPlan, MigrationResult, SchemaDefinition, TableDefinition, ValidationResult, ViewDefinition
 from .validator import SchemaValidator
-from .generator import SchemaDocGenerator, ModelGenerator
 
 
 class SchemaManager:
@@ -139,7 +132,7 @@ class SchemaManager:
 
         # Load and parse YAML
         try:
-            with open(definition_file, 'r') as f:
+            with open(definition_file) as f:
                 data = yaml.safe_load(f)
 
             # Convert to Pydantic model

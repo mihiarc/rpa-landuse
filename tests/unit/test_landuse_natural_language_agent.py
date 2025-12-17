@@ -12,6 +12,7 @@ import pytest
 
 from landuse.agents import LanduseAgent
 from landuse.core.app_config import AppConfig
+from landuse.exceptions import ConfigurationError
 
 
 class TestLanduseAgent:
@@ -58,7 +59,7 @@ class TestLanduseAgent:
         """Test agent handles missing database gracefully"""
         # The new AppConfig validates database exists
         with patch.dict(os.environ, {'OPENAI_API_KEY': 'test-key'}):
-            with pytest.raises(Exception):  # AppConfig will raise ConfigurationError
+            with pytest.raises(ConfigurationError):
                 config = AppConfig(database={'path': 'nonexistent.db'})
 
     def test_get_schema_info(self, agent):

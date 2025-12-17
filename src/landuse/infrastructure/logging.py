@@ -14,7 +14,6 @@ from rich.logging import RichHandler
 from landuse.core.app_config import AppConfig, LoggingConfig
 from landuse.core.interfaces import LoggerInterface
 
-
 # Global logger instance (singleton)
 _logger_instance: Optional["StructuredLogger"] = None
 _logger_lock = threading.Lock()
@@ -110,7 +109,7 @@ class StructuredLogger(LoggerInterface):
         """
         self.config = config
         self.console = Console(stderr=True)  # Log to stderr to not interfere with output
-        self._children: Dict[str, "StructuredLogger"] = {}
+        self._children: Dict[str, StructuredLogger] = {}
         self._component: Optional[str] = None
 
         # Create main logger

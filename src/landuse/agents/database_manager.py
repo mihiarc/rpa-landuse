@@ -4,8 +4,8 @@ Provides database connection management with connection pooling for
 improved performance and resource utilization in multi-threaded environments.
 """
 
-from typing import Optional
 import warnings
+from typing import Optional
 
 import duckdb
 import pandas as pd
@@ -315,7 +315,8 @@ class DatabaseManager(DatabaseInterface):
                     f"Database version {current_version} may not be fully compatible with "
                     f"application version {SchemaVersion.CURRENT_VERSION}. "
                     f"Some features may not work as expected.",
-                    UserWarning
+                    UserWarning,
+                    stacklevel=2
                 )
                 self.console.print(
                     f"[yellow]⚠ Version compatibility warning: Database v{current_version} "

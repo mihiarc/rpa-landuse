@@ -44,7 +44,7 @@ class TestCombinedScenariosImplementation:
         # Check which table exists
         table_name = "dim_scenario"
         try:
-            conn.execute(f"SELECT 1 FROM dim_scenario_combined LIMIT 1").fetchone()
+            conn.execute("SELECT 1 FROM dim_scenario_combined LIMIT 1").fetchone()
             table_name = "dim_scenario_combined"
         except:
             pass
@@ -89,7 +89,7 @@ class TestCombinedScenariosImplementation:
         # Check which table exists
         table_name = "dim_scenario"
         try:
-            conn.execute(f"SELECT 1 FROM dim_scenario_combined LIMIT 1").fetchone()
+            conn.execute("SELECT 1 FROM dim_scenario_combined LIMIT 1").fetchone()
             table_name = "dim_scenario_combined"
         except:
             pass
@@ -216,7 +216,7 @@ class TestCombinedScenariosImplementation:
         )]
 
         if stat_columns:
-            print(f"\n✅ Statistical fields found:")
+            print("\n✅ Statistical fields found:")
             for col in stat_columns:
                 print(f"  - {col}")
         else:

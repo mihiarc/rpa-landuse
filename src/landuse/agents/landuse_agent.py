@@ -1,6 +1,9 @@
 """Refactored landuse agent with modern architecture and separated concerns."""
 
+# Import PromptManager for versioned prompts
+import sys
 import time
+from pathlib import Path
 from typing import Any, Optional
 
 from langchain_core.language_models import BaseChatModel
@@ -18,9 +21,6 @@ from landuse.agents.llm_manager import LLMManager
 from landuse.agents.prompts import get_system_prompt
 from landuse.agents.query_executor import QueryExecutor
 
-# Import PromptManager for versioned prompts
-import sys
-from pathlib import Path
 # Add prompts directory to path if needed
 project_root = Path(__file__).parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
@@ -32,10 +32,10 @@ except ImportError:
 from landuse.agents.state import AgentState
 from landuse.core.app_config import AppConfig
 from landuse.exceptions import GraphExecutionError, LanduseError, RateLimitError, ToolExecutionError, wrap_exception
-from landuse.utils.retry_decorators import invoke_llm_with_retry
-from landuse.utils.security import RateLimiter
 from landuse.tools.common_tools import create_analysis_tool, create_execute_query_tool, create_schema_tool
 from landuse.tools.state_lookup_tool import create_state_lookup_tool
+from landuse.utils.retry_decorators import invoke_llm_with_retry
+from landuse.utils.security import RateLimiter
 
 
 class LanduseAgent:

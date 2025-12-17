@@ -8,17 +8,11 @@ This module provides comprehensive schema management capabilities including:
 - Documentation generation
 """
 
+from .generator import ModelGenerator, SchemaDocGenerator
 from .manager import SchemaManager
 from .migration import MigrationEngine, MigrationPlan, MigrationResult
+from .models import IndexDefinition, MigrationStatus, SchemaDefinition, TableDefinition, ViewDefinition
 from .validator import SchemaValidator, ValidationResult
-from .generator import SchemaDocGenerator, ModelGenerator
-from .models import (
-    SchemaDefinition,
-    TableDefinition,
-    ViewDefinition,
-    IndexDefinition,
-    MigrationStatus
-)
 
 __all__ = [
     'SchemaManager',

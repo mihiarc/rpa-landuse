@@ -19,6 +19,7 @@ sys.path.append(str(Path(__file__).parent.parent.parent / "src"))
 from landuse.agents import LanduseAgent
 from landuse.agents.landuse_agent import AgentState
 from landuse.core.app_config import AppConfig
+from landuse.exceptions import ConfigurationError
 
 
 class TestLanduseConfig:
@@ -149,12 +150,12 @@ class TestLanduseAgent:
             max_tokens=config.llm.max_tokens
         )
 
-    def test_missing_api_key(self):
+    def test_missing_api_key(self, mock_db_path):
         """Test error when API key is missing"""
+        # AppConfig requires OPENAI_API_KEY - should raise ConfigurationError when missing
         with patch.dict(os.environ, {}, clear=True):
-            with pytest.raises(Exception):  # Will raise during AppConfig creation
-                config = AppConfig(database={'path': ':memory:'})
-                LanduseAgent(config)
+            with pytest.raises(ConfigurationError):
+                AppConfig(database={'path': str(mock_db_path)})
 
     @patch.dict(os.environ, {'OPENAI_API_KEY': 'test-key'})
     @patch('landuse.agents.llm_manager.ChatOpenAI')

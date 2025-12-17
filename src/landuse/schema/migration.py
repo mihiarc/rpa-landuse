@@ -11,15 +11,10 @@ import duckdb
 from rich.console import Console
 from rich.progress import Progress, SpinnerColumn, TextColumn
 
-from landuse.exceptions import SchemaError, MigrationError
+from landuse.exceptions import MigrationError, SchemaError
 from landuse.infrastructure.performance import time_database_operation
 
-from .models import (
-    MigrationPlan,
-    MigrationResult,
-    MigrationStatus,
-    MigrationStep
-)
+from .models import MigrationPlan, MigrationResult, MigrationStatus, MigrationStep
 
 
 class MigrationEngine:
@@ -458,7 +453,7 @@ class MigrationEngine:
         # Build migration content
         content_lines = [
             f"-- Migration: v{from_version} to v{to_version}",
-            f"-- Author: system",
+            "-- Author: system",
             f"-- Date: {datetime.utcnow().isoformat()}",
             f"-- Description: Schema migration from v{from_version} to v{to_version}",
             "",

@@ -10,8 +10,8 @@ import duckdb
 from rich.console import Console
 from rich.progress import BarColumn, Progress, SpinnerColumn, TextColumn, TimeRemainingColumn
 
-from landuse.core.app_config import AppConfig
 from landuse.connections.duckdb_connection import DuckDBConnection
+from landuse.core.app_config import AppConfig
 from landuse.utils.retry_decorators import database_retry
 
 

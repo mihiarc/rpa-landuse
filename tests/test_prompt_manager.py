@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """Tests for the prompt versioning system."""
 
+# Add project root to path
+import sys
 import tempfile
 from pathlib import Path
 
 import pytest
 
-# Add project root to path
-import sys
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from prompts.prompt_manager import PromptManager

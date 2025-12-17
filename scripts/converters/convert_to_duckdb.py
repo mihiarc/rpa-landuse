@@ -1063,7 +1063,7 @@ class LanduseCombinedScenarioConverter:
             version_manager = SchemaVersionManager(self.conn)
             # Apply version 2.2.0 for combined scenarios with versioning
             version_manager.apply_version('2.2.0', applied_by='convert_to_duckdb')
-            console.print(f"[green]✓ Applied schema version 2.2.0[/green]")
+            console.print("[green]✓ Applied schema version 2.2.0[/green]")
         except Exception as e:
             console.print(f"[yellow]⚠ Could not apply schema version: {e}[/yellow]")
 

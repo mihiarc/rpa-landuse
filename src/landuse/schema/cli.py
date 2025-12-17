@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
 """CLI commands for schema management."""
 
-import click
 from pathlib import Path
+
+import click
 from rich.console import Console
 from rich.table import Table
 
 from landuse.core.app_config import AppConfig
-from .manager import SchemaManager
 
+from .manager import SchemaManager
 
 console = Console()
 

@@ -174,8 +174,8 @@ class TestChatPage:
     @patch('views.chat.get_agent')
     def test_handle_user_input_with_valid_agent(self, mock_get_agent):
         """Test handle_user_input when agent is available"""
-        from views import chat
         from landuse.utils.security import RateLimiter
+        from views import chat
 
         mock_agent = Mock()
         mock_agent.query.return_value = "Test response"
@@ -193,8 +193,8 @@ class TestChatPage:
     @patch('views.chat.get_agent')
     def test_handle_user_input_with_agent_error(self, mock_get_agent):
         """Test handle_user_input when agent has error"""
-        from views import chat
         from landuse.utils.security import RateLimiter
+        from views import chat
 
         mock_get_agent.return_value = (None, "Agent initialization failed")
 

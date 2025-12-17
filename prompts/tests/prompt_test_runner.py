@@ -19,8 +19,8 @@ from typing import Any, Dict, List, Optional, Tuple
 import yaml
 from dotenv import load_dotenv
 from rich.console import Console
-from rich.table import Table
 from rich.progress import track
+from rich.table import Table
 
 # Add project root to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
@@ -28,9 +28,9 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 # Load environment variables from .env file
 load_dotenv(Path(__file__).parent.parent.parent / ".env")
 
-from prompts.prompt_manager import PromptManager
 from landuse.agents.landuse_agent import LanduseAgent
 from landuse.config.landuse_config import LanduseConfig
+from prompts.prompt_manager import PromptManager
 
 
 @dataclass
@@ -108,7 +108,7 @@ class PromptTestRunner:
         if not queries_file.exists():
             raise FileNotFoundError(f"Benchmark queries file not found: {queries_file}")
 
-        with open(queries_file, 'r') as f:
+        with open(queries_file) as f:
             return yaml.safe_load(f)
 
     def extract_sql_from_response(self, agent_state: Dict) -> Optional[str]:

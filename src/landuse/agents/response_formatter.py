@@ -10,7 +10,9 @@ Created: 2025-09-30
 """
 
 from typing import Union
+
 import pandas as pd
+
 from landuse.config.scenario_mappings import ScenarioMapping
 
 
