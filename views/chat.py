@@ -17,6 +17,14 @@ sys.path.insert(0, str(src_path))
 
 import streamlit as st  # noqa: E402
 
+from landuse.exceptions import (  # noqa: E402
+    AgentError,
+    ConfigurationError,
+    DatabaseError,
+    LanduseError,
+    LLMError,
+    format_error_for_user,
+)
 from landuse.utils.security import RateLimiter  # noqa: E402
 
 # Rate limiting configuration: 20 AI queries per minute per session
@@ -26,7 +34,11 @@ CHAT_RATE_LIMIT_WINDOW = 60  # seconds
 
 @st.cache_resource(ttl=300)  # 5 minute TTL
 def get_agent():
-    """Get cached agent instance"""
+    """Get cached agent instance.
+
+    Returns:
+        tuple: (agent, error_message) - agent is None if error occurred
+    """
     try:
         from landuse.agents import LanduseAgent
         from landuse.core.app_config import AppConfig
@@ -34,8 +46,16 @@ def get_agent():
         config = AppConfig()
         agent = LanduseAgent(config)
         return agent, None
+    except ConfigurationError as e:
+        return None, f"Configuration error: {e.message}. Check your environment variables."
+    except DatabaseError as e:
+        return None, f"Database error: {e.message}. Ensure the database file exists."
+    except LLMError as e:
+        return None, f"LLM error: {e.message}. Check your API key configuration."
+    except LanduseError as e:
+        return None, format_error_for_user(e)
     except Exception as e:
-        return None, str(e)
+        return None, f"Unexpected error initializing agent: {type(e).__name__}: {str(e)}"
 
 
 def initialize_session_state():
@@ -262,18 +282,46 @@ def handle_user_input():
                     "content": response
                 })
 
-            except Exception as e:
-                error_msg = str(e)
-
-                # Simple error handling
-                if "rate" in error_msg.lower() or "429" in error_msg:
+            except LLMError as e:
+                # LLM-specific errors (rate limits, API issues)
+                if "rate" in str(e).lower() or "429" in str(e):
                     st.error("**Rate limit reached.** Please wait a moment and try again.")
-                elif "timeout" in error_msg.lower():
+                else:
+                    st.error(f"**AI Model Error:** {e.message}")
+                st.session_state.messages.append({
+                    "role": "assistant",
+                    "content": f"AI Error: {e.message}"
+                })
+            except DatabaseError as e:
+                # Database-specific errors
+                st.error(f"**Database Error:** {e.message}")
+                st.info("💡 Try rephrasing your question or check if the database is accessible.")
+                st.session_state.messages.append({
+                    "role": "assistant",
+                    "content": f"Database Error: {e.message}"
+                })
+            except AgentError as e:
+                # Agent processing errors
+                st.error(f"**Processing Error:** {e.message}")
+                st.session_state.messages.append({
+                    "role": "assistant",
+                    "content": f"Processing Error: {e.message}"
+                })
+            except LanduseError as e:
+                # Other landuse-specific errors
+                user_msg = format_error_for_user(e)
+                st.error(user_msg)
+                st.session_state.messages.append({
+                    "role": "assistant",
+                    "content": user_msg
+                })
+            except Exception as e:
+                # Unexpected errors
+                error_msg = str(e)
+                if "timeout" in error_msg.lower():
                     st.error("**Query timeout.** Try a simpler query.")
                 else:
-                    st.error(f"Error: {error_msg[:200]}")
-
-                # Add error to history
+                    st.error(f"Unexpected error: {type(e).__name__}: {error_msg[:200]}")
                 st.session_state.messages.append({
                     "role": "assistant",
                     "content": f"Error: {error_msg[:200]}"

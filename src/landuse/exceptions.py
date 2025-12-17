@@ -260,9 +260,15 @@ def handle_database_exception(func):
         def my_database_function():
             # database code here
     """
+    import functools
+
+    @functools.wraps(func)
     def wrapper(*args, **kwargs):
         try:
             return func(*args, **kwargs)
+        except LanduseError:
+            # Re-raise our custom exceptions as-is
+            raise
         except Exception as e:
             # Convert to our custom exception hierarchy
             if 'duckdb' in str(type(e)).lower():
@@ -273,3 +279,121 @@ def handle_database_exception(func):
                 raise wrap_exception(e, f"Error in {func.__name__}")
 
     return wrapper
+
+
+def handle_tool_exception(func):
+    """
+    Decorator to handle tool execution exceptions consistently.
+
+    Usage:
+        @handle_tool_exception
+        def my_tool_function():
+            # tool code here
+    """
+    import functools
+
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except LanduseError:
+            # Re-raise our custom exceptions as-is
+            raise
+        except Exception as e:
+            raise ToolExecutionError(
+                f"Tool '{func.__name__}' failed: {str(e)}",
+                tool_name=func.__name__
+            )
+
+    return wrapper
+
+
+def handle_query_error(error: Exception, query: str = None, context: str = None) -> dict:
+    """
+    Handle query errors and return a standardized error response dict.
+
+    Args:
+        error: The exception that occurred
+        query: The SQL query that failed (optional)
+        context: Additional context about where the error occurred
+
+    Returns:
+        dict: Standardized error response with 'success', 'error', and 'suggestion' keys
+    """
+    import duckdb
+
+    # Determine error type and suggestion
+    error_msg = str(error)
+    suggestion = None
+
+    if isinstance(error, (duckdb.CatalogException, SchemaError)):
+        suggestion = "Check table and column names. Use explore_landuse_schema to see available tables."
+    elif isinstance(error, (duckdb.SyntaxException, duckdb.BinderException, QueryValidationError)):
+        suggestion = "Check SQL syntax. Ensure proper quoting and valid expressions."
+    elif isinstance(error, SecurityError):
+        suggestion = "Query was blocked for security reasons. Only SELECT queries are allowed."
+    elif isinstance(error, DatabaseConnectionError):
+        suggestion = "Check database connectivity and file permissions."
+    elif isinstance(error, ValueError):
+        suggestion = "Check input values and query parameters."
+    else:
+        suggestion = "Check query syntax and try a simpler query."
+
+    # Build context-aware message
+    if context:
+        error_msg = f"{context}: {error_msg}"
+
+    return {
+        "success": False,
+        "error": error_msg,
+        "query": query,
+        "suggestion": suggestion
+    }
+
+
+def safe_execute(func, *args, default=None, context: str = None, **kwargs):
+    """
+    Safely execute a function, returning a default value on error.
+
+    Args:
+        func: The function to execute
+        *args: Positional arguments to pass to the function
+        default: Default value to return on error (default: None)
+        context: Context string for error logging
+        **kwargs: Keyword arguments to pass to the function
+
+    Returns:
+        The function result or default value on error
+    """
+    try:
+        return func(*args, **kwargs)
+    except LanduseError:
+        # Re-raise our custom exceptions
+        raise
+    except Exception:
+        return default
+
+
+def format_error_for_user(error: Exception, include_suggestion: bool = True) -> str:
+    """
+    Format an error message for display to users.
+
+    Args:
+        error: The exception to format
+        include_suggestion: Whether to include a suggestion for fixing the error
+
+    Returns:
+        str: User-friendly error message
+    """
+    if isinstance(error, LanduseError):
+        msg = error.message
+        if include_suggestion:
+            if isinstance(error, DatabaseError):
+                msg += "\n\nSuggestion: Check database connectivity and query syntax."
+            elif isinstance(error, SecurityError):
+                msg += "\n\nSuggestion: This action was blocked for security reasons."
+            elif isinstance(error, ValidationError):
+                msg += "\n\nSuggestion: Check input values and try again."
+        return msg
+    else:
+        return f"An unexpected error occurred: {str(error)}"

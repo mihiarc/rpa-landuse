@@ -10,6 +10,7 @@ from rich.console import Console
 from landuse.core.app_config import AppConfig
 from landuse.core.interfaces import DatabaseInterface
 from landuse.database.schema_version import SchemaVersion, SchemaVersionManager
+from landuse.exceptions import DatabaseError, SchemaError
 from landuse.infrastructure.performance import time_database_operation
 from landuse.utils.retry_decorators import database_retry
 
@@ -163,7 +164,18 @@ class DatabaseManager(DatabaseInterface):
         return pd.DataFrame(result, columns=columns)
 
     def validate_table_name(self, table_name: str) -> bool:
-        """Validate table name exists and is accessible (DatabaseInterface implementation)."""
+        """Validate table name exists and is accessible (DatabaseInterface implementation).
+
+        Args:
+            table_name: Name of table to validate
+
+        Returns:
+            True if table exists, False otherwise
+
+        Note:
+            Returns False for any database errors rather than raising,
+            as validation is used in conditional checks.
+        """
         try:
             conn = self.get_connection()
             result = conn.execute("""
@@ -171,7 +183,13 @@ class DatabaseManager(DatabaseInterface):
                 WHERE table_name = ? AND table_schema = 'main'
             """, [table_name]).fetchone()
             return result[0] > 0 if result else False
-        except Exception:
+        except duckdb.Error as e:
+            # Log the specific database error but return False for validation
+            self.console.print(f"[dim]Table validation error for '{table_name}': {str(e)}[/dim]")
+            return False
+        except Exception as e:
+            # Unexpected errors should be logged
+            self.console.print(f"[yellow]⚠ Unexpected error validating table '{table_name}': {str(e)}[/yellow]")
             return False
 
     def _check_schema_version(self, connection: duckdb.DuckDBPyConnection) -> None:
@@ -216,9 +234,15 @@ class DatabaseManager(DatabaseInterface):
                     f"with application v{SchemaVersion.CURRENT_VERSION}[/yellow]"
                 )
 
+        except duckdb.Error as e:
+            # Database-specific errors during version check - don't fail connection
+            self.console.print(f"[yellow]⚠ Database error checking schema version: {str(e)}[/yellow]")
+        except SchemaError as e:
+            # Schema-related issues - expected during version detection
+            self.console.print(f"[yellow]⚠ Schema version check: {e.message}[/yellow]")
         except Exception as e:
-            # Don't fail connection, just log warning
-            self.console.print(f"[yellow]⚠ Could not check schema version: {str(e)}[/yellow]")
+            # Unexpected errors - log but don't fail connection
+            self.console.print(f"[yellow]⚠ Could not check schema version: {type(e).__name__}: {str(e)}[/yellow]")
 
     def get_database_version(self) -> Optional[str]:
         """Get the current database schema version.

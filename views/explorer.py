@@ -22,6 +22,7 @@ import pandas as pd
 import streamlit as st
 
 from landuse.connections import DuckDBConnection
+from landuse.exceptions import DatabaseConnectionError, DatabaseError, SchemaError
 from landuse.utils.security import RateLimiter
 
 # Configuration constants
@@ -48,7 +49,14 @@ ALLOWED_TABLES = {
 
 @st.cache_resource
 def get_database_connection():
-    """Get cached database connection using st.connection"""
+    """Get cached database connection using st.connection.
+
+    Returns:
+        DuckDBConnection: Cached database connection instance
+
+    Raises:
+        SystemExit: If connection fails (via st.stop())
+    """
     try:
         conn = st.connection(
             name="landuse_db_explorer",
@@ -57,8 +65,16 @@ def get_database_connection():
             read_only=True
         )
         return conn
+    except DatabaseConnectionError as e:
+        st.error(f"❌ Database connection error: {e.message}")
+        st.info("💡 Check that the database file exists and is accessible.")
+        st.stop()
+    except duckdb.Error as e:
+        st.error(f"❌ DuckDB error: {e}")
+        st.info("💡 The database may be corrupted or in use by another process.")
+        st.stop()
     except Exception as e:
-        st.error(f"❌ Database connection error: {e}")
+        st.error(f"❌ Unexpected connection error: {type(e).__name__}: {e}")
         st.stop()
 
 
@@ -89,8 +105,15 @@ def get_table_schema():
             }
 
         return schema_info
+    except SchemaError as e:
+        st.error(f"❌ Schema error: {e.message}")
+        st.info("💡 The database schema may have changed. Try refreshing.")
+        return {}
+    except duckdb.Error as e:
+        st.error(f"❌ Database error getting schema: {e}")
+        return {}
     except Exception as e:
-        st.error(f"❌ Error getting schema: {e}")
+        st.error(f"❌ Unexpected error getting schema: {type(e).__name__}: {e}")
         return {}
 
 
@@ -346,6 +369,7 @@ def execute_query(query: str, ttl: int = 60):
     try:
         return conn.query(query, ttl=ttl)
     except duckdb.BinderException as e:
+        # Column or table reference errors
         error_str = str(e).lower()
         if "column" in error_str and "not found" in error_str:
             st.error(f"❌ Column not found: {e}")
@@ -354,18 +378,32 @@ def execute_query(query: str, ttl: int = 60):
             st.error(f"❌ Table not found: {e}")
             st.info(f"💡 Available tables: {', '.join(sorted(ALLOWED_TABLES))}")
         else:
-            st.error(f"❌ Binding error: {e}")
+            st.error(f"❌ Query binding error: {e}")
+            st.info("💡 Verify column and table names match the schema exactly")
         st.stop()
     except duckdb.SyntaxException as e:
+        # SQL syntax errors
         st.error(f"❌ SQL Syntax Error: {e}")
         st.info("💡 Check for missing commas, unclosed quotes, or invalid keywords")
         st.stop()
+    except duckdb.CatalogException as e:
+        # Catalog errors (missing objects)
+        st.error(f"❌ Catalog Error: {e}")
+        st.info(f"💡 Object not found. Available tables: {', '.join(sorted(ALLOWED_TABLES))}")
+        st.stop()
     except duckdb.ConnectionException as e:
+        # Connection errors
         st.error(f"❌ Database Connection Error: {e}")
-        st.info("💡 Try refreshing the page")
+        st.info("💡 Try refreshing the page or check database file accessibility")
+        st.stop()
+    except duckdb.Error as e:
+        # Other DuckDB errors
+        st.error(f"❌ Database Error: {e}")
+        st.info("💡 Try simplifying your query or check the syntax")
         st.stop()
     except Exception as e:
-        st.error(f"❌ Unexpected Error: {e}")
+        # Unexpected errors with type information
+        st.error(f"❌ Unexpected Error ({type(e).__name__}): {e}")
         st.stop()
 
 

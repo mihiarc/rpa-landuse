@@ -9,6 +9,13 @@ from pydantic import BaseModel, Field
 from landuse.agents.formatting import clean_sql_query, format_raw_query_results
 from landuse.agents.response_formatter import ResponseFormatter
 from landuse.core.app_config import AppConfig
+from landuse.exceptions import (
+    DatabaseError,
+    QueryValidationError,
+    SecurityError,
+    handle_query_error,
+    wrap_exception,
+)
 from landuse.utils.retry_decorators import database_retry
 
 
@@ -75,15 +82,37 @@ def create_execute_query_tool(
             else:
                 return _format_error_response(result, schema)
 
+        except (duckdb.CatalogException, duckdb.SyntaxException, duckdb.BinderException) as e:
+            # Database-specific errors with helpful suggestions
+            error_response = handle_query_error(e, cleaned_query, "Query execution")
+            return f"Error: {error_response['error']}\n\nSuggestion: {error_response['suggestion']}"
+        except (SecurityError, QueryValidationError) as e:
+            # Security or validation errors
+            return f"Query blocked: {e.message}\n\nSuggestion: Only SELECT queries are allowed."
+        except duckdb.Error as e:
+            # Other DuckDB errors
+            error_response = handle_query_error(e, cleaned_query, "Database error")
+            return f"Database error: {error_response['error']}\n\nSuggestion: {error_response['suggestion']}"
         except Exception as e:
-            return f"Error executing query: {str(e)}"
+            # Wrap unexpected errors
+            wrapped = wrap_exception(e, "Query execution")
+            return f"Error: {wrapped.message}"
 
     return execute_landuse_query
 
 
 @database_retry(max_attempts=3)
 def _execute_with_retry(db_connection: duckdb.DuckDBPyConnection, query: str) -> dict[str, Any]:
-    """Execute query with retry logic."""
+    """Execute query with retry logic.
+
+    Args:
+        db_connection: Active DuckDB connection
+        query: SQL query to execute
+
+    Returns:
+        dict with 'success', 'results', 'columns', 'row_count' on success
+        dict with 'success', 'error', 'query', 'error_type' on failure
+    """
     try:
         conn = db_connection
         result = conn.execute(query).fetchall()
@@ -95,11 +124,29 @@ def _execute_with_retry(db_connection: duckdb.DuckDBPyConnection, query: str) ->
             "columns": columns,
             "row_count": len(result)
         }
-    except Exception as e:
+    except (duckdb.CatalogException, duckdb.SyntaxException, duckdb.BinderException) as e:
+        # Schema/syntax errors - don't retry these
         return {
             "success": False,
             "error": str(e),
-            "query": query
+            "query": query,
+            "error_type": "schema"
+        }
+    except duckdb.Error as e:
+        # Other DuckDB errors - may be transient
+        return {
+            "success": False,
+            "error": str(e),
+            "query": query,
+            "error_type": "database"
+        }
+    except Exception as e:
+        # Unexpected errors
+        return {
+            "success": False,
+            "error": str(e),
+            "query": query,
+            "error_type": "unexpected"
         }
 
 
