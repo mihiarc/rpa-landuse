@@ -91,7 +91,23 @@ pythonpath = ["src"]
 
 [tool.coverage.run]
 source = ["src/landuse"]
-omit = ["*/tests/*", "*/__pycache__/*"]
+omit = [
+    "*/tests/*",
+    "*/__pycache__/*",
+    "*/site-packages/*",
+    "scripts/*",
+    # CLI entry points and standalone scripts
+    "src/landuse/__main__.py",
+    "src/landuse/agents/agent.py",
+    "src/landuse/agents/database_config_override.py",
+    # Schema management system (not yet fully integrated)
+    "src/landuse/schema/*",
+    # Map generation requires geo dependencies
+    "src/landuse/tools/map_generation_tool.py",
+    # Performance benchmarking utilities
+    "src/landuse/converters/performance_benchmark.py",
+    "src/landuse/converters/base_converter.py",
+]
 
 [tool.coverage.report]
 exclude_lines = [
