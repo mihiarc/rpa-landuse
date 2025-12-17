@@ -15,6 +15,18 @@ from landuse.agents import LanduseAgent
 from landuse.core.app_config import AppConfig
 
 
+def has_valid_openai_key():
+    """Check if a valid (non-test) OpenAI API key is available."""
+    key = os.getenv("OPENAI_API_KEY", "")
+    # Skip if no key or if it looks like a test key
+    return key and not key.startswith("sk-test") and len(key) > 20
+
+
+@pytest.mark.integration
+@pytest.mark.skipif(
+    not has_valid_openai_key(),
+    reason="Valid OpenAI API key required for LangGraph integration tests",
+)
 class TestLangGraphWorkflow:
     """Integration tests for the full LangGraph workflow."""
 

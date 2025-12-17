@@ -311,7 +311,17 @@ class TestDatabaseViews:
             assert "std_dev" in statistical_columns or "coefficient_variation" in statistical_columns
 
 
+def has_valid_openai_key():
+    """Check if a valid (non-test) OpenAI API key is available."""
+    key = os.getenv("OPENAI_API_KEY", "")
+    # Skip if no key or if it looks like a test key
+    return key and not key.startswith("sk-test") and len(key) > 20
+
+
 @pytest.mark.integration
+@pytest.mark.skipif(
+    not has_valid_openai_key(), reason="Valid OpenAI API key required for end-to-end tests (test keys don't work)"
+)
 class TestEndToEndWorkflow:
     """End-to-end workflow tests for combined scenarios."""
 
