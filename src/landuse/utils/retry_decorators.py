@@ -67,6 +67,13 @@ class RetryConfig:
         'retry': 'retry_if_exception_type((ConnectionError, TimeoutError))'
     }
 
+    # LLM operations (OpenAI)
+    LLM_RETRY = {
+        'stop': 'stop_after_attempt(3)',
+        'wait': 'wait_exponential(multiplier=2, min=1, max=60)',
+        'retry': 'retry_if_exception_type(LLM_RETRYABLE_EXCEPTIONS)'
+    }
+
 
 def database_retry(
     max_attempts: int = 3,
@@ -200,6 +207,189 @@ def network_retry(
         before_sleep=before_sleep_log(logger, logging.WARNING),
         after=after_log(logger, logging.INFO)
     )
+
+
+def _get_llm_retryable_exceptions() -> tuple:
+    """Get OpenAI exceptions that should trigger retries.
+
+    Returns:
+        Tuple of exception types to retry on
+    """
+    try:
+        import openai
+        return (
+            openai.RateLimitError,       # 429 - Rate limit exceeded
+            openai.APIConnectionError,    # Network connectivity issues
+            openai.APITimeoutError,       # Request timeout
+            openai.InternalServerError,   # 500 - Server error
+            ConnectionError,
+            TimeoutError,
+        )
+    except ImportError:
+        return (ConnectionError, TimeoutError)
+
+
+def _is_rate_limit_error(exception: Exception) -> bool:
+    """Check if exception is a rate limit error requiring longer backoff."""
+    try:
+        import openai
+        return isinstance(exception, openai.RateLimitError)
+    except ImportError:
+        return False
+
+
+def llm_retry(
+    max_attempts: int = 3,
+    min_wait: float = 1.0,
+    max_wait: float = 60.0,
+    rate_limit_wait: float = 30.0,
+):
+    """
+    Retry decorator for LLM/OpenAI API calls with intelligent backoff.
+
+    Handles common LLM API errors including:
+    - Rate limits (429) with extended backoff
+    - Server errors (500, 502, 503, 504)
+    - Connection and timeout errors
+
+    Args:
+        max_attempts: Maximum number of retry attempts (default: 3)
+        min_wait: Minimum wait time between retries in seconds (default: 1.0)
+        max_wait: Maximum wait time between retries in seconds (default: 60.0)
+        rate_limit_wait: Wait time for rate limit errors in seconds (default: 30.0)
+
+    Example:
+        >>> @llm_retry(max_attempts=3)
+        ... def call_llm(messages):
+        ...     return llm.invoke(messages)
+    """
+    exceptions = _get_llm_retryable_exceptions()
+
+    if not HAS_TENACITY:
+        return _fallback_llm_retry(max_attempts, min_wait, rate_limit_wait, exceptions)
+
+    import logging
+    logger = logging.getLogger('landuse.retry.llm')
+
+    def custom_wait(retry_state):
+        """Custom wait strategy with longer waits for rate limits."""
+        exception = retry_state.outcome.exception()
+        if _is_rate_limit_error(exception):
+            # Rate limit - use longer wait with jitter
+            import random
+            jitter = random.uniform(0, 5)
+            wait_time = rate_limit_wait + jitter
+            logger.warning(f"Rate limit hit, waiting {wait_time:.1f}s before retry")
+            return wait_time
+        else:
+            # Standard exponential backoff
+            attempt = retry_state.attempt_number
+            wait_time = min(min_wait * (2 ** (attempt - 1)), max_wait)
+            return wait_time
+
+    return retry(
+        stop=stop_after_attempt(max_attempts),
+        wait=custom_wait,
+        retry=retry_if_exception_type(exceptions),
+        before_sleep=before_sleep_log(logger, logging.WARNING),
+        after=after_log(logger, logging.INFO),
+        reraise=True
+    )
+
+
+def _fallback_llm_retry(max_attempts: int, min_wait: float, rate_limit_wait: float, exceptions: tuple):
+    """Fallback LLM retry when tenacity is not available."""
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            import random
+            last_exception = None
+
+            for attempt in range(max_attempts):
+                try:
+                    return func(*args, **kwargs)
+                except exceptions as e:
+                    last_exception = e
+
+                    if attempt < max_attempts - 1:
+                        # Determine wait time
+                        if _is_rate_limit_error(e):
+                            wait_time = rate_limit_wait + random.uniform(0, 5)
+                            console.print(f"[yellow]⚠ Rate limit hit on attempt {attempt + 1}[/yellow]")
+                        else:
+                            wait_time = min_wait * (2 ** attempt)
+                            console.print(f"[yellow]⚠ LLM call failed on attempt {attempt + 1}: {type(e).__name__}[/yellow]")
+
+                        console.print(f"[dim]🔄 Retrying in {wait_time:.1f}s...[/dim]")
+                        time.sleep(wait_time)
+                    else:
+                        console.print(f"[red]❌ All {max_attempts} LLM attempts failed[/red]")
+
+            raise last_exception
+
+        return wrapper
+    return decorator
+
+
+def invoke_llm_with_retry(
+    llm,
+    messages,
+    max_attempts: int = 3,
+    min_wait: float = 1.0,
+    rate_limit_wait: float = 30.0,
+):
+    """
+    Invoke an LLM with retry logic for transient errors.
+
+    This is a utility function for wrapping LLM invoke calls that cannot
+    easily use the @llm_retry decorator (e.g., inline calls).
+
+    Args:
+        llm: The LLM instance (or bound LLM with tools)
+        messages: Messages to send to the LLM
+        max_attempts: Maximum retry attempts (default: 3)
+        min_wait: Minimum wait between retries in seconds (default: 1.0)
+        rate_limit_wait: Wait time for rate limits in seconds (default: 30.0)
+
+    Returns:
+        LLM response
+
+    Raises:
+        The last exception if all retries fail
+
+    Example:
+        >>> response = invoke_llm_with_retry(
+        ...     llm.bind_tools(tools),
+        ...     messages,
+        ...     max_attempts=3
+        ... )
+    """
+    import random
+
+    exceptions = _get_llm_retryable_exceptions()
+    last_exception = None
+
+    for attempt in range(max_attempts):
+        try:
+            return llm.invoke(messages)
+        except exceptions as e:
+            last_exception = e
+
+            if attempt < max_attempts - 1:
+                # Determine wait time based on error type
+                if _is_rate_limit_error(e):
+                    wait_time = rate_limit_wait + random.uniform(0, 5)
+                    console.print(f"[yellow]⚠ Rate limit hit (attempt {attempt + 1}/{max_attempts})[/yellow]")
+                else:
+                    wait_time = min_wait * (2 ** attempt)
+                    console.print(f"[yellow]⚠ LLM error (attempt {attempt + 1}/{max_attempts}): {type(e).__name__}[/yellow]")
+
+                console.print(f"[dim]🔄 Retrying in {wait_time:.1f}s...[/dim]")
+                time.sleep(wait_time)
+            else:
+                console.print(f"[red]❌ LLM call failed after {max_attempts} attempts[/red]")
+
+    raise last_exception
 
 
 def custom_retry(
@@ -438,6 +628,8 @@ __all__ = [
     'api_retry',
     'file_retry',
     'network_retry',
+    'llm_retry',
+    'invoke_llm_with_retry',
     'custom_retry',
     'retry_on_result',
     'RetryableOperation',

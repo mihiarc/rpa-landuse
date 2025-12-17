@@ -32,6 +32,7 @@ except ImportError:
 from landuse.agents.state import AgentState
 from landuse.core.app_config import AppConfig
 from landuse.exceptions import GraphExecutionError, LanduseError, RateLimitError, ToolExecutionError, wrap_exception
+from landuse.utils.retry_decorators import invoke_llm_with_retry
 from landuse.utils.security import RateLimiter
 from landuse.tools.common_tools import create_analysis_tool, create_execute_query_tool, create_schema_tool
 from landuse.tools.state_lookup_tool import create_state_lookup_tool
@@ -171,8 +172,12 @@ class LanduseAgent:
             # Add current question
             messages.append(HumanMessage(content=question))
 
-            # Get initial response
-            response = self.llm.bind_tools(self.tools).invoke(messages)
+            # Get initial response with retry logic
+            response = invoke_llm_with_retry(
+                self.llm.bind_tools(self.tools),
+                messages,
+                max_attempts=3
+            )
             messages.append(response)
 
             if self.debug:
@@ -262,8 +267,12 @@ class LanduseAgent:
                         tool_call_id=tool_id
                     ))
 
-                # Get next response
-                response = self.llm.bind_tools(self.tools).invoke(messages)
+                # Get next response with retry logic
+                response = invoke_llm_with_retry(
+                    self.llm.bind_tools(self.tools),
+                    messages,
+                    max_attempts=3
+                )
                 messages.append(response)
 
                 if self.debug:

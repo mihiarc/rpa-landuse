@@ -12,6 +12,7 @@ from rich.console import Console
 
 from landuse.agents.state import AgentState
 from landuse.core.app_config import AppConfig
+from landuse.utils.retry_decorators import invoke_llm_with_retry
 
 
 class GraphBuilder:
@@ -107,8 +108,12 @@ class GraphBuilder:
         if not has_system:
             messages = [HumanMessage(content=self.system_prompt)] + messages
 
-        # Get LLM response with tools bound
-        response = self.llm.bind_tools(self.tools).invoke(messages)
+        # Get LLM response with tools bound and retry logic
+        response = invoke_llm_with_retry(
+            self.llm.bind_tools(self.tools),
+            messages,
+            max_attempts=3
+        )
 
         # Update state with new message
         return {
@@ -136,11 +141,15 @@ Focus on:
 4. Recommendations or areas for further investigation
 """
 
-            # Get analysis
-            analysis = self.llm.invoke([
-                {"role": "system", "content": "You are a land use science expert."},
-                {"role": "user", "content": analysis_prompt}
-            ])
+            # Get analysis with retry logic
+            analysis = invoke_llm_with_retry(
+                self.llm,
+                [
+                    {"role": "system", "content": "You are a land use science expert."},
+                    {"role": "user", "content": analysis_prompt}
+                ],
+                max_attempts=3
+            )
 
             return {"messages": messages + [analysis]}
 
