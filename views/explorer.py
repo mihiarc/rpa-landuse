@@ -8,6 +8,7 @@ import json
 import os
 import sys
 import time
+import uuid
 from io import BytesIO
 from pathlib import Path
 
@@ -21,6 +22,7 @@ import pandas as pd
 import streamlit as st
 
 from landuse.connections import DuckDBConnection
+from landuse.utilities.security import RateLimiter
 
 # Configuration constants
 MAX_DISPLAY_ROWS = 1000
@@ -29,6 +31,10 @@ DEFAULT_TTL = 300  # 5 minutes for most queries
 SCHEMA_TTL = 3600  # 1 hour for schema information
 MAX_EXPORT_ROWS = 10000
 QUERY_TIMEOUT = 30  # seconds
+
+# Rate limiting configuration: 30 SQL queries per minute per session
+EXPLORER_RATE_LIMIT_CALLS = 30
+EXPLORER_RATE_LIMIT_WINDOW = 60  # seconds
 
 # Allowed tables for security
 ALLOWED_TABLES = {
@@ -311,6 +317,15 @@ def execute_query(query: str, ttl: int = 60):
     Raises:
         Various DuckDB exceptions with user-friendly error messages
     """
+    # Check rate limit if initialized
+    if 'explorer_rate_limiter' in st.session_state:
+        allowed, rate_error = st.session_state.explorer_rate_limiter.check_rate_limit(
+            st.session_state.get('explorer_session_id', 'default')
+        )
+        if not allowed:
+            st.warning(f"⏳ {rate_error}")
+            st.stop()
+
     conn = get_database_connection()
 
     # Add safety limit if not present (skip if query has UNION)
@@ -799,6 +814,13 @@ def main():
     # Initialize session state
     if 'active_tab' not in st.session_state:
         st.session_state.active_tab = 0
+    if 'explorer_session_id' not in st.session_state:
+        st.session_state.explorer_session_id = str(uuid.uuid4())
+    if 'explorer_rate_limiter' not in st.session_state:
+        st.session_state.explorer_rate_limiter = RateLimiter(
+            max_calls=EXPLORER_RATE_LIMIT_CALLS,
+            time_window=EXPLORER_RATE_LIMIT_WINDOW
+        )
 
     # Create main tabs
     tabs = st.tabs([

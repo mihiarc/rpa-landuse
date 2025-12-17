@@ -7,6 +7,7 @@ Simplified Streamlit chat interface with the landuse natural language agent
 import os
 import sys
 import time
+import uuid
 from pathlib import Path
 
 # Add src to path
@@ -15,6 +16,12 @@ src_path = project_root / "src"
 sys.path.insert(0, str(src_path))
 
 import streamlit as st  # noqa: E402
+
+from landuse.utilities.security import RateLimiter  # noqa: E402
+
+# Rate limiting configuration: 20 AI queries per minute per session
+CHAT_RATE_LIMIT_CALLS = 20
+CHAT_RATE_LIMIT_WINDOW = 60  # seconds
 
 
 @st.cache_resource(ttl=300)  # 5 minute TTL
@@ -39,6 +46,13 @@ def initialize_session_state():
         st.session_state.show_welcome = True
     if "first_visit" not in st.session_state:
         st.session_state.first_visit = True
+    if "session_id" not in st.session_state:
+        st.session_state.session_id = str(uuid.uuid4())
+    if "rate_limiter" not in st.session_state:
+        st.session_state.rate_limiter = RateLimiter(
+            max_calls=CHAT_RATE_LIMIT_CALLS,
+            time_window=CHAT_RATE_LIMIT_WINDOW
+        )
 
 
 @st.dialog("🌍 Understanding RPA Scenarios")
@@ -205,6 +219,14 @@ def handle_user_input():
         return
 
     if prompt := st.chat_input("Ask about land use transitions..."):
+        # Check rate limit before processing
+        allowed, rate_error = st.session_state.rate_limiter.check_rate_limit(
+            st.session_state.session_id
+        )
+        if not allowed:
+            st.warning(f"⏳ {rate_error}")
+            return
+
         # Add user message
         st.session_state.messages.append({"role": "user", "content": prompt})
 

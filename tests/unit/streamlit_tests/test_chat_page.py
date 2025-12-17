@@ -175,6 +175,7 @@ class TestChatPage:
     def test_handle_user_input_with_valid_agent(self, mock_get_agent):
         """Test handle_user_input when agent is available"""
         from views import chat
+        from landuse.utilities.security import RateLimiter
 
         mock_agent = Mock()
         mock_agent.query.return_value = "Test response"
@@ -182,6 +183,8 @@ class TestChatPage:
 
         mock_st.session_state = MagicMock()
         mock_st.session_state.messages = []
+        mock_st.session_state.session_id = "test-session"
+        mock_st.session_state.rate_limiter = RateLimiter(max_calls=20, time_window=60)
 
         # The function uses st.chat_input which is mocked
         # Just verify it can be called without error
@@ -191,11 +194,14 @@ class TestChatPage:
     def test_handle_user_input_with_agent_error(self, mock_get_agent):
         """Test handle_user_input when agent has error"""
         from views import chat
+        from landuse.utilities.security import RateLimiter
 
         mock_get_agent.return_value = (None, "Agent initialization failed")
 
         mock_st.session_state = MagicMock()
         mock_st.session_state.messages = []
+        mock_st.session_state.session_id = "test-session"
+        mock_st.session_state.rate_limiter = RateLimiter(max_calls=20, time_window=60)
 
         # Should handle error gracefully
         chat.handle_user_input()
