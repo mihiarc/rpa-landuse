@@ -1,4 +1,8 @@
-"""Database management functionality extracted from monolithic agent class."""
+"""Database management functionality extracted from monolithic agent class.
+
+Provides database connection management with connection pooling support for
+improved performance and resource utilization in multi-threaded environments.
+"""
 
 from typing import Optional
 import warnings
@@ -10,38 +14,151 @@ from rich.console import Console
 from landuse.core.app_config import AppConfig
 from landuse.core.interfaces import DatabaseInterface
 from landuse.database.schema_version import SchemaVersion, SchemaVersionManager
-from landuse.exceptions import DatabaseError, SchemaError
+from landuse.exceptions import DatabaseConnectionError, DatabaseError, SchemaError
+from landuse.infrastructure.connection_pool import DatabaseConnectionPool
 from landuse.infrastructure.performance import time_database_operation
 from landuse.utils.retry_decorators import database_retry
 
 
 class DatabaseManager(DatabaseInterface):
     """
-    Manages database connections and schema operations.
+    Manages database connections and schema operations with connection pooling.
+
+    Supports both pooled and single-connection modes:
+    - Pooled mode (default): Uses connection pool for thread-safe connection sharing
+    - Single mode: Uses single persistent connection (for backward compatibility)
 
     Extracted from the monolithic LanduseAgent class to follow Single Responsibility Principle.
     Handles database connection creation, schema retrieval, and connection management.
+
+    Example:
+        >>> # Pooled mode (recommended for multi-threaded use)
+        >>> with DatabaseManager(config, use_pool=True) as db:
+        ...     schema = db.get_schema()
+        ...     with db.connection() as conn:
+        ...         result = conn.execute("SELECT * FROM table")
+
+        >>> # Single connection mode (backward compatible)
+        >>> with DatabaseManager(config, use_pool=False) as db:
+        ...     conn = db.get_connection()
+        ...     result = conn.execute("SELECT * FROM table")
     """
 
-    def __init__(self, config: Optional[AppConfig] = None, console: Optional[Console] = None):
-        """Initialize database manager with configuration."""
+    def __init__(
+        self,
+        config: Optional[AppConfig] = None,
+        console: Optional[Console] = None,
+        use_pool: bool = True
+    ):
+        """Initialize database manager with configuration.
+
+        Args:
+            config: Application configuration (uses defaults if not provided)
+            console: Rich console for output (creates new one if not provided)
+            use_pool: Whether to use connection pooling (default: True)
+        """
         self.config = config or AppConfig()
         self.console = console or Console()
+        self.use_pool = use_pool
+
+        # Connection pool (if enabled)
+        self._pool: Optional[DatabaseConnectionPool] = None
+
+        # Single connection (for backward compatibility)
         self._connection: Optional[duckdb.DuckDBPyConnection] = None
+
+        # Cached schema and version info
         self._schema: Optional[str] = None
         self._version_manager: Optional[SchemaVersionManager] = None
         self._db_version: Optional[str] = None
+        self._version_checked: bool = False
+
+        # Initialize pool if enabled
+        if self.use_pool:
+            self._initialize_pool()
+
+    def _initialize_pool(self) -> None:
+        """Initialize the connection pool."""
+        try:
+            self._pool = DatabaseConnectionPool(
+                database_path=self.config.database.path,
+                max_connections=self.config.database.max_connections,
+                connection_timeout=self.config.database.connection_timeout,
+                read_only=self.config.database.read_only,
+                console=self.console
+            )
+            self.console.print(
+                f"[green]✓ Connection pool initialized "
+                f"(max: {self.config.database.max_connections})[/green]"
+            )
+
+            # Check schema version with a pooled connection
+            with self._pool.connection() as conn:
+                self._check_schema_version(conn)
+
+        except Exception as e:
+            self.console.print(f"[yellow]⚠ Pool initialization failed: {e}[/yellow]")
+            self.console.print("[yellow]  Falling back to single connection mode[/yellow]")
+            self.use_pool = False
+            self._pool = None
 
     def get_connection(self) -> duckdb.DuckDBPyConnection:
         """
-        Get or create database connection.
+        Get a database connection.
+
+        In pooled mode, acquires a connection from the pool (caller should release).
+        In single mode, returns the persistent connection.
 
         Returns:
             DuckDB connection instance
+
+        Note:
+            In pooled mode, prefer using the connection() context manager
+            to ensure proper connection release.
         """
-        if self._connection is None:
-            self._connection = self.create_connection()
-        return self._connection
+        if self.use_pool and self._pool:
+            return self._pool.acquire()
+        else:
+            if self._connection is None:
+                self._connection = self.create_connection()
+            return self._connection
+
+    def release_connection(self, connection: duckdb.DuckDBPyConnection) -> None:
+        """Release a connection back to the pool.
+
+        Args:
+            connection: Connection to release
+
+        Note:
+            Only has effect in pooled mode. In single mode, this is a no-op.
+        """
+        if self.use_pool and self._pool:
+            self._pool.release(connection)
+
+    def connection(self, timeout: Optional[float] = None):
+        """Context manager for safely acquiring and releasing connections.
+
+        Args:
+            timeout: Optional timeout override for connection acquisition
+
+        Yields:
+            DuckDB connection instance
+
+        Example:
+            >>> with db_manager.connection() as conn:
+            ...     result = conn.execute("SELECT * FROM table")
+        """
+        if self.use_pool and self._pool:
+            return self._pool.connection(timeout=timeout)
+        else:
+            # For single connection mode, return a context manager that does nothing on exit
+            from contextlib import contextmanager
+
+            @contextmanager
+            def single_connection():
+                yield self.get_connection()
+
+            return single_connection()
 
     def create_connection(self) -> duckdb.DuckDBPyConnection:
         """
@@ -50,8 +167,12 @@ class DatabaseManager(DatabaseInterface):
         Returns:
             DuckDB connection in read-only mode
         """
-        connection = duckdb.connect(database=self.config.database.path, read_only=True)
-        self._check_schema_version(connection)
+        connection = duckdb.connect(
+            database=self.config.database.path,
+            read_only=self.config.database.read_only
+        )
+        if not self._version_checked:
+            self._check_schema_version(connection)
         return connection
 
     @database_retry(max_attempts=3)
@@ -69,53 +190,52 @@ class DatabaseManager(DatabaseInterface):
         if self._schema is not None:
             return self._schema
 
-        conn = self.get_connection()
+        with self.connection() as conn:
+            # Get table count for validation
+            table_count_query = """
+            SELECT COUNT(*) as table_count
+            FROM information_schema.tables
+            WHERE table_schema = 'main'
+            """
+            result = conn.execute(table_count_query).fetchone()
+            table_count = result[0] if result else 0
 
-        # Get table count for validation
-        table_count_query = """
-        SELECT COUNT(*) as table_count
-        FROM information_schema.tables
-        WHERE table_schema = 'main'
-        """
-        result = conn.execute(table_count_query).fetchone()
-        table_count = result[0] if result else 0
+            if table_count == 0:
+                raise ValueError(f"No tables found in database at {self.config.database.path}")
 
-        if table_count == 0:
-            raise ValueError(f"No tables found in database at {self.config.database.path}")
+            self.console.print(f"[green]✓ Found {table_count} tables in database[/green]")
 
-        self.console.print(f"[green]✓ Found {table_count} tables in database[/green]")
+            # Get schema information - prioritize combined tables
+            schema_query = """
+            SELECT
+                table_name,
+                column_name,
+                data_type,
+                is_nullable
+            FROM information_schema.columns
+            WHERE table_schema = 'main'
+            -- Exclude original tables if combined versions exist
+            AND table_name NOT IN ('dim_scenario_original', 'fact_landuse_transitions_original')
+            -- Prioritize combined tables by excluding originals when both exist
+            AND (
+                (table_name = 'dim_scenario_combined' OR table_name NOT LIKE 'dim_scenario')
+                AND (table_name = 'fact_landuse_combined' OR table_name NOT LIKE 'fact_landuse_transitions')
+            )
+            ORDER BY
+                -- Prioritize combined tables and views
+                CASE
+                    WHEN table_name = 'dim_scenario_combined' THEN 1
+                    WHEN table_name = 'fact_landuse_combined' THEN 2
+                    WHEN table_name LIKE 'v_default_transitions' THEN 3
+                    WHEN table_name LIKE 'v_scenario_comparisons' THEN 4
+                    ELSE 5
+                END,
+                table_name, ordinal_position
+            """
 
-        # Get schema information - prioritize combined tables
-        schema_query = """
-        SELECT
-            table_name,
-            column_name,
-            data_type,
-            is_nullable
-        FROM information_schema.columns
-        WHERE table_schema = 'main'
-        -- Exclude original tables if combined versions exist
-        AND table_name NOT IN ('dim_scenario_original', 'fact_landuse_transitions_original')
-        -- Prioritize combined tables by excluding originals when both exist
-        AND (
-            (table_name = 'dim_scenario_combined' OR table_name NOT LIKE 'dim_scenario')
-            AND (table_name = 'fact_landuse_combined' OR table_name NOT LIKE 'fact_landuse_transitions')
-        )
-        ORDER BY
-            -- Prioritize combined tables and views
-            CASE
-                WHEN table_name = 'dim_scenario_combined' THEN 1
-                WHEN table_name = 'fact_landuse_combined' THEN 2
-                WHEN table_name LIKE 'v_default_transitions' THEN 3
-                WHEN table_name LIKE 'v_scenario_comparisons' THEN 4
-                ELSE 5
-            END,
-            table_name, ordinal_position
-        """
-
-        result = conn.execute(schema_query).fetchall()
-        self._schema = self._format_schema(result)
-        return self._schema
+            result = conn.execute(schema_query).fetchall()
+            self._schema = self._format_schema(result)
+            return self._schema
 
     def _format_schema(self, schema_result: list[tuple]) -> str:
         """
@@ -141,7 +261,13 @@ class DatabaseManager(DatabaseInterface):
         return "\n".join(schema_lines)
 
     def close(self) -> None:
-        """Close the database connection if open."""
+        """Close database connections and pool."""
+        # Close pool if using pooled mode
+        if self._pool is not None:
+            self._pool.close()
+            self._pool = None
+
+        # Close single connection if in single mode
         if self._connection is not None:
             self._connection.close()
             self._connection = None
@@ -157,11 +283,10 @@ class DatabaseManager(DatabaseInterface):
     @time_database_operation("execute_query")
     def execute_query(self, query: str, **kwargs) -> pd.DataFrame:
         """Execute SQL query and return DataFrame (DatabaseInterface implementation)."""
-        conn = self.get_connection()
-        result = conn.execute(query).fetchall()
-        columns = [desc[0] for desc in conn.description] if conn.description else []
-
-        return pd.DataFrame(result, columns=columns)
+        with self.connection() as conn:
+            result = conn.execute(query).fetchall()
+            columns = [desc[0] for desc in conn.description] if conn.description else []
+            return pd.DataFrame(result, columns=columns)
 
     def validate_table_name(self, table_name: str) -> bool:
         """Validate table name exists and is accessible (DatabaseInterface implementation).
@@ -177,12 +302,12 @@ class DatabaseManager(DatabaseInterface):
             as validation is used in conditional checks.
         """
         try:
-            conn = self.get_connection()
-            result = conn.execute("""
-                SELECT COUNT(*) FROM information_schema.tables
-                WHERE table_name = ? AND table_schema = 'main'
-            """, [table_name]).fetchone()
-            return result[0] > 0 if result else False
+            with self.connection() as conn:
+                result = conn.execute("""
+                    SELECT COUNT(*) FROM information_schema.tables
+                    WHERE table_name = ? AND table_schema = 'main'
+                """, [table_name]).fetchone()
+                return result[0] > 0 if result else False
         except duckdb.Error as e:
             # Log the specific database error but return False for validation
             self.console.print(f"[dim]Table validation error for '{table_name}': {str(e)}[/dim]")
@@ -243,6 +368,8 @@ class DatabaseManager(DatabaseInterface):
         except Exception as e:
             # Unexpected errors - log but don't fail connection
             self.console.print(f"[yellow]⚠ Could not check schema version: {type(e).__name__}: {str(e)}[/yellow]")
+        finally:
+            self._version_checked = True
 
     def get_database_version(self) -> Optional[str]:
         """Get the current database schema version.
@@ -261,3 +388,29 @@ class DatabaseManager(DatabaseInterface):
         if self._version_manager:
             return self._version_manager.get_version_history()
         return []
+
+    def get_pool_statistics(self) -> Optional[dict]:
+        """Get connection pool statistics.
+
+        Returns:
+            Dictionary of pool statistics, or None if not using pooling
+        """
+        if self._pool:
+            return self._pool.get_statistics()
+        return None
+
+    def is_pool_healthy(self) -> bool:
+        """Check if connection pool is healthy.
+
+        Returns:
+            True if pool is healthy, False if unhealthy or not using pooling
+        """
+        if self._pool:
+            return self._pool.is_healthy()
+        # For single connection mode, check if connection works
+        try:
+            with self.connection() as conn:
+                conn.execute("SELECT 1").fetchone()
+            return True
+        except Exception:
+            return False
