@@ -22,15 +22,16 @@ class TestConversationHistory:
         # Create a mock database
         db_path = tmp_path / "test.duckdb"
         import duckdb
+
         conn = duckdb.connect(str(db_path))
         conn.execute("CREATE TABLE test (id INTEGER)")
         conn.close()
 
         # Create config with proper API key
-        with patch.dict(os.environ, {'OPENAI_API_KEY': 'test-key'}):
-            config = AppConfig(database={'path': str(db_path)})
+        with patch.dict(os.environ, {"OPENAI_API_KEY": "test-key"}):
+            config = AppConfig(database={"path": str(db_path)})
 
-            with patch('landuse.agents.llm_manager.ChatOpenAI') as mock_llm:
+            with patch("landuse.agents.llm_manager.ChatOpenAI") as mock_llm:
                 mock_llm_instance = Mock()
                 mock_llm.return_value = mock_llm_instance
                 agent = LanduseAgent(config)
@@ -63,7 +64,7 @@ class TestConversationHistory:
         agent._test_llm.bind_tools.return_value.invoke.return_value = mock_response
 
         # Run a follow-up query
-        with patch.object(agent.conversation_manager, 'add_conversation'):
+        with patch.object(agent.conversation_manager, "add_conversation"):
             response = agent.simple_query("Tell me more about that")
 
         # Check that the LLM was called with history
@@ -110,7 +111,7 @@ class TestConversationHistory:
         # Mock responses
         responses = [
             Mock(tool_calls=[], content="Texas has large forest areas."),
-            Mock(tool_calls=[], content="California has even more forest area than Texas.")
+            Mock(tool_calls=[], content="California has even more forest area than Texas."),
         ]
 
         agent._test_llm.bind_tools.return_value.invoke.side_effect = responses
@@ -142,13 +143,9 @@ class TestConversationHistory:
         agent.graph = agent.graph_builder.build_graph()
 
         # Mock graph invoke
-        mock_result = {
-            "messages": [
-                Mock(content="Based on the scenarios we discussed...")
-            ]
-        }
+        mock_result = {"messages": [Mock(content="Based on the scenarios we discussed...")]}
 
-        with patch.object(agent.graph, 'invoke', return_value=mock_result) as mock_invoke:
+        with patch.object(agent.graph, "invoke", return_value=mock_result) as mock_invoke:
             response = agent._graph_query("Tell me more about RCP scenarios")
 
             # Check that initial state included history

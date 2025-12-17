@@ -7,20 +7,26 @@ Implements st.connection pattern for efficient database access
 try:
     from streamlit.connections import BaseConnection
     from streamlit.runtime.caching import cache_data
+
     HAS_STREAMLIT = True
 except ImportError:
     # For testing environments where streamlit might not be fully available
     from typing import Generic, TypeVar
-    T = TypeVar('T')
+
+    T = TypeVar("T")
+
     class BaseConnection(Generic[T]):
         def __init__(self, connection_name: str, **kwargs):
             self.connection_name = connection_name
             self._secrets = None
             self._instance = None
+
     def cache_data(ttl=None):
         def decorator(func):
             return func
+
         return decorator
+
     HAS_STREAMLIT = False
 import os
 from pathlib import Path
@@ -38,22 +44,13 @@ from ..utils.retry_decorators import database_retry, network_retry
 
 class ConnectionConfig(BaseModel):
     """Configuration for DuckDB connection"""
+
     database: str = Field(
-        default="data/processed/landuse_analytics.duckdb",
-        description="Path to DuckDB file or ':memory:'"
+        default="data/processed/landuse_analytics.duckdb", description="Path to DuckDB file or ':memory:'"
     )
-    read_only: bool = Field(
-        default=True,
-        description="Open in read-only mode"
-    )
-    memory_limit: Optional[str] = Field(
-        default=None,
-        description="Memory limit for DuckDB"
-    )
-    threads: Optional[int] = Field(
-        default=None,
-        description="Number of threads for DuckDB"
-    )
+    read_only: bool = Field(default=True, description="Open in read-only mode")
+    memory_limit: Optional[str] = Field(default=None, description="Memory limit for DuckDB")
+    threads: Optional[int] = Field(default=None, description="Number of threads for DuckDB")
 
 
 class DuckDBConnection(BaseConnection[duckdb.DuckDBPyConnection]):
@@ -77,30 +74,30 @@ class DuckDBConnection(BaseConnection[duckdb.DuckDBPyConnection]):
         - read_only: Whether to open in read-only mode (default: True)
         """
         # Get database path from kwargs or secrets
-        if 'database' in kwargs:
-            db = kwargs.pop('database')
-        elif hasattr(self, '_secrets') and self._secrets:
-            if hasattr(self._secrets, 'database'):
+        if "database" in kwargs:
+            db = kwargs.pop("database")
+        elif hasattr(self, "_secrets") and self._secrets:
+            if hasattr(self._secrets, "database"):
                 db = self._secrets.database
-            elif hasattr(self._secrets, '__getitem__'):
+            elif hasattr(self._secrets, "__getitem__"):
                 try:
-                    db = self._secrets['database']
+                    db = self._secrets["database"]
                 except (KeyError, TypeError):
                     db = None
             else:
                 db = None
 
             if not db:
-                db = os.getenv('LANDUSE_DB_PATH', 'data/processed/landuse_analytics.duckdb')
+                db = os.getenv("LANDUSE_DB_PATH", "data/processed/landuse_analytics.duckdb")
         else:
             # Default to environment variable or standard path
-            db = os.getenv('LANDUSE_DB_PATH', 'data/processed/landuse_analytics.duckdb')
+            db = os.getenv("LANDUSE_DB_PATH", "data/processed/landuse_analytics.duckdb")
 
         # Get read_only setting
-        read_only = kwargs.pop('read_only', True)
+        read_only = kwargs.pop("read_only", True)
 
         # Validate database file exists (if not in-memory)
-        if db != ':memory:' and not Path(db).exists():
+        if db != ":memory:" and not Path(db).exists():
             raise FileNotFoundError(f"Database file not found: {db}")
 
         # Connect to DuckDB with potential retries for connection issues
@@ -176,34 +173,17 @@ class DuckDBConnection(BaseConnection[duckdb.DuckDBPyConnection]):
             execution_time = time.time() - start_time
 
             # Create QueryResult
-            return QueryResult(
-                success=True,
-                data=df,
-                execution_time=execution_time,
-                query=sql_obj.sql
-            )
+            return QueryResult(success=True, data=df, execution_time=execution_time, query=sql_obj.sql)
         except ValueError as e:
             # SQL validation error
-            return QueryResult(
-                success=False,
-                error=f"SQL validation error: {str(e)}",
-                query=query
-            )
+            return QueryResult(success=False, error=f"SQL validation error: {str(e)}", query=query)
         except (duckdb.Error, duckdb.CatalogException, duckdb.SyntaxException) as e:
             # Database-specific errors
-            return QueryResult(
-                success=False,
-                error=f"Database error: {str(e)}",
-                query=query
-            )
+            return QueryResult(success=False, error=f"Database error: {str(e)}", query=query)
         except Exception as e:
             # Wrap other unexpected errors
             wrapped_error = wrap_exception(e, "Query execution")
-            return QueryResult(
-                success=False,
-                error=str(wrapped_error),
-                query=query
-            )
+            return QueryResult(success=False, error=str(wrapped_error), query=query)
 
     def execute(self, query: str, **kwargs) -> None:
         """
@@ -275,7 +255,7 @@ class DuckDBConnection(BaseConnection[duckdb.DuckDBPyConnection]):
         # Safe: table_name is validated using allowlist
         query = f"SELECT COUNT(*) as count FROM {table_name}"
         result = self.query(query, ttl=ttl)
-        return result['count'].iloc[0]
+        return result["count"].iloc[0]
 
     def health_check(self) -> bool:
         """

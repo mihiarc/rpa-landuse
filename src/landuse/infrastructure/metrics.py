@@ -96,29 +96,20 @@ class InMemoryMetrics(MetricsInterface):
 
             durations = [v.value for v in values]
             return {
-                'count': len(durations),
-                'min': min(durations),
-                'max': max(durations),
-                'mean': sum(durations) / len(durations),
-                'total': sum(durations)
+                "count": len(durations),
+                "min": min(durations),
+                "max": max(durations),
+                "mean": sum(durations) / len(durations),
+                "total": sum(durations),
             }
 
     def get_all_metrics(self) -> Dict[str, Dict[str, any]]:
         """Get all metrics data."""
         with self._lock:
             return {
-                'counters': {
-                    name: self.get_counter_total(name)
-                    for name in self._counters.keys()
-                },
-                'gauges': {
-                    name: self.get_gauge_current(name)
-                    for name in self._gauges.keys()
-                },
-                'timers': {
-                    name: self.get_timer_stats(name)
-                    for name in self._timers.keys()
-                }
+                "counters": {name: self.get_counter_total(name) for name in self._counters.keys()},
+                "gauges": {name: self.get_gauge_current(name) for name in self._gauges.keys()},
+                "timers": {name: self.get_timer_stats(name) for name in self._timers.keys()},
             }
 
     def clear_metrics(self) -> None:
@@ -141,28 +132,19 @@ class InMemoryMetrics(MetricsInterface):
 
         # Clean counters
         for name in list(self._counters.keys()):
-            self._counters[name] = [
-                v for v in self._counters[name]
-                if v.timestamp >= cutoff_time
-            ]
+            self._counters[name] = [v for v in self._counters[name] if v.timestamp >= cutoff_time]
             if not self._counters[name]:
                 del self._counters[name]
 
         # Clean gauges
         for name in list(self._gauges.keys()):
-            self._gauges[name] = [
-                v for v in self._gauges[name]
-                if v.timestamp >= cutoff_time
-            ]
+            self._gauges[name] = [v for v in self._gauges[name] if v.timestamp >= cutoff_time]
             if not self._gauges[name]:
                 del self._gauges[name]
 
         # Clean timers
         for name in list(self._timers.keys()):
-            self._timers[name] = [
-                v for v in self._timers[name]
-                if v.timestamp >= cutoff_time
-            ]
+            self._timers[name] = [v for v in self._timers[name] if v.timestamp >= cutoff_time]
             if not self._timers[name]:
                 del self._timers[name]
 
@@ -180,24 +162,24 @@ class MetricsCollector:
 
     def record_query_execution(self, duration: float, row_count: int, success: bool) -> None:
         """Record database query metrics."""
-        tags = {'success': str(success)}
-        self.metrics.record_timer('database.query.duration', duration, tags)
-        self.metrics.record_gauge('database.query.rows', row_count, tags)
-        self.metrics.increment_counter('database.query.total', tags)
+        tags = {"success": str(success)}
+        self.metrics.record_timer("database.query.duration", duration, tags)
+        self.metrics.record_gauge("database.query.rows", row_count, tags)
+        self.metrics.increment_counter("database.query.total", tags)
 
     def record_llm_call(self, model: str, duration: float, token_count: int, success: bool) -> None:
         """Record LLM API call metrics."""
-        tags = {'model': model, 'success': str(success)}
-        self.metrics.record_timer('llm.call.duration', duration, tags)
-        self.metrics.record_gauge('llm.call.tokens', token_count, tags)
-        self.metrics.increment_counter('llm.call.total', tags)
+        tags = {"model": model, "success": str(success)}
+        self.metrics.record_timer("llm.call.duration", duration, tags)
+        self.metrics.record_gauge("llm.call.tokens", token_count, tags)
+        self.metrics.increment_counter("llm.call.total", tags)
 
     def record_agent_query(self, duration: float, iterations: int, success: bool) -> None:
         """Record agent query metrics."""
-        tags = {'success': str(success)}
-        self.metrics.record_timer('agent.query.duration', duration, tags)
-        self.metrics.record_gauge('agent.query.iterations', iterations, tags)
-        self.metrics.increment_counter('agent.query.total', tags)
+        tags = {"success": str(success)}
+        self.metrics.record_timer("agent.query.duration", duration, tags)
+        self.metrics.record_gauge("agent.query.iterations", iterations, tags)
+        self.metrics.increment_counter("agent.query.total", tags)
 
 
 class TimerContext:

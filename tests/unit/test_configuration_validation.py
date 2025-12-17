@@ -27,11 +27,11 @@ class TestConfigurationValidation:
             "gpt-4-turbo",
             "gpt-4-turbo-preview",
             "gpt-3.5-turbo",
-            "gpt-3.5-turbo-16k"
+            "gpt-3.5-turbo-16k",
         ]
 
         for model in valid_models:
-            with patch.dict(os.environ, {'OPENAI_API_KEY': 'sk-test123456789012345678901234567890123456789012345'}):
+            with patch.dict(os.environ, {"OPENAI_API_KEY": "sk-test123456789012345678901234567890123456789012345"}):
                 # Test with AppConfig
                 llm_config = LLMConfig(model_name=model)
                 assert llm_config.model_name == model
@@ -49,11 +49,11 @@ class TestConfigurationValidation:
             "claude-3-5-sonnet-20241022",
             "claude-3-sonnet-20240229",
             "claude-3-haiku-20240307",
-            "claude-3-opus-20240229"
+            "claude-3-opus-20240229",
         ]
 
         for model in anthropic_models:
-            with patch.dict(os.environ, {'OPENAI_API_KEY': 'sk-test123456789012345678901234567890123456789012345'}):
+            with patch.dict(os.environ, {"OPENAI_API_KEY": "sk-test123456789012345678901234567890123456789012345"}):
                 # Configuration should accept any model name, but validation happens at runtime
                 # AppConfig should also accept but require OpenAI key
                 llm_config = LLMConfig(model_name=model)
@@ -61,7 +61,7 @@ class TestConfigurationValidation:
 
     def test_temperature_validation(self):
         """Test temperature parameter validation."""
-        with patch.dict(os.environ, {'OPENAI_API_KEY': 'sk-test123456789012345678901234567890123456789012345'}):
+        with patch.dict(os.environ, {"OPENAI_API_KEY": "sk-test123456789012345678901234567890123456789012345"}):
             # Valid temperatures
             valid_temps = [0.0, 0.5, 1.0, 1.5, 2.0]
             for temp in valid_temps:
@@ -76,7 +76,7 @@ class TestConfigurationValidation:
 
     def test_max_tokens_validation(self):
         """Test max_tokens parameter validation."""
-        with patch.dict(os.environ, {'OPENAI_API_KEY': 'sk-test123456789012345678901234567890123456789012345'}):
+        with patch.dict(os.environ, {"OPENAI_API_KEY": "sk-test123456789012345678901234567890123456789012345"}):
             # Valid token counts
             valid_tokens = [100, 1000, 4000, 8000, 16000, 32000]
             for tokens in valid_tokens:
@@ -92,31 +92,28 @@ class TestConfigurationValidation:
     def test_environment_variable_integration(self):
         """Test that environment variables are properly integrated."""
         test_env = {
-            'OPENAI_API_KEY': 'sk-test123456789012345678901234567890123456789012345',
-            'LANDUSE_LLM__MODEL_NAME': 'gpt-4o',
-            'LANDUSE_LLM__TEMPERATURE': '0.7',
-            'LANDUSE_LLM__MAX_TOKENS': '2000'
+            "OPENAI_API_KEY": "sk-test123456789012345678901234567890123456789012345",
+            "LANDUSE_LLM__MODEL_NAME": "gpt-4o",
+            "LANDUSE_LLM__TEMPERATURE": "0.7",
+            "LANDUSE_LLM__MAX_TOKENS": "2000",
         }
 
         with patch.dict(os.environ, test_env):
             config = AppConfig()
 
-            assert config.llm.model_name == 'gpt-4o'
+            assert config.llm.model_name == "gpt-4o"
             assert config.llm.temperature == 0.7
             assert config.llm.max_tokens == 2000
 
     def test_configuration_override_behavior(self):
         """Test configuration override behavior."""
-        with patch.dict(os.environ, {'OPENAI_API_KEY': 'sk-test123456789012345678901234567890123456789012345'}):
+        with patch.dict(os.environ, {"OPENAI_API_KEY": "sk-test123456789012345678901234567890123456789012345"}):
             # Test that programmatic values override environment
             base_config = AppConfig()
 
-            override_config = AppConfig.from_env(
-                llm__model_name='gpt-4o',
-                llm__temperature=0.8
-            )
+            override_config = AppConfig.from_env(llm__model_name="gpt-4o", llm__temperature=0.8)
 
-            assert override_config.llm.model_name == 'gpt-4o'
+            assert override_config.llm.model_name == "gpt-4o"
             assert override_config.llm.temperature == 0.8
 
     def test_database_configuration_validation(self):
@@ -124,10 +121,12 @@ class TestConfigurationValidation:
         # Test with non-existent database
         with pytest.raises(ConfigurationError, match="Database file not found"):
             from landuse.core.app_config import DatabaseConfig
+
             DatabaseConfig(path="/nonexistent/path/database.duckdb")
 
         # Test with in-memory database (should be allowed)
         from landuse.core.app_config import DatabaseConfig
+
         db_config = DatabaseConfig(path=":memory:")
         assert db_config.path == ":memory:"
 
@@ -136,11 +135,7 @@ class TestConfigurationValidation:
         from landuse.core.app_config import AgentConfig
 
         # Valid configurations
-        valid_config = AgentConfig(
-            max_iterations=5,
-            max_execution_time=60,
-            max_query_rows=500
-        )
+        valid_config = AgentConfig(max_iterations=5, max_execution_time=60, max_query_rows=500)
         assert valid_config.max_iterations == 5
 
         # Invalid configurations
@@ -153,17 +148,17 @@ class TestConfigurationValidation:
     def test_app_config_environment_integration(self):
         """Test AppConfig environment variable integration."""
         test_env = {
-            'OPENAI_API_KEY': 'sk-test123456789012345678901234567890123456789012345',
-            'LANDUSE_LLM__MODEL_NAME': 'gpt-4o',
-            'LANDUSE_LLM__TEMPERATURE': '0.3',
-            'LANDUSE_LLM__MAX_TOKENS': '3000',
-            'LANDUSE_AGENT__MAX_ITERATIONS': '10'
+            "OPENAI_API_KEY": "sk-test123456789012345678901234567890123456789012345",
+            "LANDUSE_LLM__MODEL_NAME": "gpt-4o",
+            "LANDUSE_LLM__TEMPERATURE": "0.3",
+            "LANDUSE_LLM__MAX_TOKENS": "3000",
+            "LANDUSE_AGENT__MAX_ITERATIONS": "10",
         }
 
         with patch.dict(os.environ, test_env):
             config = AppConfig()
 
-            assert config.llm.model_name == 'gpt-4o'
+            assert config.llm.model_name == "gpt-4o"
             assert config.llm.temperature == 0.3
             assert config.llm.max_tokens == 3000
             assert config.agent.max_iterations == 10
@@ -174,33 +169,34 @@ class TestConfigurationMigration:
 
     def test_app_config_structure(self):
         """Test AppConfig structure and nested configuration."""
-        with patch.dict(os.environ, {'OPENAI_API_KEY': 'sk-test123456789012345678901234567890123456789012345'}):
+        with patch.dict(os.environ, {"OPENAI_API_KEY": "sk-test123456789012345678901234567890123456789012345"}):
             app_config = AppConfig(
-                llm={'model_name': 'gpt-4o', 'temperature': 0.5, 'max_tokens': 2000},
-                agent={'max_iterations': 12, 'enable_memory': True},
-                database={'path': ':memory:'},
-                logging={'level': 'INFO'}
+                llm={"model_name": "gpt-4o", "temperature": 0.5, "max_tokens": 2000},
+                agent={"max_iterations": 12, "enable_memory": True},
+                database={"path": ":memory:"},
+                logging={"level": "INFO"},
             )
 
             # Verify nested structure
-            assert app_config.llm.model_name == 'gpt-4o'
+            assert app_config.llm.model_name == "gpt-4o"
             assert app_config.llm.temperature == 0.5
             assert app_config.llm.max_tokens == 2000
             assert app_config.agent.max_iterations == 12
             assert app_config.agent.enable_memory is True
-            assert app_config.database.path == ':memory:'
-            assert app_config.logging.level == 'INFO'
+            assert app_config.database.path == ":memory:"
+            assert app_config.logging.level == "INFO"
 
     def test_app_config_with_managers(self):
         """Test that AppConfig works with manager classes."""
-        with patch.dict(os.environ, {'OPENAI_API_KEY': 'sk-test123456789012345678901234567890123456789012345'}):
+        with patch.dict(os.environ, {"OPENAI_API_KEY": "sk-test123456789012345678901234567890123456789012345"}):
             app_config = AppConfig(
-                llm={'model_name': 'gpt-4o-mini', 'temperature': 0.4},
-                agent={'max_iterations': 6, 'enable_memory': True}
+                llm={"model_name": "gpt-4o-mini", "temperature": 0.4},
+                agent={"max_iterations": 6, "enable_memory": True},
             )
 
         # Should work with LLM manager
         from landuse.agents.llm_manager import LLMManager
+
         manager = LLMManager(app_config)
 
         # Manager stores the AppConfig with nested properties
@@ -210,24 +206,14 @@ class TestConfigurationMigration:
 
     def test_configuration_validation_edge_cases(self):
         """Test edge cases in configuration validation."""
-        with patch.dict(os.environ, {'OPENAI_API_KEY': 'sk-test123456789012345678901234567890123456789012345'}):
+        with patch.dict(os.environ, {"OPENAI_API_KEY": "sk-test123456789012345678901234567890123456789012345"}):
             # Test minimum valid values
-            config = LLMConfig(
-                temperature=0.0,
-                max_tokens=100,
-                timeout=1,
-                max_retries=0
-            )
+            config = LLMConfig(temperature=0.0, max_tokens=100, timeout=1, max_retries=0)
             assert config.temperature == 0.0
             assert config.max_tokens == 100
 
             # Test maximum valid values
-            config = LLMConfig(
-                temperature=2.0,
-                max_tokens=32000,
-                timeout=600,
-                max_retries=10
-            )
+            config = LLMConfig(temperature=2.0, max_tokens=32000, timeout=600, max_retries=10)
             assert config.temperature == 2.0
             assert config.max_tokens == 32000
 
@@ -237,29 +223,30 @@ class TestModelCompatibilityValidation:
 
     def test_model_provider_detection(self):
         """Test detection of model providers."""
+
         def detect_provider(model_name: str) -> str:
             """Simple provider detection for testing."""
-            if model_name.startswith('gpt-'):
-                return 'openai'
-            elif model_name.startswith('claude-'):
-                return 'anthropic'
+            if model_name.startswith("gpt-"):
+                return "openai"
+            elif model_name.startswith("claude-"):
+                return "anthropic"
             else:
-                return 'unknown'
+                return "unknown"
 
         # Test OpenAI models
         openai_models = ["gpt-4o-mini", "gpt-4o", "gpt-3.5-turbo"]
         for model in openai_models:
-            assert detect_provider(model) == 'openai'
+            assert detect_provider(model) == "openai"
 
         # Test Anthropic models (would be rejected at runtime)
         anthropic_models = ["claude-3-5-sonnet-20241022", "claude-3-haiku-20240307"]
         for model in anthropic_models:
-            assert detect_provider(model) == 'anthropic'
+            assert detect_provider(model) == "anthropic"
 
     def test_unsupported_model_runtime_behavior(self):
         """Test runtime behavior with unsupported models."""
         # Configuration allows any model name, but LLM creation should handle gracefully
-        with patch.dict(os.environ, {'OPENAI_API_KEY': 'sk-test123456789012345678901234567890123456789012345'}):
+        with patch.dict(os.environ, {"OPENAI_API_KEY": "sk-test123456789012345678901234567890123456789012345"}):
             # This should not fail at config level
             config = LLMConfig(model_name="claude-3-5-sonnet-20241022")
             assert config.model_name == "claude-3-5-sonnet-20241022"
@@ -274,7 +261,7 @@ class TestModelCompatibilityValidation:
             "gpt-4o-mini",
             "gpt-4o",
             "claude-3-5-sonnet-20241022",  # Would be attempted via OpenAI
-            "custom-model"
+            "custom-model",
         ]
 
         for model in test_models:
@@ -284,7 +271,7 @@ class TestModelCompatibilityValidation:
                     LLMConfig(model_name=model)
 
             # With API key
-            with patch.dict(os.environ, {'OPENAI_API_KEY': 'sk-test123456789012345678901234567890123456789012345'}):
+            with patch.dict(os.environ, {"OPENAI_API_KEY": "sk-test123456789012345678901234567890123456789012345"}):
                 config = LLMConfig(model_name=model)
                 assert config.model_name == model
 

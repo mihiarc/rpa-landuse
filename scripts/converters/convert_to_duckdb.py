@@ -44,6 +44,7 @@ from landuse.database.schema_version import SchemaVersion, SchemaVersionManager
 
 console = Console()
 
+
 class LanduseCombinedScenarioConverter:
     """Convert nested landuse JSON to normalized DuckDB database with combined scenarios.
 
@@ -66,36 +67,36 @@ class LanduseCombinedScenarioConverter:
 
     # Combined scenarios based on 2020 RPA Assessment
     COMBINED_SCENARIOS = {
-        'OVERALL': {
-            'description': 'Overall Combined - Mean across all RCP-SSP scenarios',
-            'rcp': 'Combined',
-            'ssp': 'Combined',
-            'narrative': 'Ensemble mean of all climate and socioeconomic pathways for baseline analysis'
+        "OVERALL": {
+            "description": "Overall Combined - Mean across all RCP-SSP scenarios",
+            "rcp": "Combined",
+            "ssp": "Combined",
+            "narrative": "Ensemble mean of all climate and socioeconomic pathways for baseline analysis",
         },
-        'RCP45_SSP1': {
-            'description': 'Sustainability - Low emissions with sustainable development',
-            'rcp': 'RCP4.5',
-            'ssp': 'SSP1',
-            'narrative': 'Green growth, reduced inequality, rapid technology development'
+        "RCP45_SSP1": {
+            "description": "Sustainability - Low emissions with sustainable development",
+            "rcp": "RCP4.5",
+            "ssp": "SSP1",
+            "narrative": "Green growth, reduced inequality, rapid technology development",
         },
-        'RCP85_SSP2': {
-            'description': 'Middle of the Road - High emissions with moderate development',
-            'rcp': 'RCP8.5',
-            'ssp': 'SSP2',
-            'narrative': 'Business as usual, slow convergence, moderate progress'
+        "RCP85_SSP2": {
+            "description": "Middle of the Road - High emissions with moderate development",
+            "rcp": "RCP8.5",
+            "ssp": "SSP2",
+            "narrative": "Business as usual, slow convergence, moderate progress",
         },
-        'RCP85_SSP3': {
-            'description': 'Regional Rivalry - High emissions with slow development',
-            'rcp': 'RCP8.5',
-            'ssp': 'SSP3',
-            'narrative': 'Nationalism, security concerns, slow economic development'
+        "RCP85_SSP3": {
+            "description": "Regional Rivalry - High emissions with slow development",
+            "rcp": "RCP8.5",
+            "ssp": "SSP3",
+            "narrative": "Nationalism, security concerns, slow economic development",
         },
-        'RCP85_SSP5': {
-            'description': 'Fossil-fueled Development - High emissions with rapid development',
-            'rcp': 'RCP8.5',
-            'ssp': 'SSP5',
-            'narrative': 'Rapid growth, fossil fuel use, lifestyle convergence'
-        }
+        "RCP85_SSP5": {
+            "description": "Fossil-fueled Development - High emissions with rapid development",
+            "rcp": "RCP8.5",
+            "ssp": "SSP5",
+            "narrative": "Rapid growth, fossil fuel use, lifestyle convergence",
+        },
     }
 
     def __init__(self, input_file: str, output_file: str, use_bulk_copy: bool = True):
@@ -133,19 +134,15 @@ class LanduseCombinedScenarioConverter:
         self._validate_file_size()
 
         # Land use type mappings
-        self.landuse_types = {
-            'cr': 'Crop',
-            'ps': 'Pasture',
-            'rg': 'Rangeland',
-            'fr': 'Forest',
-            'ur': 'Urban'
-        }
+        self.landuse_types = {"cr": "Crop", "ps": "Pasture", "rg": "Rangeland", "fr": "Forest", "ur": "Urban"}
 
         # GCM models to aggregate
-        self.gcm_models = ['CNRM_CM5', 'HadGEM2_ES365', 'IPSL_CM5A_MR', 'MRI_CGCM3', 'NorESM1_M']
+        self.gcm_models = ["CNRM_CM5", "HadGEM2_ES365", "IPSL_CM5A_MR", "MRI_CGCM3", "NorESM1_M"]
 
         console.print(f"🚀 Using {'bulk COPY' if use_bulk_copy else 'traditional INSERT'} loading method")
-        console.print(f"🔄 Aggregating {len(self.gcm_models)} GCMs into {len(self.COMBINED_SCENARIOS)} combined scenarios")
+        console.print(
+            f"🔄 Aggregating {len(self.gcm_models)} GCMs into {len(self.COMBINED_SCENARIOS)} combined scenarios"
+        )
         console.print("📊 Including OVERALL scenario (mean of all GCMs and RCP-SSP combinations)")
 
     def _validate_input_path(self, input_file: str) -> Path:
@@ -158,7 +155,7 @@ class LanduseCombinedScenarioConverter:
         if not path.exists():
             raise FileNotFoundError(f"Input file not found: {input_file}")
 
-        if not path.suffix.lower() == '.json':
+        if not path.suffix.lower() == ".json":
             raise ValueError("Input must be a JSON file")
 
         return path
@@ -173,7 +170,7 @@ class LanduseCombinedScenarioConverter:
         if not path.parent.exists():
             raise FileNotFoundError(f"Output directory does not exist: {path.parent}")
 
-        if path.suffix and path.suffix.lower() not in ['.db', '.duckdb', '.duck']:
+        if path.suffix and path.suffix.lower() not in [".db", ".duckdb", ".duck"]:
             raise ValueError("Output file must be a DuckDB database file")
 
         return path
@@ -182,7 +179,9 @@ class LanduseCombinedScenarioConverter:
         """Check input file size against security limits."""
         file_size = self.input_file.stat().st_size
         if file_size > self.MAX_FILE_SIZE:
-            raise ValueError(f"Input file too large ({file_size / 1024 / 1024 / 1024:.2f}GB > {self.MAX_FILE_SIZE / 1024 / 1024 / 1024}GB limit)")
+            raise ValueError(
+                f"Input file too large ({file_size / 1024 / 1024 / 1024:.2f}GB > {self.MAX_FILE_SIZE / 1024 / 1024 / 1024}GB limit)"
+            )
 
     def create_schema(self):
         """Create star schema with dimension and fact tables for combined scenarios.
@@ -205,7 +204,9 @@ class LanduseCombinedScenarioConverter:
         Note:
             Existing tables are dropped and recreated. All data will be lost.
         """
-        console.print(Panel.fit("🏗️ [bold blue]Creating DuckDB Schema (Combined Scenarios)[/bold blue]", border_style="blue"))
+        console.print(
+            Panel.fit("🏗️ [bold blue]Creating DuckDB Schema (Combined Scenarios)[/bold blue]", border_style="blue")
+        )
 
         # Connect to DuckDB
         self.conn = duckdb.connect(str(self.output_file))
@@ -304,10 +305,13 @@ class LanduseCombinedScenarioConverter:
         # Insert landuse types
         for i, (code, name) in enumerate(self.landuse_types.items(), 1):
             category = self._get_landuse_category(name)
-            self.conn.execute("""
+            self.conn.execute(
+                """
                 INSERT INTO dim_landuse (landuse_id, landuse_code, landuse_name, landuse_category, description)
                 VALUES (?, ?, ?, ?, ?)
-            """, (i, code, name, category, f"{name} land use type"))
+            """,
+                (i, code, name, category, f"{name} land use type"),
+            )
 
     def _create_landuse_transitions_fact(self):
         """Create the main fact table for aggregated land use transitions.
@@ -357,7 +361,7 @@ class LanduseCombinedScenarioConverter:
             "CREATE INDEX idx_fact_geography ON fact_landuse_transitions(geography_id)",
             "CREATE INDEX idx_fact_from_landuse ON fact_landuse_transitions(from_landuse_id)",
             "CREATE INDEX idx_fact_to_landuse ON fact_landuse_transitions(to_landuse_id)",
-            "CREATE INDEX idx_fact_composite ON fact_landuse_transitions(scenario_id, time_id, geography_id)"
+            "CREATE INDEX idx_fact_composite ON fact_landuse_transitions(scenario_id, time_id, geography_id)",
         ]
 
         for idx in indexes:
@@ -365,30 +369,30 @@ class LanduseCombinedScenarioConverter:
 
     def _get_landuse_category(self, landuse_name: str) -> str:
         """Categorize landuse types"""
-        if landuse_name in ['Crop', 'Pasture']:
-            return 'Agriculture'
-        elif landuse_name == 'Forest':
-            return 'Natural'
-        elif landuse_name == 'Urban':
-            return 'Developed'
-        elif landuse_name == 'Rangeland':
-            return 'Natural'
+        if landuse_name in ["Crop", "Pasture"]:
+            return "Agriculture"
+        elif landuse_name == "Forest":
+            return "Natural"
+        elif landuse_name == "Urban":
+            return "Developed"
+        elif landuse_name == "Rangeland":
+            return "Natural"
         else:
-            return 'Other'
+            return "Other"
 
     def _get_combined_scenario_key(self, original_scenario: str) -> str:
         """Extract RCP-SSP combination from original scenario name.
 
         Example: 'CNRM_CM5_rcp45_ssp1' -> 'RCP45_SSP1'
         """
-        parts = original_scenario.lower().split('_')
+        parts = original_scenario.lower().split("_")
         rcp = None
         ssp = None
 
         for part in parts:
-            if 'rcp' in part:
+            if "rcp" in part:
                 rcp = part.upper()
-            elif 'ssp' in part:
+            elif "ssp" in part:
                 ssp = part.upper()
 
         if rcp and ssp:
@@ -451,16 +455,18 @@ class LanduseCombinedScenarioConverter:
 
         scenario_data = []
         for i, (key, info) in enumerate(self.COMBINED_SCENARIOS.items(), 1):
-            scenario_data.append({
-                'scenario_id': i,
-                'scenario_name': key,
-                'rcp_scenario': info['rcp'],
-                'ssp_scenario': info['ssp'],
-                'description': info['description'],
-                'narrative': info['narrative'],
-                'aggregation_method': 'mean',
-                'gcm_count': len(self.gcm_models)
-            })
+            scenario_data.append(
+                {
+                    "scenario_id": i,
+                    "scenario_name": key,
+                    "rcp_scenario": info["rcp"],
+                    "ssp_scenario": info["ssp"],
+                    "description": info["description"],
+                    "narrative": info["narrative"],
+                    "aggregation_method": "mean",
+                    "gcm_count": len(self.gcm_models),
+                }
+            )
 
         if self.use_bulk_copy:
             df = pd.DataFrame(scenario_data)
@@ -474,12 +480,15 @@ class LanduseCombinedScenarioConverter:
             """)
         else:
             for scenario in scenario_data:
-                self.conn.execute("""
+                self.conn.execute(
+                    """
                     INSERT INTO dim_scenario
                     (scenario_id, scenario_name, rcp_scenario, ssp_scenario,
                      description, narrative, aggregation_method, gcm_count)
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-                """, tuple(scenario.values()))
+                """,
+                    tuple(scenario.values()),
+                )
 
     def _extract_time_periods(self, data: dict) -> list[str]:
         """Extract unique time period strings across all scenarios.
@@ -521,16 +530,18 @@ class LanduseCombinedScenarioConverter:
         """
         time_data = []
         for i, period in enumerate(time_periods):
-            start_year, end_year = map(int, period.split('-'))
+            start_year, end_year = map(int, period.split("-"))
             period_length = end_year - start_year
 
-            time_data.append({
-                'time_id': i + 1,
-                'year_range': period,
-                'start_year': start_year,
-                'end_year': end_year,
-                'period_length': period_length
-            })
+            time_data.append(
+                {
+                    "time_id": i + 1,
+                    "year_range": period,
+                    "start_year": start_year,
+                    "end_year": end_year,
+                    "period_length": period_length,
+                }
+            )
 
         if self.use_bulk_copy:
             df = pd.DataFrame(time_data)
@@ -556,14 +567,16 @@ class LanduseCombinedScenarioConverter:
         for i, fips in enumerate(fips_codes):
             state_code = fips[:2]
 
-            geo_data.append({
-                'geography_id': i + 1,
-                'fips_code': fips,
-                'state_code': state_code,
-                'county_name': None,
-                'state_name': None,
-                'region': None
-            })
+            geo_data.append(
+                {
+                    "geography_id": i + 1,
+                    "fips_code": fips,
+                    "state_code": state_code,
+                    "county_name": None,
+                    "state_name": None,
+                    "region": None,
+                }
+            )
 
         if self.use_bulk_copy:
             df = pd.DataFrame(geo_data)
@@ -590,25 +603,32 @@ class LanduseCombinedScenarioConverter:
         console.print("🔄 [cyan]Aggregating transitions across GCMs...[/cyan]")
 
         # Get dimension lookups
-        scenario_lookup = {row[1]: row[0] for row in
-                          self.conn.execute("SELECT scenario_id, scenario_name FROM dim_scenario").fetchall()}
-        time_lookup = {row[1]: row[0] for row in
-                      self.conn.execute("SELECT time_id, year_range FROM dim_time").fetchall()}
-        geography_lookup = {row[1]: row[0] for row in
-                           self.conn.execute("SELECT geography_id, fips_code FROM dim_geography").fetchall()}
-        landuse_lookup = {row[1]: row[0] for row in
-                         self.conn.execute("SELECT landuse_id, landuse_code FROM dim_landuse").fetchall()}
+        scenario_lookup = {
+            row[1]: row[0]
+            for row in self.conn.execute("SELECT scenario_id, scenario_name FROM dim_scenario").fetchall()
+        }
+        time_lookup = {
+            row[1]: row[0] for row in self.conn.execute("SELECT time_id, year_range FROM dim_time").fetchall()
+        }
+        geography_lookup = {
+            row[1]: row[0] for row in self.conn.execute("SELECT geography_id, fips_code FROM dim_geography").fetchall()
+        }
+        landuse_lookup = {
+            row[1]: row[0] for row in self.conn.execute("SELECT landuse_id, landuse_code FROM dim_landuse").fetchall()
+        }
 
         # Aggregate transitions by RCP-SSP combination
         aggregated_data = self._aggregate_by_scenario(data)
 
         # Load aggregated transitions
         if self.use_bulk_copy:
-            self._load_transitions_bulk_copy(aggregated_data, scenario_lookup, time_lookup,
-                                            geography_lookup, landuse_lookup)
+            self._load_transitions_bulk_copy(
+                aggregated_data, scenario_lookup, time_lookup, geography_lookup, landuse_lookup
+            )
         else:
-            self._load_transitions_traditional(aggregated_data, scenario_lookup, time_lookup,
-                                             geography_lookup, landuse_lookup)
+            self._load_transitions_traditional(
+                aggregated_data, scenario_lookup, time_lookup, geography_lookup, landuse_lookup
+            )
 
     def _aggregate_by_scenario(self, data: dict) -> dict:
         """Aggregate GCM-specific data into combined RCP-SSP scenarios.
@@ -652,7 +672,7 @@ class LanduseCombinedScenarioConverter:
                 scenario_groups[combined_key].append(original_scenario)
 
         # Add OVERALL scenario that combines all scenarios
-        scenario_groups['OVERALL'] = all_scenarios
+        scenario_groups["OVERALL"] = all_scenarios
 
         # Process each combined scenario
         with Progress(
@@ -660,7 +680,7 @@ class LanduseCombinedScenarioConverter:
             TextColumn("[progress.description]{task.description}"),
             BarColumn(),
             TimeElapsedColumn(),
-            console=console
+            console=console,
         ) as progress:
             task = progress.add_task("Aggregating scenarios...", total=len(scenario_groups))
 
@@ -690,20 +710,21 @@ class LanduseCombinedScenarioConverter:
                         gcm_values = {}
 
                         for gcm_scenario in gcm_scenarios:
-                            if (gcm_scenario in data and
-                                time_period in data[gcm_scenario] and
-                                fips in data[gcm_scenario][time_period]):
-
+                            if (
+                                gcm_scenario in data
+                                and time_period in data[gcm_scenario]
+                                and fips in data[gcm_scenario][time_period]
+                            ):
                                 fips_data = data[gcm_scenario][time_period][fips]
                                 if isinstance(fips_data, list):
                                     for transition in fips_data:
-                                        from_lu = transition.get('_row')
+                                        from_lu = transition.get("_row")
                                         if from_lu:
                                             if from_lu not in gcm_values:
                                                 gcm_values[from_lu] = {}
 
                                             for to_lu, acres in transition.items():
-                                                if to_lu not in ['_row', 't1']:
+                                                if to_lu not in ["_row", "t1"]:
                                                     if to_lu not in gcm_values[from_lu]:
                                                         gcm_values[from_lu][to_lu] = []
                                                     gcm_values[from_lu][to_lu].append(float(acres))
@@ -711,14 +732,16 @@ class LanduseCombinedScenarioConverter:
                         # Calculate aggregated statistics
                         aggregated_transitions = []
                         for from_lu, to_transitions in gcm_values.items():
-                            transition_dict = {'_row': from_lu}
+                            transition_dict = {"_row": from_lu}
                             for to_lu, acres_list in to_transitions.items():
                                 # Use mean as the primary aggregation method
                                 mean_acres = sum(acres_list) / len(acres_list)
                                 transition_dict[to_lu] = mean_acres
 
                                 # Store additional statistics (for potential future use)
-                                transition_dict[f"{to_lu}_std"] = pd.Series(acres_list).std() if len(acres_list) > 1 else 0
+                                transition_dict[f"{to_lu}_std"] = (
+                                    pd.Series(acres_list).std() if len(acres_list) > 1 else 0
+                                )
                                 transition_dict[f"{to_lu}_min"] = min(acres_list)
                                 transition_dict[f"{to_lu}_max"] = max(acres_list)
 
@@ -731,8 +754,9 @@ class LanduseCombinedScenarioConverter:
 
         return aggregated
 
-    def _load_transitions_bulk_copy(self, data: dict, scenario_lookup: dict, time_lookup: dict,
-                                   geography_lookup: dict, landuse_lookup: dict):
+    def _load_transitions_bulk_copy(
+        self, data: dict, scenario_lookup: dict, time_lookup: dict, geography_lookup: dict, landuse_lookup: dict
+    ):
         """Load aggregated transitions using DuckDB COPY from Parquet files"""
         console.print("🚀 [bold cyan]Using optimized bulk COPY loading...[/bold cyan]")
 
@@ -750,7 +774,7 @@ class LanduseCombinedScenarioConverter:
             BarColumn(),
             TextColumn("[progress.percentage]{task.percentage:>3.0f}%"),
             TimeElapsedColumn(),
-            console=console
+            console=console,
         ) as progress:
             task = progress.add_task("Bulk loading aggregated transitions...", total=total_transitions)
             processed = 0
@@ -766,13 +790,18 @@ class LanduseCombinedScenarioConverter:
 
                         if isinstance(fips_data, list):
                             for transition in fips_data:
-                                from_landuse = transition.get('_row')
+                                from_landuse = transition.get("_row")
                                 if from_landuse in landuse_lookup:
                                     from_landuse_id = landuse_lookup[from_landuse]
 
                                     for to_code, value in transition.items():
                                         # Skip metadata fields
-                                        if to_code in ['_row', 't1'] or '_std' in to_code or '_min' in to_code or '_max' in to_code:
+                                        if (
+                                            to_code in ["_row", "t1"]
+                                            or "_std" in to_code
+                                            or "_min" in to_code
+                                            or "_max" in to_code
+                                        ):
                                             continue
 
                                         if to_code in landuse_lookup:
@@ -780,26 +809,28 @@ class LanduseCombinedScenarioConverter:
                                             acres = float(value)
 
                                             if acres > 0:
-                                                transition_type = 'same' if from_landuse == to_code else 'change'
+                                                transition_type = "same" if from_landuse == to_code else "change"
 
                                                 # Get statistics if available
                                                 std_dev = transition.get(f"{to_code}_std", None)
                                                 min_val = transition.get(f"{to_code}_min", None)
                                                 max_val = transition.get(f"{to_code}_max", None)
 
-                                                current_batch.append({
-                                                    'transition_id': transition_id,
-                                                    'scenario_id': scenario_id,
-                                                    'time_id': time_id,
-                                                    'geography_id': geography_id,
-                                                    'from_landuse_id': from_landuse_id,
-                                                    'to_landuse_id': to_landuse_id,
-                                                    'acres': acres,
-                                                    'acres_std_dev': std_dev,
-                                                    'acres_min': min_val,
-                                                    'acres_max': max_val,
-                                                    'transition_type': transition_type
-                                                })
+                                                current_batch.append(
+                                                    {
+                                                        "transition_id": transition_id,
+                                                        "scenario_id": scenario_id,
+                                                        "time_id": time_id,
+                                                        "geography_id": geography_id,
+                                                        "from_landuse_id": from_landuse_id,
+                                                        "to_landuse_id": to_landuse_id,
+                                                        "acres": acres,
+                                                        "acres_std_dev": std_dev,
+                                                        "acres_min": min_val,
+                                                        "acres_max": max_val,
+                                                        "transition_type": transition_type,
+                                                    }
+                                                )
 
                                                 transition_id += 1
                                                 processed += 1
@@ -818,8 +849,9 @@ class LanduseCombinedScenarioConverter:
 
             progress.update(task, completed=processed)
 
-    def _load_transitions_traditional(self, data: dict, scenario_lookup: dict, time_lookup: dict,
-                                     geography_lookup: dict, landuse_lookup: dict):
+    def _load_transitions_traditional(
+        self, data: dict, scenario_lookup: dict, time_lookup: dict, geography_lookup: dict, landuse_lookup: dict
+    ):
         """Load transitions using traditional SQL INSERT statements.
 
         Alternative to bulk copy method, uses batch INSERT statements.
@@ -850,9 +882,12 @@ class LanduseCombinedScenarioConverter:
                     if isinstance(fips_data, list):
                         for transition in fips_data:
                             # Count actual land use transitions, not statistics
-                            actual_transitions = [k for k in transition.keys()
-                                                 if k not in ['_row', 't1']
-                                                 and not any(suffix in k for suffix in ['_std', '_min', '_max'])]
+                            actual_transitions = [
+                                k
+                                for k in transition.keys()
+                                if k not in ["_row", "t1"]
+                                and not any(suffix in k for suffix in ["_std", "_min", "_max"])
+                            ]
                             total += len(actual_transitions)
         return total
 
@@ -1016,7 +1051,9 @@ class LanduseCombinedScenarioConverter:
             This method is typically called after successful data loading to confirm
             the conversion completed successfully.
         """
-        console.print(Panel.fit("📈 [bold magenta]Database Summary (Combined Scenarios)[/bold magenta]", border_style="magenta"))
+        console.print(
+            Panel.fit("📈 [bold magenta]Database Summary (Combined Scenarios)[/bold magenta]", border_style="magenta")
+        )
 
         # Create summary table
         table = Table(title="🦆 DuckDB Database Summary", show_header=True, header_style="bold cyan")
@@ -1029,7 +1066,7 @@ class LanduseCombinedScenarioConverter:
             ("dim_time", "Time periods and ranges"),
             ("dim_geography", "Geographic locations (FIPS codes)"),
             ("dim_landuse", "Land use types and categories"),
-            ("fact_landuse_transitions", "Aggregated transitions (mean across GCMs)")
+            ("fact_landuse_transitions", "Aggregated transitions (mean across GCMs)"),
         ]
 
         for table_name, description in tables:
@@ -1062,7 +1099,7 @@ class LanduseCombinedScenarioConverter:
         try:
             version_manager = SchemaVersionManager(self.conn)
             # Apply version 2.2.0 for combined scenarios with versioning
-            version_manager.apply_version('2.2.0', applied_by='convert_to_duckdb')
+            version_manager.apply_version("2.2.0", applied_by="convert_to_duckdb")
             console.print("[green]✓ Applied schema version 2.2.0[/green]")
         except Exception as e:
             console.print(f"[yellow]⚠ Could not apply schema version: {e}[/yellow]")
@@ -1105,30 +1142,28 @@ class LanduseCombinedScenarioConverter:
             except Exception as e:
                 console.print(f"⚠️ Warning: Could not clean up temp directory: {e}")
 
+
 def main():
     """Execute land use data conversion to DuckDB with combined scenarios."""
     import argparse
 
-    parser = argparse.ArgumentParser(
-        description="Convert landuse JSON to DuckDB with combined RCP-SSP scenarios"
-    )
-    parser.add_argument("--no-bulk-copy", action="store_true",
-                       help="Use traditional INSERT instead of bulk COPY")
-    parser.add_argument("--input", default="data/raw/county_landuse_projections_RPA.json",
-                       help="Input JSON file path")
-    parser.add_argument("--output", default="data/processed/landuse_analytics.duckdb",
-                       help="Output DuckDB file path")
+    parser = argparse.ArgumentParser(description="Convert landuse JSON to DuckDB with combined RCP-SSP scenarios")
+    parser.add_argument("--no-bulk-copy", action="store_true", help="Use traditional INSERT instead of bulk COPY")
+    parser.add_argument("--input", default="data/raw/county_landuse_projections_RPA.json", help="Input JSON file path")
+    parser.add_argument("--output", default="data/processed/landuse_analytics.duckdb", help="Output DuckDB file path")
 
     args = parser.parse_args()
     use_bulk_copy = not args.no_bulk_copy
 
-    console.print(Panel.fit(
-        "🦆 [bold blue]DuckDB Landuse Database Converter[/bold blue]\n"
-        f"[yellow]Converting nested JSON to normalized relational database[/yellow]\n"
-        f"[cyan]Aggregating 20 GCM projections into 5 combined scenarios[/cyan]\n"
-        f"[green]Method: {'Bulk COPY (optimized)' if use_bulk_copy else 'Traditional INSERT'}[/green]",
-        border_style="blue"
-    ))
+    console.print(
+        Panel.fit(
+            "🦆 [bold blue]DuckDB Landuse Database Converter[/bold blue]\n"
+            f"[yellow]Converting nested JSON to normalized relational database[/yellow]\n"
+            f"[cyan]Aggregating 20 GCM projections into 5 combined scenarios[/cyan]\n"
+            f"[green]Method: {'Bulk COPY (optimized)' if use_bulk_copy else 'Traditional INSERT'}[/green]",
+            border_style="blue",
+        )
+    )
 
     converter = LanduseCombinedScenarioConverter(args.input, args.output, use_bulk_copy=use_bulk_copy)
 
@@ -1150,21 +1185,24 @@ def main():
         end_time = time.time()
         duration = end_time - start_time
 
-        console.print(Panel.fit(
-            f"✅ [bold green]Conversion Complete![/bold green]\n"
-            f"⏱️ Duration: {duration:.2f} seconds\n"
-            f"📁 Output: {args.output}\n"
-            f"🔄 Aggregated 20 GCM-specific scenarios into 5 scenarios:\n"
-            f"   • 1 OVERALL (default for most queries)\n"
-            f"   • 4 RCP-SSP combinations for scenario comparison",
-            border_style="green"
-        ))
+        console.print(
+            Panel.fit(
+                f"✅ [bold green]Conversion Complete![/bold green]\n"
+                f"⏱️ Duration: {duration:.2f} seconds\n"
+                f"📁 Output: {args.output}\n"
+                f"🔄 Aggregated 20 GCM-specific scenarios into 5 scenarios:\n"
+                f"   • 1 OVERALL (default for most queries)\n"
+                f"   • 4 RCP-SSP combinations for scenario comparison",
+                border_style="green",
+            )
+        )
 
     except Exception as e:
         console.print(Panel.fit(f"❌ [bold red]Error: {str(e)}[/bold red]", border_style="red"))
         raise
     finally:
         converter.close()
+
 
 if __name__ == "__main__":
     main()

@@ -59,7 +59,7 @@ class TestDuckDBConnection:
     def test_connect_with_secrets(self, mock_secrets, temp_db_path):
         """Test connection with database path in secrets"""
         mock_secrets.database = temp_db_path
-        mock_secrets.__getitem__ = lambda self, key: temp_db_path if key == 'database' else None
+        mock_secrets.__getitem__ = lambda self, key: temp_db_path if key == "database" else None
 
         connection = DuckDBConnection(connection_name="test")
         connection._secrets = mock_secrets
@@ -125,7 +125,7 @@ class TestDuckDBConnection:
 
         connection._instance.close()
 
-    @patch('landuse.connections.duckdb_connection.cache_data')
+    @patch("landuse.connections.duckdb_connection.cache_data")
     def test_query_method(self, mock_cache_data, temp_db_path):
         """Test query method with caching"""
         # Mock the cache decorator to just return the function
@@ -139,14 +139,14 @@ class TestDuckDBConnection:
 
         assert isinstance(df, pd.DataFrame)
         assert len(df) == 2
-        assert list(df.columns) == ['id', 'name']
+        assert list(df.columns) == ["id", "name"]
 
         # Verify cache decorator was called with correct TTL
         mock_cache_data.assert_called_with(ttl=3600)
 
         connection._instance.close()
 
-    @patch('landuse.connections.duckdb_connection.cache_data')
+    @patch("landuse.connections.duckdb_connection.cache_data")
     def test_query_with_parameters(self, mock_cache_data, temp_db_path):
         """Test query with parameters"""
         mock_cache_data.return_value = lambda func: func
@@ -155,17 +155,14 @@ class TestDuckDBConnection:
         connection._instance = connection._connect(database=temp_db_path)
 
         # Test query with parameters
-        df = connection.query(
-            "SELECT * FROM test_table WHERE id = $1",
-            id=1
-        )
+        df = connection.query("SELECT * FROM test_table WHERE id = $1", id=1)
 
         assert len(df) == 1
-        assert df.iloc[0]['name'] == 'test1'
+        assert df.iloc[0]["name"] == "test1"
 
         connection._instance.close()
 
-    @patch('landuse.connections.duckdb_connection.cache_data')
+    @patch("landuse.connections.duckdb_connection.cache_data")
     def test_query_custom_ttl(self, mock_cache_data, temp_db_path):
         """Test query with custom TTL"""
         mock_cache_data.return_value = lambda func: func
@@ -207,10 +204,7 @@ class TestDuckDBConnection:
         connection.execute("CREATE TABLE param_test (id INTEGER, name VARCHAR)")
 
         # Insert with parameters
-        connection.execute(
-            "INSERT INTO param_test VALUES ($1, $2)",
-            id=1, name="test"
-        )
+        connection.execute("INSERT INTO param_test VALUES ($1, $2)", id=1, name="test")
 
         # Verify
         result = connection._instance.execute("SELECT name FROM param_test WHERE id = 1").fetchone()
@@ -218,7 +212,7 @@ class TestDuckDBConnection:
 
         connection._instance.close()
 
-    @patch('landuse.connections.duckdb_connection.cache_data')
+    @patch("landuse.connections.duckdb_connection.cache_data")
     def test_get_table_info(self, mock_cache_data, temp_db_path):
         """Test get_table_info method"""
         # STALE TEST: get_table_info now has security validation that restricts table names
@@ -226,7 +220,7 @@ class TestDuckDBConnection:
         # TODO: Update test to use production database with allowed tables
         pytest.skip("Stale test: get_table_info now has security validation, needs allowed table name")
 
-    @patch('landuse.connections.duckdb_connection.cache_data')
+    @patch("landuse.connections.duckdb_connection.cache_data")
     def test_list_tables(self, mock_cache_data, temp_db_path):
         """Test list_tables method"""
         mock_cache_data.return_value = lambda func: func
@@ -237,12 +231,12 @@ class TestDuckDBConnection:
         df = connection.list_tables()
 
         assert isinstance(df, pd.DataFrame)
-        assert 'table_name' in df.columns
-        assert 'test_table' in df['table_name'].values
+        assert "table_name" in df.columns
+        assert "test_table" in df["table_name"].values
 
         connection._instance.close()
 
-    @patch('landuse.connections.duckdb_connection.cache_data')
+    @patch("landuse.connections.duckdb_connection.cache_data")
     def test_get_row_count(self, mock_cache_data, temp_db_path):
         """Test get_row_count method"""
         # STALE TEST: get_row_count now has security validation that restricts table names
@@ -250,7 +244,7 @@ class TestDuckDBConnection:
         # TODO: Update test to use production database with allowed tables
         pytest.skip("Stale test: get_row_count now has security validation, needs allowed table name")
 
-    @patch('landuse.connections.duckdb_connection.cache_data')
+    @patch("landuse.connections.duckdb_connection.cache_data")
     def test_health_check_success(self, mock_cache_data, temp_db_path):
         """Test health_check when connection is healthy"""
         mock_cache_data.return_value = lambda func: func
@@ -264,7 +258,7 @@ class TestDuckDBConnection:
 
         connection._instance.close()
 
-    @patch('landuse.connections.duckdb_connection.cache_data')
+    @patch("landuse.connections.duckdb_connection.cache_data")
     def test_health_check_failure(self, mock_cache_data):
         """Test health_check when connection fails"""
         mock_cache_data.return_value = lambda func: func
@@ -297,7 +291,7 @@ class TestDuckDBConnection:
         db_conn = connection._connect(
             database=":memory:",
             read_only=False,  # In-memory databases cannot be read-only
-            config={'threads': 4, 'memory_limit': '1GB'}
+            config={"threads": 4, "memory_limit": "1GB"},
         )
 
         assert db_conn is not None

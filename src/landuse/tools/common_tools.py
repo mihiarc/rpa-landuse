@@ -21,14 +21,11 @@ from landuse.utils.retry_decorators import database_retry
 
 class QueryInput(BaseModel):
     """Input model for SQL query execution."""
+
     query: str = Field(description="SQL query to execute against the landuse database")
 
 
-def create_execute_query_tool(
-    config: AppConfig,
-    db_connection: duckdb.DuckDBPyConnection,
-    schema: str
-) -> Any:
+def create_execute_query_tool(config: AppConfig, db_connection: duckdb.DuckDBPyConnection, schema: str) -> Any:
     """
     Create a tool for executing SQL queries with consistent error handling.
 
@@ -55,7 +52,7 @@ def create_execute_query_tool(
         - dim_indicators: Socioeconomic indicator definitions
         - dim_landuse: Land use categories (crop, pasture, forest, urban, rangeland)
         - dim_time: Time periods from 2012 to 2100
-        
+
         RECOMMENDED VIEWS (use these first for socioeconomic analysis):
         - v_population_trends: Easy population analysis by county/state/scenario
         - v_income_trends: Easy income analysis by county/state/scenario
@@ -118,36 +115,16 @@ def _execute_with_retry(db_connection: duckdb.DuckDBPyConnection, query: str) ->
         result = conn.execute(query).fetchall()
         columns = [desc[0] for desc in conn.description] if conn.description else []
 
-        return {
-            "success": True,
-            "results": result,
-            "columns": columns,
-            "row_count": len(result)
-        }
+        return {"success": True, "results": result, "columns": columns, "row_count": len(result)}
     except (duckdb.CatalogException, duckdb.SyntaxException, duckdb.BinderException) as e:
         # Schema/syntax errors - don't retry these
-        return {
-            "success": False,
-            "error": str(e),
-            "query": query,
-            "error_type": "schema"
-        }
+        return {"success": False, "error": str(e), "query": query, "error_type": "schema"}
     except duckdb.Error as e:
         # Other DuckDB errors - may be transient
-        return {
-            "success": False,
-            "error": str(e),
-            "query": query,
-            "error_type": "database"
-        }
+        return {"success": False, "error": str(e), "query": query, "error_type": "database"}
     except Exception as e:
         # Unexpected errors
-        return {
-            "success": False,
-            "error": str(e),
-            "query": query,
-            "error_type": "unexpected"
-        }
+        return {"success": False, "error": str(e), "query": query, "error_type": "unexpected"}
 
 
 def _format_success_response(result: dict[str, Any], config: AppConfig) -> str:
@@ -156,7 +133,7 @@ def _format_success_response(result: dict[str, Any], config: AppConfig) -> str:
 
     # Replace technical scenario names with user-friendly names in the formatted output
     # This ensures users see "LM (Lower-Moderate)" instead of "RCP45_SSP1"
-    formatted = ResponseFormatter.format_scenario_in_text(formatted, format='full')
+    formatted = ResponseFormatter.format_scenario_in_text(formatted, format="full")
 
     # Add row count information if truncated
     if result["row_count"] >= config.agent.max_query_rows:
@@ -190,7 +167,7 @@ def _get_error_suggestion(error_msg: str) -> str:
         "syntax error": "Check SQL syntax. Common issues: missing commas, unclosed quotes.",
         "ambiguous column": "Specify table name for columns (e.g., fact.year instead of year)",
         "division by zero": "Add WHERE clause to filter out zero values.",
-        "timeout": "Query may be too complex. Try adding filters or limiting results."
+        "timeout": "Query may be too complex. Try adding filters or limiting results.",
     }
 
     for key, suggestion in suggestions.items():
@@ -210,9 +187,7 @@ def create_analysis_tool() -> Any:
 
     @tool
     def analyze_landuse_results(
-        query_results: str,
-        original_question: str,
-        additional_context: Optional[str] = None
+        query_results: str, original_question: str, additional_context: Optional[str] = None
     ) -> str:
         """
         Analyze landuse query results and provide business insights.
@@ -316,25 +291,25 @@ def create_analysis_tool() -> Any:
 
         # Cross-dataset recommendations - suggest related queries
         cross_dataset_suggestions = []
-        
+
         if "population" in query_results.lower() and "urban" not in query_results.lower():
             cross_dataset_suggestions.append(
                 "RECOMMENDATION: Query urban land transitions to see how population growth drives development: "
                 "SELECT scenario_name, SUM(acres) FROM fact_landuse_transitions WHERE to_landuse_name = 'Urban'"
             )
-        
+
         if "urban" in query_results.lower() and "population" not in query_results.lower():
             cross_dataset_suggestions.append(
                 "RECOMMENDATION: Query population projections to understand demographic drivers: "
                 "SELECT ssp_scenario, population_thousands FROM v_population_trends"
             )
-            
+
         if "forest" in query_results.lower() and "population" not in query_results.lower():
             cross_dataset_suggestions.append(
                 "RECOMMENDATION: Query population growth to understand development pressure on forests: "
                 "Population growth often drives forest conversion to urban/agricultural uses"
             )
-            
+
         if "agricultural" in query_results.lower() and "income" not in query_results.lower():
             cross_dataset_suggestions.append(
                 "RECOMMENDATION: Query income trends to understand agricultural economic drivers: "
@@ -358,7 +333,7 @@ def create_analysis_tool() -> Any:
         if insights:
             all_content.append("Key Insights:")
             all_content.extend([f"• {insight}" for insight in insights])
-        
+
         if cross_dataset_suggestions:
             if all_content:
                 all_content.append("")  # Add blank line
@@ -397,7 +372,7 @@ def create_schema_tool(schema: str) -> Any:
         """
         if table_name:
             # Extract schema for specific table
-            lines = schema.split('\n')
+            lines = schema.split("\n")
             table_schema = []
             capturing = False
 
@@ -430,10 +405,7 @@ def create_socioeconomic_analysis_tool() -> Any:
 
     @tool
     def analyze_socioeconomic_trends(
-        query_results: str,
-        analysis_type: str,
-        original_question: str,
-        additional_context: Optional[str] = None
+        query_results: str, analysis_type: str, original_question: str, additional_context: Optional[str] = None
     ) -> str:
         """
         Analyze socioeconomic projections and their relationship to land use changes.
@@ -532,10 +504,7 @@ def create_integration_query_tool() -> Any:
     """
 
     @tool
-    def suggest_integration_queries(
-        user_question: str,
-        analysis_focus: Optional[str] = None
-    ) -> str:
+    def suggest_integration_queries(user_question: str, analysis_focus: Optional[str] = None) -> str:
         """
         Suggest SQL queries that integrate landuse and socioeconomic data.
 
@@ -573,7 +542,9 @@ def create_integration_query_tool() -> Any:
                 "```"
             )
 
-        if "income" in user_question.lower() and ("agricultural" in user_question.lower() or "farm" in user_question.lower()):
+        if "income" in user_question.lower() and (
+            "agricultural" in user_question.lower() or "farm" in user_question.lower()
+        ):
             suggestions.append(
                 "Income-Agricultural Change Analysis:\n"
                 "```sql\n"

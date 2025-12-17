@@ -33,7 +33,7 @@ class TestPoolStatistics:
             total_acquisitions=100,
             total_releases=98,
             total_wait_time_ms=500.0,
-            max_wait_time_ms=50.0
+            max_wait_time_ms=50.0,
         )
         result = stats.to_dict()
 
@@ -81,7 +81,7 @@ class TestDatabaseConnectionPool:
     @pytest.fixture
     def mock_duckdb(self):
         """Mock duckdb module."""
-        with patch('landuse.infrastructure.connection_pool.duckdb') as mock:
+        with patch("landuse.infrastructure.connection_pool.duckdb") as mock:
             mock_conn = MagicMock()
             mock_conn.execute.return_value.fetchone.return_value = (1,)
             mock.connect.return_value = mock_conn
@@ -89,12 +89,7 @@ class TestDatabaseConnectionPool:
 
     def test_pool_initialization(self, mock_duckdb):
         """Test pool initializes with correct parameters."""
-        pool = DatabaseConnectionPool(
-            database_path="test.db",
-            max_connections=5,
-            connection_timeout=10,
-            read_only=True
-        )
+        pool = DatabaseConnectionPool(database_path="test.db", max_connections=5, connection_timeout=10, read_only=True)
 
         assert pool.database_path == "test.db"
         assert pool.max_connections == 5
@@ -105,10 +100,7 @@ class TestDatabaseConnectionPool:
 
     def test_acquire_connection(self, mock_duckdb):
         """Test acquiring a connection from pool."""
-        pool = DatabaseConnectionPool(
-            database_path="test.db",
-            max_connections=5
-        )
+        pool = DatabaseConnectionPool(database_path="test.db", max_connections=5)
 
         conn = pool.acquire()
         assert conn is not None
@@ -123,10 +115,7 @@ class TestDatabaseConnectionPool:
 
     def test_release_connection(self, mock_duckdb):
         """Test releasing a connection back to pool."""
-        pool = DatabaseConnectionPool(
-            database_path="test.db",
-            max_connections=5
-        )
+        pool = DatabaseConnectionPool(database_path="test.db", max_connections=5)
 
         conn = pool.acquire()
         pool.release(conn)
@@ -138,10 +127,7 @@ class TestDatabaseConnectionPool:
 
     def test_context_manager(self, mock_duckdb):
         """Test using pool connection as context manager."""
-        pool = DatabaseConnectionPool(
-            database_path="test.db",
-            max_connections=5
-        )
+        pool = DatabaseConnectionPool(database_path="test.db", max_connections=5)
 
         with pool.connection() as conn:
             assert conn is not None
@@ -151,20 +137,14 @@ class TestDatabaseConnectionPool:
 
     def test_pool_context_manager(self, mock_duckdb):
         """Test pool itself as context manager."""
-        with DatabaseConnectionPool(
-            database_path="test.db",
-            max_connections=5
-        ) as pool:
+        with DatabaseConnectionPool(database_path="test.db", max_connections=5) as pool:
             conn = pool.acquire()
             assert conn is not None
             pool.release(conn)
 
     def test_is_healthy(self, mock_duckdb):
         """Test pool health check."""
-        pool = DatabaseConnectionPool(
-            database_path="test.db",
-            max_connections=5
-        )
+        pool = DatabaseConnectionPool(database_path="test.db", max_connections=5)
 
         assert pool.is_healthy() is True
 
@@ -174,10 +154,7 @@ class TestDatabaseConnectionPool:
         """Test that closed pool raises error on acquire."""
         from landuse.exceptions import DatabaseConnectionError
 
-        pool = DatabaseConnectionPool(
-            database_path="test.db",
-            max_connections=5
-        )
+        pool = DatabaseConnectionPool(database_path="test.db", max_connections=5)
         pool.close()
 
         with pytest.raises(DatabaseConnectionError, match="closed"):
@@ -185,10 +162,7 @@ class TestDatabaseConnectionPool:
 
     def test_statistics_tracking(self, mock_duckdb):
         """Test that statistics are properly tracked."""
-        pool = DatabaseConnectionPool(
-            database_path="test.db",
-            max_connections=5
-        )
+        pool = DatabaseConnectionPool(database_path="test.db", max_connections=5)
 
         # Acquire and release several times
         for _ in range(3):
@@ -203,10 +177,7 @@ class TestDatabaseConnectionPool:
 
     def test_concurrent_access(self, mock_duckdb):
         """Test pool handles concurrent access."""
-        pool = DatabaseConnectionPool(
-            database_path="test.db",
-            max_connections=5
-        )
+        pool = DatabaseConnectionPool(database_path="test.db", max_connections=5)
 
         results = []
         errors = []
@@ -245,8 +216,8 @@ class TestDatabaseManagerPooling:
         config.database.read_only = True
         return config
 
-    @patch('landuse.agents.database_manager.DatabaseConnectionPool')
-    @patch('landuse.agents.database_manager.SchemaVersionManager')
+    @patch("landuse.agents.database_manager.DatabaseConnectionPool")
+    @patch("landuse.agents.database_manager.SchemaVersionManager")
     def test_pool_initialization(self, mock_version_mgr, mock_pool_cls, mock_config):
         """Test DatabaseManager initializes connection pool."""
         from landuse.agents.database_manager import DatabaseManager
@@ -264,8 +235,8 @@ class TestDatabaseManagerPooling:
 
         db_manager.close()
 
-    @patch('landuse.agents.database_manager.DatabaseConnectionPool')
-    @patch('landuse.agents.database_manager.SchemaVersionManager')
+    @patch("landuse.agents.database_manager.DatabaseConnectionPool")
+    @patch("landuse.agents.database_manager.SchemaVersionManager")
     def test_get_pool_statistics(self, mock_version_mgr, mock_pool_cls, mock_config):
         """Test getting pool statistics."""
         from landuse.agents.database_manager import DatabaseManager
@@ -284,8 +255,8 @@ class TestDatabaseManagerPooling:
 
         db_manager.close()
 
-    @patch('landuse.agents.database_manager.DatabaseConnectionPool')
-    @patch('landuse.agents.database_manager.SchemaVersionManager')
+    @patch("landuse.agents.database_manager.DatabaseConnectionPool")
+    @patch("landuse.agents.database_manager.SchemaVersionManager")
     def test_is_pool_healthy(self, mock_version_mgr, mock_pool_cls, mock_config):
         """Test pool health check."""
         from landuse.agents.database_manager import DatabaseManager
@@ -301,8 +272,8 @@ class TestDatabaseManagerPooling:
 
         db_manager.close()
 
-    @patch('landuse.agents.database_manager.DatabaseConnectionPool')
-    @patch('landuse.agents.database_manager.SchemaVersionManager')
+    @patch("landuse.agents.database_manager.DatabaseConnectionPool")
+    @patch("landuse.agents.database_manager.SchemaVersionManager")
     def test_connection_context_manager(self, mock_version_mgr, mock_pool_cls, mock_config):
         """Test connection context manager delegates to pool."""
         from landuse.agents.database_manager import DatabaseManager

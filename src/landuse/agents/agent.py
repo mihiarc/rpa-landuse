@@ -27,61 +27,24 @@ Examples:
   rpa-analytics --verbose          # Enable verbose output
 
 For more information, visit: https://github.com/yourusername/rpa-landuse
-        """
+        """,
     )
 
-    parser.add_argument(
-        "--config-file",
-        type=str,
-        help="Path to configuration file (.env format)",
-        metavar="PATH"
-    )
+    parser.add_argument("--config-file", type=str, help="Path to configuration file (.env format)", metavar="PATH")
 
-    parser.add_argument(
-        "--model",
-        type=str,
-        help="Model name to use (overrides config)",
-        metavar="MODEL"
-    )
+    parser.add_argument("--model", type=str, help="Model name to use (overrides config)", metavar="MODEL")
 
-    parser.add_argument(
-        "--temperature",
-        type=float,
-        help="Model temperature (0.0-2.0)",
-        metavar="TEMP"
-    )
+    parser.add_argument("--temperature", type=float, help="Model temperature (0.0-2.0)", metavar="TEMP")
 
-    parser.add_argument(
-        "--max-iterations",
-        type=int,
-        help="Maximum agent iterations",
-        metavar="N"
-    )
+    parser.add_argument("--max-iterations", type=int, help="Maximum agent iterations", metavar="N")
 
-    parser.add_argument(
-        "--verbose",
-        action="store_true",
-        help="Enable verbose output"
-    )
+    parser.add_argument("--verbose", action="store_true", help="Enable verbose output")
 
-    parser.add_argument(
-        "--debug",
-        action="store_true",
-        help="Enable debug mode"
-    )
+    parser.add_argument("--debug", action="store_true", help="Enable debug mode")
 
-    parser.add_argument(
-        "--db-path",
-        type=str,
-        help="Path to DuckDB database file",
-        metavar="PATH"
-    )
+    parser.add_argument("--db-path", type=str, help="Path to DuckDB database file", metavar="PATH")
 
-    parser.add_argument(
-        "--version",
-        action="version",
-        version="RPA Land Use Analytics 0.1.0"
-    )
+    parser.add_argument("--version", action="version", version="RPA Land Use Analytics 0.1.0")
 
     args = parser.parse_args()
 

@@ -18,7 +18,7 @@ import pytest
 # Mock streamlit before importing pages
 from tests.unit.streamlit_tests.mock_streamlit import mock_st
 
-sys.modules['streamlit'] = mock_st
+sys.modules["streamlit"] = mock_st
 import streamlit as st  # noqa: E402
 
 
@@ -32,15 +32,15 @@ class TestStreamlitApp:
     @pytest.fixture
     def mock_streamlit(self):
         """Mock Streamlit components"""
-        with patch('streamlit.set_page_config') as mock_config:
-            with patch('streamlit.markdown') as mock_markdown:
-                with patch('streamlit.navigation') as mock_nav:
-                    with patch('streamlit.Page') as mock_page:
+        with patch("streamlit.set_page_config") as mock_config:
+            with patch("streamlit.markdown") as mock_markdown:
+                with patch("streamlit.navigation") as mock_nav:
+                    with patch("streamlit.Page") as mock_page:
                         yield {
-                            'config': mock_config,
-                            'markdown': mock_markdown,
-                            'navigation': mock_nav,
-                            'page': mock_page
+                            "config": mock_config,
+                            "markdown": mock_markdown,
+                            "navigation": mock_nav,
+                            "page": mock_page,
                         }
 
     @pytest.fixture
@@ -53,7 +53,7 @@ class TestStreamlitApp:
         monkeypatch.setenv("LANDUSE_DB_PATH", str(db_path))
         monkeypatch.setenv("OPENAI_API_KEY", "test-key")
 
-        return {'db_path': db_path}
+        return {"db_path": db_path}
 
     def test_check_environment_all_good(self, mock_env):
         """Test environment check when everything is configured"""
@@ -110,7 +110,7 @@ class TestStreamlitApp:
         import landuse_app
 
         # Test that key functions exist
-        assert hasattr(landuse_app, 'check_environment')
+        assert hasattr(landuse_app, "check_environment")
 
         # Test that they are callable
         assert callable(landuse_app.check_environment)

@@ -18,6 +18,7 @@ from rich.panel import Panel
 
 console = Console()
 
+
 def cleanup_test_artifacts():
     """Remove test tables and other artifacts from the production database"""
 
@@ -90,7 +91,9 @@ def cleanup_test_artifacts():
     console.print("\n[green]✨ Cleanup completed successfully![/green]")
     return True
 
+
 if __name__ == "__main__":
     import sys
+
     success = cleanup_test_artifacts()
     sys.exit(0 if success else 1)

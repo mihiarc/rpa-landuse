@@ -85,7 +85,7 @@ class PromptManager:
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
 
-        if not hasattr(module, 'SYSTEM_PROMPT_BASE'):
+        if not hasattr(module, "SYSTEM_PROMPT_BASE"):
             raise ImportError(f"Prompt file {prompt_file} missing SYSTEM_PROMPT_BASE")
 
         prompt = module.SYSTEM_PROMPT_BASE
@@ -140,7 +140,7 @@ class PromptManager:
         for file in self.versions_dir.glob("v*.py"):
             # Extract version from filename (e.g., v1.0.0.py -> v1.0.0)
             version = file.stem
-            if re.match(r'^v\d+\.\d+\.\d+$', version):
+            if re.match(r"^v\d+\.\d+\.\d+$", version):
                 versions.append(version)
 
         return sorted(versions, key=self._version_key)
@@ -156,7 +156,7 @@ class PromptManager:
             Tuple of integers for sorting
         """
         # Remove 'v' prefix and split by dots
-        parts = version[1:].split('.')
+        parts = version[1:].split(".")
         return tuple(int(part) for part in parts)
 
     def get_version_info(self, version: Optional[str] = None) -> Dict[str, str]:
@@ -227,8 +227,7 @@ class PromptManager:
 
         return None
 
-    def create_version(self, version: str, prompt_content: str,
-                      author: str = "Unknown", description: str = "") -> None:
+    def create_version(self, version: str, prompt_content: str, author: str = "Unknown", description: str = "") -> None:
         """
         Create a new prompt version.
 
@@ -238,7 +237,7 @@ class PromptManager:
             author: Author of the changes
             description: Description of changes
         """
-        if not re.match(r'^v\d+\.\d+\.\d+$', version):
+        if not re.match(r"^v\d+\.\d+\.\d+$", version):
             raise ValueError(f"Invalid version format: {version}. Use vX.Y.Z")
 
         prompt_file = self.versions_dir / f"{version}.py"

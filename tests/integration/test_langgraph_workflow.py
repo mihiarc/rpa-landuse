@@ -100,19 +100,17 @@ class TestLangGraphWorkflow:
 
         # Cleanup
         import shutil
+
         if os.path.exists(tmpdir):
             shutil.rmtree(tmpdir)
 
     @pytest.fixture
     def agent(self, test_db):
         """Create an agent with test database."""
-        with patch.dict(os.environ, {'OPENAI_API_KEY': 'test-key'}):
-            config = AppConfig(
-                database={'path': test_db},
-                agent={'enable_memory': True, 'max_iterations': 5}
-            )
+        with patch.dict(os.environ, {"OPENAI_API_KEY": "test-key"}):
+            config = AppConfig(database={"path": test_db}, agent={"enable_memory": True, "max_iterations": 5})
 
-            with patch('landuse.agents.llm_manager.ChatOpenAI') as mock_llm:
+            with patch("landuse.agents.llm_manager.ChatOpenAI") as mock_llm:
                 # Create a mock LLM that returns reasonable responses
                 mock_llm_instance = Mock()
                 mock_llm.return_value = mock_llm_instance
@@ -132,18 +130,17 @@ class TestLangGraphWorkflow:
         responses = [
             # First response: agent decides to use execute_landuse_query tool
             Mock(
-                tool_calls=[{
-                    "name": "execute_landuse_query",
-                    "args": {"query": "SELECT COUNT(*) FROM dim_scenario"},
-                    "id": "tool_1"
-                }],
-                content=""
+                tool_calls=[
+                    {
+                        "name": "execute_landuse_query",
+                        "args": {"query": "SELECT COUNT(*) FROM dim_scenario"},
+                        "id": "tool_1",
+                    }
+                ],
+                content="",
             ),
             # Second response: agent provides final answer
-            Mock(
-                tool_calls=[],
-                content="There are 2 scenarios in the database."
-            )
+            Mock(tool_calls=[], content="There are 2 scenarios in the database."),
         ]
 
         agent._test_llm.bind_tools.return_value.invoke.side_effect = responses
@@ -163,31 +160,32 @@ class TestLangGraphWorkflow:
         responses = [
             # First: query for data
             Mock(
-                tool_calls=[{
-                    "name": "execute_landuse_query",
-                    "args": {"query": "SELECT SUM(acres) FROM fact_landuse_transitions WHERE from_landuse_id = 1"},
-                    "id": "tool_1"
-                }],
-                content=""
+                tool_calls=[
+                    {
+                        "name": "execute_landuse_query",
+                        "args": {"query": "SELECT SUM(acres) FROM fact_landuse_transitions WHERE from_landuse_id = 1"},
+                        "id": "tool_1",
+                    }
+                ],
+                content="",
             ),
             # Second: analyze results
             Mock(
-                tool_calls=[{
-                    "name": "analyze_landuse_results",
-                    "args": {
-                        "query_results": "3000 acres",
-                        "original_question": "Total forest loss?",
-                        "additional_context": None
-                    },
-                    "id": "tool_2"
-                }],
-                content=""
+                tool_calls=[
+                    {
+                        "name": "analyze_landuse_results",
+                        "args": {
+                            "query_results": "3000 acres",
+                            "original_question": "Total forest loss?",
+                            "additional_context": None,
+                        },
+                        "id": "tool_2",
+                    }
+                ],
+                content="",
             ),
             # Third: final response
-            Mock(
-                tool_calls=[],
-                content="The total forest loss is 3,000 acres across all scenarios."
-            )
+            Mock(tool_calls=[], content="The total forest loss is 3,000 acres across all scenarios."),
         ]
 
         agent._test_llm.bind_tools.return_value.invoke.side_effect = responses
@@ -204,18 +202,14 @@ class TestLangGraphWorkflow:
         agent.graph = agent.graph_builder.build_graph()
 
         # First query
-        responses1 = [
-            Mock(tool_calls=[], content="Texas has significant forest areas.")
-        ]
+        responses1 = [Mock(tool_calls=[], content="Texas has significant forest areas.")]
         agent._test_llm.bind_tools.return_value.invoke.side_effect = responses1
 
         result1 = agent._graph_query("Tell me about Texas forests", thread_id="test-thread")
         assert "Texas" in result1
 
         # Second query - should have context from first
-        responses2 = [
-            Mock(tool_calls=[], content="California has even more forest area than Texas.")
-        ]
+        responses2 = [Mock(tool_calls=[], content="California has even more forest area than Texas.")]
         agent._test_llm.bind_tools.return_value.invoke.side_effect = responses2
 
         result2 = agent._graph_query("How about California?", thread_id="test-thread")
@@ -228,23 +222,15 @@ class TestLangGraphWorkflow:
 
         # Mock an error in tool execution
         error_response = Mock(
-            tool_calls=[{
-                "name": "execute_landuse_query",
-                "args": {"query": "INVALID SQL"},
-                "id": "tool_1"
-            }],
-            content=""
+            tool_calls=[{"name": "execute_landuse_query", "args": {"query": "INVALID SQL"}, "id": "tool_1"}], content=""
         )
 
         recovery_response = Mock(
             tool_calls=[],
-            content="I encountered an error with the SQL query. Let me rephrase: The query syntax was invalid."
+            content="I encountered an error with the SQL query. Let me rephrase: The query syntax was invalid.",
         )
 
-        agent._test_llm.bind_tools.return_value.invoke.side_effect = [
-            error_response,
-            recovery_response
-        ]
+        agent._test_llm.bind_tools.return_value.invoke.side_effect = [error_response, recovery_response]
 
         # Run query - should handle error gracefully
         result = agent._graph_query("Run an invalid query")
@@ -258,14 +244,7 @@ class TestLangGraphWorkflow:
         agent.graph = agent.graph_builder.build_graph()
 
         # Mock responses that would loop forever
-        loop_response = Mock(
-            tool_calls=[{
-                "name": "explore_landuse_schema",
-                "args": {},
-                "id": "tool_loop"
-            }],
-            content=""
-        )
+        loop_response = Mock(tool_calls=[{"name": "explore_landuse_schema", "args": {}, "id": "tool_loop"}], content="")
 
         # Set up infinite loop
         agent._test_llm.bind_tools.return_value.invoke.return_value = loop_response
@@ -288,7 +267,7 @@ class TestLangGraphWorkflow:
             {"agent": {"messages": [Mock(content="Final result: 42")]}},
         ]
 
-        with patch.object(agent.graph, 'stream', return_value=iter(mock_chunks)):
+        with patch.object(agent.graph, "stream", return_value=iter(mock_chunks)):
             chunks = list(agent.stream_query("Stream this query"))
 
             # Verify we got chunks

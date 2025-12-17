@@ -2,4 +2,4 @@
 
 from .database_security import DatabaseSecurity, QueryValidationResult, QueryValidator
 
-__all__ = ['DatabaseSecurity', 'QueryValidator', 'QueryValidationResult']
+__all__ = ["DatabaseSecurity", "QueryValidator", "QueryValidationResult"]

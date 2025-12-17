@@ -69,10 +69,7 @@ def initialize_session_state():
     if "session_id" not in st.session_state:
         st.session_state.session_id = str(uuid.uuid4())
     if "rate_limiter" not in st.session_state:
-        st.session_state.rate_limiter = RateLimiter(
-            max_calls=CHAT_RATE_LIMIT_CALLS,
-            time_window=CHAT_RATE_LIMIT_WINDOW
-        )
+        st.session_state.rate_limiter = RateLimiter(max_calls=CHAT_RATE_LIMIT_CALLS, time_window=CHAT_RATE_LIMIT_WINDOW)
 
 
 @st.dialog("🌍 Understanding RPA Scenarios")
@@ -132,9 +129,11 @@ def show_first_time_onboarding():
     """Show engaging onboarding for first-time users"""
     # Use native Streamlit components instead of unsafe HTML
     with st.container():
-        st.info("🌍 **Welcome to RPA Land Use Analytics**\n\n"
-                "Understanding climate scenarios helps you ask better questions and interpret results accurately. "
-                "Take 2 minutes to learn about RPA scenarios, or dive right in!")
+        st.info(
+            "🌍 **Welcome to RPA Land Use Analytics**\n\n"
+            "Understanding climate scenarios helps you ask better questions and interpret results accurately. "
+            "Take 2 minutes to learn about RPA scenarios, or dive right in!"
+        )
 
     col1, col2, col3 = st.columns([2, 2, 1])
     with col1:
@@ -164,8 +163,10 @@ def show_first_time_onboarding():
 def show_persistent_context_bar():
     """Show always-visible minimal context bar"""
     # Use native Streamlit components instead of unsafe HTML
-    st.caption("📍 **Quick Reference:** RCP4.5 = Lower emissions (2.5°C) | RCP8.5 = High emissions (4.5°C) | "
-               "4 scenarios: LM (sustainable), HL (rivalry), HM (middle), HH (fossil-fuel)")
+    st.caption(
+        "📍 **Quick Reference:** RCP4.5 = Lower emissions (2.5°C) | RCP8.5 = High emissions (4.5°C) | "
+        "4 scenarios: LM (sustainable), HL (rivalry), HM (middle), HH (fossil-fuel)"
+    )
 
 
 def show_smart_example_queries():
@@ -176,34 +177,29 @@ def show_smart_example_queries():
         {
             "label": "🌡️ Compare Climate Impacts",
             "query": "Compare forest loss between RCP4.5 (lower emissions) and RCP8.5 (high emissions) scenarios",
-            "tooltip": "See how different climate pathways affect forest transitions"
+            "tooltip": "See how different climate pathways affect forest transitions",
         },
         {
             "label": "🏙️ Urban Development Futures",
             "query": "Show urban expansion in SSP1 (sustainable) vs SSP5 (fossil-fuel) scenarios",
-            "tooltip": "Compare urbanization under different socioeconomic pathways"
+            "tooltip": "Compare urbanization under different socioeconomic pathways",
         },
         {
             "label": "🌾 Agricultural Impacts",
             "query": "Which scenario (LM, HL, HM, or HH) shows the most agricultural land loss?",
-            "tooltip": "Identify worst-case scenario for agriculture"
+            "tooltip": "Identify worst-case scenario for agriculture",
         },
         {
             "label": "🌲 Regional Forest Patterns",
             "query": "Show me forest transitions in California across all RPA scenarios",
-            "tooltip": "State-specific analysis across all four scenarios"
-        }
+            "tooltip": "State-specific analysis across all four scenarios",
+        },
     ]
 
     cols = st.columns(2)
     for i, example in enumerate(examples):
         with cols[i % 2]:
-            if st.button(
-                example["label"],
-                key=f"example_{i}",
-                help=example["tooltip"],
-                use_container_width=True
-            ):
+            if st.button(example["label"], key=f"example_{i}", help=example["tooltip"], use_container_width=True):
                 # Add query to messages and trigger processing
                 st.session_state.messages.append({"role": "user", "content": example["query"]})
                 st.session_state.show_welcome = False
@@ -240,9 +236,7 @@ def handle_user_input():
 
     if prompt := st.chat_input("Ask about land use transitions..."):
         # Check rate limit before processing
-        allowed, rate_error = st.session_state.rate_limiter.check_rate_limit(
-            st.session_state.session_id
-        )
+        allowed, rate_error = st.session_state.rate_limiter.check_rate_limit(st.session_state.session_id)
         if not allowed:
             st.warning(f"⏳ {rate_error}")
             return
@@ -277,10 +271,7 @@ def handle_user_input():
                 st.caption(f"Response time: {query_time:.1f}s")
 
                 # Add to history
-                st.session_state.messages.append({
-                    "role": "assistant",
-                    "content": response
-                })
+                st.session_state.messages.append({"role": "assistant", "content": response})
 
             except LLMError as e:
                 # LLM-specific errors (rate limits, API issues)
@@ -288,33 +279,21 @@ def handle_user_input():
                     st.error("**Rate limit reached.** Please wait a moment and try again.")
                 else:
                     st.error(f"**AI Model Error:** {e.message}")
-                st.session_state.messages.append({
-                    "role": "assistant",
-                    "content": f"AI Error: {e.message}"
-                })
+                st.session_state.messages.append({"role": "assistant", "content": f"AI Error: {e.message}"})
             except DatabaseError as e:
                 # Database-specific errors
                 st.error(f"**Database Error:** {e.message}")
                 st.info("💡 Try rephrasing your question or check if the database is accessible.")
-                st.session_state.messages.append({
-                    "role": "assistant",
-                    "content": f"Database Error: {e.message}"
-                })
+                st.session_state.messages.append({"role": "assistant", "content": f"Database Error: {e.message}"})
             except AgentError as e:
                 # Agent processing errors
                 st.error(f"**Processing Error:** {e.message}")
-                st.session_state.messages.append({
-                    "role": "assistant",
-                    "content": f"Processing Error: {e.message}"
-                })
+                st.session_state.messages.append({"role": "assistant", "content": f"Processing Error: {e.message}"})
             except LanduseError as e:
                 # Other landuse-specific errors
                 user_msg = format_error_for_user(e)
                 st.error(user_msg)
-                st.session_state.messages.append({
-                    "role": "assistant",
-                    "content": user_msg
-                })
+                st.session_state.messages.append({"role": "assistant", "content": user_msg})
             except Exception as e:
                 # Unexpected errors
                 error_msg = str(e)
@@ -322,16 +301,14 @@ def handle_user_input():
                     st.error("**Query timeout.** Try a simpler query.")
                 else:
                     st.error(f"Unexpected error: {type(e).__name__}: {error_msg[:200]}")
-                st.session_state.messages.append({
-                    "role": "assistant",
-                    "content": f"Error: {error_msg[:200]}"
-                })
+                st.session_state.messages.append({"role": "assistant", "content": f"Error: {error_msg[:200]}"})
 
 
 def main():
     """Main chat interface - simplified"""
     # CSS for accessibility and mobile responsiveness
-    st.markdown("""
+    st.markdown(
+        """
     <style>
     /* Ensure minimum touch target size for mobile */
     .stButton > button { min-height: 44px; }
@@ -353,7 +330,9 @@ def main():
         }
     }
     </style>
-    """, unsafe_allow_html=True)
+    """,
+        unsafe_allow_html=True,
+    )
 
     st.title("💬 RPA Assessment Natural Language Chat")
     st.caption("AI-powered analysis of USDA Forest Service RPA Assessment data")
@@ -407,7 +386,7 @@ def main():
 
     # Minimal sidebar
     with st.sidebar:
-        if os.getenv('OPENAI_API_KEY'):
+        if os.getenv("OPENAI_API_KEY"):
             st.success("✅ API Key Set")
         else:
             st.error("❌ API Key Missing")

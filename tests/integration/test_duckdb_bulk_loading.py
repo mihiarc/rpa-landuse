@@ -38,14 +38,14 @@ class TestDuckDBBulkLoading:
 
         num_records = 1000
         data = {
-            'transition_id': range(1, num_records + 1),
-            'scenario_id': np.random.randint(1, 5, num_records),
-            'time_id': np.random.randint(1, 3, num_records),
-            'geography_id': np.random.randint(1, 10, num_records),
-            'from_landuse_id': np.random.randint(1, 6, num_records),
-            'to_landuse_id': np.random.randint(1, 6, num_records),
-            'acres': np.random.uniform(0.1, 1000.0, num_records),
-            'transition_type': np.random.choice(['change', 'same'], num_records)
+            "transition_id": range(1, num_records + 1),
+            "scenario_id": np.random.randint(1, 5, num_records),
+            "time_id": np.random.randint(1, 3, num_records),
+            "geography_id": np.random.randint(1, 10, num_records),
+            "from_landuse_id": np.random.randint(1, 6, num_records),
+            "to_landuse_id": np.random.randint(1, 6, num_records),
+            "acres": np.random.uniform(0.1, 1000.0, num_records),
+            "transition_type": np.random.choice(["change", "same"], num_records),
         }
 
         return pd.DataFrame(data)
@@ -83,10 +83,7 @@ class TestDuckDBBulkLoading:
     def test_bulk_load_dataframe(self, test_table_schema, sample_data):
         """Test bulk loading a DataFrame"""
         with DuckDBBulkLoader(test_table_schema) as loader:
-            stats = loader.bulk_load_dataframe(
-                sample_data,
-                "test_transitions"
-            )
+            stats = loader.bulk_load_dataframe(sample_data, "test_transitions")
 
             # Verify statistics
             assert isinstance(stats, ConversionStats)
@@ -107,10 +104,18 @@ class TestDuckDBBulkLoading:
 
     def test_bulk_load_empty_dataframe(self, test_table_schema):
         """Test bulk loading empty DataFrame"""
-        empty_df = pd.DataFrame(columns=[
-            'transition_id', 'scenario_id', 'time_id', 'geography_id',
-            'from_landuse_id', 'to_landuse_id', 'acres', 'transition_type'
-        ])
+        empty_df = pd.DataFrame(
+            columns=[
+                "transition_id",
+                "scenario_id",
+                "time_id",
+                "geography_id",
+                "from_landuse_id",
+                "to_landuse_id",
+                "acres",
+                "transition_type",
+            ]
+        )
 
         with DuckDBBulkLoader(test_table_schema) as loader:
             stats = loader.bulk_load_dataframe(empty_df, "test_transitions")
@@ -122,18 +127,15 @@ class TestDuckDBBulkLoading:
 
     def test_bulk_load_batches(self, test_table_schema, sample_data):
         """Test bulk loading with batch generator"""
+
         def data_generator():
             """Generator that yields data in chunks"""
             chunk_size = 100
             for i in range(0, len(sample_data), chunk_size):
-                yield sample_data.iloc[i:i+chunk_size]
+                yield sample_data.iloc[i : i + chunk_size]
 
         with DuckDBBulkLoader(test_table_schema, batch_size=200) as loader:
-            stats = loader.bulk_load_batches(
-                data_generator(),
-                "test_transitions",
-                total_records=len(sample_data)
-            )
+            stats = loader.bulk_load_batches(data_generator(), "test_transitions", total_records=len(sample_data))
 
             # Verify all data was loaded
             assert stats.processed_records == len(sample_data)
@@ -149,12 +151,15 @@ class TestDuckDBBulkLoading:
         start_time = time.time()
         with duckdb.connect(test_table_schema) as conn:
             values = [tuple(row) for row in sample_data.values]
-            conn.executemany("""
+            conn.executemany(
+                """
                 INSERT INTO test_transitions
                 (transition_id, scenario_id, time_id, geography_id,
                  from_landuse_id, to_landuse_id, acres, transition_type)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            """, values)
+            """,
+                values,
+            )
         traditional_time = time.time() - start_time
 
         # Clear table
@@ -173,12 +178,12 @@ class TestDuckDBBulkLoading:
 
         print(f"Traditional INSERT: {traditional_time:.3f}s")
         print(f"Bulk COPY: {bulk_time:.3f}s")
-        print(f"Speedup: {traditional_time/bulk_time:.1f}x")
+        print(f"Speedup: {traditional_time / bulk_time:.1f}x")
 
     def test_error_handling(self, test_db_path):
         """Test error handling in bulk loader"""
         # Test with non-existent table
-        invalid_data = pd.DataFrame({'col1': [1, 2, 3], 'col2': ['a', 'b', 'c']})
+        invalid_data = pd.DataFrame({"col1": [1, 2, 3], "col2": ["a", "b", "c"]})
 
         with DuckDBBulkLoader(test_db_path) as loader:
             with pytest.raises(duckdb.CatalogException):  # Should raise error for non-existent table
@@ -242,9 +247,9 @@ class TestPerformanceBenchmark:
         test_data = benchmark.create_test_data(1000)
 
         assert len(test_data) == 1000
-        assert 'transition_id' in test_data.columns
-        assert 'acres' in test_data.columns
-        assert test_data['transition_id'].nunique() == 1000  # All unique IDs
+        assert "transition_id" in test_data.columns
+        assert "acres" in test_data.columns
+        assert test_data["transition_id"].nunique() == 1000  # All unique IDs
 
         benchmark.cleanup()
 

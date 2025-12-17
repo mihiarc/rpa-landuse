@@ -276,10 +276,7 @@ When displaying ANY numbers in your text responses, always format them as whole 
 
 
 def get_system_prompt(
-    include_maps: bool = False,
-    analysis_style: str = "standard",
-    domain_focus: str = None,
-    schema_info: str = ""
+    include_maps: bool = False, analysis_style: str = "standard", domain_focus: str = None, schema_info: str = ""
 ) -> str:
     """
     Generate the system prompt with database schema information.

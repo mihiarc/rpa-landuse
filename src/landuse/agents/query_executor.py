@@ -23,12 +23,7 @@ class QueryExecutor:
     Provides standardized query execution with error handling and result formatting.
     """
 
-    def __init__(
-        self,
-        config: AppConfig,
-        db_connection: duckdb.DuckDBPyConnection,
-        console: Optional[Console] = None
-    ):
+    def __init__(self, config: AppConfig, db_connection: duckdb.DuckDBPyConnection, console: Optional[Console] = None):
         """
         Initialize query executor.
 
@@ -65,7 +60,7 @@ class QueryExecutor:
 
         # Replace RPA codes with database names (but not OVERALL, which stays the same)
         for rpa_code, db_name in ScenarioMapping.RPA_TO_DB.items():
-            if rpa_code == 'OVERALL' or rpa_code not in modified_query:
+            if rpa_code == "OVERALL" or rpa_code not in modified_query:
                 continue
 
             # Replace in single quotes
@@ -94,7 +89,7 @@ class QueryExecutor:
         # Translate scenario names from user-friendly to database format
         cleaned_query = self.translate_scenario_in_query(cleaned_query)
 
-        debug_mode = self.config.logging.level == 'DEBUG'
+        debug_mode = self.config.logging.level == "DEBUG"
         if debug_mode:
             print("\nDEBUG execute_query: Executing SQL query")
             print(f"DEBUG execute_query: Query: {cleaned_query}")
@@ -122,12 +117,9 @@ class QueryExecutor:
             df = pd.DataFrame(result, columns=columns)
 
             # Format scenario names in DataFrame if present
-            if 'scenario_name' in df.columns:
+            if "scenario_name" in df.columns:
                 df = ResponseFormatter.format_dataframe_scenarios(
-                    df,
-                    scenario_column='scenario_name',
-                    format='full',
-                    sort=True
+                    df, scenario_column="scenario_name", format="full", sort=True
                 )
 
             # Format results
@@ -140,7 +132,7 @@ class QueryExecutor:
                 "columns": columns,
                 "formatted": formatted_results,
                 "row_count": len(result),
-                "dataframe": df  # Include formatted DataFrame
+                "dataframe": df,  # Include formatted DataFrame
             }
 
         except (duckdb.Error, duckdb.CatalogException, duckdb.SyntaxException, duckdb.BinderException) as e:
@@ -155,7 +147,7 @@ class QueryExecutor:
                 "success": False,
                 "query": cleaned_query,
                 "error": f"Database error: {error_msg}",
-                "suggestion": suggestion
+                "suggestion": suggestion,
             }
         except ValueError as e:
             # Security validation or other validation errors
@@ -167,7 +159,7 @@ class QueryExecutor:
                 "success": False,
                 "query": cleaned_query,
                 "error": f"Query validation error: {error_msg}",
-                "suggestion": "Check query syntax and security requirements"
+                "suggestion": "Check query syntax and security requirements",
             }
         except Exception as e:
             # Wrap other unexpected errors
@@ -177,13 +169,14 @@ class QueryExecutor:
             if debug_mode:
                 print(f"DEBUG execute_query: Unexpected Error: {error_msg}")
                 import traceback
+
                 traceback.print_exc()
 
             return {
                 "success": False,
                 "query": cleaned_query,
                 "error": f"Unexpected error: {error_msg}",
-                "suggestion": "Contact support if this persists"
+                "suggestion": "Contact support if this persists",
             }
 
     def _get_error_suggestion(self, error_msg: str) -> str:
@@ -208,4 +201,3 @@ class QueryExecutor:
             return "Specify table name for columns used in joins (e.g., fact.year instead of just year)"
         else:
             return "Check the query syntax and ensure all table/column names match the schema exactly."
-

@@ -28,7 +28,7 @@ class TestLanduseDataConverter:
                         {"_row": "ps", "cr": 150.0, "ps": 2000.0, "fr": 75.0, "ur": 30.0, "rg": 15.0},
                         {"_row": "fr", "cr": 20.0, "ps": 40.0, "fr": 3000.0, "ur": 100.0, "rg": 50.0},
                         {"_row": "ur", "cr": 0.0, "ps": 0.0, "fr": 0.0, "ur": 4000.0, "rg": 0.0},
-                        {"_row": "rg", "cr": 30.0, "ps": 60.0, "fr": 200.0, "ur": 10.0, "rg": 1500.0}
+                        {"_row": "rg", "cr": 30.0, "ps": 60.0, "fr": 200.0, "ur": 10.0, "rg": 1500.0},
                     ]
                 }
             }
@@ -47,7 +47,7 @@ class TestLanduseDataConverter:
         assert converter.input_file == input_file
         assert converter.output_file == output_file
         assert len(converter.landuse_types) == 5
-        assert converter.landuse_types['cr'] == 'Crop'
+        assert converter.landuse_types["cr"] == "Crop"
 
     def test_schema_creation(self, tmp_path):
         """Test database schema is created correctly"""
@@ -141,9 +141,9 @@ class TestLanduseDataConverter:
         scenario = "CNRM_CM5_rcp45_ssp1"
 
         # Expected parsing
-        parts = scenario.split('_')
+        parts = scenario.split("_")
         if len(parts) >= 4:
-            model = '_'.join(parts[:-2])
+            model = "_".join(parts[:-2])
             rcp = parts[-2]
             ssp = parts[-1]
             assert model == "CNRM_CM5"
@@ -152,7 +152,7 @@ class TestLanduseDataConverter:
 
         # Test invalid scenario format
         invalid_scenario = "invalid_scenario"
-        parts = invalid_scenario.split('_')
+        parts = invalid_scenario.split("_")
         assert len(parts) < 4  # Not enough parts for valid format
 
     def test_transitions_calculation(self, tmp_path, sample_json_data):

@@ -28,10 +28,7 @@ def mock_openai_llm():
 def mock_agent_executor():
     """Mock LangChain AgentExecutor"""
     mock = Mock()
-    mock.invoke.return_value = {
-        "input": "test query",
-        "output": "Test response from agent"
-    }
+    mock.invoke.return_value = {"input": "test query", "output": "Test response from agent"}
     return mock
 
 
@@ -45,7 +42,7 @@ def sample_nl_queries():
         "scenario": "Compare RCP45 and RCP85 scenarios",
         "geographic": "What are land use changes in California?",
         "temporal": "Show changes between 2020 and 2050",
-        "complex": "Which scenarios show the most crop to urban conversion in the midwest between 2030 and 2060?"
+        "complex": "Which scenarios show the most crop to urban conversion in the midwest between 2030 and 2060?",
     }
 
 
@@ -76,7 +73,7 @@ def expected_sql_queries():
               AND f.transition_type = 'change'
             GROUP BY t.start_year, t.end_year
             ORDER BY t.start_year
-        """
+        """,
     }
 
 
@@ -85,19 +82,19 @@ def mock_query_results():
     """Mock database query results"""
     return {
         "count": pd.DataFrame({"count": [5]}),
-        "scenarios": pd.DataFrame({
-            "scenario_name": ["CNRM_CM5_rcp45_ssp1", "CNRM_CM5_rcp85_ssp5"],
-            "total_acres": [1000000, 1500000]
-        }),
-        "transitions": pd.DataFrame({
-            "from_landuse": ["Crop", "Forest", "Pasture"],
-            "to_landuse": ["Urban", "Urban", "Urban"],
-            "acres": [50000, 30000, 20000]
-        }),
-        "time_series": pd.DataFrame({
-            "year_range": ["2012-2020", "2020-2030", "2030-2040"],
-            "acres_changed": [100000, 150000, 200000]
-        })
+        "scenarios": pd.DataFrame(
+            {"scenario_name": ["CNRM_CM5_rcp45_ssp1", "CNRM_CM5_rcp85_ssp5"], "total_acres": [1000000, 1500000]}
+        ),
+        "transitions": pd.DataFrame(
+            {
+                "from_landuse": ["Crop", "Forest", "Pasture"],
+                "to_landuse": ["Urban", "Urban", "Urban"],
+                "acres": [50000, 30000, 20000],
+            }
+        ),
+        "time_series": pd.DataFrame(
+            {"year_range": ["2012-2020", "2020-2030", "2030-2040"], "acres_changed": [100000, 150000, 200000]}
+        ),
     }
 
 
@@ -105,15 +102,9 @@ def mock_query_results():
 def mock_file_operations():
     """Mock file operations for general data agent"""
     mock_files = {
-        "data/test.csv": pd.DataFrame({
-            "id": [1, 2, 3],
-            "value": [10, 20, 30]
-        }),
+        "data/test.csv": pd.DataFrame({"id": [1, 2, 3], "value": [10, 20, 30]}),
         "data/test.json": {"records": [{"id": 1}, {"id": 2}]},
-        "data/test.parquet": pd.DataFrame({
-            "category": ["A", "B", "A"],
-            "amount": [100, 200, 150]
-        })
+        "data/test.parquet": pd.DataFrame({"category": ["A", "B", "A"], "amount": [100, 200, 150]}),
     }
 
     def mock_read(file_path, *args, **kwargs):
@@ -128,6 +119,7 @@ def mock_file_operations():
 @pytest.fixture
 def mock_duckdb_operations():
     """Mock DuckDB operations"""
+
     class MockDuckDBConnection:
         def __init__(self):
             self.executed_queries = []
@@ -139,10 +131,7 @@ def mock_duckdb_operations():
             if "COUNT(*)" in query:
                 return MockResult([(5,)])
             elif "SELECT * FROM" in query:
-                return MockResult([
-                    ("value1", "value2", "value3"),
-                    ("value4", "value5", "value6")
-                ])
+                return MockResult([("value1", "value2", "value3"), ("value4", "value5", "value6")])
             else:
                 return MockResult([])
 
@@ -180,7 +169,7 @@ def agent_test_config():
         "max_tokens": 1000,
         "max_query_limit": 100,
         "rate_limit_calls": 60,
-        "rate_limit_window": 60
+        "rate_limit_window": 60,
     }
 
 
@@ -219,7 +208,7 @@ Table: test_data
 Columns: id, name, value
 """,
         "error_response": "❌ Error executing query: Table not found",
-        "security_blocked": "❌ Security Error: Dangerous keyword 'DROP' not allowed"
+        "security_blocked": "❌ Security Error: Dangerous keyword 'DROP' not allowed",
     }
 
 

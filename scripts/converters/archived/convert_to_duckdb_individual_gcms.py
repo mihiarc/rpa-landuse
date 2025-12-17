@@ -40,6 +40,7 @@ sys.path.insert(0, str(src_path))
 
 console = Console()
 
+
 class LanduseDataConverter:
     """Convert nested landuse JSON to normalized DuckDB database.
 
@@ -70,13 +71,7 @@ class LanduseDataConverter:
         self._validate_file_size()
 
         # Land use type mappings
-        self.landuse_types = {
-            'cr': 'Crop',
-            'ps': 'Pasture',
-            'rg': 'Rangeland',
-            'fr': 'Forest',
-            'ur': 'Urban'
-        }
+        self.landuse_types = {"cr": "Crop", "ps": "Pasture", "rg": "Rangeland", "fr": "Forest", "ur": "Urban"}
 
         console.print(f"🚀 Using {'bulk COPY' if use_bulk_copy else 'traditional INSERT'} loading method")
 
@@ -104,7 +99,7 @@ class LanduseDataConverter:
             raise FileNotFoundError(f"Input file not found: {input_file}")
 
         # Validate file type
-        if not path.suffix.lower() == '.json':
+        if not path.suffix.lower() == ".json":
             raise ValueError("Input must be a JSON file")
 
         return path
@@ -133,7 +128,7 @@ class LanduseDataConverter:
             raise FileNotFoundError(f"Output directory does not exist: {path.parent}")
 
         # Validate file extension
-        if path.suffix and path.suffix.lower() not in ['.db', '.duckdb', '.duck']:
+        if path.suffix and path.suffix.lower() not in [".db", ".duckdb", ".duck"]:
             raise ValueError("Output file must be a DuckDB database file")
 
         return path
@@ -146,7 +141,9 @@ class LanduseDataConverter:
         """
         file_size = self.input_file.stat().st_size
         if file_size > self.MAX_FILE_SIZE:
-            raise ValueError(f"Input file too large ({file_size / 1024 / 1024 / 1024:.2f}GB > {self.MAX_FILE_SIZE / 1024 / 1024 / 1024}GB limit)")
+            raise ValueError(
+                f"Input file too large ({file_size / 1024 / 1024 / 1024:.2f}GB > {self.MAX_FILE_SIZE / 1024 / 1024 / 1024}GB limit)"
+            )
 
     def create_schema(self):
         """Create star schema with dimension and fact tables.
@@ -237,10 +234,13 @@ class LanduseDataConverter:
         # Insert landuse types
         for i, (code, name) in enumerate(self.landuse_types.items(), 1):
             category = self._get_landuse_category(name)
-            self.conn.execute("""
+            self.conn.execute(
+                """
                 INSERT INTO dim_landuse (landuse_id, landuse_code, landuse_name, landuse_category, description)
                 VALUES (?, ?, ?, ?, ?)
-            """, (i, code, name, category, f"{name} land use type"))
+            """,
+                (i, code, name, category, f"{name} land use type"),
+            )
 
     def _create_landuse_transitions_fact(self):
         """Create the main fact table for landuse transitions"""
@@ -277,7 +277,7 @@ class LanduseDataConverter:
             "CREATE INDEX idx_fact_geography ON fact_landuse_transitions(geography_id)",
             "CREATE INDEX idx_fact_from_landuse ON fact_landuse_transitions(from_landuse_id)",
             "CREATE INDEX idx_fact_to_landuse ON fact_landuse_transitions(to_landuse_id)",
-            "CREATE INDEX idx_fact_composite ON fact_landuse_transitions(scenario_id, time_id, geography_id)"
+            "CREATE INDEX idx_fact_composite ON fact_landuse_transitions(scenario_id, time_id, geography_id)",
         ]
 
         for idx in indexes:
@@ -285,16 +285,16 @@ class LanduseDataConverter:
 
     def _get_landuse_category(self, landuse_name: str) -> str:
         """Categorize landuse types"""
-        if landuse_name in ['Crop', 'Pasture']:
-            return 'Agriculture'
-        elif landuse_name == 'Forest':
-            return 'Natural'
-        elif landuse_name == 'Urban':
-            return 'Developed'
-        elif landuse_name == 'Rangeland':
-            return 'Natural'
+        if landuse_name in ["Crop", "Pasture"]:
+            return "Agriculture"
+        elif landuse_name == "Forest":
+            return "Natural"
+        elif landuse_name == "Urban":
+            return "Developed"
+        elif landuse_name == "Rangeland":
+            return "Natural"
         else:
-            return 'Other'
+            return "Other"
 
     def load_data(self):
         """Load JSON data and populate all database tables.
@@ -353,18 +353,20 @@ class LanduseDataConverter:
             scenario_data = []
             for i, scenario in enumerate(scenarios):
                 # Parse scenario components
-                parts = scenario.split('_')
+                parts = scenario.split("_")
                 climate_model = parts[0] if len(parts) > 0 else None
                 rcp = parts[2] if len(parts) > 2 else None
                 ssp = parts[3] if len(parts) > 3 else None
 
-                scenario_data.append({
-                    'scenario_id': i + 1,
-                    'scenario_name': scenario,
-                    'climate_model': climate_model,
-                    'rcp_scenario': rcp,
-                    'ssp_scenario': ssp
-                })
+                scenario_data.append(
+                    {
+                        "scenario_id": i + 1,
+                        "scenario_name": scenario,
+                        "climate_model": climate_model,
+                        "rcp_scenario": rcp,
+                        "ssp_scenario": ssp,
+                    }
+                )
 
             # Create DataFrame and use DuckDB COPY
             df = pd.DataFrame(scenario_data)
@@ -383,21 +385,24 @@ class LanduseDataConverter:
                 TextColumn("[progress.description]{task.description}"),
                 BarColumn(),
                 TimeElapsedColumn(),
-                console=console
+                console=console,
             ) as progress:
                 task = progress.add_task("Loading scenarios...", total=len(scenarios))
 
                 for i, scenario in enumerate(scenarios):
                     # Parse scenario components
-                    parts = scenario.split('_')
+                    parts = scenario.split("_")
                     climate_model = parts[0] if len(parts) > 0 else None
                     rcp = parts[2] if len(parts) > 2 else None
                     ssp = parts[3] if len(parts) > 3 else None
 
-                    self.conn.execute("""
+                    self.conn.execute(
+                        """
                         INSERT INTO dim_scenario (scenario_id, scenario_name, climate_model, rcp_scenario, ssp_scenario)
                         VALUES (?, ?, ?, ?, ?)
-                    """, (i + 1, scenario, climate_model, rcp, ssp))
+                    """,
+                        (i + 1, scenario, climate_model, rcp, ssp),
+                    )
 
                     progress.update(task, advance=1)
 
@@ -408,16 +413,18 @@ class LanduseDataConverter:
             time_data = []
             for i, period in enumerate(time_periods):
                 # Parse year range
-                start_year, end_year = map(int, period.split('-'))
+                start_year, end_year = map(int, period.split("-"))
                 period_length = end_year - start_year
 
-                time_data.append({
-                    'time_id': i + 1,
-                    'year_range': period,
-                    'start_year': start_year,
-                    'end_year': end_year,
-                    'period_length': period_length
-                })
+                time_data.append(
+                    {
+                        "time_id": i + 1,
+                        "year_range": period,
+                        "start_year": start_year,
+                        "end_year": end_year,
+                        "period_length": period_length,
+                    }
+                )
 
             # Create DataFrame and use DuckDB COPY
             df = pd.DataFrame(time_data)
@@ -436,19 +443,22 @@ class LanduseDataConverter:
                 TextColumn("[progress.description]{task.description}"),
                 BarColumn(),
                 TimeElapsedColumn(),
-                console=console
+                console=console,
             ) as progress:
                 task = progress.add_task("Loading time periods...", total=len(time_periods))
 
                 for i, period in enumerate(time_periods):
                     # Parse year range
-                    start_year, end_year = map(int, period.split('-'))
+                    start_year, end_year = map(int, period.split("-"))
                     period_length = end_year - start_year
 
-                    self.conn.execute("""
+                    self.conn.execute(
+                        """
                         INSERT INTO dim_time (time_id, year_range, start_year, end_year, period_length)
                         VALUES (?, ?, ?, ?, ?)
-                    """, (i + 1, period, start_year, end_year, period_length))
+                    """,
+                        (i + 1, period, start_year, end_year, period_length),
+                    )
 
                     progress.update(task, advance=1)
 
@@ -462,14 +472,16 @@ class LanduseDataConverter:
                 state_code = fips[:2]
                 county_code = fips[2:]
 
-                geo_data.append({
-                    'geography_id': i + 1,
-                    'fips_code': fips,
-                    'state_code': state_code,
-                    'county_name': None,  # Will be populated later if needed
-                    'state_name': None,   # Will be populated later if needed
-                    'region': None        # Will be populated later if needed
-                })
+                geo_data.append(
+                    {
+                        "geography_id": i + 1,
+                        "fips_code": fips,
+                        "state_code": state_code,
+                        "county_name": None,  # Will be populated later if needed
+                        "state_name": None,  # Will be populated later if needed
+                        "region": None,  # Will be populated later if needed
+                    }
+                )
 
             # Create DataFrame and use DuckDB COPY
             df = pd.DataFrame(geo_data)
@@ -488,7 +500,7 @@ class LanduseDataConverter:
                 TextColumn("[progress.description]{task.description}"),
                 BarColumn(),
                 TimeElapsedColumn(),
-                console=console
+                console=console,
             ) as progress:
                 task = progress.add_task("Loading geographies...", total=len(fips_codes))
 
@@ -497,10 +509,13 @@ class LanduseDataConverter:
                     state_code = fips[:2]
                     county_code = fips[2:]
 
-                    self.conn.execute("""
+                    self.conn.execute(
+                        """
                         INSERT INTO dim_geography (geography_id, fips_code, state_code)
                         VALUES (?, ?, ?)
-                    """, (i + 1, fips, state_code))
+                    """,
+                        (i + 1, fips, state_code),
+                    )
 
                     progress.update(task, advance=1)
 
@@ -517,10 +532,19 @@ class LanduseDataConverter:
         console.print("🔄 [cyan]Processing transitions data...[/cyan]")
 
         # Get dimension lookups
-        scenario_lookup = {row[1]: row[0] for row in self.conn.execute("SELECT scenario_id, scenario_name FROM dim_scenario").fetchall()}
-        time_lookup = {row[1]: row[0] for row in self.conn.execute("SELECT time_id, year_range FROM dim_time").fetchall()}
-        geography_lookup = {row[1]: row[0] for row in self.conn.execute("SELECT geography_id, fips_code FROM dim_geography").fetchall()}
-        landuse_lookup = {row[1]: row[0] for row in self.conn.execute("SELECT landuse_id, landuse_code FROM dim_landuse").fetchall()}
+        scenario_lookup = {
+            row[1]: row[0]
+            for row in self.conn.execute("SELECT scenario_id, scenario_name FROM dim_scenario").fetchall()
+        }
+        time_lookup = {
+            row[1]: row[0] for row in self.conn.execute("SELECT time_id, year_range FROM dim_time").fetchall()
+        }
+        geography_lookup = {
+            row[1]: row[0] for row in self.conn.execute("SELECT geography_id, fips_code FROM dim_geography").fetchall()
+        }
+        landuse_lookup = {
+            row[1]: row[0] for row in self.conn.execute("SELECT landuse_id, landuse_code FROM dim_landuse").fetchall()
+        }
 
         if self.use_bulk_copy:
             # Use bulk copy method with Parquet files
@@ -529,7 +553,9 @@ class LanduseDataConverter:
             # Traditional batch insert method
             self._load_transitions_traditional(data, scenario_lookup, time_lookup, geography_lookup, landuse_lookup)
 
-    def _load_transitions_bulk_copy(self, data: dict, scenario_lookup: dict, time_lookup: dict, geography_lookup: dict, landuse_lookup: dict):
+    def _load_transitions_bulk_copy(
+        self, data: dict, scenario_lookup: dict, time_lookup: dict, geography_lookup: dict, landuse_lookup: dict
+    ):
         """Load transitions using DuckDB COPY from Parquet files"""
         console.print("🚀 [bold cyan]Using optimized bulk COPY loading...[/bold cyan]")
 
@@ -547,7 +573,7 @@ class LanduseDataConverter:
             BarColumn(),
             TextColumn("[progress.percentage]{task.percentage:>3.0f}%"),
             TimeElapsedColumn(),
-            console=console
+            console=console,
         ) as progress:
             task = progress.add_task("Bulk loading transitions...", total=total_transitions)
             processed = 0
@@ -563,27 +589,29 @@ class LanduseDataConverter:
 
                         if isinstance(fips_data, list):
                             for transition in fips_data:
-                                from_landuse = transition.get('_row')
+                                from_landuse = transition.get("_row")
                                 if from_landuse in landuse_lookup:
                                     from_landuse_id = landuse_lookup[from_landuse]
 
                                     for to_code, acres in transition.items():
-                                        if to_code not in ['_row', 't1'] and to_code in landuse_lookup:
+                                        if to_code not in ["_row", "t1"] and to_code in landuse_lookup:
                                             to_landuse_id = landuse_lookup[to_code]
 
                                             if acres > 0:
-                                                transition_type = 'same' if from_landuse == to_code else 'change'
+                                                transition_type = "same" if from_landuse == to_code else "change"
 
-                                                current_batch.append({
-                                                    'transition_id': transition_id,
-                                                    'scenario_id': scenario_id,
-                                                    'time_id': time_id,
-                                                    'geography_id': geography_id,
-                                                    'from_landuse_id': from_landuse_id,
-                                                    'to_landuse_id': to_landuse_id,
-                                                    'acres': float(acres),
-                                                    'transition_type': transition_type
-                                                })
+                                                current_batch.append(
+                                                    {
+                                                        "transition_id": transition_id,
+                                                        "scenario_id": scenario_id,
+                                                        "time_id": time_id,
+                                                        "geography_id": geography_id,
+                                                        "from_landuse_id": from_landuse_id,
+                                                        "to_landuse_id": to_landuse_id,
+                                                        "acres": float(acres),
+                                                        "transition_type": transition_type,
+                                                    }
+                                                )
 
                                                 transition_id += 1
                                                 processed += 1
@@ -602,7 +630,9 @@ class LanduseDataConverter:
 
             progress.update(task, completed=processed)
 
-    def _load_transitions_traditional(self, data: dict, scenario_lookup: dict, time_lookup: dict, geography_lookup: dict, landuse_lookup: dict):
+    def _load_transitions_traditional(
+        self, data: dict, scenario_lookup: dict, time_lookup: dict, geography_lookup: dict, landuse_lookup: dict
+    ):
         """Traditional batch insert method for comparison"""
         console.print("🐌 [yellow]Using traditional INSERT method...[/yellow]")
 
@@ -619,7 +649,7 @@ class LanduseDataConverter:
             BarColumn(),
             TextColumn("[progress.percentage]{task.percentage:>3.0f}%"),
             TimeElapsedColumn(),
-            console=console
+            console=console,
         ) as progress:
             task = progress.add_task("Loading transitions...", total=total_transitions)
             processed = 0
@@ -635,27 +665,29 @@ class LanduseDataConverter:
 
                         if isinstance(fips_data, list):
                             for transition in fips_data:
-                                from_landuse = transition.get('_row')
+                                from_landuse = transition.get("_row")
                                 if from_landuse in landuse_lookup:
                                     from_landuse_id = landuse_lookup[from_landuse]
 
                                     for to_code, acres in transition.items():
-                                        if to_code not in ['_row', 't1'] and to_code in landuse_lookup:
+                                        if to_code not in ["_row", "t1"] and to_code in landuse_lookup:
                                             to_landuse_id = landuse_lookup[to_code]
 
                                             if acres > 0:
-                                                transition_type = 'same' if from_landuse == to_code else 'change'
+                                                transition_type = "same" if from_landuse == to_code else "change"
 
-                                                batch_data.append((
-                                                    transition_id,
-                                                    scenario_id,
-                                                    time_id,
-                                                    geography_id,
-                                                    from_landuse_id,
-                                                    to_landuse_id,
-                                                    float(acres),
-                                                    transition_type
-                                                ))
+                                                batch_data.append(
+                                                    (
+                                                        transition_id,
+                                                        scenario_id,
+                                                        time_id,
+                                                        geography_id,
+                                                        from_landuse_id,
+                                                        to_landuse_id,
+                                                        float(acres),
+                                                        transition_type,
+                                                    )
+                                                )
 
                                                 transition_id += 1
                                                 processed += 1
@@ -678,7 +710,7 @@ class LanduseDataConverter:
                 for fips_data in time_data.values():
                     if isinstance(fips_data, list):
                         for transition in fips_data:
-                            total += len([k for k in transition.keys() if k not in ['_row', 't1']])
+                            total += len([k for k in transition.keys() if k not in ["_row", "t1"]])
         return total
 
     def _write_and_copy_batch(self, batch_data: list[dict], batch_num: int):
@@ -724,11 +756,14 @@ class LanduseDataConverter:
 
     def _insert_batch(self, batch_data: list[tuple]):
         """Insert a batch of transition records"""
-        self.conn.executemany("""
+        self.conn.executemany(
+            """
             INSERT INTO fact_landuse_transitions
             (transition_id, scenario_id, time_id, geography_id, from_landuse_id, to_landuse_id, acres, transition_type)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        """, batch_data)
+        """,
+            batch_data,
+        )
 
     def create_views(self):
         """Create analytical views for common query patterns.
@@ -839,7 +874,7 @@ class LanduseDataConverter:
             ("dim_time", "Time periods and ranges"),
             ("dim_geography", "Geographic locations (FIPS codes)"),
             ("dim_landuse", "Land use types and categories"),
-            ("fact_landuse_transitions", "Main fact table with all transitions")
+            ("fact_landuse_transitions", "Main fact table with all transitions"),
         ]
 
         for table_name, description in tables:
@@ -865,6 +900,7 @@ class LanduseDataConverter:
             except Exception as e:
                 console.print(f"⚠️ Warning: Could not clean up temp directory: {e}")
 
+
 def main():
     """Execute land use data conversion to DuckDB.
 
@@ -875,22 +911,25 @@ def main():
     import argparse
 
     parser = argparse.ArgumentParser(description="Convert landuse JSON to DuckDB")
-    parser.add_argument("--no-bulk-copy", action="store_true",
-                       help="Use traditional INSERT instead of bulk COPY (for performance comparison)")
-    parser.add_argument("--input", default="data/raw/county_landuse_projections_RPA.json",
-                       help="Input JSON file path")
-    parser.add_argument("--output", default="data/processed/landuse_analytics.duckdb",
-                       help="Output DuckDB file path")
+    parser.add_argument(
+        "--no-bulk-copy",
+        action="store_true",
+        help="Use traditional INSERT instead of bulk COPY (for performance comparison)",
+    )
+    parser.add_argument("--input", default="data/raw/county_landuse_projections_RPA.json", help="Input JSON file path")
+    parser.add_argument("--output", default="data/processed/landuse_analytics.duckdb", help="Output DuckDB file path")
 
     args = parser.parse_args()
     use_bulk_copy = not args.no_bulk_copy
 
-    console.print(Panel.fit(
-        "🦆 [bold blue]DuckDB Landuse Database Converter[/bold blue]\n"
-        f"[yellow]Converting nested JSON to normalized relational database[/yellow]\n"
-        f"[cyan]Method: {'Bulk COPY (optimized)' if use_bulk_copy else 'Traditional INSERT'}[/cyan]",
-        border_style="blue"
-    ))
+    console.print(
+        Panel.fit(
+            "🦆 [bold blue]DuckDB Landuse Database Converter[/bold blue]\n"
+            f"[yellow]Converting nested JSON to normalized relational database[/yellow]\n"
+            f"[cyan]Method: {'Bulk COPY (optimized)' if use_bulk_copy else 'Traditional INSERT'}[/cyan]",
+            border_style="blue",
+        )
+    )
 
     converter = LanduseDataConverter(args.input, args.output, use_bulk_copy=use_bulk_copy)
 
@@ -912,18 +951,21 @@ def main():
         end_time = time.time()
         duration = end_time - start_time
 
-        console.print(Panel.fit(
-            f"✅ [bold green]Conversion Complete![/bold green]\n"
-            f"⏱️ Duration: {duration:.2f} seconds\n"
-            f"📁 Output: {args.output}",
-            border_style="green"
-        ))
+        console.print(
+            Panel.fit(
+                f"✅ [bold green]Conversion Complete![/bold green]\n"
+                f"⏱️ Duration: {duration:.2f} seconds\n"
+                f"📁 Output: {args.output}",
+                border_style="green",
+            )
+        )
 
     except Exception as e:
         console.print(Panel.fit(f"❌ [bold red]Error: {str(e)}[/bold red]", border_style="red"))
         raise
     finally:
         converter.close()
+
 
 if __name__ == "__main__":
     main()

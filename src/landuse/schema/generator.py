@@ -28,7 +28,7 @@ class SchemaDocGenerator:
             f"**Backward Compatible:** {'Yes' if schema.backward_compatible else 'No'}",
             "",
             "## Tables",
-            ""
+            "",
         ]
 
         # Document tables
@@ -38,21 +38,14 @@ class SchemaDocGenerator:
 
         # Document views
         if schema.views:
-            lines.extend([
-                "## Views",
-                ""
-            ])
+            lines.extend(["## Views", ""])
             for view_name, view_def in sorted(schema.views.items()):
                 lines.extend(self._document_view_markdown(view_name, view_def))
                 lines.append("")
 
         return "\n".join(lines)
 
-    def _document_table_markdown(
-        self,
-        table_name: str,
-        table_def: TableDefinition
-    ) -> List[str]:
+    def _document_table_markdown(self, table_name: str, table_def: TableDefinition) -> List[str]:
         """Generate Markdown documentation for a table.
 
         Args:
@@ -62,39 +55,26 @@ class SchemaDocGenerator:
         Returns:
             List of documentation lines
         """
-        lines = [
-            f"### {table_name}",
-            ""
-        ]
+        lines = [f"### {table_name}", ""]
 
         if table_def.description:
-            lines.extend([
-                table_def.description,
-                ""
-            ])
+            lines.extend([table_def.description, ""])
 
         # Extract columns from DDL
         columns = self._extract_columns_from_ddl(table_def.ddl)
         if columns:
-            lines.extend([
-                "| Column | Type | Constraints | Description |",
-                "|--------|------|------------|-------------|"
-            ])
+            lines.extend(
+                ["| Column | Type | Constraints | Description |", "|--------|------|------------|-------------|"]
+            )
             for col in columns:
-                lines.append(
-                    f"| {col['name']} | {col['type']} | "
-                    f"{col['constraints']} | {col.get('description', '')} |"
-                )
+                lines.append(f"| {col['name']} | {col['type']} | {col['constraints']} | {col.get('description', '')} |")
             lines.append("")
 
         # Document indexes
         if table_def.indexes:
-            lines.extend([
-                "**Indexes:**",
-                ""
-            ])
+            lines.extend(["**Indexes:**", ""])
             for index in table_def.indexes:
-                if isinstance(index, dict) and 'ddl' in index:
+                if isinstance(index, dict) and "ddl" in index:
                     lines.append(f"- {index['ddl']}")
                 else:
                     lines.append(f"- {index}")
@@ -102,11 +82,7 @@ class SchemaDocGenerator:
 
         return lines
 
-    def _document_view_markdown(
-        self,
-        view_name: str,
-        view_def: ViewDefinition
-    ) -> List[str]:
+    def _document_view_markdown(self, view_name: str, view_def: ViewDefinition) -> List[str]:
         """Generate Markdown documentation for a view.
 
         Args:
@@ -116,16 +92,10 @@ class SchemaDocGenerator:
         Returns:
             List of documentation lines
         """
-        lines = [
-            f"### {view_name}",
-            ""
-        ]
+        lines = [f"### {view_name}", ""]
 
         if view_def.description:
-            lines.extend([
-                view_def.description,
-                ""
-            ])
+            lines.extend([view_def.description, ""])
 
         if view_def.materialized:
             lines.append("**Type:** Materialized View")
@@ -133,12 +103,7 @@ class SchemaDocGenerator:
 
         # Show simplified DDL
         simplified_ddl = self._simplify_view_ddl(view_def.ddl)
-        lines.extend([
-            "**Definition:**",
-            "```sql",
-            simplified_ddl,
-            "```"
-        ])
+        lines.extend(["**Definition:**", "```sql", simplified_ddl, "```"])
 
         return lines
 
@@ -151,10 +116,7 @@ class SchemaDocGenerator:
         Returns:
             Mermaid ER diagram
         """
-        lines = [
-            "```mermaid",
-            "erDiagram"
-        ]
+        lines = ["```mermaid", "erDiagram"]
 
         # Extract relationships from foreign keys
         relationships = self._extract_relationships(schema)
@@ -170,7 +132,7 @@ class SchemaDocGenerator:
 
         # Add relationships
         for rel in relationships:
-            lines.append(f"    {rel['from']} ||--o{{ {rel['to']} : \"{rel['label']}\"")
+            lines.append(f'    {rel["from"]} ||--o{{ {rel["to"]} : "{rel["label"]}"')
 
         lines.append("```")
         return "\n".join(lines)
@@ -191,7 +153,7 @@ class SchemaDocGenerator:
             "",
             "-- Drop existing objects (careful!)",
             "-- Uncomment to use:",
-            ""
+            "",
         ]
 
         # Generate DROP statements (commented out for safety)
@@ -201,42 +163,27 @@ class SchemaDocGenerator:
         for table_name in reversed(list(schema.tables.keys())):
             lines.append(f"-- DROP TABLE IF EXISTS {table_name};")
 
-        lines.extend([
-            "",
-            "-- Create tables",
-            ""
-        ])
+        lines.extend(["", "-- Create tables", ""])
 
         # Create tables in dependency order
         ordered_tables = self._order_tables_by_dependencies(schema)
         for table_name in ordered_tables:
             table_def = schema.tables[table_name]
-            lines.extend([
-                f"-- Table: {table_name}",
-                table_def.ddl.strip(),
-                ""
-            ])
+            lines.extend([f"-- Table: {table_name}", table_def.ddl.strip(), ""])
 
             # Add indexes
             for index in table_def.indexes:
-                if isinstance(index, dict) and 'ddl' in index:
-                    lines.append(index['ddl'])
+                if isinstance(index, dict) and "ddl" in index:
+                    lines.append(index["ddl"])
                 else:
                     lines.append(str(index))
             lines.append("")
 
         # Create views
         if schema.views:
-            lines.extend([
-                "-- Create views",
-                ""
-            ])
+            lines.extend(["-- Create views", ""])
             for view_name, view_def in schema.views.items():
-                lines.extend([
-                    f"-- View: {view_name}",
-                    view_def.ddl.strip(),
-                    ""
-                ])
+                lines.extend([f"-- View: {view_name}", view_def.ddl.strip(), ""])
 
         return "\n".join(lines)
 
@@ -249,17 +196,12 @@ class SchemaDocGenerator:
         Returns:
             Formatted schema for prompts
         """
-        lines = [
-            "DATABASE SCHEMA:",
-            ""
-        ]
+        lines = ["DATABASE SCHEMA:", ""]
 
         # Add tables with simplified structure
         for table_name, table_def in sorted(schema.tables.items()):
             columns = self._extract_columns_from_ddl(table_def.ddl)
-            column_list = ", ".join([
-                f"{col['name']} {col['type']}" for col in columns
-            ])
+            column_list = ", ".join([f"{col['name']} {col['type']}" for col in columns])
             lines.append(f"Table: {table_name} ({column_list})")
 
         lines.append("")
@@ -285,7 +227,7 @@ class SchemaDocGenerator:
         columns = []
 
         # Remove CREATE TABLE and parentheses
-        table_body = re.search(r'CREATE TABLE.*?\((.*)\)', ddl, re.DOTALL | re.IGNORECASE)
+        table_body = re.search(r"CREATE TABLE.*?\((.*)\)", ddl, re.DOTALL | re.IGNORECASE)
         if not table_body:
             return columns
 
@@ -298,33 +240,27 @@ class SchemaDocGenerator:
             line = line.strip()
 
             # Skip constraints and keys
-            if any(keyword in line.upper() for keyword in [
-                'PRIMARY KEY', 'FOREIGN KEY', 'UNIQUE', 'CHECK', 'INDEX'
-            ]):
+            if any(keyword in line.upper() for keyword in ["PRIMARY KEY", "FOREIGN KEY", "UNIQUE", "CHECK", "INDEX"]):
                 continue
 
             # Parse column definition
-            match = re.match(r'(\w+)\s+([^\s,]+)(.*)$', line)
+            match = re.match(r"(\w+)\s+([^\s,]+)(.*)$", line)
             if match:
                 col_name = match.group(1)
                 col_type = match.group(2)
-                col_rest = match.group(3) or ''
+                col_rest = match.group(3) or ""
 
                 constraints = []
-                if 'PRIMARY KEY' in col_rest.upper():
-                    constraints.append('PK')
-                if 'NOT NULL' in col_rest.upper():
-                    constraints.append('NOT NULL')
-                if 'UNIQUE' in col_rest.upper():
-                    constraints.append('UNIQUE')
-                if 'DEFAULT' in col_rest.upper():
-                    constraints.append('DEFAULT')
+                if "PRIMARY KEY" in col_rest.upper():
+                    constraints.append("PK")
+                if "NOT NULL" in col_rest.upper():
+                    constraints.append("NOT NULL")
+                if "UNIQUE" in col_rest.upper():
+                    constraints.append("UNIQUE")
+                if "DEFAULT" in col_rest.upper():
+                    constraints.append("DEFAULT")
 
-                columns.append({
-                    'name': col_name,
-                    'type': col_type,
-                    'constraints': ' '.join(constraints)
-                })
+                columns.append({"name": col_name, "type": col_type, "constraints": " ".join(constraints)})
 
         return columns
 
@@ -342,19 +278,19 @@ class SchemaDocGenerator:
         paren_depth = 0
 
         for char in sql:
-            if char == '(':
+            if char == "(":
                 paren_depth += 1
-            elif char == ')':
+            elif char == ")":
                 paren_depth -= 1
-            elif char == ',' and paren_depth == 0:
-                lines.append(''.join(current))
+            elif char == "," and paren_depth == 0:
+                lines.append("".join(current))
                 current = []
                 continue
 
             current.append(char)
 
         if current:
-            lines.append(''.join(current))
+            lines.append("".join(current))
 
         return lines
 
@@ -371,17 +307,13 @@ class SchemaDocGenerator:
 
         for table_name, table_def in schema.tables.items():
             # Find foreign key references
-            fk_pattern = r'FOREIGN\s+KEY\s*\((\w+)\)\s*REFERENCES\s+(\w+)'
+            fk_pattern = r"FOREIGN\s+KEY\s*\((\w+)\)\s*REFERENCES\s+(\w+)"
             matches = re.finditer(fk_pattern, table_def.ddl, re.IGNORECASE)
 
             for match in matches:
                 fk_column = match.group(1)
                 ref_table = match.group(2)
-                relationships.append({
-                    'from': ref_table,
-                    'to': table_name,
-                    'label': fk_column
-                })
+                relationships.append({"from": ref_table, "to": table_name, "label": fk_column})
 
         return relationships
 
@@ -395,12 +327,12 @@ class SchemaDocGenerator:
             Primary key column name
         """
         # Try column-level PK
-        match = re.search(r'(\w+)\s+.*PRIMARY\s+KEY', ddl, re.IGNORECASE)
+        match = re.search(r"(\w+)\s+.*PRIMARY\s+KEY", ddl, re.IGNORECASE)
         if match:
             return match.group(1)
 
         # Try table-level PK
-        match = re.search(r'PRIMARY\s+KEY\s*\((\w+)\)', ddl, re.IGNORECASE)
+        match = re.search(r"PRIMARY\s+KEY\s*\((\w+)\)", ddl, re.IGNORECASE)
         if match:
             return match.group(1)
 
@@ -416,14 +348,14 @@ class SchemaDocGenerator:
             Simplified DDL
         """
         # Remove excessive whitespace
-        ddl = re.sub(r'\s+', ' ', ddl)
+        ddl = re.sub(r"\s+", " ", ddl)
 
         # Format for readability
-        ddl = ddl.replace(' SELECT ', '\nSELECT ')
-        ddl = ddl.replace(' FROM ', '\nFROM ')
-        ddl = ddl.replace(' WHERE ', '\nWHERE ')
-        ddl = ddl.replace(' GROUP BY ', '\nGROUP BY ')
-        ddl = ddl.replace(' ORDER BY ', '\nORDER BY ')
+        ddl = ddl.replace(" SELECT ", "\nSELECT ")
+        ddl = ddl.replace(" FROM ", "\nFROM ")
+        ddl = ddl.replace(" WHERE ", "\nWHERE ")
+        ddl = ddl.replace(" GROUP BY ", "\nGROUP BY ")
+        ddl = ddl.replace(" ORDER BY ", "\nORDER BY ")
 
         return ddl
 
@@ -437,13 +369,11 @@ class SchemaDocGenerator:
             List of table names in dependency order
         """
         # Build dependency graph
-        dependencies: Dict[str, Set[str]] = {
-            table: set() for table in schema.tables
-        }
+        dependencies: Dict[str, Set[str]] = {table: set() for table in schema.tables}
 
         for table_name, table_def in schema.tables.items():
             # Find tables this table depends on
-            fk_pattern = r'REFERENCES\s+(\w+)'
+            fk_pattern = r"REFERENCES\s+(\w+)"
             matches = re.finditer(fk_pattern, table_def.ddl, re.IGNORECASE)
             for match in matches:
                 ref_table = match.group(1).lower()
@@ -495,7 +425,7 @@ class ModelGenerator:
             f"# Generated from schema v{schema.version}",
             f"# Generated at: {datetime.utcnow().isoformat()}",
             "",
-            ""
+            "",
         ]
 
         # Generate model for each table
@@ -506,11 +436,7 @@ class ModelGenerator:
 
         return "\n".join(lines)
 
-    def _generate_table_model(
-        self,
-        table_name: str,
-        table_def: TableDefinition
-    ) -> List[str]:
+    def _generate_table_model(self, table_name: str, table_def: TableDefinition) -> List[str]:
         """Generate Pydantic model for a table.
 
         Args:
@@ -521,13 +447,9 @@ class ModelGenerator:
             List of code lines
         """
         # Convert table name to class name
-        class_name = ''.join(word.capitalize() for word in table_name.split('_'))
+        class_name = "".join(word.capitalize() for word in table_name.split("_"))
 
-        lines = [
-            f"class {class_name}(BaseModel):",
-            f'    """Model for {table_name} table."""',
-            ""
-        ]
+        lines = [f"class {class_name}(BaseModel):", f'    """Model for {table_name} table."""', ""]
 
         # Extract columns from DDL
         columns = self._extract_columns_for_model(table_def.ddl)
@@ -539,15 +461,17 @@ class ModelGenerator:
                 field_line = self._generate_field_line(col)
                 lines.append(field_line)
 
-        lines.extend([
-            "",
-            "    class Config:",
-            '        """Pydantic configuration."""',
-            "",
-            f'        table_name = "{table_name}"',
-            "        validate_assignment = True",
-            "        use_enum_values = True"
-        ])
+        lines.extend(
+            [
+                "",
+                "    class Config:",
+                '        """Pydantic configuration."""',
+                "",
+                f'        table_name = "{table_name}"',
+                "        validate_assignment = True",
+                "        use_enum_values = True",
+            ]
+        )
 
         return lines
 
@@ -563,7 +487,7 @@ class ModelGenerator:
         columns = []
 
         # Remove CREATE TABLE and parentheses
-        table_body = re.search(r'CREATE TABLE.*?\((.*)\)', ddl, re.DOTALL | re.IGNORECASE)
+        table_body = re.search(r"CREATE TABLE.*?\((.*)\)", ddl, re.DOTALL | re.IGNORECASE)
         if not table_body:
             return columns
 
@@ -574,36 +498,29 @@ class ModelGenerator:
             line = line.strip()
 
             # Skip constraints
-            if any(keyword in line.upper() for keyword in [
-                'PRIMARY KEY', 'FOREIGN KEY', 'UNIQUE', 'CHECK', 'INDEX'
-            ]):
+            if any(keyword in line.upper() for keyword in ["PRIMARY KEY", "FOREIGN KEY", "UNIQUE", "CHECK", "INDEX"]):
                 continue
 
             # Parse column
-            match = re.match(r'(\w+)\s+([^\s,]+)(.*)$', line)
+            match = re.match(r"(\w+)\s+([^\s,]+)(.*)$", line)
             if match:
                 col_name = match.group(1)
                 col_type = match.group(2).upper()
-                col_rest = (match.group(3) or '').upper()
+                col_rest = (match.group(3) or "").upper()
 
                 # Determine Python type
                 python_type = self._sql_type_to_python(col_type)
 
                 # Check if nullable
-                nullable = 'NOT NULL' not in col_rest
+                nullable = "NOT NULL" not in col_rest
 
                 # Check for default
                 default = None
-                default_match = re.search(r'DEFAULT\s+(\S+)', col_rest)
+                default_match = re.search(r"DEFAULT\s+(\S+)", col_rest)
                 if default_match:
                     default = default_match.group(1)
 
-                columns.append({
-                    'name': col_name,
-                    'type': python_type,
-                    'nullable': nullable,
-                    'default': default
-                })
+                columns.append({"name": col_name, "type": python_type, "nullable": nullable, "default": default})
 
         return columns
 
@@ -617,26 +534,26 @@ class ModelGenerator:
             Python type string
         """
         type_mapping = {
-            'INTEGER': 'int',
-            'BIGINT': 'int',
-            'SMALLINT': 'int',
-            'DECIMAL': 'Decimal',
-            'NUMERIC': 'Decimal',
-            'FLOAT': 'float',
-            'DOUBLE': 'float',
-            'VARCHAR': 'str',
-            'TEXT': 'str',
-            'CHAR': 'str',
-            'DATE': 'datetime',
-            'TIMESTAMP': 'datetime',
-            'BOOLEAN': 'bool',
-            'BOOL': 'bool'
+            "INTEGER": "int",
+            "BIGINT": "int",
+            "SMALLINT": "int",
+            "DECIMAL": "Decimal",
+            "NUMERIC": "Decimal",
+            "FLOAT": "float",
+            "DOUBLE": "float",
+            "VARCHAR": "str",
+            "TEXT": "str",
+            "CHAR": "str",
+            "DATE": "datetime",
+            "TIMESTAMP": "datetime",
+            "BOOLEAN": "bool",
+            "BOOL": "bool",
         }
 
         # Remove size specifications
-        base_type = re.sub(r'\(.*?\)', '', sql_type).upper()
+        base_type = re.sub(r"\(.*?\)", "", sql_type).upper()
 
-        return type_mapping.get(base_type, 'str')
+        return type_mapping.get(base_type, "str")
 
     def _generate_field_line(self, col: Dict) -> str:
         """Generate Pydantic field line.
@@ -647,20 +564,20 @@ class ModelGenerator:
         Returns:
             Field definition line
         """
-        field_name = col['name']
-        field_type = col['type']
+        field_name = col["name"]
+        field_type = col["type"]
 
-        if col['nullable']:
+        if col["nullable"]:
             field_type = f"Optional[{field_type}]"
 
-        if col['default'] is not None:
-            if col['default'] == 'CURRENT_TIMESTAMP':
+        if col["default"] is not None:
+            if col["default"] == "CURRENT_TIMESTAMP":
                 field_def = "Field(default_factory=datetime.utcnow)"
-            elif col['default'] in ('NULL', 'null'):
+            elif col["default"] in ("NULL", "null"):
                 field_def = "Field(default=None)"
             else:
                 field_def = f"Field(default={col['default']})"
-        elif col['nullable']:
+        elif col["nullable"]:
             field_def = "Field(default=None)"
         else:
             field_def = "Field(...)"
@@ -681,18 +598,18 @@ class ModelGenerator:
         paren_depth = 0
 
         for char in sql:
-            if char == '(':
+            if char == "(":
                 paren_depth += 1
-            elif char == ')':
+            elif char == ")":
                 paren_depth -= 1
-            elif char == ',' and paren_depth == 0:
-                lines.append(''.join(current))
+            elif char == "," and paren_depth == 0:
+                lines.append("".join(current))
                 current = []
                 continue
 
             current.append(char)
 
         if current:
-            lines.append(''.join(current))
+            lines.append("".join(current))
 
         return lines

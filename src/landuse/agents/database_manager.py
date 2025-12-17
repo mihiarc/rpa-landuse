@@ -52,7 +52,7 @@ class DatabaseManager(DatabaseInterface):
         """
         self.config = config or AppConfig()
         self.console = console or Console()
-        self._logger = get_logger('database')
+        self._logger = get_logger("database")
 
         # Cached schema and version info
         self._schema: Optional[str] = None
@@ -80,16 +80,15 @@ class DatabaseManager(DatabaseInterface):
                 max_connections=self.config.database.max_connections,
                 connection_timeout=self.config.database.connection_timeout,
                 read_only=self.config.database.read_only,
-                console=self.console
+                console=self.console,
             )
             self._logger.info(
                 "Connection pool initialized",
                 max_connections=self.config.database.max_connections,
-                read_only=self.config.database.read_only
+                read_only=self.config.database.read_only,
             )
             self.console.print(
-                f"[green]✓ Connection pool initialized "
-                f"(max: {self.config.database.max_connections})[/green]"
+                f"[green]✓ Connection pool initialized (max: {self.config.database.max_connections})[/green]"
             )
 
             # Check schema version with a pooled connection
@@ -103,10 +102,7 @@ class DatabaseManager(DatabaseInterface):
             raise
         except Exception as e:
             self._logger.exception("Unexpected error creating connection pool")
-            raise DatabaseConnectionError(
-                f"Failed to initialize connection pool: {e}",
-                host=self.config.database.path
-            )
+            raise DatabaseConnectionError(f"Failed to initialize connection pool: {e}", host=self.config.database.path)
 
     def get_connection(self) -> duckdb.DuckDBPyConnection:
         """
@@ -266,10 +262,13 @@ class DatabaseManager(DatabaseInterface):
         """
         try:
             with self.connection() as conn:
-                result = conn.execute("""
+                result = conn.execute(
+                    """
                     SELECT COUNT(*) FROM information_schema.tables
                     WHERE table_name = ? AND table_schema = 'main'
-                """, [table_name]).fetchone()
+                """,
+                    [table_name],
+                ).fetchone()
                 return result[0] > 0 if result else False
         except duckdb.Error as e:
             # Log the specific database error but return False for validation
@@ -316,7 +315,7 @@ class DatabaseManager(DatabaseInterface):
                     f"application version {SchemaVersion.CURRENT_VERSION}. "
                     f"Some features may not work as expected.",
                     UserWarning,
-                    stacklevel=2
+                    stacklevel=2,
                 )
                 self.console.print(
                     f"[yellow]⚠ Version compatibility warning: Database v{current_version} "

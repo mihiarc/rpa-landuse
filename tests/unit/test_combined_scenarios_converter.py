@@ -38,7 +38,7 @@ class TestRCPSSPKeyExtraction:
             "HadGEM2_ES365_rcp45_ssp1",
             "IPSL_CM5A_MR_rcp45_ssp1",
             "MRI_CGCM3_rcp45_ssp1",
-            "NorESM1_M_rcp45_ssp1"
+            "NorESM1_M_rcp45_ssp1",
         ]
 
         for scenario in scenarios:
@@ -57,7 +57,7 @@ class TestRCPSSPKeyExtraction:
             "HadGEM2_ES365_rcp85_ssp2",
             "IPSL_CM5A_MR_rcp85_ssp2",
             "MRI_CGCM3_rcp85_ssp2",
-            "NorESM1_M_rcp85_ssp2"
+            "NorESM1_M_rcp85_ssp2",
         ]
 
         for scenario in scenarios:
@@ -121,7 +121,7 @@ class TestGCMAggregation:
                 "2012-2020": {
                     "01001": [
                         {"_row": "cr", "cr": 1000.0, "ps": 100.0, "fr": 50.0, "ur": 25.0, "rg": 10.0},
-                        {"_row": "ps", "cr": 150.0, "ps": 2000.0, "fr": 75.0, "ur": 30.0, "rg": 15.0}
+                        {"_row": "ps", "cr": 150.0, "ps": 2000.0, "fr": 75.0, "ur": 30.0, "rg": 15.0},
                     ]
                 }
             },
@@ -129,7 +129,7 @@ class TestGCMAggregation:
                 "2012-2020": {
                     "01001": [
                         {"_row": "cr", "cr": 1100.0, "ps": 110.0, "fr": 60.0, "ur": 30.0, "rg": 12.0},
-                        {"_row": "ps", "cr": 160.0, "ps": 2100.0, "fr": 80.0, "ur": 35.0, "rg": 18.0}
+                        {"_row": "ps", "cr": 160.0, "ps": 2100.0, "fr": 80.0, "ur": 35.0, "rg": 18.0},
                     ]
                 }
             },
@@ -137,7 +137,7 @@ class TestGCMAggregation:
                 "2012-2020": {
                     "01001": [
                         {"_row": "cr", "cr": 900.0, "ps": 90.0, "fr": 40.0, "ur": 20.0, "rg": 8.0},
-                        {"_row": "ps", "cr": 140.0, "ps": 1900.0, "fr": 70.0, "ur": 25.0, "rg": 12.0}
+                        {"_row": "ps", "cr": 140.0, "ps": 1900.0, "fr": 70.0, "ur": 25.0, "rg": 12.0},
                     ]
                 }
             },
@@ -145,7 +145,7 @@ class TestGCMAggregation:
                 "2012-2020": {
                     "01001": [
                         {"_row": "cr", "cr": 1050.0, "ps": 105.0, "fr": 55.0, "ur": 27.5, "rg": 11.0},
-                        {"_row": "ps", "cr": 155.0, "ps": 2050.0, "fr": 77.5, "ur": 32.5, "rg": 16.5}
+                        {"_row": "ps", "cr": 155.0, "ps": 2050.0, "fr": 77.5, "ur": 32.5, "rg": 16.5},
                     ]
                 }
             },
@@ -153,10 +153,10 @@ class TestGCMAggregation:
                 "2012-2020": {
                     "01001": [
                         {"_row": "cr", "cr": 950.0, "ps": 95.0, "fr": 45.0, "ur": 22.5, "rg": 9.0},
-                        {"_row": "ps", "cr": 145.0, "ps": 1950.0, "fr": 72.5, "ur": 27.5, "rg": 13.5}
+                        {"_row": "ps", "cr": 145.0, "ps": 1950.0, "fr": 72.5, "ur": 27.5, "rg": 13.5},
                     ]
                 }
-            }
+            },
         }
 
     def test_mean_aggregation(self, sample_gcm_data, tmp_path):
@@ -220,8 +220,9 @@ class TestGCMAggregation:
         # Values: [1000, 1100, 900, 1050, 950]
         # Pandas uses ddof=1 by default
         expected_std = pd.Series([1000.0, 1100.0, 900.0, 1050.0, 950.0]).std()
-        assert abs(cr_trans["cr_std"] - expected_std) < 0.01, \
+        assert abs(cr_trans["cr_std"] - expected_std) < 0.01, (
             f"Expected std ~{expected_std:.2f}, got {cr_trans['cr_std']}"
+        )
 
     def test_missing_gcm_handling(self, tmp_path):
         """Test handling when some GCMs are missing data."""
@@ -232,22 +233,14 @@ class TestGCMAggregation:
 
         # Data with missing GCM for specific county
         incomplete_data = {
-            "CNRM_CM5_rcp45_ssp1": {
-                "2012-2020": {
-                    "01001": [{"_row": "cr", "cr": 1000.0}]
-                }
-            },
+            "CNRM_CM5_rcp45_ssp1": {"2012-2020": {"01001": [{"_row": "cr", "cr": 1000.0}]}},
             "HadGEM2_ES365_rcp45_ssp1": {
                 "2012-2020": {
                     # County 01001 missing for this GCM
                     "01002": [{"_row": "cr", "cr": 2000.0}]
                 }
             },
-            "IPSL_CM5A_MR_rcp45_ssp1": {
-                "2012-2020": {
-                    "01001": [{"_row": "cr", "cr": 900.0}]
-                }
-            }
+            "IPSL_CM5A_MR_rcp45_ssp1": {"2012-2020": {"01001": [{"_row": "cr", "cr": 900.0}]}},
         }
 
         aggregated = converter._aggregate_by_scenario(incomplete_data)
@@ -297,39 +290,15 @@ class TestOVERALLScenarioCreation:
         """Create data with multiple RCP-SSP combinations."""
         return {
             # RCP4.5-SSP1 scenarios
-            "CNRM_CM5_rcp45_ssp1": {
-                "2012-2020": {
-                    "01001": [{"_row": "cr", "cr": 1000.0, "ps": 100.0}]
-                }
-            },
-            "HadGEM2_ES365_rcp45_ssp1": {
-                "2012-2020": {
-                    "01001": [{"_row": "cr", "cr": 1100.0, "ps": 110.0}]
-                }
-            },
+            "CNRM_CM5_rcp45_ssp1": {"2012-2020": {"01001": [{"_row": "cr", "cr": 1000.0, "ps": 100.0}]}},
+            "HadGEM2_ES365_rcp45_ssp1": {"2012-2020": {"01001": [{"_row": "cr", "cr": 1100.0, "ps": 110.0}]}},
             # RCP8.5-SSP2 scenarios
-            "CNRM_CM5_rcp85_ssp2": {
-                "2012-2020": {
-                    "01001": [{"_row": "cr", "cr": 1200.0, "ps": 120.0}]
-                }
-            },
-            "HadGEM2_ES365_rcp85_ssp2": {
-                "2012-2020": {
-                    "01001": [{"_row": "cr", "cr": 1300.0, "ps": 130.0}]
-                }
-            },
+            "CNRM_CM5_rcp85_ssp2": {"2012-2020": {"01001": [{"_row": "cr", "cr": 1200.0, "ps": 120.0}]}},
+            "HadGEM2_ES365_rcp85_ssp2": {"2012-2020": {"01001": [{"_row": "cr", "cr": 1300.0, "ps": 130.0}]}},
             # RCP8.5-SSP3 scenarios
-            "CNRM_CM5_rcp85_ssp3": {
-                "2012-2020": {
-                    "01001": [{"_row": "cr", "cr": 1400.0, "ps": 140.0}]
-                }
-            },
+            "CNRM_CM5_rcp85_ssp3": {"2012-2020": {"01001": [{"_row": "cr", "cr": 1400.0, "ps": 140.0}]}},
             # RCP8.5-SSP5 scenarios
-            "NorESM1_M_rcp85_ssp5": {
-                "2012-2020": {
-                    "01001": [{"_row": "cr", "cr": 1500.0, "ps": 150.0}]
-                }
-            }
+            "NorESM1_M_rcp85_ssp5": {"2012-2020": {"01001": [{"_row": "cr", "cr": 1500.0, "ps": 150.0}]}},
         }
 
     def test_overall_scenario_created(self, multi_scenario_data, tmp_path):
@@ -384,17 +353,11 @@ class TestOVERALLScenarioCreation:
         expected_sum = 0
         num_scenarios = 20  # 4 RCP-SSP combinations × 5 GCMs
 
-        for i, (rcp, ssp) in enumerate([("rcp45", "ssp1"), ("rcp85", "ssp2"),
-                                        ("rcp85", "ssp3"), ("rcp85", "ssp5")]):
-            for j, gcm in enumerate(["CNRM_CM5", "HadGEM2_ES365", "IPSL_CM5A_MR",
-                                     "MRI_CGCM3", "NorESM1_M"]):
+        for i, (rcp, ssp) in enumerate([("rcp45", "ssp1"), ("rcp85", "ssp2"), ("rcp85", "ssp3"), ("rcp85", "ssp5")]):
+            for j, gcm in enumerate(["CNRM_CM5", "HadGEM2_ES365", "IPSL_CM5A_MR", "MRI_CGCM3", "NorESM1_M"]):
                 scenario_name = f"{gcm}_{rcp}_{ssp}"
                 value = float((i * 5 + j + 1) * 100)  # Unique value for each
-                data[scenario_name] = {
-                    "2012-2020": {
-                        "01001": [{"_row": "cr", "cr": value}]
-                    }
-                }
+                data[scenario_name] = {"2012-2020": {"01001": [{"_row": "cr", "cr": value}]}}
                 expected_sum += value
 
         aggregated = converter._aggregate_by_scenario(data)
@@ -423,15 +386,9 @@ class TestStatisticalAccuracy:
 
         # Create data with known values for easy verification
         data = {
-            "GCM1_rcp45_ssp1": {
-                "2020": {"01001": [{"_row": "cr", "cr": 100.0, "ps": 20.0}]}
-            },
-            "GCM2_rcp45_ssp1": {
-                "2020": {"01001": [{"_row": "cr", "cr": 200.0, "ps": 40.0}]}
-            },
-            "GCM3_rcp45_ssp1": {
-                "2020": {"01001": [{"_row": "cr", "cr": 300.0, "ps": 60.0}]}
-            }
+            "GCM1_rcp45_ssp1": {"2020": {"01001": [{"_row": "cr", "cr": 100.0, "ps": 20.0}]}},
+            "GCM2_rcp45_ssp1": {"2020": {"01001": [{"_row": "cr", "cr": 200.0, "ps": 40.0}]}},
+            "GCM3_rcp45_ssp1": {"2020": {"01001": [{"_row": "cr", "cr": 300.0, "ps": 60.0}]}},
         }
 
         aggregated = converter._aggregate_by_scenario(data)
@@ -458,12 +415,7 @@ class TestStatisticalAccuracy:
         converter = LanduseCombinedScenarioConverter(str(input_file), str(output_file))
 
         # All GCMs have identical values
-        data = {
-            f"GCM{i}_rcp45_ssp1": {
-                "2020": {"01001": [{"_row": "cr", "cr": 150.0}]}
-            }
-            for i in range(1, 4)
-        }
+        data = {f"GCM{i}_rcp45_ssp1": {"2020": {"01001": [{"_row": "cr", "cr": 150.0}]}} for i in range(1, 4)}
 
         aggregated = converter._aggregate_by_scenario(data)
         cr_trans = aggregated["RCP45_SSP1"]["2020"]["01001"][0]
@@ -487,12 +439,8 @@ class TestNumericalEdgeCases:
 
         large_value = 1e15  # Very large but valid number
         data = {
-            "GCM1_rcp45_ssp1": {
-                "2020": {"01001": [{"_row": "cr", "cr": large_value}]}
-            },
-            "GCM2_rcp45_ssp1": {
-                "2020": {"01001": [{"_row": "cr", "cr": large_value * 2}]}
-            }
+            "GCM1_rcp45_ssp1": {"2020": {"01001": [{"_row": "cr", "cr": large_value}]}},
+            "GCM2_rcp45_ssp1": {"2020": {"01001": [{"_row": "cr", "cr": large_value * 2}]}},
         }
 
         aggregated = converter._aggregate_by_scenario(data)
@@ -510,15 +458,9 @@ class TestNumericalEdgeCases:
 
         # Use values that might cause precision issues
         data = {
-            "GCM1_rcp45_ssp1": {
-                "2020": {"01001": [{"_row": "cr", "cr": 0.1}]}
-            },
-            "GCM2_rcp45_ssp1": {
-                "2020": {"01001": [{"_row": "cr", "cr": 0.2}]}
-            },
-            "GCM3_rcp45_ssp1": {
-                "2020": {"01001": [{"_row": "cr", "cr": 0.3}]}
-            }
+            "GCM1_rcp45_ssp1": {"2020": {"01001": [{"_row": "cr", "cr": 0.1}]}},
+            "GCM2_rcp45_ssp1": {"2020": {"01001": [{"_row": "cr", "cr": 0.2}]}},
+            "GCM3_rcp45_ssp1": {"2020": {"01001": [{"_row": "cr", "cr": 0.3}]}},
         }
 
         aggregated = converter._aggregate_by_scenario(data)
@@ -540,16 +482,8 @@ class TestErrorHandling:
         converter = LanduseCombinedScenarioConverter(str(input_file), str(output_file))
 
         data = {
-            "invalid_scenario": {
-                "2012-2020": {
-                    "01001": [{"_row": "cr", "cr": 1000.0}]
-                }
-            },
-            "CNRM_CM5_rcp45_ssp1": {
-                "2012-2020": {
-                    "01001": [{"_row": "cr", "cr": 900.0}]
-                }
-            }
+            "invalid_scenario": {"2012-2020": {"01001": [{"_row": "cr", "cr": 1000.0}]}},
+            "CNRM_CM5_rcp45_ssp1": {"2012-2020": {"01001": [{"_row": "cr", "cr": 900.0}]}},
         }
 
         # Should not raise error, just skip invalid scenarios
@@ -583,13 +517,7 @@ class TestErrorHandling:
         output_file = tmp_path / "dummy.db"
         converter = LanduseCombinedScenarioConverter(str(input_file), str(output_file))
 
-        data = {
-            "CNRM_CM5_rcp45_ssp1": {
-                "2012-2020": {
-                    "01001": [{"_row": "cr", "cr": 1000.0}]
-                }
-            }
-        }
+        data = {"CNRM_CM5_rcp45_ssp1": {"2012-2020": {"01001": [{"_row": "cr", "cr": 1000.0}]}}}
 
         aggregated = converter._aggregate_by_scenario(data)
 
@@ -613,16 +541,18 @@ class TestErrorHandling:
         # Create batch data exceeding limit
         batch_data = []
         for i in range(converter.MAX_BATCH_SIZE + 1):
-            batch_data.append({
-                'transition_id': i,
-                'scenario_id': 1,
-                'time_id': 1,
-                'geography_id': 1,
-                'from_landuse_id': 1,
-                'to_landuse_id': 1,
-                'acres': 100.0,
-                'transition_type': 'same'
-            })
+            batch_data.append(
+                {
+                    "transition_id": i,
+                    "scenario_id": 1,
+                    "time_id": 1,
+                    "geography_id": 1,
+                    "from_landuse_id": 1,
+                    "to_landuse_id": 1,
+                    "acres": 100.0,
+                    "transition_type": "same",
+                }
+            )
 
         # Should raise error when batch exceeds limit
         with pytest.raises(ValueError, match="Batch size .* exceeds maximum"):
@@ -638,16 +568,18 @@ class TestErrorHandling:
         # Create batch data exactly at limit
         batch_data = []
         for i in range(100000):  # Common batch size
-            batch_data.append({
-                'transition_id': i,
-                'scenario_id': 1,
-                'time_id': 1,
-                'geography_id': 1,
-                'from_landuse_id': 1,
-                'to_landuse_id': 1,
-                'acres': 100.0,
-                'transition_type': 'same'
-            })
+            batch_data.append(
+                {
+                    "transition_id": i,
+                    "scenario_id": 1,
+                    "time_id": 1,
+                    "geography_id": 1,
+                    "from_landuse_id": 1,
+                    "to_landuse_id": 1,
+                    "acres": 100.0,
+                    "transition_type": "same",
+                }
+            )
 
         # Should process without error (but will fail on missing connection)
         converter.conn = None  # Ensure connection is None
@@ -678,13 +610,11 @@ class TestErrorHandling:
         output_file = tmp_path / "output.db"
 
         # Mock the file size check
-        with patch.object(Path, 'stat') as mock_stat:
+        with patch.object(Path, "stat") as mock_stat:
             mock_stat.return_value.st_size = 11 * 1024 * 1024 * 1024  # 11GB
 
             with pytest.raises(ValueError, match="Input file too large"):
-                converter = LanduseCombinedScenarioConverter(
-                    str(large_file), str(output_file)
-                )
+                converter = LanduseCombinedScenarioConverter(str(large_file), str(output_file))
 
     def test_path_traversal_prevention(self, tmp_path):
         """Test that path traversal attempts are blocked."""
@@ -694,15 +624,11 @@ class TestErrorHandling:
 
         # Test input path traversal
         with pytest.raises(ValueError, match="Path traversal detected"):
-            converter = LanduseCombinedScenarioConverter(
-                "../../../etc/passwd", str(tmp_path / "output.db")
-            )
+            converter = LanduseCombinedScenarioConverter("../../../etc/passwd", str(tmp_path / "output.db"))
 
         # Test output path traversal
         with pytest.raises(ValueError, match="Path traversal detected"):
-            converter = LanduseCombinedScenarioConverter(
-                str(input_file), "../../../tmp/malicious.db"
-            )
+            converter = LanduseCombinedScenarioConverter(str(input_file), "../../../tmp/malicious.db")
 
 
 class TestDataConservation:
@@ -721,7 +647,7 @@ class TestDataConservation:
                     "01001": [
                         {"_row": "cr", "cr": 100, "ps": 50, "fr": 25},
                         {"_row": "ps", "cr": 30, "ps": 200, "fr": 40},
-                        {"_row": "fr", "cr": 10, "ps": 20, "fr": 300}
+                        {"_row": "fr", "cr": 10, "ps": 20, "fr": 300},
                     ]
                 }
             },
@@ -730,10 +656,10 @@ class TestDataConservation:
                     "01001": [
                         {"_row": "cr", "cr": 110, "ps": 55, "fr": 27},
                         {"_row": "ps", "cr": 33, "ps": 210, "fr": 42},
-                        {"_row": "fr", "cr": 11, "ps": 22, "fr": 310}
+                        {"_row": "fr", "cr": 11, "ps": 22, "fr": 310},
                     ]
                 }
-            }
+            },
         }
 
         aggregated = converter._aggregate_by_scenario(data)
@@ -752,20 +678,8 @@ class TestDataConservation:
         converter = LanduseCombinedScenarioConverter(str(input_file), str(output_file))
 
         data = {
-            "CNRM_CM5_rcp45_ssp1": {
-                "2012-2020": {
-                    "01001": [
-                        {"_row": "ur", "cr": 0.0, "ps": 0.0, "ur": 1000.0}
-                    ]
-                }
-            },
-            "HadGEM2_ES365_rcp45_ssp1": {
-                "2012-2020": {
-                    "01001": [
-                        {"_row": "ur", "cr": 0.0, "ps": 0.0, "ur": 1100.0}
-                    ]
-                }
-            }
+            "CNRM_CM5_rcp45_ssp1": {"2012-2020": {"01001": [{"_row": "ur", "cr": 0.0, "ps": 0.0, "ur": 1000.0}]}},
+            "HadGEM2_ES365_rcp45_ssp1": {"2012-2020": {"01001": [{"_row": "ur", "cr": 0.0, "ps": 0.0, "ur": 1100.0}]}},
         }
 
         aggregated = converter._aggregate_by_scenario(data)
@@ -804,17 +718,13 @@ class TestIntegrationWithRealData:
             "MRI_CGCM3_rcp85_ssp3",
             "NorESM1_M_rcp85_ssp5",
             "IPSL_CM5A_MR_rcp85_ssp5",
-            "NorESM1_M_rcp45_ssp1"
+            "NorESM1_M_rcp45_ssp1",
         ]
 
         # Create data with real scenario names
         data = {}
         for scenario in real_scenarios:
-            data[scenario] = {
-                "2012-2020": {
-                    "01001": [{"_row": "cr", "cr": 1000.0}]
-                }
-            }
+            data[scenario] = {"2012-2020": {"01001": [{"_row": "cr", "cr": 1000.0}]}}
 
         aggregated = converter._aggregate_by_scenario(data)
 
@@ -836,10 +746,21 @@ class TestIntegrationWithRealData:
             "CNRM_CM5_rcp45_ssp1": {
                 "2012-2020": {
                     "01001": [
-                        {"_row": "cr", "cr": 100, "ps": 50, "fr": 25,
-                         "cr_std": 5, "ps_std": 2, "fr_std": 1,
-                         "cr_min": 95, "ps_min": 48, "fr_min": 24,
-                         "cr_max": 105, "ps_max": 52, "fr_max": 26}
+                        {
+                            "_row": "cr",
+                            "cr": 100,
+                            "ps": 50,
+                            "fr": 25,
+                            "cr_std": 5,
+                            "ps_std": 2,
+                            "fr_std": 1,
+                            "cr_min": 95,
+                            "ps_min": 48,
+                            "fr_min": 24,
+                            "cr_max": 105,
+                            "ps_max": 52,
+                            "fr_max": 26,
+                        }
                     ]
                 }
             }

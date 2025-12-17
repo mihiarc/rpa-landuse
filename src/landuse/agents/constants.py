@@ -71,7 +71,7 @@ DEFAULT_ASSUMPTIONS = {
     "geographic_scope": "All 3,075 U.S. counties in the conterminous United States",
     "transition_type": "Only 'change' transitions (excluding same-to-same land use)",
     "rpa_context": "Based on USDA Forest Service 2020 Resources Planning Act Assessment",
-    "methodology": "Econometric model calibrated on 2001-2012 observed transitions, private land only"
+    "methodology": "Econometric model calibrated on 2001-2012 observed transitions, private land only",
 }
 
 # Common query examples
@@ -136,7 +136,7 @@ JOIN dim_landuse tl ON f.to_landuse_id = tl.landuse_id
 WHERE f.transition_type = 'change'
 GROUP BY t.start_year, t.end_year, fl.landuse_name, tl.landuse_name
 ORDER BY t.start_year, total_acres DESC;
-"""
+""",
 }
 
 # Interactive chat examples
@@ -146,7 +146,7 @@ CHAT_EXAMPLES = [
     "Compare forest loss between RCP4.5 and RCP8.5 climate pathways",
     "Show me land use changes under the sustainability scenario (SSP1)",
     "What's the difference between the 'hot' and 'dry' climate models?",
-    "How does land use change differ between high growth (SSP5) and low growth (SSP3)?"
+    "How does land use change differ between high growth (SSP5) and low growth (SSP3)?",
 ]
 
 # Response formatting sections
@@ -154,7 +154,7 @@ RESPONSE_SECTIONS = {
     "assumptions": "📊 **Analysis Assumptions:**",
     "findings": "🔍 **Key Findings:**",
     "interpretation": "💡 **Interpretation:**",
-    "followup": "📈 **Suggested Follow-up Analyses:**"
+    "followup": "📈 **Suggested Follow-up Analyses:**",
 }
 
 # Database configuration defaults
@@ -162,7 +162,7 @@ DB_CONFIG = {
     "default_path": "data/processed/landuse_analytics.duckdb",
     "max_query_limit": int(os.getenv("LANDUSE_MAX_QUERY_ROWS", "1000")),
     "default_display_limit": int(os.getenv("LANDUSE_DEFAULT_DISPLAY_LIMIT", "50")),
-    "read_only": True
+    "read_only": True,
 }
 
 # Model configuration defaults
@@ -171,13 +171,13 @@ MODEL_CONFIG = {
     "default_max_tokens": 4000,
     "max_iterations": int(os.getenv("LANDUSE_MAX_ITERATIONS", "5")),  # Increased from 3 to 5
     "max_execution_time": int(os.getenv("LANDUSE_MAX_EXECUTION_TIME", "120")),  # 2 minutes default
-    "default_openai_model": "gpt-4o-mini"
+    "default_openai_model": "gpt-4o-mini",
 }
 
 # Rate limiting configuration
 RATE_LIMIT_CONFIG = {
     "max_calls": int(os.getenv("LANDUSE_RATE_LIMIT_CALLS", "60")),
-    "time_window": int(os.getenv("LANDUSE_RATE_LIMIT_WINDOW", "60"))  # seconds
+    "time_window": int(os.getenv("LANDUSE_RATE_LIMIT_WINDOW", "60")),  # seconds
 }
 
 # RPA Scenario definitions
@@ -187,29 +187,29 @@ RPA_SCENARIOS = {
         "rcp": "rcp45",
         "ssp": "ssp1",
         "description": "Lower warming (~2.5°C), moderate U.S. growth, sustainable development",
-        "theme": "Taking the Green Road"
+        "theme": "Taking the Green Road",
     },
     "HL": {
         "name": "High-Low",
         "rcp": "rcp85",
         "ssp": "ssp3",
         "description": "High warming (~4.5°C), low U.S. growth, regional rivalry",
-        "theme": "A Rocky Road"
+        "theme": "A Rocky Road",
     },
     "HM": {
         "name": "High-Moderate",
         "rcp": "rcp85",
         "ssp": "ssp2",
         "description": "High warming (~4.5°C), moderate U.S. growth, middle of the road",
-        "theme": "Middle of the Road"
+        "theme": "Middle of the Road",
     },
     "HH": {
         "name": "High-High",
         "rcp": "rcp85",
         "ssp": "ssp5",
         "description": "High warming (~4.5°C), high U.S. growth, fossil-fueled development",
-        "theme": "Taking the Highway"
-    }
+        "theme": "Taking the Highway",
+    },
 }
 
 # Climate model characteristics
@@ -218,5 +218,5 @@ CLIMATE_MODELS = {
     "HadGEM2_ES365": {"type": "Hot", "description": "Upper bound of warming"},
     "IPSL_CM5A_MR": {"type": "Dry", "description": "Reduced precipitation scenario"},
     "MRI_CGCM3": {"type": "Least warm", "description": "Lower bound of warming"},
-    "NorESM1_M": {"type": "Middle", "description": "Central tendency projection"}
+    "NorESM1_M": {"type": "Middle", "description": "Central tendency projection"},
 }

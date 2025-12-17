@@ -25,7 +25,7 @@ class ResponseFormatter:
     """
 
     @staticmethod
-    def format_scenario_in_text(text: str, format: str = 'full') -> str:
+    def format_scenario_in_text(text: str, format: str = "full") -> str:
         """Replace database scenario names with user-friendly names in text.
 
         Performs case-sensitive replacement of all scenario names found in text.
@@ -60,10 +60,7 @@ class ResponseFormatter:
 
     @staticmethod
     def format_dataframe_scenarios(
-        df: pd.DataFrame,
-        scenario_column: str = 'scenario_name',
-        format: str = 'full',
-        sort: bool = True
+        df: pd.DataFrame, scenario_column: str = "scenario_name", format: str = "full", sort: bool = True
     ) -> pd.DataFrame:
         """Format scenario names in a DataFrame.
 
@@ -98,10 +95,10 @@ class ResponseFormatter:
 
         # Sort by display order if requested
         if sort:
-            df['_sort_order'] = df[scenario_column].apply(
+            df["_sort_order"] = df[scenario_column].apply(
                 lambda x: ScenarioMapping.get_sort_key(x) if pd.notna(x) else 999
             )
-            df = df.sort_values('_sort_order').drop('_sort_order', axis=1)
+            df = df.sort_values("_sort_order").drop("_sort_order", axis=1)
 
         return df
 
@@ -139,7 +136,7 @@ class ResponseFormatter:
             >>> formatted = ResponseFormatter.format_query_result_text(result)
         """
         # Apply standard text formatting
-        formatted = ResponseFormatter.format_scenario_in_text(result_text, format='full')
+        formatted = ResponseFormatter.format_scenario_in_text(result_text, format="full")
 
         # Count unique scenarios mentioned
         scenarios_mentioned = []
@@ -180,11 +177,11 @@ class ResponseFormatter:
         if not info:
             return scenario
 
-        if info.code == 'OVERALL':
+        if info.code == "OVERALL":
             return "Ensemble Mean (average across all scenarios)"
 
         # Create concise summary
-        society_short = info.society.split('(')[1].rstrip(')') if '(' in info.society else info.society
+        society_short = info.society.split("(")[1].rstrip(")") if "(" in info.society else info.society
         climate_short = "low emissions" if "4.5" in info.climate else "high emissions"
 
         return f"{info.name} ({society_short.lower()}, {climate_short})"

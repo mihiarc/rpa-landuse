@@ -35,7 +35,7 @@ class SchemaManager:
         schema_dir: Path,
         config: Optional[AppConfig] = None,
         console: Optional[Console] = None,
-        read_only: bool = True
+        read_only: bool = True,
     ):
         """Initialize schema manager.
 
@@ -71,10 +71,7 @@ class SchemaManager:
     def connection(self) -> duckdb.DuckDBPyConnection:
         """Get or create database connection."""
         if self._connection is None:
-            self._connection = duckdb.connect(
-                str(self.db_path),
-                read_only=self.read_only
-            )
+            self._connection = duckdb.connect(str(self.db_path), read_only=self.read_only)
         return self._connection
 
     @property
@@ -88,10 +85,7 @@ class SchemaManager:
     def migration_engine(self) -> MigrationEngine:
         """Get migration engine."""
         if self._migration_engine is None:
-            self._migration_engine = MigrationEngine(
-                connection=self.connection,
-                migrations_dir=self.migrations_dir
-            )
+            self._migration_engine = MigrationEngine(connection=self.connection, migrations_dir=self.migrations_dir)
         return self._migration_engine
 
     @property
@@ -159,32 +153,32 @@ class SchemaManager:
         """
         # Parse tables
         tables = {}
-        for table_name, table_data in data.get('tables', {}).items():
+        for table_name, table_data in data.get("tables", {}).items():
             tables[table_name] = TableDefinition(
                 name=table_name,
-                description=table_data.get('description'),
-                ddl=table_data['ddl'],
-                indexes=[{'ddl': idx} for idx in table_data.get('indexes', [])]
+                description=table_data.get("description"),
+                ddl=table_data["ddl"],
+                indexes=[{"ddl": idx} for idx in table_data.get("indexes", [])],
             )
 
         # Parse views
         views = {}
-        for view_name, view_data in data.get('views', {}).items():
+        for view_name, view_data in data.get("views", {}).items():
             views[view_name] = ViewDefinition(
                 name=view_name,
-                description=view_data.get('description'),
-                ddl=view_data['ddl'],
-                materialized=view_data.get('materialized', False)
+                description=view_data.get("description"),
+                ddl=view_data["ddl"],
+                materialized=view_data.get("materialized", False),
             )
 
         return SchemaDefinition(
-            version=data['version'],
-            description=data.get('description', ''),
-            author=data.get('author', 'system'),
-            created_at=data.get('created_at'),
-            backward_compatible=data.get('backward_compatible', True),
+            version=data["version"],
+            description=data.get("description", ""),
+            author=data.get("author", "system"),
+            created_at=data.get("created_at"),
+            backward_compatible=data.get("backward_compatible", True),
             tables=tables,
-            views=views
+            views=views,
         )
 
     @time_database_operation("get_current_version")
@@ -230,21 +224,13 @@ class SchemaManager:
         if not current_version:
             return ValidationResult(
                 is_valid=False,
-                issues=[{
-                    'level': 'error',
-                    'category': 'version',
-                    'message': 'Database has no schema version'
-                }]
+                issues=[{"level": "error", "category": "version", "message": "Database has no schema version"}],
             )
 
         schema_def = self.load_definition(current_version)
         return self.validator.validate_database(self.connection, schema_def)
 
-    def migrate(
-        self,
-        target_version: Optional[str] = None,
-        dry_run: bool = False
-    ) -> MigrationResult:
+    def migrate(self, target_version: Optional[str] = None, dry_run: bool = False) -> MigrationResult:
         """Migrate database to target version.
 
         Args:
@@ -272,13 +258,9 @@ class SchemaManager:
         if current_version == target_version:
             self.console.print(f"[green]Already at version {target_version}[/green]")
             return MigrationResult(
-                plan=MigrationPlan(
-                    from_version=current_version,
-                    to_version=target_version,
-                    steps=[]
-                ),
+                plan=MigrationPlan(from_version=current_version, to_version=target_version, steps=[]),
                 status="completed",
-                started_at=datetime.utcnow()
+                started_at=datetime.utcnow(),
             )
 
         # Plan migration
@@ -286,11 +268,7 @@ class SchemaManager:
 
         if dry_run:
             self.console.print("[yellow]Dry run - migration not executed[/yellow]")
-            return MigrationResult(
-                plan=plan,
-                status="pending",
-                started_at=datetime.utcnow()
-            )
+            return MigrationResult(plan=plan, status="pending", started_at=datetime.utcnow())
 
         # Execute migration
         return self.migration_engine.execute_migration(plan)
@@ -363,17 +341,15 @@ class SchemaManager:
 
         # Export complete schema state
         checkpoint_data = {
-            'version': current_version,
-            'created_at': datetime.utcnow().isoformat(),
-            'schema_sql': self.export_schema('sql'),
-            'schema_json': json.loads(self.export_schema('json'))
+            "version": current_version,
+            "created_at": datetime.utcnow().isoformat(),
+            "schema_sql": self.export_schema("sql"),
+            "schema_json": json.loads(self.export_schema("json")),
         }
 
         # Calculate checksum
-        checksum = hashlib.sha256(
-            json.dumps(checkpoint_data, sort_keys=True).encode()
-        ).hexdigest()
-        checkpoint_data['checksum'] = checksum
+        checksum = hashlib.sha256(json.dumps(checkpoint_data, sort_keys=True).encode()).hexdigest()
+        checkpoint_data["checksum"] = checksum
 
         # Write checkpoint
         checkpoint_file.write_text(json.dumps(checkpoint_data, indent=2))

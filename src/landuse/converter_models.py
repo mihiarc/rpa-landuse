@@ -13,6 +13,7 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 class ConversionMode(str, Enum):
     """Available conversion modes"""
+
     STREAMING = "streaming"
     BATCH = "batch"
     PARALLEL = "parallel"
@@ -21,98 +22,64 @@ class ConversionMode(str, Enum):
 
 class ConversionConfig(BaseModel):
     """Configuration for data conversion process"""
+
     model_config = ConfigDict(extra="forbid")
 
     # Input/Output paths
-    input_file: Path = Field(
-        default=Path("data/raw/landuse_transitions.json"),
-        description="Path to input JSON file"
-    )
+    input_file: Path = Field(default=Path("data/raw/landuse_transitions.json"), description="Path to input JSON file")
     output_file: Path = Field(
-        default=Path("data/processed/landuse_analytics.duckdb"),
-        description="Path to output DuckDB database"
+        default=Path("data/processed/landuse_analytics.duckdb"), description="Path to output DuckDB database"
     )
 
     # Processing configuration
     mode: ConversionMode = Field(
-        default=ConversionMode.BULK_COPY,
-        description="Processing mode (bulk_copy recommended for performance)"
+        default=ConversionMode.BULK_COPY, description="Processing mode (bulk_copy recommended for performance)"
     )
     batch_size: int = Field(
-        default=100000,
-        gt=0,
-        le=1000000,
-        description="Batch size for processing (larger for bulk loading)"
+        default=100000, gt=0, le=1000000, description="Batch size for processing (larger for bulk loading)"
     )
-    parallel_workers: int = Field(
-        default=4,
-        gt=0,
-        le=16,
-        description="Number of parallel workers"
-    )
+    parallel_workers: int = Field(default=4, gt=0, le=16, description="Number of parallel workers")
 
     # Bulk loading options
-    use_bulk_copy: bool = Field(
-        default=True,
-        description="Use DuckDB COPY command for bulk loading"
-    )
+    use_bulk_copy: bool = Field(default=True, description="Use DuckDB COPY command for bulk loading")
     parquet_compression: str = Field(
-        default="snappy",
-        description="Parquet compression (snappy, gzip, brotli, lz4, zstd)"
+        default="snappy", description="Parquet compression (snappy, gzip, brotli, lz4, zstd)"
     )
-    temp_dir: Optional[Path] = Field(
-        default=None,
-        description="Temporary directory for bulk operations"
-    )
-    optimize_after_load: bool = Field(
-        default=True,
-        description="Run ANALYZE on tables after bulk loading"
-    )
+    temp_dir: Optional[Path] = Field(default=None, description="Temporary directory for bulk operations")
+    optimize_after_load: bool = Field(default=True, description="Run ANALYZE on tables after bulk loading")
 
     # DuckDB configuration
-    memory_limit: str = Field(
-        default="8GB",
-        description="DuckDB memory limit"
-    )
-    threads: int = Field(
-        default=8,
-        gt=0,
-        description="DuckDB thread count"
-    )
+    memory_limit: str = Field(default="8GB", description="DuckDB memory limit")
+    threads: int = Field(default=8, gt=0, description="DuckDB thread count")
 
     # Progress tracking
-    show_progress: bool = Field(
-        default=True,
-        description="Show progress bars"
-    )
-    checkpoint_interval: int = Field(
-        default=100000,
-        gt=0,
-        description="Records between checkpoints"
-    )
+    show_progress: bool = Field(default=True, description="Show progress bars")
+    checkpoint_interval: int = Field(default=100000, gt=0, description="Records between checkpoints")
 
-    @field_validator('input_file')
+    @field_validator("input_file")
     @classmethod
     def validate_input_file(cls, v: Path) -> Path:
         """Ensure input file exists"""
         if not v.exists():
             raise ValueError(f"Input file not found: {v}")
-        if not v.suffix == '.json':
+        if not v.suffix == ".json":
             raise ValueError(f"Input file must be JSON: {v}")
         return v
 
-    @field_validator('memory_limit')
+    @field_validator("memory_limit")
     @classmethod
     def validate_memory_limit(cls, v: str) -> str:
         """Validate memory limit format"""
         import re
-        if not re.match(r'^\d+[MG]B$', v):
+
+        if not re.match(r"^\d+[MG]B$", v):
             raise ValueError(f"Invalid memory limit format: {v}. Use format like '8GB' or '512MB'")
         return v
 
 
 class RawLandUseData(BaseModel):
     """Raw land use data from JSON"""
+
     model_config = ConfigDict(extra="allow")
 
     scenario: str
@@ -123,6 +90,7 @@ class RawLandUseData(BaseModel):
 
 class ProcessedTransition(BaseModel):
     """Processed transition record ready for database"""
+
     model_config = ConfigDict(extra="forbid")
 
     scenario_name: str
@@ -140,7 +108,7 @@ class ProcessedTransition(BaseModel):
     acres: float = Field(ge=0)
     transition_type: str
 
-    @field_validator('fips_code')
+    @field_validator("fips_code")
     @classmethod
     def validate_fips_code(cls, v: str) -> str:
         """Validate FIPS code"""
@@ -148,17 +116,18 @@ class ProcessedTransition(BaseModel):
             raise ValueError(f"Invalid FIPS code: {v}")
         return v
 
-    @field_validator('transition_type')
+    @field_validator("transition_type")
     @classmethod
     def validate_transition_type(cls, v: str) -> str:
         """Validate transition type"""
-        if v not in ['change', 'stable']:
+        if v not in ["change", "stable"]:
             raise ValueError(f"Invalid transition type: {v}")
         return v
 
 
 class ConversionStats(BaseModel):
     """Statistics from conversion process"""
+
     model_config = ConfigDict(extra="forbid")
 
     total_records: int = 0
@@ -185,6 +154,7 @@ class ConversionStats(BaseModel):
 
 class ValidationResult(BaseModel):
     """Result from data validation"""
+
     model_config = ConfigDict(extra="forbid")
 
     is_valid: bool
@@ -203,6 +173,7 @@ class ValidationResult(BaseModel):
 
 class CheckpointData(BaseModel):
     """Checkpoint data for recovery"""
+
     model_config = ConfigDict(extra="forbid")
 
     timestamp: str

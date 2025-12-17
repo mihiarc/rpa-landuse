@@ -6,7 +6,7 @@ from typing import Any, Callable, Dict, Optional, Type, TypeVar, Union
 
 from landuse.core.interfaces import LoggerInterface, MetricsInterface
 
-F = TypeVar('F', bound=Callable[..., Any])
+F = TypeVar("F", bound=Callable[..., Any])
 
 
 class PerformanceMonitor:
@@ -31,7 +31,7 @@ class PerformanceMonitor:
         operation_name: Optional[str] = None,
         log_params: bool = False,
         track_exceptions: bool = True,
-        tags: Optional[Dict[str, str]] = None
+        tags: Optional[Dict[str, str]] = None,
     ) -> Callable[[F], F]:
         """
         Decorator to time method execution and collect performance metrics.
@@ -50,6 +50,7 @@ class PerformanceMonitor:
             def execute_query(self, query: str) -> pd.DataFrame:
                 return self.connection.execute(query)
         """
+
         def decorator(func: F) -> F:
             @functools.wraps(func)
             def wrapper(*args, **kwargs):
@@ -58,8 +59,8 @@ class PerformanceMonitor:
 
                 # Prepare tags
                 metric_tags = tags or {}
-                if args and hasattr(args[0], '__class__'):
-                    metric_tags['class'] = args[0].__class__.__name__
+                if args and hasattr(args[0], "__class__"):
+                    metric_tags["class"] = args[0].__class__.__name__
 
                 # Start timing
                 start_time = time.time()
@@ -69,12 +70,9 @@ class PerformanceMonitor:
                 try:
                     # Log start if logger available
                     if self.logger:
-                        log_data = {'operation': op_name, 'start_time': start_time}
+                        log_data = {"operation": op_name, "start_time": start_time}
                         if log_params:
-                            log_data.update({
-                                'args_count': len(args),
-                                'kwargs_keys': list(kwargs.keys())
-                            })
+                            log_data.update({"args_count": len(args), "kwargs_keys": list(kwargs.keys())})
                         self.logger.debug(f"Starting {op_name}", **log_data)
 
                     # Execute function
@@ -84,15 +82,15 @@ class PerformanceMonitor:
                 except Exception as e:
                     exception_occurred = True
                     if track_exceptions and self.metrics:
-                        error_tags = {**metric_tags, 'error_type': type(e).__name__}
-                        self.metrics.increment_counter(f'{op_name}.errors', error_tags)
+                        error_tags = {**metric_tags, "error_type": type(e).__name__}
+                        self.metrics.increment_counter(f"{op_name}.errors", error_tags)
 
                     if self.logger:
                         self.logger.error(
                             f"Exception in {op_name}: {str(e)}",
                             operation=op_name,
                             error_type=type(e).__name__,
-                            exception=str(e)
+                            exception=str(e),
                         )
                     raise
 
@@ -102,20 +100,16 @@ class PerformanceMonitor:
 
                     # Update metrics
                     if self.metrics:
-                        success_tags = {**metric_tags, 'success': str(not exception_occurred)}
-                        self.metrics.record_timer(f'{op_name}.duration', duration, success_tags)
-                        self.metrics.increment_counter(f'{op_name}.calls', success_tags)
+                        success_tags = {**metric_tags, "success": str(not exception_occurred)}
+                        self.metrics.record_timer(f"{op_name}.duration", duration, success_tags)
+                        self.metrics.increment_counter(f"{op_name}.calls", success_tags)
 
                     # Log completion
                     if self.logger:
-                        self.logger.performance_event(
-                            op_name,
-                            duration,
-                            success=not exception_occurred,
-                            **metric_tags
-                        )
+                        self.logger.performance_event(op_name, duration, success=not exception_occurred, **metric_tags)
 
             return wrapper
+
         return decorator
 
     def time_context(self, operation_name: str, tags: Optional[Dict[str, str]] = None):
@@ -136,12 +130,7 @@ class PerformanceMonitor:
 class TimedContext:
     """Context manager for timing code execution."""
 
-    def __init__(
-        self,
-        monitor: PerformanceMonitor,
-        operation_name: str,
-        tags: Optional[Dict[str, str]] = None
-    ):
+    def __init__(self, monitor: PerformanceMonitor, operation_name: str, tags: Optional[Dict[str, str]] = None):
         """Initialize timed context."""
         self.monitor = monitor
         self.operation_name = operation_name
@@ -157,7 +146,7 @@ class TimedContext:
             self.monitor.logger.debug(
                 f"Starting timed context: {self.operation_name}",
                 operation=self.operation_name,
-                start_time=self.start_time
+                start_time=self.start_time,
             )
 
         return self
@@ -172,37 +161,23 @@ class TimedContext:
 
         # Record metrics
         if self.monitor.metrics:
-            success_tags = {**self.tags, 'success': str(not self.exception_occurred)}
-            self.monitor.metrics.record_timer(
-                f'{self.operation_name}.duration',
-                duration,
-                success_tags
-            )
-            self.monitor.metrics.increment_counter(
-                f'{self.operation_name}.calls',
-                success_tags
-            )
+            success_tags = {**self.tags, "success": str(not self.exception_occurred)}
+            self.monitor.metrics.record_timer(f"{self.operation_name}.duration", duration, success_tags)
+            self.monitor.metrics.increment_counter(f"{self.operation_name}.calls", success_tags)
 
             if self.exception_occurred:
-                error_tags = {**self.tags, 'error_type': exc_type.__name__}
-                self.monitor.metrics.increment_counter(
-                    f'{self.operation_name}.errors',
-                    error_tags
-                )
+                error_tags = {**self.tags, "error_type": exc_type.__name__}
+                self.monitor.metrics.increment_counter(f"{self.operation_name}.errors", error_tags)
 
         # Log completion
         if self.monitor.logger:
             self.monitor.logger.performance_event(
-                self.operation_name,
-                duration,
-                success=not self.exception_occurred,
-                **self.tags
+                self.operation_name, duration, success=not self.exception_occurred, **self.tags
             )
 
 
 def create_performance_decorator(
-    logger: Optional[LoggerInterface] = None,
-    metrics: Optional[MetricsInterface] = None
+    logger: Optional[LoggerInterface] = None, metrics: Optional[MetricsInterface] = None
 ) -> PerformanceMonitor:
     """
     Factory function to create a performance monitor with logging and metrics.
@@ -227,10 +202,7 @@ def create_performance_decorator(
 
 
 # Convenience decorators for common use cases
-def time_database_operation(
-    operation_name: Optional[str] = None,
-    track_row_count: bool = True
-) -> Callable[[F], F]:
+def time_database_operation(operation_name: Optional[str] = None, track_row_count: bool = True) -> Callable[[F], F]:
     """
     Specialized decorator for database operations.
 
@@ -241,6 +213,7 @@ def time_database_operation(
     Returns:
         Decorated function
     """
+
     def decorator(func: F) -> F:
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
@@ -253,7 +226,7 @@ def time_database_operation(
 
                 # Try to extract row count
                 row_count = 0
-                if track_row_count and hasattr(result, '__len__'):
+                if track_row_count and hasattr(result, "__len__"):
                     try:
                         row_count = len(result)
                     except (TypeError, AttributeError):
@@ -270,13 +243,11 @@ def time_database_operation(
                 raise
 
         return wrapper
+
     return decorator
 
 
-def time_llm_operation(
-    operation_name: Optional[str] = None,
-    track_tokens: bool = True
-) -> Callable[[F], F]:
+def time_llm_operation(operation_name: Optional[str] = None, track_tokens: bool = True) -> Callable[[F], F]:
     """
     Specialized decorator for LLM API operations.
 
@@ -287,6 +258,7 @@ def time_llm_operation(
     Returns:
         Decorated function
     """
+
     def decorator(func: F) -> F:
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
@@ -299,9 +271,9 @@ def time_llm_operation(
 
                 # Try to extract token count
                 token_info = ""
-                if track_tokens and hasattr(result, 'usage_metadata'):
+                if track_tokens and hasattr(result, "usage_metadata"):
                     try:
-                        tokens = result.usage_metadata.get('total_tokens', 0)
+                        tokens = result.usage_metadata.get("total_tokens", 0)
                         token_info = f" ({tokens} tokens)"
                     except (AttributeError, TypeError):
                         pass
@@ -316,4 +288,5 @@ def time_llm_operation(
                 raise
 
         return wrapper
+
     return decorator

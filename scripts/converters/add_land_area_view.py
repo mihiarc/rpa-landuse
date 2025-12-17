@@ -13,14 +13,17 @@ from rich.table import Table
 
 console = Console()
 
+
 def add_land_area_view(db_path: str = "data/processed/landuse_analytics.duckdb"):
     """Add total land area view to the database"""
 
-    console.print(Panel.fit(
-        "📊 [bold green]Adding Total Land Area View[/bold green]\n"
-        "[yellow]Creating v_total_land_area for percentage calculations[/yellow]",
-        border_style="green"
-    ))
+    console.print(
+        Panel.fit(
+            "📊 [bold green]Adding Total Land Area View[/bold green]\n"
+            "[yellow]Creating v_total_land_area for percentage calculations[/yellow]",
+            border_style="green",
+        )
+    )
 
     db_file = Path(db_path)
     if not db_file.exists():
@@ -106,12 +109,7 @@ def add_land_area_view(db_path: str = "data/processed/landuse_analytics.duckdb")
 
         for row in sample_data:
             table.add_row(
-                row[0],
-                f"{row[1]:,}",
-                f"{int(row[2]):,}",
-                f"{int(row[3]):,}",
-                f"{int(row[4]):,}",
-                f"{int(row[5]):,}"
+                row[0], f"{row[1]:,}", f"{int(row[2]):,}", f"{int(row[3]):,}", f"{int(row[4]):,}", f"{int(row[5]):,}"
             )
 
         console.print(table)
@@ -126,6 +124,7 @@ def add_land_area_view(db_path: str = "data/processed/landuse_analytics.duckdb")
     except Exception as e:
         console.print(f"❌ [red]Error creating view: {str(e)}[/red]")
         return False
+
 
 def create_percentage_examples():
     """Create example queries using the new view"""
@@ -188,31 +187,38 @@ ORDER BY urban_expansion_pct DESC;
 
     console.print(Panel(examples, title="📝 Usage Examples", border_style="blue"))
 
+
 def main():
     """Main function"""
-    console.print(Panel.fit(
-        "🦆 [bold blue]DuckDB Land Area View Creator[/bold blue]\n"
-        "[yellow]Adding total land area calculations for percentage analysis[/yellow]",
-        border_style="blue"
-    ))
+    console.print(
+        Panel.fit(
+            "🦆 [bold blue]DuckDB Land Area View Creator[/bold blue]\n"
+            "[yellow]Adding total land area calculations for percentage analysis[/yellow]",
+            border_style="blue",
+        )
+    )
 
     if add_land_area_view():
         create_percentage_examples()
 
-        console.print(Panel.fit(
-            "✅ [bold green]View Creation Complete![/bold green]\n"
-            "🎯 You can now ask percentage-based questions like:\n"
-            "• 'Rank states by percentage of forest loss'\n"
-            "• 'Which counties have the highest percentage of agricultural land'\n"
-            "• 'Show urban expansion as percentage of total land area'",
-            border_style="green"
-        ))
+        console.print(
+            Panel.fit(
+                "✅ [bold green]View Creation Complete![/bold green]\n"
+                "🎯 You can now ask percentage-based questions like:\n"
+                "• 'Rank states by percentage of forest loss'\n"
+                "• 'Which counties have the highest percentage of agricultural land'\n"
+                "• 'Show urban expansion as percentage of total land area'",
+                border_style="green",
+            )
+        )
     else:
-        console.print(Panel.fit(
-            "❌ [bold red]View Creation Failed[/bold red]\n"
-            "Check the error messages above for details.",
-            border_style="red"
-        ))
+        console.print(
+            Panel.fit(
+                "❌ [bold red]View Creation Failed[/bold red]\nCheck the error messages above for details.",
+                border_style="red",
+            )
+        )
+
 
 if __name__ == "__main__":
     main()

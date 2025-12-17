@@ -330,8 +330,7 @@ class TestQueryValidator:
 
         # Extract table names using the internal method directly
         table_names = validator._extract_table_names(
-            "SELECT * FROM fact_landuse_transitions f "
-            "JOIN dim_scenario s ON f.scenario_id = s.scenario_id"
+            "SELECT * FROM fact_landuse_transitions f JOIN dim_scenario s ON f.scenario_id = s.scenario_id"
         )
 
         # Should extract both tables

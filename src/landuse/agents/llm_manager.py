@@ -27,7 +27,7 @@ class LLMManager(LLMInterface):
         """Initialize LLM manager with configuration."""
         self.config = config or AppConfig()
         self.console = console or Console()
-        self._logger = get_logger('llm')
+        self._logger = get_logger("llm")
 
     @time_llm_operation("create_llm", track_tokens=False)
     def create_llm(self) -> BaseChatModel:
@@ -47,7 +47,7 @@ class LLMManager(LLMInterface):
 
     def _create_openai_llm(self, model_name: str) -> ChatOpenAI:
         """Create OpenAI LLM instance."""
-        api_key = os.getenv('OPENAI_API_KEY')
+        api_key = os.getenv("OPENAI_API_KEY")
 
         if not api_key:
             self._logger.error("OpenAI API key not configured", model=model_name)
@@ -57,7 +57,7 @@ class LLMManager(LLMInterface):
             "OpenAI LLM configured",
             model=model_name,
             temperature=self.config.llm.temperature,
-            max_tokens=self.config.llm.max_tokens
+            max_tokens=self.config.llm.max_tokens,
         )
         self.console.print("[dim]Using OpenAI API key: ✓ Configured[/dim]")
 
@@ -75,7 +75,7 @@ class LLMManager(LLMInterface):
         Returns:
             Status string indicating if API key is configured
         """
-        api_key = os.getenv('OPENAI_API_KEY')
+        api_key = os.getenv("OPENAI_API_KEY")
         if not api_key:
             return "Not configured"
         return "Configured"
@@ -86,4 +86,4 @@ class LLMManager(LLMInterface):
 
     def validate_api_key(self) -> bool:
         """Validate API key is available and valid."""
-        return os.getenv('OPENAI_API_KEY') is not None
+        return os.getenv("OPENAI_API_KEY") is not None

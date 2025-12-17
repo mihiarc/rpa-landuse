@@ -227,9 +227,7 @@ class TestInMemoryMetricsTagFiltering:
         metrics.increment_counter("requests", {"env": "prod", "region": "us-west"})
         metrics.increment_counter("requests", {"env": "staging", "region": "us-east"})
 
-        prod_east = metrics.get_counter_total(
-            "requests", {"env": "prod", "region": "us-east"}
-        )
+        prod_east = metrics.get_counter_total("requests", {"env": "prod", "region": "us-east"})
         prod_any = metrics.get_counter_total("requests", {"env": "prod"})
 
         assert prod_east == 1.0
@@ -425,9 +423,7 @@ class TestMetricsCollector:
         metrics = InMemoryMetrics()
         collector = MetricsCollector(metrics)
 
-        collector.record_llm_call(
-            model="gpt-4o", duration=1.5, token_count=500, success=True
-        )
+        collector.record_llm_call(model="gpt-4o", duration=1.5, token_count=500, success=True)
 
         timer_stats = metrics.get_timer_stats("llm.call.duration")
         assert timer_stats["count"] == 1

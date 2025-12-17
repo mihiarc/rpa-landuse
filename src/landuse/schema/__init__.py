@@ -15,17 +15,17 @@ from .models import IndexDefinition, MigrationStatus, SchemaDefinition, TableDef
 from .validator import SchemaValidator, ValidationResult
 
 __all__ = [
-    'SchemaManager',
-    'MigrationEngine',
-    'MigrationPlan',
-    'MigrationResult',
-    'SchemaValidator',
-    'ValidationResult',
-    'SchemaDocGenerator',
-    'ModelGenerator',
-    'SchemaDefinition',
-    'TableDefinition',
-    'ViewDefinition',
-    'IndexDefinition',
-    'MigrationStatus'
+    "SchemaManager",
+    "MigrationEngine",
+    "MigrationPlan",
+    "MigrationResult",
+    "SchemaValidator",
+    "ValidationResult",
+    "SchemaDocGenerator",
+    "ModelGenerator",
+    "SchemaDefinition",
+    "TableDefinition",
+    "ViewDefinition",
+    "IndexDefinition",
+    "MigrationStatus",
 ]

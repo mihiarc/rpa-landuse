@@ -27,7 +27,7 @@ class TestCombinedScenariosImplementation:
     @pytest.fixture
     def db_path(self):
         """Get database path."""
-        db_path = os.getenv('LANDUSE_DB_PATH', 'data/processed/landuse_analytics.duckdb')
+        db_path = os.getenv("LANDUSE_DB_PATH", "data/processed/landuse_analytics.duckdb")
         if not Path(db_path).exists():
             pytest.skip(f"Database not found at {db_path}")
         return db_path
@@ -66,8 +66,8 @@ class TestCombinedScenariosImplementation:
             print(f"  ... and {len(scenario_names) - 5} more")
 
         # Check implementation status
-        has_overall = any('OVERALL' in name for name in scenario_names)
-        has_gcm_scenarios = any('CNRM' in name or 'HadGEM' in name for name in scenario_names)
+        has_overall = any("OVERALL" in name for name in scenario_names)
+        has_gcm_scenarios = any("CNRM" in name or "HadGEM" in name for name in scenario_names)
 
         if scenario_count == 5 and has_overall:
             print("✅ Combined scenarios fully implemented")
@@ -144,7 +144,7 @@ class TestCombinedScenariosImplementation:
             print("\n⚠️  No combined RCP-SSP scenarios found")
 
         # Expected scenarios
-        expected = ['RCP45_SSP1', 'RCP45_SSP5', 'RCP85_SSP1', 'RCP85_SSP5', 'OVERALL']
+        expected = ["RCP45_SSP1", "RCP45_SSP5", "RCP85_SSP1", "RCP85_SSP5", "OVERALL"]
         found_expected = [s for s in expected if any(s in scenario for scenario in combined_scenarios)]
 
         if len(found_expected) == 5:
@@ -179,7 +179,7 @@ class TestCombinedScenariosImplementation:
             print(f"  - {view}")
 
         # Check for expected views
-        expected_views = ['v_default_transitions', 'v_scenario_comparisons']
+        expected_views = ["v_default_transitions", "v_scenario_comparisons"]
         found_views = [v for v in expected_views if v in views]
 
         if len(found_views) == len(expected_views):
@@ -211,9 +211,11 @@ class TestCombinedScenariosImplementation:
         conn.close()
 
         # Check for statistical columns
-        stat_columns = [c for c in columns if any(
-            term in c.lower() for term in ['std', 'dev', 'min', 'max', 'variance', 'coefficient']
-        )]
+        stat_columns = [
+            c
+            for c in columns
+            if any(term in c.lower() for term in ["std", "dev", "min", "max", "variance", "coefficient"])
+        ]
 
         if stat_columns:
             print("\n✅ Statistical fields found:")
@@ -234,9 +236,9 @@ class TestCombinedScenariosImplementation:
         prompt_text = SYSTEM_PROMPT_BASE
 
         # Check for references to combined scenarios
-        has_overall = 'OVERALL' in prompt_text
-        has_default = 'default' in prompt_text.lower() and 'overall' in prompt_text.lower()
-        has_exclude = 'exclude' in prompt_text.lower() and 'overall' in prompt_text.lower()
+        has_overall = "OVERALL" in prompt_text
+        has_default = "default" in prompt_text.lower() and "overall" in prompt_text.lower()
+        has_exclude = "exclude" in prompt_text.lower() and "overall" in prompt_text.lower()
 
         print("\n Agent prompt configuration:")
         if has_overall:
@@ -260,7 +262,7 @@ class TestImplementationReadiness:
         from scripts.converters.convert_to_duckdb import LanduseCombinedScenarioConverter
 
         # Check for combined scenarios support
-        has_combined = hasattr(LanduseCombinedScenarioConverter, 'COMBINED_SCENARIOS')
+        has_combined = hasattr(LanduseCombinedScenarioConverter, "COMBINED_SCENARIOS")
 
         if has_combined:
             scenarios = LanduseCombinedScenarioConverter.COMBINED_SCENARIOS
@@ -275,21 +277,17 @@ class TestImplementationReadiness:
     def test_agent_can_handle_queries(self):
         """Test if agent can handle basic queries with current database."""
         # Skip if no API key
-        if not os.getenv('OPENAI_API_KEY'):
+        if not os.getenv("OPENAI_API_KEY"):
             pytest.skip("OpenAI API key required for agent testing")
 
         from landuse.agents.landuse_agent import LanduseAgent
         from landuse.core.app_config import AppConfig
 
-        db_path = os.getenv('LANDUSE_DB_PATH', 'data/processed/landuse_analytics.duckdb')
+        db_path = os.getenv("LANDUSE_DB_PATH", "data/processed/landuse_analytics.duckdb")
         if not Path(db_path).exists():
             pytest.skip(f"Database not found at {db_path}")
 
-        config = AppConfig(
-            database={'path': db_path},
-            agent={'max_iterations': 3},
-            logging={'level': 'WARNING'}
-        )
+        config = AppConfig(database={"path": db_path}, agent={"max_iterations": 3}, logging={"level": "WARNING"})
 
         with LanduseAgent(config) as agent:
             # Test a simple query

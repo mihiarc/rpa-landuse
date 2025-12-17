@@ -39,11 +39,19 @@ EXPLORER_RATE_LIMIT_WINDOW = 60  # seconds
 
 # Allowed tables for security
 ALLOWED_TABLES = {
-    'dim_geography', 'dim_indicators', 'dim_landuse', 'dim_scenario',
-    'dim_socioeconomic', 'dim_time', 'fact_landuse_transitions',
-    'fact_socioeconomic_projections', 'v_full_projection_period',
-    'v_income_trends', 'v_landuse_socioeconomic', 'v_population_trends',
-    'v_scenarios_combined'
+    "dim_geography",
+    "dim_indicators",
+    "dim_landuse",
+    "dim_scenario",
+    "dim_socioeconomic",
+    "dim_time",
+    "fact_landuse_transitions",
+    "fact_socioeconomic_projections",
+    "v_full_projection_period",
+    "v_income_trends",
+    "v_landuse_socioeconomic",
+    "v_population_trends",
+    "v_scenarios_combined",
 }
 
 
@@ -61,8 +69,8 @@ def get_database_connection():
         conn = st.connection(
             name="landuse_db_explorer",
             type=DuckDBConnection,
-            database=os.getenv('LANDUSE_DB_PATH', 'data/processed/landuse_analytics.duckdb'),
-            read_only=True
+            database=os.getenv("LANDUSE_DB_PATH", "data/processed/landuse_analytics.duckdb"),
+            read_only=True,
         )
         return conn
     except DatabaseConnectionError as e:
@@ -88,7 +96,7 @@ def get_table_schema():
         schema_info = {}
 
         for _, row in tables_df.iterrows():
-            table_name = row['table_name']
+            table_name = row["table_name"]
 
             if table_name not in ALLOWED_TABLES:
                 continue
@@ -98,11 +106,7 @@ def get_table_schema():
             sample_query = f'SELECT * FROM "{table_name}" LIMIT 5'
             sample_data = conn.query(sample_query, ttl=SCHEMA_TTL)
 
-            schema_info[table_name] = {
-                'columns': columns,
-                'row_count': row_count,
-                'sample_data': sample_data
-            }
+            schema_info[table_name] = {"columns": columns, "row_count": row_count, "sample_data": sample_data}
 
         return schema_info
     except SchemaError as e:
@@ -155,7 +159,7 @@ FROM dim_geography
 WHERE state_name IS NOT NULL
 ORDER BY state_name, county_name
 LIMIT 20;
-"""
+""",
         },
         "Agricultural Analysis": {
             "Agricultural land loss": """
@@ -197,7 +201,7 @@ WHERE ((fl.landuse_name = 'Crop' AND tl.landuse_name = 'Pasture')
 GROUP BY t.year_range, g.state_code, fl.landuse_name, tl.landuse_name
 ORDER BY avg_acres_per_scenario DESC
 LIMIT 30;
-"""
+""",
         },
         "Climate Analysis": {
             "RCP scenario comparison": """
@@ -233,7 +237,7 @@ WHERE f.transition_type = 'change'
 GROUP BY s.ssp_scenario, fl.landuse_name, tl.landuse_name
 ORDER BY total_acres DESC
 LIMIT 40;
-"""
+""",
         },
         "Geographic Analysis": {
             "State-level summaries": """
@@ -271,7 +275,7 @@ WHERE f.transition_type = 'change'
 GROUP BY g.fips_code, g.county_name, g.state_code
 ORDER BY total_transition_acres DESC
 LIMIT 30;
-"""
+""",
         },
         "Time Series": {
             "Trends over time": """
@@ -321,8 +325,8 @@ FROM period_comparison
 GROUP BY from_landuse, to_landuse
 ORDER BY ABS(acceleration) DESC
 LIMIT 20;
-"""
-        }
+""",
+        },
     }
 
 
@@ -341,9 +345,9 @@ def execute_query(query: str, ttl: int = 60):
         Various DuckDB exceptions with user-friendly error messages
     """
     # Check rate limit if initialized
-    if 'explorer_rate_limiter' in st.session_state:
+    if "explorer_rate_limiter" in st.session_state:
         allowed, rate_error = st.session_state.explorer_rate_limiter.check_rate_limit(
-            st.session_state.get('explorer_session_id', 'default')
+            st.session_state.get("explorer_session_id", "default")
         )
         if not allowed:
             st.warning(f"⏳ {rate_error}")
@@ -352,16 +356,14 @@ def execute_query(query: str, ttl: int = 60):
     conn = get_database_connection()
 
     # Add safety limit if not present (skip if query has UNION)
-    query_trimmed = query.strip().rstrip(';')
+    query_trimmed = query.strip().rstrip(";")
     query_upper = query_trimmed.upper()
 
     # Only add LIMIT if:
     # 1. It's a SELECT query
     # 2. Doesn't already have LIMIT
     # 3. Doesn't have UNION (which may have its own limits)
-    if (query_upper.startswith('SELECT') and
-        'LIMIT' not in query_upper and
-        'UNION' not in query_upper):
+    if query_upper.startswith("SELECT") and "LIMIT" not in query_upper and "UNION" not in query_upper:
         query = f"{query_trimmed} LIMIT {MAX_DISPLAY_ROWS}"
     else:
         query = query_trimmed
@@ -456,9 +458,9 @@ def show_schema_browser():
     col1, col2, col3, col4 = st.columns(4)
 
     total_tables = len(schema_info)
-    total_rows = sum(info['row_count'] for info in schema_info.values())
-    fact_tables = sum(1 for name in schema_info.keys() if 'fact' in name)
-    dim_tables = sum(1 for name in schema_info.keys() if 'dim' in name)
+    total_rows = sum(info["row_count"] for info in schema_info.values())
+    fact_tables = sum(1 for name in schema_info.keys() if "fact" in name)
+    dim_tables = sum(1 for name in schema_info.keys() if "dim" in name)
 
     with col1:
         st.metric("📊 Total Tables", total_tables)
@@ -475,8 +477,11 @@ def show_schema_browser():
     search_term = st.text_input("🔍 Search tables:", placeholder="Type to filter tables...")
 
     # Filter tables based on search
-    filtered_tables = {name: info for name, info in schema_info.items()
-                      if search_term.lower() in name.lower()} if search_term else schema_info
+    filtered_tables = (
+        {name: info for name, info in schema_info.items() if search_term.lower() in name.lower()}
+        if search_term
+        else schema_info
+    )
 
     if not filtered_tables:
         st.info(f"No tables found matching '{search_term}'")
@@ -488,7 +493,7 @@ def show_schema_browser():
     selected_table = st.selectbox(
         "Select a table to explore:",
         list(filtered_tables.keys()),
-        help="Choose a table to view its structure and sample data"
+        help="Choose a table to view its structure and sample data",
     )
 
     if selected_table and selected_table in filtered_tables:
@@ -499,7 +504,7 @@ def show_schema_browser():
         with col1:
             st.metric("Total Rows", f"{table_data['row_count']:,}")
         with col2:
-            st.metric("Columns", len(table_data['columns']))
+            st.metric("Columns", len(table_data["columns"]))
         with col3:
             st.metric("Table Type", "Fact" if "fact_" in selected_table else "Dimension")
 
@@ -521,20 +526,12 @@ def show_schema_browser():
 
         # Column information
         st.markdown("#### 📋 Column Details")
-        st.dataframe(
-            table_data['columns'],
-            use_container_width=True,
-            hide_index=True
-        )
+        st.dataframe(table_data["columns"], use_container_width=True, hide_index=True)
 
         # Sample data
         st.markdown("#### 🔍 Sample Data (First 5 Rows)")
-        if not table_data['sample_data'].empty:
-            st.dataframe(
-                table_data['sample_data'],
-                use_container_width=True,
-                hide_index=True
-            )
+        if not table_data["sample_data"].empty:
+            st.dataframe(table_data["sample_data"], use_container_width=True, hide_index=True)
         else:
             st.info("No sample data available")
 
@@ -545,7 +542,7 @@ def show_query_editor():
     st.markdown("### 📝 SQL Query Editor")
 
     # Initialize query text in session state
-    if 'query_text' not in st.session_state:
+    if "query_text" not in st.session_state:
         st.session_state.query_text = "SELECT * FROM dim_landuse LIMIT 10;"
 
     # Query templates with descriptions
@@ -554,15 +551,13 @@ def show_query_editor():
         "Basic SELECT": "View agricultural land use types (simple filtering example)",
         "JOIN tables": "Total acres by scenario and time period (demonstrates table joins)",
         "Aggregation": "Count land use types by category (grouping and counting)",
-        "Time series": "Total land transitions over years (temporal analysis)"
+        "Time series": "Total land transitions over years (temporal analysis)",
     }
 
     col1, col2 = st.columns([3, 1])
     with col2:
         template = st.selectbox(
-            "Quick templates:",
-            list(template_descriptions.keys()),
-            help="Load a query template to get started"
+            "Quick templates:", list(template_descriptions.keys()), help="Load a query template to get started"
         )
 
         # Show description of selected template
@@ -608,7 +603,7 @@ ORDER BY t.start_year;"""
         value=st.session_state.query_text,
         height=200,
         help=f"Write SQL queries to explore the data. Results automatically limited to {MAX_DISPLAY_ROWS} rows.",
-        placeholder="SELECT * FROM table_name WHERE condition..."
+        placeholder="SELECT * FROM table_name WHERE condition...",
     )
 
     # Update session state
@@ -618,12 +613,7 @@ ORDER BY t.start_year;"""
     col1, col2 = st.columns([1, 1])
 
     with col1:
-        run_query = st.button(
-            "▶️ Run Query",
-            type="primary",
-            use_container_width=True,
-            disabled=not query.strip()
-        )
+        run_query = st.button("▶️ Run Query", type="primary", use_container_width=True, disabled=not query.strip())
 
     with col2:
         if st.button("🗑️ Clear", use_container_width=True):
@@ -677,27 +667,24 @@ def display_query_results(df: pd.DataFrame, query: str):
             min_value=min_rows,
             max_value=min(MAX_DISPLAY_ROWS, len(df)),
             value=min(DEFAULT_DISPLAY_ROWS, len(df)),
-            step=min(10, len(df))
+            step=min(10, len(df)),
         )
 
     # Format display dataframe
     display_df = df.head(max_rows).copy()
 
     if format_numbers:
-        numeric_cols = df.select_dtypes(include=['int64', 'float64']).columns.tolist()
+        numeric_cols = df.select_dtypes(include=["int64", "float64"]).columns.tolist()
         for col in numeric_cols:
             if col in display_df.columns:
-                if display_df[col].dtype == 'int64':
+                if display_df[col].dtype == "int64":
                     display_df[col] = display_df[col].apply(lambda x: f"{x:,}")
                 else:
                     display_df[col] = display_df[col].apply(lambda x: f"{x:,.2f}")
 
     # Display data (always hide index)
     st.dataframe(
-        display_df,
-        use_container_width=True,
-        hide_index=True,
-        height=min(600, max(100, len(display_df) * 35 + 50))
+        display_df, use_container_width=True, hide_index=True, height=min(600, max(100, len(display_df) * 35 + 50))
     )
 
     if len(df) > max_rows:
@@ -710,36 +697,32 @@ def display_query_results(df: pd.DataFrame, query: str):
     with export_col1:
         csv = df.to_csv(index=False)
         st.download_button(
-            label="CSV",
-            data=csv,
-            file_name="query_results.csv",
-            mime="text/csv",
-            use_container_width=True
+            label="CSV", data=csv, file_name="query_results.csv", mime="text/csv", use_container_width=True
         )
 
     with export_col2:
-        json_str = df.to_json(orient='records', indent=2)
+        json_str = df.to_json(orient="records", indent=2)
         st.download_button(
             label="JSON",
             data=json_str,
             file_name="query_results.json",
             mime="application/json",
-            use_container_width=True
+            use_container_width=True,
         )
 
     with export_col3:
         parquet_buffer = BytesIO()
-        df.to_parquet(parquet_buffer, engine='pyarrow', index=False)
+        df.to_parquet(parquet_buffer, engine="pyarrow", index=False)
         st.download_button(
             label="Parquet",
             data=parquet_buffer.getvalue(),
             file_name="query_results.parquet",
             mime="application/octet-stream",
-            use_container_width=True
+            use_container_width=True,
         )
 
     # Statistics for numeric columns
-    numeric_cols = df.select_dtypes(include=['int64', 'float64']).columns.tolist()
+    numeric_cols = df.select_dtypes(include=["int64", "float64"]).columns.tolist()
     if numeric_cols:
         with st.expander("📊 View Statistics"):
             stats_df = df[numeric_cols].describe()
@@ -764,12 +747,19 @@ def show_query_examples():
 
                     col1, col2 = st.columns([1, 1])
                     with col1:
-                        if st.button("▶️ Run Now", key=f"run_{category}_{name}", type="primary", use_container_width=True):
+                        if st.button(
+                            "▶️ Run Now", key=f"run_{category}_{name}", type="primary", use_container_width=True
+                        ):
                             with st.spinner("Executing query..."):
                                 df = execute_query(query, ttl=60)
                             display_query_results(df, query)
                     with col2:
-                        if st.button("📝 Load in Editor", key=f"load_{category}_{name}", use_container_width=True, help="Copy this query to the SQL Editor tab where you can modify it"):
+                        if st.button(
+                            "📝 Load in Editor",
+                            key=f"load_{category}_{name}",
+                            use_container_width=True,
+                            help="Copy this query to the SQL Editor tab where you can modify it",
+                        ):
                             st.session_state.query_text = query
                             st.session_state.active_tab = 0  # Switch to SQL Editor
                             st.rerun()
@@ -781,34 +771,38 @@ def show_data_dictionary():
 
     # Land use categories
     st.markdown("#### 🌱 Land Use Categories")
-    landuse_data = pd.DataFrame({
-        "Code": ["cr", "ps", "rg", "fr", "ur"],
-        "Name": ["Crop", "Pasture", "Rangeland", "Forest", "Urban"],
-        "Category": ["Agriculture", "Agriculture", "Natural", "Natural", "Developed"],
-        "Description": [
-            "Agricultural cropland for farming",
-            "Livestock grazing and pasture land",
-            "Natural grasslands and rangeland",
-            "Forested areas and woodlands",
-            "Developed urban and suburban areas"
-        ]
-    })
+    landuse_data = pd.DataFrame(
+        {
+            "Code": ["cr", "ps", "rg", "fr", "ur"],
+            "Name": ["Crop", "Pasture", "Rangeland", "Forest", "Urban"],
+            "Category": ["Agriculture", "Agriculture", "Natural", "Natural", "Developed"],
+            "Description": [
+                "Agricultural cropland for farming",
+                "Livestock grazing and pasture land",
+                "Natural grasslands and rangeland",
+                "Forested areas and woodlands",
+                "Developed urban and suburban areas",
+            ],
+        }
+    )
     st.dataframe(landuse_data, use_container_width=True, hide_index=True)
 
     # Climate scenarios
     st.markdown("#### 🌡️ Climate Scenarios")
-    scenario_data = pd.DataFrame({
-        "Component": ["RCP", "RCP", "SSP", "SSP", "SSP", "SSP"],
-        "Value": ["4.5", "8.5", "1", "2", "3", "5"],
-        "Description": [
-            "Lower emissions pathway (moderate climate change)",
-            "Higher emissions pathway (severe climate change)",
-            "Sustainability pathway (strong international cooperation)",
-            "Middle of the road (moderate challenges)",
-            "Regional rivalry (significant challenges)",
-            "Fossil-fueled development (high economic growth)"
-        ]
-    })
+    scenario_data = pd.DataFrame(
+        {
+            "Component": ["RCP", "RCP", "SSP", "SSP", "SSP", "SSP"],
+            "Value": ["4.5", "8.5", "1", "2", "3", "5"],
+            "Description": [
+                "Lower emissions pathway (moderate climate change)",
+                "Higher emissions pathway (severe climate change)",
+                "Sustainability pathway (strong international cooperation)",
+                "Middle of the road (moderate challenges)",
+                "Regional rivalry (significant challenges)",
+                "Fossil-fueled development (high economic growth)",
+            ],
+        }
+    )
     st.dataframe(scenario_data, use_container_width=True, hide_index=True)
 
     # Time periods
@@ -850,23 +844,17 @@ def main():
     st.markdown("**Interactive database exploration with SQL editor and schema browser**")
 
     # Initialize session state
-    if 'active_tab' not in st.session_state:
+    if "active_tab" not in st.session_state:
         st.session_state.active_tab = 0
-    if 'explorer_session_id' not in st.session_state:
+    if "explorer_session_id" not in st.session_state:
         st.session_state.explorer_session_id = str(uuid.uuid4())
-    if 'explorer_rate_limiter' not in st.session_state:
+    if "explorer_rate_limiter" not in st.session_state:
         st.session_state.explorer_rate_limiter = RateLimiter(
-            max_calls=EXPLORER_RATE_LIMIT_CALLS,
-            time_window=EXPLORER_RATE_LIMIT_WINDOW
+            max_calls=EXPLORER_RATE_LIMIT_CALLS, time_window=EXPLORER_RATE_LIMIT_WINDOW
         )
 
     # Create main tabs
-    tabs = st.tabs([
-        "📝 SQL Editor",
-        "🗺️ Schema Browser",
-        "📋 Example Queries",
-        "📚 Data Dictionary"
-    ])
+    tabs = st.tabs(["📝 SQL Editor", "🗺️ Schema Browser", "📋 Example Queries", "📚 Data Dictionary"])
 
     with tabs[0]:
         show_query_editor()

@@ -11,7 +11,7 @@ from langchain_core.tools import BaseTool
 
 from landuse.core.app_config import AppConfig
 
-T = TypeVar('T')
+T = TypeVar("T")
 
 
 class ConfigInterface(Protocol):

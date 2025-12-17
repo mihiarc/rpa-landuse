@@ -20,8 +20,8 @@ pytest.skip("LangGraph agent refactoring in progress", allow_module_level=True)
 
 @pytest.mark.integration
 @pytest.mark.skipif(
-    not os.getenv('ANTHROPIC_API_KEY') and not os.getenv('OPENAI_API_KEY'),
-    reason="No API key available for integration test"
+    not os.getenv("ANTHROPIC_API_KEY") and not os.getenv("OPENAI_API_KEY"),
+    reason="No API key available for integration test",
 )
 class TestLangGraphIntegration:
     """Integration tests for LangGraph agent with real API calls"""
@@ -29,7 +29,7 @@ class TestLangGraphIntegration:
     @pytest.fixture
     def agent_config(self):
         """Create test configuration"""
-        db_path = os.getenv('LANDUSE_DB_PATH', 'data/processed/landuse_analytics.duckdb')
+        db_path = os.getenv("LANDUSE_DB_PATH", "data/processed/landuse_analytics.duckdb")
 
         # Skip if database doesn't exist
         if not Path(db_path).exists():
@@ -39,7 +39,7 @@ class TestLangGraphIntegration:
             db_path=db_path,
             max_iterations=3,
             enable_memory=False,  # Disable for testing
-            verbose=True
+            verbose=True,
         )
 
     def test_simple_query(self, agent_config):
@@ -55,10 +55,10 @@ class TestLangGraphIntegration:
         assert "❌" not in response  # No error
 
         # Should mention some expected tables
-        assert any(table in response.lower() for table in [
-            "fact_landuse_transitions", "dim_scenario", "dim_geography",
-            "dim_landuse", "dim_time"
-        ])
+        assert any(
+            table in response.lower()
+            for table in ["fact_landuse_transitions", "dim_scenario", "dim_geography", "dim_landuse", "dim_time"]
+        )
 
     def test_agricultural_query(self, agent_config):
         """Test an agricultural land loss query"""
@@ -72,9 +72,7 @@ class TestLangGraphIntegration:
         assert "❌" not in response  # No error
 
         # Should contain relevant terms
-        assert any(term in response.lower() for term in [
-            "agricultural", "agriculture", "crop", "acres", "land"
-        ])
+        assert any(term in response.lower() for term in ["agricultural", "agriculture", "crop", "acres", "land"])
 
     def test_streaming_query(self, agent_config):
         """Test streaming functionality"""
@@ -143,9 +141,7 @@ class TestLangGraphIntegration:
 
         assert response is not None
         assert "❌" not in response
-        assert any(term in response.lower() for term in [
-            "rcp45", "rcp85", "agricultural", "scenario"
-        ])
+        assert any(term in response.lower() for term in ["rcp45", "rcp85", "agricultural", "scenario"])
 
 
 if __name__ == "__main__":

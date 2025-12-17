@@ -19,15 +19,15 @@ def mock_streamlit_module():
     from tests.unit.streamlit_tests.mock_streamlit import mock_st
 
     # Save original module if it exists
-    original_streamlit = sys.modules.get('streamlit', None)
+    original_streamlit = sys.modules.get("streamlit", None)
 
     # Set our mock
-    sys.modules['streamlit'] = mock_st
+    sys.modules["streamlit"] = mock_st
 
     yield
 
     # Restore original module
     if original_streamlit:
-        sys.modules['streamlit'] = original_streamlit
+        sys.modules["streamlit"] = original_streamlit
     else:
-        sys.modules.pop('streamlit', None)
+        sys.modules.pop("streamlit", None)

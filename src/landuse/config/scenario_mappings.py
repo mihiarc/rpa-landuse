@@ -23,6 +23,7 @@ class ScenarioDisplay(NamedTuple):
         society: Socioeconomic pathway description
         growth_summary: Summary of US growth metrics
     """
+
     code: str
     name: str
     theme: str
@@ -44,11 +45,11 @@ class ScenarioMapping:
 
     # Core mapping from database names to RPA codes
     DB_TO_RPA: Dict[str, str] = {
-        'OVERALL': 'OVERALL',  # Special case - ensemble mean
-        'RCP45_SSP1': 'LM',    # Lower-Moderate (Taking the Green Road)
-        'RCP85_SSP2': 'HM',    # High-Moderate (Middle of the Road)
-        'RCP85_SSP3': 'HL',    # High-Low (A Rocky Road)
-        'RCP85_SSP5': 'HH',    # High-High (Taking the Highway)
+        "OVERALL": "OVERALL",  # Special case - ensemble mean
+        "RCP45_SSP1": "LM",  # Lower-Moderate (Taking the Green Road)
+        "RCP85_SSP2": "HM",  # High-Moderate (Middle of the Road)
+        "RCP85_SSP3": "HL",  # High-Low (A Rocky Road)
+        "RCP85_SSP5": "HH",  # High-High (Taking the Highway)
     }
 
     # Reverse mapping from RPA codes to database names
@@ -56,59 +57,53 @@ class ScenarioMapping:
 
     # Full display information for each scenario
     SCENARIO_INFO: Dict[str, ScenarioDisplay] = {
-        'OVERALL': ScenarioDisplay(
-            code='OVERALL',
-            name='Ensemble Mean',
-            theme='Baseline Projection',
-            climate='All pathways averaged',
-            society='All pathways averaged',
-            growth_summary='Mean of all scenarios'
+        "OVERALL": ScenarioDisplay(
+            code="OVERALL",
+            name="Ensemble Mean",
+            theme="Baseline Projection",
+            climate="All pathways averaged",
+            society="All pathways averaged",
+            growth_summary="Mean of all scenarios",
         ),
-        'RCP45_SSP1': ScenarioDisplay(
-            code='LM',
-            name='Lower-Moderate',
-            theme='Taking the Green Road',
-            climate='RCP4.5 (2.5°C)',
-            society='Sustainable (SSP1)',
-            growth_summary='GDP: 3.0x, Pop: 1.5x'
+        "RCP45_SSP1": ScenarioDisplay(
+            code="LM",
+            name="Lower-Moderate",
+            theme="Taking the Green Road",
+            climate="RCP4.5 (2.5°C)",
+            society="Sustainable (SSP1)",
+            growth_summary="GDP: 3.0x, Pop: 1.5x",
         ),
-        'RCP85_SSP2': ScenarioDisplay(
-            code='HM',
-            name='High-Moderate',
-            theme='Middle of the Road',
-            climate='RCP8.5 (4.5°C)',
-            society='Middle road (SSP2)',
-            growth_summary='GDP: 2.8x, Pop: 1.4x'
+        "RCP85_SSP2": ScenarioDisplay(
+            code="HM",
+            name="High-Moderate",
+            theme="Middle of the Road",
+            climate="RCP8.5 (4.5°C)",
+            society="Middle road (SSP2)",
+            growth_summary="GDP: 2.8x, Pop: 1.4x",
         ),
-        'RCP85_SSP3': ScenarioDisplay(
-            code='HL',
-            name='High-Low',
-            theme='A Rocky Road',
-            climate='RCP8.5 (4.5°C)',
-            society='Regional rivalry (SSP3)',
-            growth_summary='GDP: 1.9x, Pop: 1.0x'
+        "RCP85_SSP3": ScenarioDisplay(
+            code="HL",
+            name="High-Low",
+            theme="A Rocky Road",
+            climate="RCP8.5 (4.5°C)",
+            society="Regional rivalry (SSP3)",
+            growth_summary="GDP: 1.9x, Pop: 1.0x",
         ),
-        'RCP85_SSP5': ScenarioDisplay(
-            code='HH',
-            name='High-High',
-            theme='Taking the Highway',
-            climate='RCP8.5 (4.5°C)',
-            society='Fossil-fueled (SSP5)',
-            growth_summary='GDP: 4.7x, Pop: 1.9x'
+        "RCP85_SSP5": ScenarioDisplay(
+            code="HH",
+            name="High-High",
+            theme="Taking the Highway",
+            climate="RCP8.5 (4.5°C)",
+            society="Fossil-fueled (SSP5)",
+            growth_summary="GDP: 4.7x, Pop: 1.9x",
         ),
     }
 
     # Display order for sorting scenarios in results
-    DISPLAY_ORDER: Dict[str, int] = {
-        'OVERALL': 0,
-        'LM': 1,
-        'HM': 2,
-        'HL': 3,
-        'HH': 4
-    }
+    DISPLAY_ORDER: Dict[str, int] = {"OVERALL": 0, "LM": 1, "HM": 2, "HL": 3, "HH": 4}
 
     @classmethod
-    def get_display_name(cls, db_name: str, format: str = 'full') -> str:
+    def get_display_name(cls, db_name: str, format: str = "full") -> str:
         """Get display name for a database scenario name.
 
         Args:
@@ -134,21 +129,21 @@ class ScenarioMapping:
 
         info = cls.SCENARIO_INFO[db_name]
 
-        if format == 'code':
+        if format == "code":
             return info.code
-        elif format == 'name':
+        elif format == "name":
             return info.name
-        elif format == 'full':
-            if info.code == 'OVERALL':
-                return 'OVERALL (Ensemble Mean)'
+        elif format == "full":
+            if info.code == "OVERALL":
+                return "OVERALL (Ensemble Mean)"
             return f"{info.code} ({info.name})"
-        elif format == 'full_technical':
-            if info.code == 'OVERALL':
-                return 'OVERALL (Ensemble Mean)'
+        elif format == "full_technical":
+            if info.code == "OVERALL":
+                return "OVERALL (Ensemble Mean)"
             return f"{info.code} ({info.name}, {db_name})"
-        elif format == 'detailed':
-            if info.code == 'OVERALL':
-                return 'OVERALL: Ensemble Mean across all scenarios'
+        elif format == "detailed":
+            if info.code == "OVERALL":
+                return "OVERALL: Ensemble Mean across all scenarios"
             return f"{info.code} ({info.name}): {info.climate}, {info.society} - {info.growth_summary}"
         else:
             return db_name
@@ -192,9 +187,11 @@ class ScenarioMapping:
 
         # Check partial matches in names and themes
         for db_name, info in cls.SCENARIO_INFO.items():
-            if (input_upper in info.name.upper() or
-                input_upper in info.theme.upper() or
-                input_upper.replace('-', ' ') in info.name.upper().replace('-', ' ')):
+            if (
+                input_upper in info.name.upper()
+                or input_upper in info.theme.upper()
+                or input_upper.replace("-", " ") in info.name.upper().replace("-", " ")
+            ):
                 return db_name
 
         return None
@@ -240,7 +237,7 @@ class ScenarioMapping:
             return cls.DISPLAY_ORDER.get(info.code, 999)
 
         # Check if it's already a code
-        code = scenario_name.split()[0] if ' ' in scenario_name else scenario_name
+        code = scenario_name.split()[0] if " " in scenario_name else scenario_name
         return cls.DISPLAY_ORDER.get(code.upper(), 999)
 
     @classmethod
@@ -258,27 +255,21 @@ class ScenarioMapping:
         """
         rows = []
         for db_name, info in cls.SCENARIO_INFO.items():
-            if db_name == 'OVERALL':
+            if db_name == "OVERALL":
                 continue  # Skip overall in reference table
-            rows.append(
-                f"| **{info.code}** | {info.name} | {info.climate} | "
-                f"{info.society} | {info.growth_summary} |"
-            )
+            rows.append(f"| **{info.code}** | {info.name} | {info.climate} | {info.society} | {info.growth_summary} |")
 
-        header = (
-            "| Code | Name | Climate | Society | U.S. Growth |\n"
-            "|------|------|---------|---------|-------------|"
-        )
+        header = "| Code | Name | Climate | Society | U.S. Growth |\n|------|------|---------|---------|-------------|"
 
         return header + "\n" + "\n".join(rows)
 
 
 # Convenience constants for common use
-OVERALL = 'OVERALL'
-LOWER_MODERATE = 'LM'
-HIGH_MODERATE = 'HM'
-HIGH_LOW = 'HL'
-HIGH_HIGH = 'HH'
+OVERALL = "OVERALL"
+LOWER_MODERATE = "LM"
+HIGH_MODERATE = "HM"
+HIGH_LOW = "HL"
+HIGH_HIGH = "HH"
 
 ALL_RPA_CODES = [OVERALL, LOWER_MODERATE, HIGH_MODERATE, HIGH_LOW, HIGH_HIGH]
 COMPARISON_CODES = [LOWER_MODERATE, HIGH_MODERATE, HIGH_LOW, HIGH_HIGH]  # Exclude OVERALL

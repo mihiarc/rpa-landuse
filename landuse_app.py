@@ -31,6 +31,7 @@ try:
 except Exception as e:
     print(f"ERROR setting up paths: {e}")
     import traceback
+
     traceback.print_exc()
 
 # Import third-party libraries after sys.path modification
@@ -43,9 +44,9 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded",
     menu_items={
-        'Get Help': 'https://github.com/mihiarc/rpa-landuse',
-        'Report a bug': 'https://github.com/mihiarc/rpa-landuse/issues',
-        'About': """
+        "Get Help": "https://github.com/mihiarc/rpa-landuse",
+        "Report a bug": "https://github.com/mihiarc/rpa-landuse/issues",
+        "About": """
         # USDA Forest Service RPA Assessment
 
         Resources Planning Act (RPA) Assessment Analytics Dashboard
@@ -58,8 +59,8 @@ st.set_page_config(
 
         Data source: USDA Forest Service 2020 RPA Assessment
         Built with LangGraph, DuckDB, and Streamlit.
-        """
-    }
+        """,
+    },
 )
 
 # Load environment variables (already imported at top)
@@ -69,12 +70,7 @@ try:
     from dotenv import load_dotenv  # noqa: E402
 
     # Try multiple possible env file locations
-    possible_env_paths = [
-        project_root / "config" / ".env",
-        project_root / ".env",
-        Path("config/.env"),
-        Path(".env")
-    ]
+    possible_env_paths = [project_root / "config" / ".env", project_root / ".env", Path("config/.env"), Path(".env")]
 
     env_loaded = False
     for env_path in possible_env_paths:
@@ -97,7 +93,7 @@ except Exception as e:
 
 # Use Streamlit secrets in deployment (if available)
 try:
-    if hasattr(st, 'secrets'):
+    if hasattr(st, "secrets"):
         # Check if secrets exist before trying to access them
         try:
             if len(st.secrets) > 0:
@@ -115,7 +111,8 @@ except Exception as e:
         print(f"ERROR loading st.secrets: {e}")
 
 # Custom CSS for modern styling with theme-aware colors
-st.markdown("""
+st.markdown(
+    """
 <style>
     /* Wide layout optimizations */
     .block-container {
@@ -312,26 +309,24 @@ st.markdown("""
         margin-bottom: 2rem;
     }
 </style>
-""", unsafe_allow_html=True)
+""",
+    unsafe_allow_html=True,
+)
+
 
 def check_environment():
     """Check if the environment is properly configured"""
     # os and Path already imported at top of file
 
-    checks = {
-        "database": False,
-        "api_keys": False,
-        "dependencies": False,
-        "landuse_module": False
-    }
+    checks = {"database": False, "api_keys": False, "dependencies": False, "landuse_module": False}
 
     debug_info = []
 
     # Check database with multiple possible paths
     db_paths = [
-        Path(os.getenv('LANDUSE_DB_PATH', 'data/processed/landuse_analytics.duckdb')),
-        project_root / 'data' / 'processed' / 'landuse_analytics.duckdb',
-        Path('data/processed/landuse_analytics.duckdb')
+        Path(os.getenv("LANDUSE_DB_PATH", "data/processed/landuse_analytics.duckdb")),
+        project_root / "data" / "processed" / "landuse_analytics.duckdb",
+        Path("data/processed/landuse_analytics.duckdb"),
     ]
 
     for db_path in db_paths:
@@ -357,6 +352,7 @@ def check_environment():
         import duckdb
         import langchain
         import pandas
+
         checks["dependencies"] = True
         debug_info.append("Core dependencies OK")
     except ImportError as e:
@@ -366,6 +362,7 @@ def check_environment():
     # Check landuse module
     try:
         from landuse.core.app_config import AppConfig
+
         checks["landuse_module"] = True
         debug_info.append("Landuse module OK")
     except Exception as e:
@@ -374,17 +371,21 @@ def check_environment():
 
     return checks, debug_info
 
+
 def show_welcome_page():
     """Display the welcome/home page with wide layout optimization"""
 
     # Hero Section with gradient background
-    st.markdown("""
+    st.markdown(
+        """
     <div class="hero-section">
         <h1 class="hero-title">🌲 USDA Forest Service RPA Assessment</h1>
         <p class="hero-subtitle">Resources Planning Act Assessment Analytics Dashboard</p>
         <p class="hero-subtitle">Explore county-level land use projections from 2012-2100 across 20 climate scenarios</p>
     </div>
-    """, unsafe_allow_html=True)
+    """,
+        unsafe_allow_html=True,
+    )
 
     # Add system check hint if there are issues
     checks, _ = check_environment()
@@ -399,7 +400,8 @@ def show_welcome_page():
 
     with col1:
         with st.container():
-            st.markdown("""
+            st.markdown(
+                """
             <div class="feature-card">
                 <div class="feature-icon">💬</div>
                 <h3 class="feature-title">Natural Language Queries</h3>
@@ -410,14 +412,17 @@ def show_welcome_page():
                     <li>Urban expansion patterns</li>
                 </ul>
             </div>
-            """, unsafe_allow_html=True)
+            """,
+                unsafe_allow_html=True,
+            )
 
             if st.button("💬 Open Chat", key="feature_chat", use_container_width=True):
                 st.switch_page("views/chat.py")
 
     with col2:
         with st.container():
-            st.markdown("""
+            st.markdown(
+                """
             <div class="feature-card">
                 <div class="feature-icon">📊</div>
                 <h3 class="feature-title">Interactive Analytics</h3>
@@ -428,7 +433,9 @@ def show_welcome_page():
                     <li>Time series analysis</li>
                 </ul>
             </div>
-            """, unsafe_allow_html=True)
+            """,
+                unsafe_allow_html=True,
+            )
 
             if st.button("📊 Open Analytics", key="feature_analytics", use_container_width=True):
                 st.switch_page("views/analytics.py")
@@ -438,7 +445,8 @@ def show_welcome_page():
 
     with col3:
         with st.container():
-            st.markdown("""
+            st.markdown(
+                """
             <div class="feature-card">
                 <div class="feature-icon">🔍</div>
                 <h3 class="feature-title">Data Explorer</h3>
@@ -449,14 +457,17 @@ def show_welcome_page():
                     <li>Export capabilities</li>
                 </ul>
             </div>
-            """, unsafe_allow_html=True)
+            """,
+                unsafe_allow_html=True,
+            )
 
             if st.button("🔍 Open Explorer", key="feature_explorer", use_container_width=True):
                 st.switch_page("views/explorer.py")
 
     with col4:
         with st.container():
-            st.markdown("""
+            st.markdown(
+                """
             <div class="feature-card">
                 <div class="feature-icon">🗺️</div>
                 <h3 class="feature-title">Enhanced Visualizations</h3>
@@ -467,63 +478,42 @@ def show_welcome_page():
                     <li>Animated timelines</li>
                 </ul>
             </div>
-            """, unsafe_allow_html=True)
+            """,
+                unsafe_allow_html=True,
+            )
 
             if st.button("🗺️ Open Visualizations", key="feature_viz", use_container_width=True):
                 st.switch_page("views/analytics.py")
+
 
 # Define pages using modern st.Page API
 def create_pages():
     """Create page definitions for navigation"""
 
     # Main dashboard (home page)
-    home_page = st.Page(
-        show_welcome_page,
-        title="Home",
-        icon=":material/home:",
-        default=True
-    )
+    home_page = st.Page(show_welcome_page, title="Home", icon=":material/home:", default=True)
 
     # Chat interface page
-    chat_page = st.Page(
-        "views/chat.py",
-        title="Natural Language Chat",
-        icon=":material/chat:"
-    )
+    chat_page = st.Page("views/chat.py", title="Natural Language Chat", icon=":material/chat:")
 
     # Analytics dashboard page
-    analytics_page = st.Page(
-        "views/analytics.py",
-        title="Analytics Dashboard",
-        icon=":material/analytics:"
-    )
+    analytics_page = st.Page("views/analytics.py", title="Analytics Dashboard", icon=":material/analytics:")
 
     # Data explorer page
-    explorer_page = st.Page(
-        "views/explorer.py",
-        title="Data Explorer",
-        icon=":material/search:"
-    )
+    explorer_page = st.Page("views/explorer.py", title="Data Explorer", icon=":material/search:")
 
     # Data extraction page
-    extraction_page = st.Page(
-        "views/extraction.py",
-        title="Data Extraction",
-        icon=":material/download:"
-    )
+    extraction_page = st.Page("views/extraction.py", title="Data Extraction", icon=":material/download:")
 
     # Help & Documentation page
-    help_page = st.Page(
-        "views/settings.py",
-        title="Help & Documentation",
-        icon=":material/help:"
-    )
+    help_page = st.Page("views/settings.py", title="Help & Documentation", icon=":material/help:")
 
     return {
         "Main": [home_page],
         "Analysis": [chat_page, analytics_page, explorer_page, extraction_page],
-        "Help": [help_page]
+        "Help": [help_page],
     }
+
 
 # Main navigation using modern st.navigation
 def main():
@@ -540,7 +530,7 @@ def main():
         pg.run()
 
     except AttributeError as e:
-        if 'navigation' in str(e):
+        if "navigation" in str(e):
             st.error("❌ Navigation API Error")
             st.error(f"This app requires Streamlit 1.36.0 or later. Current version: {st.__version__}")
             st.info("The app is configured to use st.navigation which was introduced in Streamlit 1.36.0")
@@ -577,6 +567,7 @@ def main():
 
         # Show traceback in expander
         import traceback
+
         with st.expander("Show full traceback"):
             st.code(traceback.format_exc())
 
@@ -585,13 +576,17 @@ def main():
 
     # Add footer with attribution
     st.markdown("---")
-    st.markdown("""
+    st.markdown(
+        """
     <div style='text-align: center; color: #496f4a; padding: 20px;'>
         <p><strong>USDA Forest Service Resources Planning Act Assessment</strong></p>
         <p>Data source: <a href='https://www.fs.usda.gov/research/inventory/rpaa' target='_blank'>USDA Forest Service 2020 RPA Assessment</a></p>
         <p style='font-size: 0.9em;'>Analyzing America's forests and rangelands for sustainable resource management</p>
     </div>
-    """, unsafe_allow_html=True)
+    """,
+        unsafe_allow_html=True,
+    )
+
 
 if __name__ == "__main__":
     try:
@@ -599,11 +594,13 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"FATAL ERROR in main: {type(e).__name__}: {e}")
         import traceback
+
         traceback.print_exc()
 
         # Try to show error in Streamlit if possible
         try:
             import streamlit as st
+
             st.error(f"Fatal error: {type(e).__name__}: {e}")
             with st.expander("Full traceback"):
                 st.code(traceback.format_exc())

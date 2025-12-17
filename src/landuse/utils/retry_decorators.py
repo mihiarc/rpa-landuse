@@ -22,15 +22,19 @@ try:
         wait_exponential,
         wait_fixed,
     )
+
     HAS_TENACITY = True
 except ImportError:
     HAS_TENACITY = False
+
     # Fallback implementation for environments without tenacity
     class retry_fallback:
         def __init__(self, *args, **kwargs):
             pass
+
         def __call__(self, func):
             return func
+
     retry = retry_fallback
 
 console = Console()
@@ -41,46 +45,41 @@ class RetryConfig:
 
     # Database operations
     DATABASE_RETRY = {
-        'stop': 'stop_after_attempt(3)',
-        'wait': 'wait_exponential(multiplier=1, min=1, max=10)',
-        'retry': 'retry_if_exception_type((ConnectionError, TimeoutError))'
+        "stop": "stop_after_attempt(3)",
+        "wait": "wait_exponential(multiplier=1, min=1, max=10)",
+        "retry": "retry_if_exception_type((ConnectionError, TimeoutError))",
     }
 
     # API operations
     API_RETRY = {
-        'stop': 'stop_after_attempt(5)',
-        'wait': 'wait_exponential(multiplier=2, min=1, max=60)',
-        'retry': 'retry_if_exception_type((ConnectionError, TimeoutError, OSError))'
+        "stop": "stop_after_attempt(5)",
+        "wait": "wait_exponential(multiplier=2, min=1, max=60)",
+        "retry": "retry_if_exception_type((ConnectionError, TimeoutError, OSError))",
     }
 
     # File operations
     FILE_RETRY = {
-        'stop': 'stop_after_attempt(3)',
-        'wait': 'wait_fixed(2)',
-        'retry': 'retry_if_exception_type((FileNotFoundError, PermissionError, OSError))'
+        "stop": "stop_after_attempt(3)",
+        "wait": "wait_fixed(2)",
+        "retry": "retry_if_exception_type((FileNotFoundError, PermissionError, OSError))",
     }
 
     # Network operations
     NETWORK_RETRY = {
-        'stop': 'stop_after_attempt(5)',
-        'wait': 'wait_exponential(multiplier=1, min=2, max=30)',
-        'retry': 'retry_if_exception_type((ConnectionError, TimeoutError))'
+        "stop": "stop_after_attempt(5)",
+        "wait": "wait_exponential(multiplier=1, min=2, max=30)",
+        "retry": "retry_if_exception_type((ConnectionError, TimeoutError))",
     }
 
     # LLM operations (OpenAI)
     LLM_RETRY = {
-        'stop': 'stop_after_attempt(3)',
-        'wait': 'wait_exponential(multiplier=2, min=1, max=60)',
-        'retry': 'retry_if_exception_type(LLM_RETRYABLE_EXCEPTIONS)'
+        "stop": "stop_after_attempt(3)",
+        "wait": "wait_exponential(multiplier=2, min=1, max=60)",
+        "retry": "retry_if_exception_type(LLM_RETRYABLE_EXCEPTIONS)",
     }
 
 
-def database_retry(
-    max_attempts: int = 3,
-    min_wait: float = 1.0,
-    max_wait: float = 10.0,
-    exceptions: tuple = None
-):
+def database_retry(max_attempts: int = 3, min_wait: float = 1.0, max_wait: float = 10.0, exceptions: tuple = None):
     """
     Retry decorator for database operations.
 
@@ -98,23 +97,19 @@ def database_retry(
 
     # Create a standard logger for tenacity (Rich console doesn't work with tenacity logging)
     import logging
-    logger = logging.getLogger('landuse.retry.database')
+
+    logger = logging.getLogger("landuse.retry.database")
 
     return retry(
         stop=stop_after_attempt(max_attempts),
         wait=wait_exponential(multiplier=1, min=min_wait, max=max_wait),
         retry=retry_if_exception_type(exceptions),
         before_sleep=before_sleep_log(logger, logging.WARNING),
-        after=after_log(logger, logging.INFO)
+        after=after_log(logger, logging.INFO),
     )
 
 
-def api_retry(
-    max_attempts: int = 5,
-    base_wait: float = 2.0,
-    max_wait: float = 60.0,
-    exceptions: tuple = None
-):
+def api_retry(max_attempts: int = 5, base_wait: float = 2.0, max_wait: float = 60.0, exceptions: tuple = None):
     """
     Retry decorator for API operations with exponential backoff.
 
@@ -132,22 +127,19 @@ def api_retry(
 
     # Create a standard logger for tenacity
     import logging
-    logger = logging.getLogger('landuse.retry.api')
+
+    logger = logging.getLogger("landuse.retry.api")
 
     return retry(
         stop=stop_after_attempt(max_attempts),
         wait=wait_exponential(multiplier=base_wait, min=1, max=max_wait),
         retry=retry_if_exception_type(exceptions),
         before_sleep=before_sleep_log(logger, logging.WARNING),
-        after=after_log(logger, logging.INFO)
+        after=after_log(logger, logging.INFO),
     )
 
 
-def file_retry(
-    max_attempts: int = 3,
-    wait_time: float = 2.0,
-    exceptions: tuple = None
-):
+def file_retry(max_attempts: int = 3, wait_time: float = 2.0, exceptions: tuple = None):
     """
     Retry decorator for file operations.
 
@@ -164,23 +156,19 @@ def file_retry(
 
     # Create a standard logger for tenacity
     import logging
-    logger = logging.getLogger('landuse.retry.file')
+
+    logger = logging.getLogger("landuse.retry.file")
 
     return retry(
         stop=stop_after_attempt(max_attempts),
         wait=wait_fixed(wait_time),
         retry=retry_if_exception_type(exceptions),
         before_sleep=before_sleep_log(logger, logging.WARNING),
-        after=after_log(logger, logging.INFO)
+        after=after_log(logger, logging.INFO),
     )
 
 
-def network_retry(
-    max_attempts: int = 5,
-    min_wait: float = 2.0,
-    max_wait: float = 30.0,
-    exceptions: tuple = None
-):
+def network_retry(max_attempts: int = 5, min_wait: float = 2.0, max_wait: float = 30.0, exceptions: tuple = None):
     """
     Retry decorator for network operations.
 
@@ -198,14 +186,15 @@ def network_retry(
 
     # Create a standard logger for tenacity
     import logging
-    logger = logging.getLogger('landuse.retry.network')
+
+    logger = logging.getLogger("landuse.retry.network")
 
     return retry(
         stop=stop_after_attempt(max_attempts),
         wait=wait_exponential(multiplier=1, min=min_wait, max=max_wait),
         retry=retry_if_exception_type(exceptions),
         before_sleep=before_sleep_log(logger, logging.WARNING),
-        after=after_log(logger, logging.INFO)
+        after=after_log(logger, logging.INFO),
     )
 
 
@@ -217,11 +206,12 @@ def _get_llm_retryable_exceptions() -> tuple:
     """
     try:
         import openai
+
         return (
-            openai.RateLimitError,       # 429 - Rate limit exceeded
-            openai.APIConnectionError,    # Network connectivity issues
-            openai.APITimeoutError,       # Request timeout
-            openai.InternalServerError,   # 500 - Server error
+            openai.RateLimitError,  # 429 - Rate limit exceeded
+            openai.APIConnectionError,  # Network connectivity issues
+            openai.APITimeoutError,  # Request timeout
+            openai.InternalServerError,  # 500 - Server error
             ConnectionError,
             TimeoutError,
         )
@@ -233,6 +223,7 @@ def _is_rate_limit_error(exception: Exception) -> bool:
     """Check if exception is a rate limit error requiring longer backoff."""
     try:
         import openai
+
         return isinstance(exception, openai.RateLimitError)
     except ImportError:
         return False
@@ -269,7 +260,8 @@ def llm_retry(
         return _fallback_llm_retry(max_attempts, min_wait, rate_limit_wait, exceptions)
 
     import logging
-    logger = logging.getLogger('landuse.retry.llm')
+
+    logger = logging.getLogger("landuse.retry.llm")
 
     def custom_wait(retry_state):
         """Custom wait strategy with longer waits for rate limits."""
@@ -277,6 +269,7 @@ def llm_retry(
         if _is_rate_limit_error(exception):
             # Rate limit - use longer wait with jitter
             import random
+
             jitter = random.uniform(0, 5)
             wait_time = rate_limit_wait + jitter
             logger.warning(f"Rate limit hit, waiting {wait_time:.1f}s before retry")
@@ -293,16 +286,18 @@ def llm_retry(
         retry=retry_if_exception_type(exceptions),
         before_sleep=before_sleep_log(logger, logging.WARNING),
         after=after_log(logger, logging.INFO),
-        reraise=True
+        reraise=True,
     )
 
 
 def _fallback_llm_retry(max_attempts: int, min_wait: float, rate_limit_wait: float, exceptions: tuple):
     """Fallback LLM retry when tenacity is not available."""
+
     def decorator(func):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
             import random
+
             last_exception = None
 
             for attempt in range(max_attempts):
@@ -317,8 +312,10 @@ def _fallback_llm_retry(max_attempts: int, min_wait: float, rate_limit_wait: flo
                             wait_time = rate_limit_wait + random.uniform(0, 5)
                             console.print(f"[yellow]⚠ Rate limit hit on attempt {attempt + 1}[/yellow]")
                         else:
-                            wait_time = min_wait * (2 ** attempt)
-                            console.print(f"[yellow]⚠ LLM call failed on attempt {attempt + 1}: {type(e).__name__}[/yellow]")
+                            wait_time = min_wait * (2**attempt)
+                            console.print(
+                                f"[yellow]⚠ LLM call failed on attempt {attempt + 1}: {type(e).__name__}[/yellow]"
+                            )
 
                         console.print(f"[dim]🔄 Retrying in {wait_time:.1f}s...[/dim]")
                         time.sleep(wait_time)
@@ -328,6 +325,7 @@ def _fallback_llm_retry(max_attempts: int, min_wait: float, rate_limit_wait: flo
             raise last_exception
 
         return wrapper
+
     return decorator
 
 
@@ -381,8 +379,10 @@ def invoke_llm_with_retry(
                     wait_time = rate_limit_wait + random.uniform(0, 5)
                     console.print(f"[yellow]⚠ Rate limit hit (attempt {attempt + 1}/{max_attempts})[/yellow]")
                 else:
-                    wait_time = min_wait * (2 ** attempt)
-                    console.print(f"[yellow]⚠ LLM error (attempt {attempt + 1}/{max_attempts}): {type(e).__name__}[/yellow]")
+                    wait_time = min_wait * (2**attempt)
+                    console.print(
+                        f"[yellow]⚠ LLM error (attempt {attempt + 1}/{max_attempts}): {type(e).__name__}[/yellow]"
+                    )
 
                 console.print(f"[dim]🔄 Retrying in {wait_time:.1f}s...[/dim]")
                 time.sleep(wait_time)
@@ -393,11 +393,7 @@ def invoke_llm_with_retry(
 
 
 def custom_retry(
-    stop_condition=None,
-    wait_strategy=None,
-    retry_condition=None,
-    before_sleep_func=None,
-    after_attempt_func=None
+    stop_condition=None, wait_strategy=None, retry_condition=None, before_sleep_func=None, after_attempt_func=None
 ):
     """
     Custom retry decorator with full configuration options.
@@ -414,24 +410,20 @@ def custom_retry(
 
     kwargs = {}
     if stop_condition:
-        kwargs['stop'] = stop_condition
+        kwargs["stop"] = stop_condition
     if wait_strategy:
-        kwargs['wait'] = wait_strategy
+        kwargs["wait"] = wait_strategy
     if retry_condition:
-        kwargs['retry'] = retry_condition
+        kwargs["retry"] = retry_condition
     if before_sleep_func:
-        kwargs['before_sleep'] = before_sleep_func
+        kwargs["before_sleep"] = before_sleep_func
     if after_attempt_func:
-        kwargs['after'] = after_attempt_func
+        kwargs["after"] = after_attempt_func
 
     return retry(**kwargs)
 
 
-def retry_on_result(
-    result_predicate: Callable[[Any], bool],
-    max_attempts: int = 3,
-    wait_time: float = 1.0
-):
+def retry_on_result(result_predicate: Callable[[Any], bool], max_attempts: int = 3, wait_time: float = 1.0):
     """
     Retry decorator that retries based on the result value.
 
@@ -445,13 +437,14 @@ def retry_on_result(
 
     # Create a standard logger for tenacity
     import logging
-    logger = logging.getLogger('landuse.retry.result')
+
+    logger = logging.getLogger("landuse.retry.result")
 
     return retry(
         stop=stop_after_attempt(max_attempts),
         wait=wait_fixed(wait_time),
         retry=retry_if_result(result_predicate),
-        before_sleep=before_sleep_log(logger, logging.INFO)
+        before_sleep=before_sleep_log(logger, logging.INFO),
     )
 
 
@@ -462,6 +455,7 @@ def _fallback_retry(max_attempts: int, wait_time: float):
     This provides basic retry functionality without the advanced features
     of tenacity, but ensures the decorators still work.
     """
+
     def decorator(func):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
@@ -483,11 +477,13 @@ def _fallback_retry(max_attempts: int, wait_time: float):
             raise last_exception
 
         return wrapper
+
     return decorator
 
 
 def _fallback_retry_result(result_predicate: Callable, max_attempts: int, wait_time: float):
     """Fallback retry implementation for result-based retries"""
+
     def decorator(func):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
@@ -506,6 +502,7 @@ def _fallback_retry_result(result_predicate: Callable, max_attempts: int, wait_t
             return result  # Return the last result
 
         return wrapper
+
     return decorator
 
 
@@ -525,7 +522,7 @@ class RetryableOperation:
         wait_strategy: str = "exponential",
         min_wait: float = 1.0,
         max_wait: float = 60.0,
-        exceptions: tuple = None
+        exceptions: tuple = None,
     ):
         self.operation_name = operation_name
         self.max_attempts = max_attempts
@@ -544,7 +541,9 @@ class RetryableOperation:
     def __exit__(self, exc_type, exc_val, exc_tb):
         elapsed_time = time.time() - self.start_time
         if exc_type is None:
-            console.print(f"✅ Operation completed successfully in {elapsed_time:.2f}s after {self.attempt_count} attempts")
+            console.print(
+                f"✅ Operation completed successfully in {elapsed_time:.2f}s after {self.attempt_count} attempts"
+            )
         else:
             console.print(f"❌ Operation failed after {elapsed_time:.2f}s and {self.attempt_count} attempts")
         return False
@@ -594,7 +593,7 @@ def execute_with_retry(
     max_wait: float = 60.0,
     exceptions: tuple = None,
     *args,
-    **kwargs
+    **kwargs,
 ):
     """
     Execute a function with retry logic.
@@ -615,25 +614,22 @@ def execute_with_retry(
     Raises:
         Last exception if all attempts fail
     """
-    with RetryableOperation(
-        operation_name, max_attempts, wait_strategy,
-        min_wait, max_wait, exceptions
-    ) as op:
+    with RetryableOperation(operation_name, max_attempts, wait_strategy, min_wait, max_wait, exceptions) as op:
         return op.execute(func, *args, **kwargs)
 
 
 # Export the main decorators and utilities
 __all__ = [
-    'database_retry',
-    'api_retry',
-    'file_retry',
-    'network_retry',
-    'llm_retry',
-    'invoke_llm_with_retry',
-    'custom_retry',
-    'retry_on_result',
-    'RetryableOperation',
-    'execute_with_retry',
-    'RetryConfig',
-    'HAS_TENACITY'
+    "database_retry",
+    "api_retry",
+    "file_retry",
+    "network_retry",
+    "llm_retry",
+    "invoke_llm_with_retry",
+    "custom_retry",
+    "retry_on_result",
+    "RetryableOperation",
+    "execute_with_retry",
+    "RetryConfig",
+    "HAS_TENACITY",
 ]

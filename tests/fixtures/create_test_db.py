@@ -4,7 +4,7 @@
 import duckdb
 
 # Create test database with minimal schema
-conn = duckdb.connect('test_landuse.duckdb')
+conn = duckdb.connect("test_landuse.duckdb")
 
 # Create dimension tables
 conn.execute("""

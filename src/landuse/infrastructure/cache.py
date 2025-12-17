@@ -106,10 +106,7 @@ class InMemoryCache(CacheInterface):
     def cleanup_expired(self) -> int:
         """Clean up expired entries and return count removed."""
         with self._lock:
-            expired_keys = [
-                key for key, entry in self._cache.items()
-                if entry.is_expired()
-            ]
+            expired_keys = [key for key, entry in self._cache.items() if entry.is_expired()]
 
             for key in expired_keys:
                 del self._cache[key]
@@ -121,8 +118,8 @@ class InMemoryCache(CacheInterface):
         """Get cache statistics."""
         with self._lock:
             return {
-                'size': len(self._cache),
-                'max_size': self.max_size,
-                'default_ttl': self.default_ttl,
-                'expired_entries': sum(1 for entry in self._cache.values() if entry.is_expired())
+                "size": len(self._cache),
+                "max_size": self.max_size,
+                "default_ttl": self.default_ttl,
+                "expired_entries": sum(1 for entry in self._cache.values() if entry.is_expired()),
             }

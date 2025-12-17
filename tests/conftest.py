@@ -24,7 +24,7 @@ TEST_ENV = {
     "MAX_TOKENS": "1000",
     "DEFAULT_QUERY_LIMIT": "100",
     "LOG_LEVEL": "DEBUG",
-    "LANDUSE_DB_PATH": "tests/fixtures/test_landuse.duckdb"
+    "LANDUSE_DB_PATH": "tests/fixtures/test_landuse.duckdb",
 }
 
 
@@ -181,7 +181,7 @@ def sample_queries():
         "Which states have the most urban expansion?",
         "Compare forest loss between RCP45 and RCP85",
         "Show me crop to pasture transitions",
-        "What are the biggest land use changes?"
+        "What are the biggest land use changes?",
     ]
 
 
@@ -193,7 +193,7 @@ def malicious_queries():
         "DELETE FROM fact_landuse_transitions",
         "UPDATE dim_scenario SET scenario_name = 'hacked'",
         "SELECT * FROM dim_scenario; DROP TABLE dim_scenario",
-        "SELECT * FROM dim_scenario WHERE '1'='1' UNION ALL SELECT null,null,null,null,null--"
+        "SELECT * FROM dim_scenario WHERE '1'='1' UNION ALL SELECT null,null,null,null,null--",
     ]
 
 
@@ -213,7 +213,7 @@ def cleanup_logs():
 @pytest.fixture
 def mock_rate_limiter():
     """Mock rate limiter that always allows requests"""
-    with patch('landuse.utilities.security.RateLimiter') as mock:
+    with patch("landuse.utilities.security.RateLimiter") as mock:
         limiter = Mock()
         limiter.check_rate_limit.return_value = (True, None)
         mock.return_value = limiter
@@ -223,26 +223,20 @@ def mock_rate_limiter():
 # Skip markers for tests requiring external resources
 def pytest_configure(config):
     """Configure pytest with custom markers"""
-    config.addinivalue_line(
-        "markers", "requires_api: mark test as requiring real API keys"
-    )
-    config.addinivalue_line(
-        "markers", "requires_db: mark test as requiring database"
-    )
-    config.addinivalue_line(
-        "markers", "slow: mark test as slow running"
-    )
+    config.addinivalue_line("markers", "requires_api: mark test as requiring real API keys")
+    config.addinivalue_line("markers", "requires_db: mark test as requiring database")
+    config.addinivalue_line("markers", "slow: mark test as slow running")
 
 
 # Auto-use fixture to skip tests based on environment
 @pytest.fixture(autouse=True)
 def skip_tests_based_on_env(request):
     """Skip tests that require resources not available in test environment"""
-    if request.node.get_closest_marker('requires_api'):
-        if not os.getenv('REAL_OPENAI_API_KEY'):
-            pytest.skip('Skipping test that requires real API key')
+    if request.node.get_closest_marker("requires_api"):
+        if not os.getenv("REAL_OPENAI_API_KEY"):
+            pytest.skip("Skipping test that requires real API key")
 
-    if request.node.get_closest_marker('requires_db'):
-        db_path = Path(os.getenv('LANDUSE_DB_PATH', 'data/processed/landuse_analytics.duckdb'))
+    if request.node.get_closest_marker("requires_db"):
+        db_path = Path(os.getenv("LANDUSE_DB_PATH", "data/processed/landuse_analytics.duckdb"))
         if not db_path.exists():
-            pytest.skip('Skipping test that requires production database')
+            pytest.skip("Skipping test that requires production database")

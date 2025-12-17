@@ -36,7 +36,6 @@ class IndexDefinition(BaseModel):
     ddl: Optional[str] = Field(default=None, description="Custom DDL for index creation")
 
 
-
 class ConstraintDefinition(BaseModel):
     """Constraint definition for a table."""
 
@@ -90,12 +89,13 @@ class SchemaDefinition(BaseModel):
     tables: Dict[str, TableDefinition] = Field(default_factory=dict, description="Table definitions")
     views: Dict[str, ViewDefinition] = Field(default_factory=dict, description="View definitions")
 
-    @field_validator('version')
+    @field_validator("version")
     @classmethod
     def validate_version(cls, v: str) -> str:
         """Validate semantic version format."""
         import re
-        pattern = r'^\d+\.\d+\.\d+(?:-[\w.]+)?(?:\+[\w.]+)?$'
+
+        pattern = r"^\d+\.\d+\.\d+(?:-[\w.]+)?(?:\+[\w.]+)?$"
         if not re.match(pattern, v):
             raise ValueError(f"Invalid semantic version: {v}")
         return v

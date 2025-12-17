@@ -19,10 +19,7 @@ class BaseConverter(ABC):
     """Base class for data converters with common functionality."""
 
     def __init__(
-        self,
-        input_path: Optional[Path] = None,
-        output_path: Optional[Path] = None,
-        config: Optional[AppConfig] = None
+        self, input_path: Optional[Path] = None, output_path: Optional[Path] = None, config: Optional[AppConfig] = None
     ):
         """
         Initialize the converter.
@@ -48,11 +45,8 @@ class BaseConverter(ABC):
         self.output_path.parent.mkdir(parents=True, exist_ok=True)
 
         # Initialize database connection if output is DuckDB
-        if str(self.output_path).endswith('.duckdb'):
-            self.db_connection = DuckDBConnection(
-                database_path=str(self.output_path),
-                read_only=False
-            )
+        if str(self.output_path).endswith(".duckdb"):
+            self.db_connection = DuckDBConnection(database_path=str(self.output_path), read_only=False)
         else:
             self.db_connection = None
 
@@ -78,10 +72,11 @@ class BaseConverter(ABC):
             first_char = f.read(1)
             f.seek(0)
 
-            if first_char == '[':
+            if first_char == "[":
                 # JSON array - use streaming parser
                 import ijson
-                parser = ijson.items(f, 'item')
+
+                parser = ijson.items(f, "item")
                 yield from parser
             else:
                 # Assume newline-delimited JSON
@@ -177,14 +172,12 @@ class BaseConverter(ABC):
                 BarColumn(),
                 TextColumn("[progress.percentage]{task.percentage:>3.0f}%"),
                 TimeRemainingColumn(),
-                console=self.console
+                console=self.console,
             )
         else:
             # Indeterminate progress
             return Progress(
-                SpinnerColumn(),
-                TextColumn("[progress.description]{task.description}"),
-                console=self.console
+                SpinnerColumn(), TextColumn("[progress.description]{task.description}"), console=self.console
             )
 
     def validate_output(self) -> bool:

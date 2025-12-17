@@ -24,12 +24,7 @@ class MigrationEngine:
     rollback support, and validation.
     """
 
-    def __init__(
-        self,
-        connection: duckdb.DuckDBPyConnection,
-        migrations_dir: Path,
-        console: Optional[Console] = None
-    ):
+    def __init__(self, connection: duckdb.DuckDBPyConnection, migrations_dir: Path, console: Optional[Console] = None):
         """Initialize migration engine.
 
         Args:
@@ -87,17 +82,12 @@ class MigrationEngine:
 
         if expected != actual:
             raise MigrationError(
-                f"Migration checksum mismatch for {migration_file.name}. "
-                "File may have been modified after creation."
+                f"Migration checksum mismatch for {migration_file.name}. File may have been modified after creation."
             )
 
         return True
 
-    def find_migration_path(
-        self,
-        from_version: str,
-        to_version: str
-    ) -> List[Path]:
+    def find_migration_path(self, from_version: str, to_version: str) -> List[Path]:
         """Find migration files needed to migrate between versions.
 
         Args:
@@ -121,7 +111,7 @@ class MigrationEngine:
         # Build migration graph
         migration_graph: Dict[str, List[Tuple[str, Path]]] = {}
         for file in migration_files:
-            match = re.match(r'v([\d.]+)_to_v([\d.]+)\.sql', file.name)
+            match = re.match(r"v([\d.]+)_to_v([\d.]+)\.sql", file.name)
             if match:
                 from_v, to_v = match.groups()
                 if from_v not in migration_graph:
@@ -132,18 +122,11 @@ class MigrationEngine:
         path = self._find_path_bfs(migration_graph, from_version, to_version)
 
         if not path:
-            raise MigrationError(
-                f"No migration path found from v{from_version} to v{to_version}"
-            )
+            raise MigrationError(f"No migration path found from v{from_version} to v{to_version}")
 
         return path
 
-    def _find_path_bfs(
-        self,
-        graph: Dict[str, List[Tuple[str, Path]]],
-        start: str,
-        target: str
-    ) -> Optional[List[Path]]:
+    def _find_path_bfs(self, graph: Dict[str, List[Tuple[str, Path]]], start: str, target: str) -> Optional[List[Path]]:
         """Find migration path using breadth-first search.
 
         Args:
@@ -173,11 +156,7 @@ class MigrationEngine:
 
         return None
 
-    def plan_migration(
-        self,
-        from_version: str,
-        to_version: str
-    ) -> MigrationPlan:
+    def plan_migration(self, from_version: str, to_version: str) -> MigrationPlan:
         """Plan migration between versions.
 
         Args:
@@ -216,7 +195,7 @@ class MigrationEngine:
             steps=steps,
             estimated_duration=len(steps) * 2,  # Rough estimate
             requires_downtime=requires_downtime,
-            data_loss_risk=data_loss_risk
+            data_loss_risk=data_loss_risk,
         )
 
     def _parse_migration_file(self, content: str) -> List[MigrationStep]:
@@ -231,7 +210,7 @@ class MigrationEngine:
         steps = []
 
         # Split by migration markers
-        sections = re.split(r'-- MIGRATION STEP:?\s*(.*)', content)
+        sections = re.split(r"-- MIGRATION STEP:?\s*(.*)", content)
 
         for i in range(1, len(sections), 2):
             if i + 1 < len(sections):
@@ -240,37 +219,28 @@ class MigrationEngine:
 
                 if sql:
                     # Look for rollback SQL
-                    rollback_match = re.search(
-                        r'-- ROLLBACK:\s*(.*?)(?:-- |$)',
-                        sql,
-                        re.DOTALL
-                    )
+                    rollback_match = re.search(r"-- ROLLBACK:\s*(.*?)(?:-- |$)", sql, re.DOTALL)
                     rollback_sql = rollback_match.group(1) if rollback_match else None
 
                     # Look for validation SQL
-                    validate_match = re.search(
-                        r'-- VALIDATE:\s*(.*?)(?:-- |$)',
-                        sql,
-                        re.DOTALL
-                    )
+                    validate_match = re.search(r"-- VALIDATE:\s*(.*?)(?:-- |$)", sql, re.DOTALL)
                     validate_sql = validate_match.group(1) if validate_match else None
 
                     # Clean up main SQL
-                    sql = re.sub(r'-- (ROLLBACK|VALIDATE):.*?(?=-- |$)', '', sql, flags=re.DOTALL)
+                    sql = re.sub(r"-- (ROLLBACK|VALIDATE):.*?(?=-- |$)", "", sql, flags=re.DOTALL)
 
-                    steps.append(MigrationStep(
-                        description=description,
-                        sql=sql.strip(),
-                        rollback_sql=rollback_sql.strip() if rollback_sql else None,
-                        validate_sql=validate_sql.strip() if validate_sql else None
-                    ))
+                    steps.append(
+                        MigrationStep(
+                            description=description,
+                            sql=sql.strip(),
+                            rollback_sql=rollback_sql.strip() if rollback_sql else None,
+                            validate_sql=validate_sql.strip() if validate_sql else None,
+                        )
+                    )
 
         # If no step markers, treat entire content as single step
         if not steps and content.strip():
-            steps.append(MigrationStep(
-                description="Complete migration",
-                sql=content.strip()
-            ))
+            steps.append(MigrationStep(description="Complete migration", sql=content.strip()))
 
         return steps
 
@@ -284,11 +254,11 @@ class MigrationEngine:
             True if operation requires downtime
         """
         downtime_patterns = [
-            r'ALTER\s+TABLE.*RENAME',
-            r'DROP\s+TABLE',
-            r'DROP\s+INDEX',
-            r'CREATE\s+UNIQUE\s+INDEX',
-            r'ALTER\s+TABLE.*ALTER\s+COLUMN.*TYPE'
+            r"ALTER\s+TABLE.*RENAME",
+            r"DROP\s+TABLE",
+            r"DROP\s+INDEX",
+            r"CREATE\s+UNIQUE\s+INDEX",
+            r"ALTER\s+TABLE.*ALTER\s+COLUMN.*TYPE",
         ]
 
         sql_upper = sql.upper()
@@ -307,13 +277,7 @@ class MigrationEngine:
         Returns:
             True if operation risks data loss
         """
-        risky_patterns = [
-            r'DROP\s+TABLE',
-            r'DROP\s+COLUMN',
-            r'DELETE\s+FROM',
-            r'TRUNCATE',
-            r'ALTER\s+TABLE.*DROP'
-        ]
+        risky_patterns = [r"DROP\s+TABLE", r"DROP\s+COLUMN", r"DELETE\s+FROM", r"TRUNCATE", r"ALTER\s+TABLE.*DROP"]
 
         sql_upper = sql.upper()
         for pattern in risky_patterns:
@@ -323,11 +287,7 @@ class MigrationEngine:
         return False
 
     @time_database_operation("execute_migration")
-    def execute_migration(
-        self,
-        plan: MigrationPlan,
-        stop_on_error: bool = True
-    ) -> MigrationResult:
+    def execute_migration(self, plan: MigrationPlan, stop_on_error: bool = True) -> MigrationResult:
         """Execute migration plan.
 
         Args:
@@ -337,32 +297,23 @@ class MigrationEngine:
         Returns:
             Migration execution result
         """
-        result = MigrationResult(
-            plan=plan,
-            status=MigrationStatus.IN_PROGRESS,
-            started_at=datetime.utcnow()
-        )
+        result = MigrationResult(plan=plan, status=MigrationStatus.IN_PROGRESS, started_at=datetime.utcnow())
 
         # Warn about risky operations
         if plan.data_loss_risk:
-            self.console.print(
-                "[bold red]WARNING: This migration has data loss risk![/bold red]"
-            )
+            self.console.print("[bold red]WARNING: This migration has data loss risk![/bold red]")
             response = input("Continue? (yes/no): ")
-            if response.lower() != 'yes':
+            if response.lower() != "yes":
                 result.status = MigrationStatus.FAILED
                 result.errors.append("Migration cancelled by user")
                 return result
 
         # Execute migration steps
         with Progress(
-            SpinnerColumn(),
-            TextColumn("[progress.description]{task.description}"),
-            console=self.console
+            SpinnerColumn(), TextColumn("[progress.description]{task.description}"), console=self.console
         ) as progress:
             task = progress.add_task(
-                f"Migrating from v{plan.from_version} to v{plan.to_version}",
-                total=len(plan.steps)
+                f"Migrating from v{plan.from_version} to v{plan.to_version}", total=len(plan.steps)
             )
 
             for i, step in enumerate(plan.steps):
@@ -377,13 +328,9 @@ class MigrationEngine:
 
                     # Validate if provided
                     if step.validate_sql:
-                        validation_result = self.connection.execute(
-                            step.validate_sql
-                        ).fetchone()
+                        validation_result = self.connection.execute(step.validate_sql).fetchone()
                         if not validation_result or not validation_result[0]:
-                            raise MigrationError(
-                                f"Validation failed for step: {step.description}"
-                            )
+                            raise MigrationError(f"Validation failed for step: {step.description}")
 
                     # Commit transaction
                     self.connection.commit()
@@ -394,7 +341,7 @@ class MigrationEngine:
                     # Rollback transaction
                     self.connection.rollback()
 
-                    error_msg = f"Step {i+1} failed: {str(e)}"
+                    error_msg = f"Step {i + 1} failed: {str(e)}"
                     result.errors.append(error_msg)
                     self.console.print(f"[red]{error_msg}[/red]")
 
@@ -408,36 +355,23 @@ class MigrationEngine:
 
                 # Update schema version
                 from landuse.database.schema_version import SchemaVersionManager
+
                 version_manager = SchemaVersionManager(self.connection)
-                version_manager.apply_version(
-                    plan.to_version,
-                    applied_by='migration_engine'
-                )
+                version_manager.apply_version(plan.to_version, applied_by="migration_engine")
 
         # Set completion time
         result.completed_at = datetime.utcnow()
-        result.duration_seconds = (
-            result.completed_at - result.started_at
-        ).total_seconds()
+        result.duration_seconds = (result.completed_at - result.started_at).total_seconds()
 
         # Log result
         if result.status == MigrationStatus.COMPLETED:
-            self.console.print(
-                f"[green]✓ Migration completed in {result.duration_seconds:.1f}s[/green]"
-            )
+            self.console.print(f"[green]✓ Migration completed in {result.duration_seconds:.1f}s[/green]")
         else:
-            self.console.print(
-                f"[red]✗ Migration failed with {len(result.errors)} errors[/red]"
-            )
+            self.console.print(f"[red]✗ Migration failed with {len(result.errors)} errors[/red]")
 
         return result
 
-    def create_migration_file(
-        self,
-        from_version: str,
-        to_version: str,
-        steps: List[MigrationStep]
-    ) -> Path:
+    def create_migration_file(self, from_version: str, to_version: str, steps: List[MigrationStep]) -> Path:
         """Create a new migration file.
 
         Args:
@@ -467,41 +401,33 @@ class MigrationEngine:
             "",
             "-- Migration",
             "BEGIN TRANSACTION;",
-            ""
+            "",
         ]
 
         for i, step in enumerate(steps, 1):
-            content_lines.extend([
-                f"-- MIGRATION STEP: {step.description}",
-                step.sql,
-                ""
-            ])
+            content_lines.extend([f"-- MIGRATION STEP: {step.description}", step.sql, ""])
 
             if step.rollback_sql:
-                content_lines.extend([
-                    f"-- ROLLBACK: {step.rollback_sql}",
-                    ""
-                ])
+                content_lines.extend([f"-- ROLLBACK: {step.rollback_sql}", ""])
 
             if step.validate_sql:
-                content_lines.extend([
-                    f"-- VALIDATE: {step.validate_sql}",
-                    ""
-                ])
+                content_lines.extend([f"-- VALIDATE: {step.validate_sql}", ""])
 
-        content_lines.extend([
-            "-- Update version",
-            "INSERT INTO schema_version (version_number, description, applied_by)",
-            f"VALUES ('{to_version}', 'Migration from v{from_version}', 'migration_system');",
-            "",
-            "COMMIT;",
-            "",
-            "-- Post-migration validation",
-            f"SELECT 'Migration to v{to_version} successful' WHERE EXISTS (",
-            "  SELECT 1 FROM schema_version",
-            f"  WHERE version_number = '{to_version}'",
-            ");"
-        ])
+        content_lines.extend(
+            [
+                "-- Update version",
+                "INSERT INTO schema_version (version_number, description, applied_by)",
+                f"VALUES ('{to_version}', 'Migration from v{from_version}', 'migration_system');",
+                "",
+                "COMMIT;",
+                "",
+                "-- Post-migration validation",
+                f"SELECT 'Migration to v{to_version} successful' WHERE EXISTS (",
+                "  SELECT 1 FROM schema_version",
+                f"  WHERE version_number = '{to_version}'",
+                ");",
+            ]
+        )
 
         content = "\n".join(content_lines)
 

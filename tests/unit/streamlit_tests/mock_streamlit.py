@@ -11,10 +11,12 @@ from unittest.mock import Mock
 
 def cache_resource(func=None, *, ttl=None, max_entries=None, show_spinner=True, validate=None):
     """Mock implementation of st.cache_resource decorator"""
+
     def decorator(f):
         @wraps(f)
         def wrapper(*args, **kwargs):
             return f(*args, **kwargs)
+
         return wrapper
 
     if func is None:
@@ -25,10 +27,12 @@ def cache_resource(func=None, *, ttl=None, max_entries=None, show_spinner=True, 
 
 def cache_data(func=None, *, ttl=None, max_entries=None, show_spinner=True, persist=None):
     """Mock implementation of st.cache_data decorator"""
+
     def decorator(f):
         @wraps(f)
         def wrapper(*args, **kwargs):
             return f(*args, **kwargs)
+
         return wrapper
 
     if func is None:
@@ -39,10 +43,12 @@ def cache_data(func=None, *, ttl=None, max_entries=None, show_spinner=True, pers
 
 def fragment(func=None):
     """Mock implementation of st.fragment decorator"""
+
     def decorator(f):
         @wraps(f)
         def wrapper(*args, **kwargs):
             return f(*args, **kwargs)
+
         return wrapper
 
     if func is None:
@@ -53,16 +59,19 @@ def fragment(func=None):
 
 def dialog(title=None):
     """Mock implementation of st.dialog decorator"""
+
     def decorator(f):
         @wraps(f)
         def wrapper(*args, **kwargs):
             return f(*args, **kwargs)
+
         return wrapper
+
     return decorator
 
 
 # Create mock streamlit module as a proper module
-mock_st = types.ModuleType('streamlit')
+mock_st = types.ModuleType("streamlit")
 mock_st.__file__ = __file__
 mock_st.cache_resource = cache_resource
 mock_st.cache_data = cache_data
@@ -135,6 +144,7 @@ mock_st.rerun = Mock()  # For triggering reruns
 mock_st.navigation = Mock()  # For multi-page navigation
 mock_st.Page = Mock()  # For page creation
 
+
 # Session state mock
 class SessionState:
     def __init__(self):
@@ -144,7 +154,7 @@ class SessionState:
         return self._state.get(name, None)
 
     def __setattr__(self, name, value):
-        if name == '_state':
+        if name == "_state":
             super().__setattr__(name, value)
         else:
             self._state[name] = value
@@ -155,12 +165,14 @@ class SessionState:
     def get(self, key, default=None):
         return self._state.get(key, default)
 
+
 mock_st.session_state = SessionState()
 
 # Experimental features
 mock_st.experimental_rerun = Mock()
 mock_st.experimental_memo = Mock()
 mock_st.experimental_singleton = Mock()
+
 
 # Context managers
 class MockContainer:
@@ -173,6 +185,7 @@ class MockContainer:
     def __getattr__(self, name):
         return Mock()
 
+
 mock_st.container.return_value = MockContainer()
 mock_st.spinner.return_value = MockContainer()
 mock_st.form.return_value = MockContainer()
@@ -180,6 +193,7 @@ mock_st.expander.return_value = MockContainer()
 mock_st.echo.return_value = MockContainer()
 mock_st.chat_message.return_value = MockContainer()
 mock_st.status.return_value = MockContainer()
+
 
 # Update smart_columns to return context managers
 def smart_columns_with_context(spec=None, gap="small", vertical_alignment="top"):
@@ -190,11 +204,14 @@ def smart_columns_with_context(spec=None, gap="small", vertical_alignment="top")
         return [MockContainer() for _ in range(spec)]
     return [MockContainer() for _ in spec]
 
+
 mock_st.columns = smart_columns_with_context
+
 
 # Update tabs to return context managers
 def smart_tabs(tab_names):
     """Return mock tabs that support context manager protocol"""
     return [MockContainer() for _ in tab_names]
+
 
 mock_st.tabs = smart_tabs

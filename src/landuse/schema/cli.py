@@ -19,25 +19,17 @@ console = Console()
 def cli(ctx):
     """Schema management commands for DuckDB database."""
     config = AppConfig()
-    ctx.obj = {
-        'config': config,
-        'schema_dir': Path('schema')
-    }
+    ctx.obj = {"config": config, "schema_dir": Path("schema")}
 
 
 @cli.command()
 @click.pass_context
 def status(ctx):
     """Show current schema status and version."""
-    config = ctx.obj['config']
-    schema_dir = ctx.obj['schema_dir']
+    config = ctx.obj["config"]
+    schema_dir = ctx.obj["schema_dir"]
 
-    manager = SchemaManager(
-        db_path=Path(config.database.path),
-        schema_dir=schema_dir,
-        config=config,
-        console=console
-    )
+    manager = SchemaManager(db_path=Path(config.database.path), schema_dir=schema_dir, config=config, console=console)
 
     current_version = manager.get_current_version()
 
@@ -70,8 +62,10 @@ def status(ctx):
     if validation_result.is_valid:
         console.print("[green]✓ Schema is valid[/green]")
     else:
-        console.print(f"[red]✗ Schema has {validation_result.error_count} errors, "
-                     f"{validation_result.warning_count} warnings[/red]")
+        console.print(
+            f"[red]✗ Schema has {validation_result.error_count} errors, "
+            f"{validation_result.warning_count} warnings[/red]"
+        )
 
         for issue in validation_result.issues:
             icon = "❌" if issue.level == "error" else "⚠️" if issue.level == "warning" else "ℹ️"
@@ -83,29 +77,26 @@ def status(ctx):
 
 
 @cli.command()
-@click.option('--version', default='latest', help='Target schema version')
-@click.option('--dry-run', is_flag=True, help='Plan migration without executing')
+@click.option("--version", default="latest", help="Target schema version")
+@click.option("--dry-run", is_flag=True, help="Plan migration without executing")
 @click.pass_context
 def migrate(ctx, version, dry_run):
     """Migrate database to target schema version."""
-    config = ctx.obj['config']
-    schema_dir = ctx.obj['schema_dir']
+    config = ctx.obj["config"]
+    schema_dir = ctx.obj["schema_dir"]
 
     manager = SchemaManager(
         db_path=Path(config.database.path),
         schema_dir=schema_dir,
         config=config,
         console=console,
-        read_only=False  # Need write access for migrations
+        read_only=False,  # Need write access for migrations
     )
 
     console.print(f"[bold]Migrating to version: {version}[/bold]")
 
     try:
-        result = manager.migrate(
-            target_version=version if version != 'latest' else None,
-            dry_run=dry_run
-        )
+        result = manager.migrate(target_version=version if version != "latest" else None, dry_run=dry_run)
 
         if dry_run:
             console.print("\n[yellow]Dry run - no changes made[/yellow]")
@@ -119,8 +110,7 @@ def migrate(ctx, version, dry_run):
                 console.print("\n[red]⚠️  This migration has data loss risk[/red]")
         else:
             if result.status == "completed":
-                console.print(f"[green]✓ Migration completed successfully in "
-                             f"{result.duration_seconds:.1f}s[/green]")
+                console.print(f"[green]✓ Migration completed successfully in {result.duration_seconds:.1f}s[/green]")
             else:
                 console.print(f"[red]✗ Migration failed: {result.status}[/red]")
                 for error in result.errors:
@@ -136,15 +126,10 @@ def migrate(ctx, version, dry_run):
 @click.pass_context
 def validate(ctx):
     """Validate database schema against definition."""
-    config = ctx.obj['config']
-    schema_dir = ctx.obj['schema_dir']
+    config = ctx.obj["config"]
+    schema_dir = ctx.obj["schema_dir"]
 
-    manager = SchemaManager(
-        db_path=Path(config.database.path),
-        schema_dir=schema_dir,
-        config=config,
-        console=console
-    )
+    manager = SchemaManager(db_path=Path(config.database.path), schema_dir=schema_dir, config=config, console=console)
 
     console.print("[bold]Validating database schema...[/bold]")
     result = manager.validate_schema()
@@ -162,12 +147,7 @@ def validate(ctx):
         if issue.column:
             location += f".{issue.column}"
 
-        table.add_row(
-            f"[{level_style}]{issue.level}[/{level_style}]",
-            issue.category,
-            issue.message,
-            location
-        )
+        table.add_row(f"[{level_style}]{issue.level}[/{level_style}]", issue.category, issue.message, location)
 
     console.print(table)
 
@@ -175,26 +155,22 @@ def validate(ctx):
     if result.is_valid:
         console.print("\n[green]✓ Schema validation passed[/green]")
     else:
-        console.print(f"\n[red]✗ Schema validation failed with "
-                     f"{result.error_count} errors, {result.warning_count} warnings[/red]")
+        console.print(
+            f"\n[red]✗ Schema validation failed with {result.error_count} errors, {result.warning_count} warnings[/red]"
+        )
 
     manager.close()
 
 
 @cli.command()
-@click.option('--output', '-o', help='Output file path')
+@click.option("--output", "-o", help="Output file path")
 @click.pass_context
 def generate_models(ctx, output):
     """Generate Pydantic models from current schema."""
-    config = ctx.obj['config']
-    schema_dir = ctx.obj['schema_dir']
+    config = ctx.obj["config"]
+    schema_dir = ctx.obj["schema_dir"]
 
-    manager = SchemaManager(
-        db_path=Path(config.database.path),
-        schema_dir=schema_dir,
-        config=config,
-        console=console
-    )
+    manager = SchemaManager(db_path=Path(config.database.path), schema_dir=schema_dir, config=config, console=console)
 
     console.print("[bold]Generating Pydantic models...[/bold]")
     models_path = manager.generate_models()
@@ -211,23 +187,21 @@ def generate_models(ctx, output):
 
 
 @cli.command()
-@click.option('--format', '-f',
-              type=click.Choice(['sql', 'markdown', 'json', 'mermaid']),
-              default='markdown',
-              help='Export format')
-@click.option('--output', '-o', help='Output file path (stdout if not specified)')
+@click.option(
+    "--format",
+    "-f",
+    type=click.Choice(["sql", "markdown", "json", "mermaid"]),
+    default="markdown",
+    help="Export format",
+)
+@click.option("--output", "-o", help="Output file path (stdout if not specified)")
 @click.pass_context
 def export(ctx, format, output):
     """Export schema in various formats."""
-    config = ctx.obj['config']
-    schema_dir = ctx.obj['schema_dir']
+    config = ctx.obj["config"]
+    schema_dir = ctx.obj["schema_dir"]
 
-    manager = SchemaManager(
-        db_path=Path(config.database.path),
-        schema_dir=schema_dir,
-        config=config,
-        console=console
-    )
+    manager = SchemaManager(db_path=Path(config.database.path), schema_dir=schema_dir, config=config, console=console)
 
     console.print(f"[bold]Exporting schema as {format}...[/bold]")
     content = manager.export_schema(format)
@@ -246,15 +220,10 @@ def export(ctx, format, output):
 @click.pass_context
 def checkpoint(ctx):
     """Create a checkpoint of current schema state."""
-    config = ctx.obj['config']
-    schema_dir = ctx.obj['schema_dir']
+    config = ctx.obj["config"]
+    schema_dir = ctx.obj["schema_dir"]
 
-    manager = SchemaManager(
-        db_path=Path(config.database.path),
-        schema_dir=schema_dir,
-        config=config,
-        console=console
-    )
+    manager = SchemaManager(db_path=Path(config.database.path), schema_dir=schema_dir, config=config, console=console)
 
     console.print("[bold]Creating schema checkpoint...[/bold]")
     checkpoint_path = manager.create_checkpoint()
@@ -264,13 +233,13 @@ def checkpoint(ctx):
 
 
 @cli.command()
-@click.argument('from_version')
-@click.argument('to_version')
+@click.argument("from_version")
+@click.argument("to_version")
 @click.pass_context
 def create_migration(ctx, from_version, to_version):
     """Create a new migration file template."""
-    schema_dir = ctx.obj['schema_dir']
-    migrations_dir = schema_dir / 'migrations'
+    schema_dir = ctx.obj["schema_dir"]
+    migrations_dir = schema_dir / "migrations"
     migrations_dir.mkdir(parents=True, exist_ok=True)
 
     migration_file = migrations_dir / f"v{from_version}_to_v{to_version}.sql"
@@ -317,6 +286,7 @@ SELECT 'Migration to v{to_version} successful' WHERE EXISTS (
     console.print("Edit the file to add your migration steps")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     from datetime import datetime
+
     cli()

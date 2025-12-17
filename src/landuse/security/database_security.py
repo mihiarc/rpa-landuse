@@ -14,73 +14,96 @@ class DatabaseSecurity:
     """
 
     # Allowlist of approved table names
-    ALLOWED_TABLES: FrozenSet[str] = frozenset([
-        # Fact tables
-        'fact_landuse_transitions',
-        'fact_socioeconomic_projections',
-        # Dimension tables
-        'dim_scenario',
-        'dim_geography',
-        'dim_landuse',
-        'dim_time',
-        'dim_indicators',
-        'dim_socioeconomic',
-        # Views for analysis
-        'v_income_trends',
-        'v_population_trends',
-        'v_landuse_socioeconomic',
-        'v_full_projection_period',
-        'v_scenarios_combined',
-        # Allow common information schema tables for metadata queries
-        'information_schema.tables',
-        'information_schema.columns',
-        'information_schema.schemata'
-    ])
+    ALLOWED_TABLES: FrozenSet[str] = frozenset(
+        [
+            # Fact tables
+            "fact_landuse_transitions",
+            "fact_socioeconomic_projections",
+            # Dimension tables
+            "dim_scenario",
+            "dim_geography",
+            "dim_landuse",
+            "dim_time",
+            "dim_indicators",
+            "dim_socioeconomic",
+            # Views for analysis
+            "v_income_trends",
+            "v_population_trends",
+            "v_landuse_socioeconomic",
+            "v_full_projection_period",
+            "v_scenarios_combined",
+            # Allow common information schema tables for metadata queries
+            "information_schema.tables",
+            "information_schema.columns",
+            "information_schema.schemata",
+        ]
+    )
 
     # Allowlist of approved column prefixes for dynamic queries
-    ALLOWED_COLUMN_PREFIXES: FrozenSet[str] = frozenset([
-        'fact_',
-        'dim_',
-        'id',
-        'name',
-        'code',
-        'year',
-        'from_',
-        'to_',
-        'area_',
-        'change_',
-        'scenario_',
-        'geography_',
-        'landuse_',
-        'table_',
-        'column_',
-        'data_',
-        'is_',
-        # Socioeconomic data fields
-        'indicator_',
-        'socioeconomic_',
-        'projection_',
-        'population_',
-        'income_',
-        'economic_',
-        'value',
-        'trend',
-        'growth_',
-        'urbanization_',
-        'narrative_',
-        'unit_',
-        'measure'
-    ])
+    ALLOWED_COLUMN_PREFIXES: FrozenSet[str] = frozenset(
+        [
+            "fact_",
+            "dim_",
+            "id",
+            "name",
+            "code",
+            "year",
+            "from_",
+            "to_",
+            "area_",
+            "change_",
+            "scenario_",
+            "geography_",
+            "landuse_",
+            "table_",
+            "column_",
+            "data_",
+            "is_",
+            # Socioeconomic data fields
+            "indicator_",
+            "socioeconomic_",
+            "projection_",
+            "population_",
+            "income_",
+            "economic_",
+            "value",
+            "trend",
+            "growth_",
+            "urbanization_",
+            "narrative_",
+            "unit_",
+            "measure",
+        ]
+    )
 
     # Disallowed SQL keywords and patterns
     # Note: Comment syntax (--,/*,*/) removed as comments are stripped before validation
-    DANGEROUS_KEYWORDS: FrozenSet[str] = frozenset([
-        'DROP', 'DELETE', 'UPDATE', 'INSERT', 'ALTER', 'CREATE',
-        'TRUNCATE', 'REPLACE', 'MERGE', 'UPSERT', 'COPY',
-        'GRANT', 'REVOKE', 'COMMIT', 'ROLLBACK',
-        'EXEC', 'EXECUTE', 'CALL', 'EVAL',
-        ';--', 'xp_', 'sp_'
-    ])
+    DANGEROUS_KEYWORDS: FrozenSet[str] = frozenset(
+        [
+            "DROP",
+            "DELETE",
+            "UPDATE",
+            "INSERT",
+            "ALTER",
+            "CREATE",
+            "TRUNCATE",
+            "REPLACE",
+            "MERGE",
+            "UPSERT",
+            "COPY",
+            "GRANT",
+            "REVOKE",
+            "COMMIT",
+            "ROLLBACK",
+            "EXEC",
+            "EXECUTE",
+            "CALL",
+            "EVAL",
+            ";--",
+            "xp_",
+            "sp_",
+        ]
+    )
 
     @classmethod
     def validate_table_name(cls, table_name: str) -> str:
@@ -105,8 +128,7 @@ class DatabaseSecurity:
         # Check against allowlist
         if normalized_name not in cls.ALLOWED_TABLES:
             raise ValueError(
-                f"Table '{table_name}' is not allowed. "
-                f"Allowed tables: {', '.join(sorted(cls.ALLOWED_TABLES))}"
+                f"Table '{table_name}' is not allowed. Allowed tables: {', '.join(sorted(cls.ALLOWED_TABLES))}"
             )
 
         return table_name
@@ -129,15 +151,12 @@ class DatabaseSecurity:
             raise ValueError("Column name cannot be empty")
 
         # Basic alphanumeric and underscore check
-        if not column_name.replace('_', '').replace('.', '').isalnum():
+        if not column_name.replace("_", "").replace(".", "").isalnum():
             raise ValueError(f"Column name '{column_name}' contains invalid characters")
 
         # Check against allowed prefixes
         normalized_name = column_name.lower()
-        allowed = any(
-            normalized_name.startswith(prefix)
-            for prefix in cls.ALLOWED_COLUMN_PREFIXES
-        )
+        allowed = any(normalized_name.startswith(prefix) for prefix in cls.ALLOWED_COLUMN_PREFIXES)
 
         if not allowed:
             raise ValueError(
@@ -161,10 +180,10 @@ class DatabaseSecurity:
         import re
 
         # Remove -- style comments (to end of line)
-        query = re.sub(r'--[^\n]*', '', query)
+        query = re.sub(r"--[^\n]*", "", query)
 
         # Remove /* */ style comments
-        query = re.sub(r'/\*.*?\*/', '', query, flags=re.DOTALL)
+        query = re.sub(r"/\*.*?\*/", "", query, flags=re.DOTALL)
 
         return query
 
@@ -206,8 +225,7 @@ class DatabaseSecurity:
 
         if dangerous_patterns:
             raise ValueError(
-                f"Query contains dangerous keywords: {', '.join(dangerous_patterns)}. "
-                "Only SELECT queries are allowed."
+                f"Query contains dangerous keywords: {', '.join(dangerous_patterns)}. Only SELECT queries are allowed."
             )
 
     @classmethod
@@ -222,7 +240,7 @@ class DatabaseSecurity:
             True if query is read-only
         """
         query_trimmed = query.strip().upper()
-        read_only_starters = ('SELECT', 'WITH', 'SHOW', 'DESCRIBE', 'EXPLAIN')
+        read_only_starters = ("SELECT", "WITH", "SHOW", "DESCRIBE", "EXPLAIN")
 
         return query_trimmed.startswith(read_only_starters)
 
@@ -331,10 +349,10 @@ class QueryValidator:
 
         # Look for patterns like "FROM table_name" or "JOIN table_name"
         patterns = [
-            r'\bFROM\s+([a-zA-Z_][a-zA-Z0-9_]*)',
-            r'\bJOIN\s+([a-zA-Z_][a-zA-Z0-9_]*)',
-            r'\bINTO\s+([a-zA-Z_][a-zA-Z0-9_]*)',
-            r'\bUPDATE\s+([a-zA-Z_][a-zA-Z0-9_]*)',
+            r"\bFROM\s+([a-zA-Z_][a-zA-Z0-9_]*)",
+            r"\bJOIN\s+([a-zA-Z_][a-zA-Z0-9_]*)",
+            r"\bINTO\s+([a-zA-Z_][a-zA-Z0-9_]*)",
+            r"\bUPDATE\s+([a-zA-Z_][a-zA-Z0-9_]*)",
         ]
 
         table_names = []

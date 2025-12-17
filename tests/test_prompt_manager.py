@@ -78,9 +78,7 @@ def test_version_sorting():
         # Create test version files
         test_versions = ["v1.0.0", "v1.10.0", "v1.2.0", "v2.0.0", "v1.0.10"]
         for version in test_versions:
-            (versions_dir / f"{version}.py").write_text(
-                f'SYSTEM_PROMPT_BASE = "Test prompt for {version}"'
-            )
+            (versions_dir / f"{version}.py").write_text(f'SYSTEM_PROMPT_BASE = "Test prompt for {version}"')
 
         # Create active version file
         (prompts_dir / "active_version.txt").write_text("v1.0.0")
@@ -139,7 +137,7 @@ def test_create_version():
             version="v1.1.0",
             prompt_content="This is a test prompt",
             author="Test Author",
-            description="Test version for unit tests"
+            description="Test version for unit tests",
         )
 
         # Check the version was created

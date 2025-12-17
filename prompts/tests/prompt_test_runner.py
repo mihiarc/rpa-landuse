@@ -36,6 +36,7 @@ from prompts.prompt_manager import PromptManager
 @dataclass
 class TestResult:
     """Result of a single test case."""
+
     name: str
     query: str
     passed: bool
@@ -60,6 +61,7 @@ class TestResult:
 @dataclass
 class TestSuiteResult:
     """Result of entire test suite execution."""
+
     version: str
     total_tests: int
     passed_tests: int
@@ -132,15 +134,12 @@ class PromptTestRunner:
         # This is a placeholder - actual implementation needs agent changes
         if isinstance(agent_state, dict):
             for key, value in agent_state.items():
-                if 'sql' in key.lower() and value:
+                if "sql" in key.lower() and value:
                     return str(value)
         return None
 
     def validate_sql_contains(
-        self,
-        sql: str,
-        expected_contains: List[str],
-        expected_not_contains: Optional[List[str]] = None
+        self, sql: str, expected_contains: List[str], expected_not_contains: Optional[List[str]] = None
     ) -> Tuple[bool, List[str]]:
         """
         Validate that SQL contains expected keywords.
@@ -169,11 +168,7 @@ class PromptTestRunner:
 
         return len(errors) == 0, errors
 
-    def validate_response_contains(
-        self,
-        response: str,
-        expected_contains: List[str]
-    ) -> Tuple[bool, List[str]]:
+    def validate_response_contains(self, response: str, expected_contains: List[str]) -> Tuple[bool, List[str]]:
         """
         Validate that response contains expected content.
 
@@ -199,10 +194,7 @@ class PromptTestRunner:
         return len(errors) == 0, errors
 
     def validate_numeric_range(
-        self,
-        response: str,
-        min_value: Optional[float] = None,
-        max_value: Optional[float] = None
+        self, response: str, min_value: Optional[float] = None, max_value: Optional[float] = None
     ) -> Tuple[bool, List[str]]:
         """
         Validate that response contains numbers within expected range.
@@ -222,12 +214,12 @@ class PromptTestRunner:
         import re
 
         # Remove commas and find all numbers
-        clean_response = response.replace(',', '')
+        clean_response = response.replace(",", "")
 
         # Find all numeric patterns
         number_patterns = [
-            r'\d+\.?\d*',  # Regular numbers
-            r'\d+\.\d+\s*(?:million|billion|thousand)',  # Numbers with units
+            r"\d+\.?\d*",  # Regular numbers
+            r"\d+\.\d+\s*(?:million|billion|thousand)",  # Numbers with units
         ]
 
         numbers = []
@@ -236,12 +228,12 @@ class PromptTestRunner:
             for match in matches:
                 try:
                     # Handle units
-                    if 'million' in match.lower():
-                        num = float(re.search(r'[\d.]+', match).group()) * 1000000
-                    elif 'billion' in match.lower():
-                        num = float(re.search(r'[\d.]+', match).group()) * 1000000000
-                    elif 'thousand' in match.lower():
-                        num = float(re.search(r'[\d.]+', match).group()) * 1000
+                    if "million" in match.lower():
+                        num = float(re.search(r"[\d.]+", match).group()) * 1000000
+                    elif "billion" in match.lower():
+                        num = float(re.search(r"[\d.]+", match).group()) * 1000000000
+                    elif "thousand" in match.lower():
+                        num = float(re.search(r"[\d.]+", match).group()) * 1000
                     else:
                         num = float(match)
 
@@ -267,7 +259,9 @@ class PromptTestRunner:
 
         if not found_in_range:
             if min_value is not None and max_value is not None:
-                errors.append(f"No values found in range [{min_value:,.0f}, {max_value:,.0f}]. Found: {[f'{n:,.0f}' for n in numbers[:3]]}")
+                errors.append(
+                    f"No values found in range [{min_value:,.0f}, {max_value:,.0f}]. Found: {[f'{n:,.0f}' for n in numbers[:3]]}"
+                )
             elif min_value is not None:
                 errors.append(f"No values found >= {min_value:,.0f}. Found: {[f'{n:,.0f}' for n in numbers[:3]]}")
             elif max_value is not None:
@@ -275,11 +269,7 @@ class PromptTestRunner:
 
         return found_in_range, errors
 
-    def run_single_test(
-        self,
-        test_case: Dict[str, Any],
-        agent: LanduseAgent
-    ) -> TestResult:
+    def run_single_test(self, test_case: Dict[str, Any], agent: LanduseAgent) -> TestResult:
         """
         Run a single test case.
 
@@ -291,17 +281,17 @@ class PromptTestRunner:
             TestResult with outcome
         """
         result = TestResult(
-            name=test_case.get('name', 'Unnamed test'),
-            query=test_case['query'],
+            name=test_case.get("name", "Unnamed test"),
+            query=test_case["query"],
             passed=False,
-            critical=test_case.get('critical', False)
+            critical=test_case.get("critical", False),
         )
 
         start_time = time.time()
 
         try:
             # Execute query
-            response = agent.query(test_case['query'])
+            response = agent.query(test_case["query"])
             result.response_text = response
             result.execution_time = time.time() - start_time
 
@@ -309,27 +299,31 @@ class PromptTestRunner:
             # For now, we'll check if response indicates data was retrieved
 
             # Validate SQL contains expected keywords
-            if 'expected_sql_contains' in test_case:
+            if "expected_sql_contains" in test_case:
                 # Since we can't easily extract SQL from the current agent,
                 # we'll check the response for indicators
                 # In a real implementation, we'd instrument the agent
                 result.warnings.append("SQL validation skipped (needs agent instrumentation)")
 
             # Validate response contains expected content
-            if 'expected_response_contains' in test_case:
-                passed, errors = self.validate_response_contains(
-                    response,
-                    test_case['expected_response_contains']
-                )
+            if "expected_response_contains" in test_case:
+                passed, errors = self.validate_response_contains(response, test_case["expected_response_contains"])
                 if not passed:
                     result.errors.extend(errors)
 
             # Check if query should be rejected (off-topic)
-            if test_case.get('should_reject', False):
+            if test_case.get("should_reject", False):
                 # Check that response indicates the query is out of scope
                 rejection_keywords = [
-                    "land use", "RPA", "cannot", "outside", "scope",
-                    "don't have", "not able", "unable to help", "can't answer"
+                    "land use",
+                    "RPA",
+                    "cannot",
+                    "outside",
+                    "scope",
+                    "don't have",
+                    "not able",
+                    "unable to help",
+                    "can't answer",
                 ]
                 response_lower = response.lower() if response else ""
                 if not any(keyword.lower() in response_lower for keyword in rejection_keywords):
@@ -338,12 +332,10 @@ class PromptTestRunner:
                     result.warnings.append("Off-topic query correctly rejected")
 
             # Check numeric range validation
-            if 'expected_numeric_range' in test_case:
-                range_config = test_case['expected_numeric_range']
+            if "expected_numeric_range" in test_case:
+                range_config = test_case["expected_numeric_range"]
                 passed, errors = self.validate_numeric_range(
-                    response,
-                    min_value=range_config.get('min'),
-                    max_value=range_config.get('max')
+                    response, min_value=range_config.get("min"), max_value=range_config.get("max")
                 )
                 if not passed:
                     result.errors.extend(errors)
@@ -351,13 +343,13 @@ class PromptTestRunner:
                     result.warnings.append("Numeric validation passed")
 
             # Check if it should return data
-            elif test_case.get('should_return_data', False):
+            elif test_case.get("should_return_data", False):
                 # Simple heuristic: check if response contains numbers/data
-                if not re.search(r'\d+', response):
+                if not re.search(r"\d+", response):
                     result.errors.append("Response doesn't appear to contain data")
 
             # Check graceful error handling
-            if test_case.get('should_handle_gracefully', False):
+            if test_case.get("should_handle_gracefully", False):
                 # If we got here without exception, it handled gracefully
                 result.warnings.append("Graceful handling check: OK")
 
@@ -368,7 +360,7 @@ class PromptTestRunner:
             result.execution_time = time.time() - start_time
 
             # Check if error was expected
-            if test_case.get('should_not_error', True):
+            if test_case.get("should_not_error", True):
                 result.errors.append(f"Unexpected error: {str(e)}")
                 if self.verbose:
                     result.errors.append(traceback.format_exc())
@@ -379,11 +371,7 @@ class PromptTestRunner:
 
         return result
 
-    def run_test_suite(
-        self,
-        version: Optional[str] = None,
-        categories: Optional[List[str]] = None
-    ) -> TestSuiteResult:
+    def run_test_suite(self, version: Optional[str] = None, categories: Optional[List[str]] = None) -> TestSuiteResult:
         """
         Run the complete test suite for a prompt version.
 
@@ -451,7 +439,7 @@ class PromptTestRunner:
             failed_tests=failed,
             critical_failures=critical_failures,
             execution_time=total_time,
-            test_results=test_results
+            test_results=test_results,
         )
 
     def _print_test_result(self, result: TestResult):
@@ -486,10 +474,7 @@ class PromptTestRunner:
         table.add_row("Failed", f"[red]{suite_result.failed_tests}[/red]")
 
         if suite_result.critical_failures > 0:
-            table.add_row(
-                "Critical Failures",
-                f"[bold red]{suite_result.critical_failures}[/bold red]"
-            )
+            table.add_row("Critical Failures", f"[bold red]{suite_result.critical_failures}[/bold red]")
 
         pass_color = "green" if suite_result.pass_rate >= 80 else "yellow" if suite_result.pass_rate >= 60 else "red"
         table.add_row("Pass Rate", f"[{pass_color}]{suite_result.pass_rate:.1f}%[/{pass_color}]")
@@ -529,31 +514,31 @@ class PromptTestRunner:
 
         # Convert to JSON-serializable format
         results_dict = {
-            'version': suite_result.version,
-            'timestamp': suite_result.timestamp,
-            'summary': {
-                'total_tests': suite_result.total_tests,
-                'passed_tests': suite_result.passed_tests,
-                'failed_tests': suite_result.failed_tests,
-                'critical_failures': suite_result.critical_failures,
-                'pass_rate': suite_result.pass_rate,
-                'execution_time': suite_result.execution_time
+            "version": suite_result.version,
+            "timestamp": suite_result.timestamp,
+            "summary": {
+                "total_tests": suite_result.total_tests,
+                "passed_tests": suite_result.passed_tests,
+                "failed_tests": suite_result.failed_tests,
+                "critical_failures": suite_result.critical_failures,
+                "pass_rate": suite_result.pass_rate,
+                "execution_time": suite_result.execution_time,
             },
-            'tests': [
+            "tests": [
                 {
-                    'name': r.name,
-                    'query': r.query,
-                    'passed': r.passed,
-                    'critical': r.critical,
-                    'errors': r.errors,
-                    'warnings': r.warnings,
-                    'execution_time': r.execution_time
+                    "name": r.name,
+                    "query": r.query,
+                    "passed": r.passed,
+                    "critical": r.critical,
+                    "errors": r.errors,
+                    "warnings": r.warnings,
+                    "execution_time": r.execution_time,
                 }
                 for r in suite_result.test_results
-            ]
+            ],
         }
 
-        with open(output_file, 'w') as f:
+        with open(output_file, "w") as f:
             json.dump(results_dict, f, indent=2)
 
         self.console.print(f"\nResults saved to: {output_file}")
@@ -563,26 +548,11 @@ def main():
     """Main entry point for the test runner."""
     import argparse
 
-    parser = argparse.ArgumentParser(description='Test prompt versions')
-    parser.add_argument(
-        '--version', '-v',
-        help='Prompt version to test (default: active version)'
-    )
-    parser.add_argument(
-        '--category', '-c',
-        action='append',
-        help='Test category to run (can specify multiple)'
-    )
-    parser.add_argument(
-        '--verbose',
-        action='store_true',
-        help='Show detailed output'
-    )
-    parser.add_argument(
-        '--save-results',
-        action='store_true',
-        help='Save results to JSON file'
-    )
+    parser = argparse.ArgumentParser(description="Test prompt versions")
+    parser.add_argument("--version", "-v", help="Prompt version to test (default: active version)")
+    parser.add_argument("--category", "-c", action="append", help="Test category to run (can specify multiple)")
+    parser.add_argument("--verbose", action="store_true", help="Show detailed output")
+    parser.add_argument("--save-results", action="store_true", help="Save results to JSON file")
 
     args = parser.parse_args()
 
@@ -590,10 +560,7 @@ def main():
     runner = PromptTestRunner(verbose=args.verbose)
 
     try:
-        results = runner.run_test_suite(
-            version=args.version,
-            categories=args.category
-        )
+        results = runner.run_test_suite(version=args.version, categories=args.category)
 
         runner.print_summary(results)
 

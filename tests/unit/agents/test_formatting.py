@@ -32,9 +32,9 @@ class TestCleanSQLQuery:
 
     def test_remove_markdown(self):
         """Test removing markdown formatting"""
-        assert clean_sql_query('```sql\nSELECT * FROM table\n```') == "SELECT * FROM table"
-        assert clean_sql_query('```SELECT * FROM table```') == "SELECT * FROM table"
-        assert clean_sql_query('```sql SELECT * FROM table```') == "SELECT * FROM table"
+        assert clean_sql_query("```sql\nSELECT * FROM table\n```") == "SELECT * FROM table"
+        assert clean_sql_query("```SELECT * FROM table```") == "SELECT * FROM table"
+        assert clean_sql_query("```sql SELECT * FROM table```") == "SELECT * FROM table"
 
     def test_combined_cleaning(self):
         """Test combined quote and markdown removal"""
@@ -59,11 +59,7 @@ class TestFormatQueryResults:
 
     def test_simple_dataframe(self):
         """Test formatting simple results"""
-        df = pd.DataFrame({
-            'id': [1, 2, 3],
-            'name': ['A', 'B', 'C'],
-            'acres': [100.5, 200.7, 300.9]
-        })
+        df = pd.DataFrame({"id": [1, 2, 3], "name": ["A", "B", "C"], "acres": [100.5, 200.7, 300.9]})
         result = format_query_results(df, "SELECT * FROM test", max_display_rows=5)
 
         # Check for table formatting
@@ -79,10 +75,7 @@ class TestFormatQueryResults:
 
     def test_state_code_conversion(self):
         """Test state code to name conversion"""
-        df = pd.DataFrame({
-            'state_code': ['06', '48', '36'],
-            'value': [100, 200, 300]
-        })
+        df = pd.DataFrame({"state_code": ["06", "48", "36"], "value": [100, 200, 300]})
         result = format_query_results(df, "SELECT * FROM test")
 
         # Check state names appear
@@ -93,20 +86,14 @@ class TestFormatQueryResults:
 
     def test_large_dataframe_truncation(self):
         """Test truncation of large results"""
-        df = pd.DataFrame({
-            'id': range(100),
-            'value': range(100)
-        })
+        df = pd.DataFrame({"id": range(100), "value": range(100)})
         result = format_query_results(df, "SELECT * FROM test", max_display_rows=10)
 
         assert "Showing first 10 of 100 total records" in result
 
     def test_summary_statistics(self):
         """Test inclusion of summary statistics"""
-        df = pd.DataFrame({
-            'acres': [100, 200, 300, 400, 500],
-            'count': [10, 20, 30, 40, 50]
-        })
+        df = pd.DataFrame({"acres": [100, 200, 300, 400, 500], "count": [10, 20, 30, 40, 50]})
         result = format_query_results(df, "SELECT * FROM test", include_summary=True)
 
         assert "Summary Statistics" in result
@@ -119,8 +106,8 @@ class TestFormatRowValues:
 
     def test_format_numeric_values(self):
         """Test formatting of numeric values - all rounded to integers"""
-        row = pd.Series({'id': 1000, 'acres': 12345.67, 'ratio': 0.123})
-        formatted = format_row_values(row, ['id', 'acres', 'ratio'])
+        row = pd.Series({"id": 1000, "acres": 12345.67, "ratio": 0.123})
+        formatted = format_row_values(row, ["id", "acres", "ratio"])
 
         assert formatted[0] == "1,000"
         assert formatted[1] == "12,346"  # Rounded acres
@@ -130,8 +117,9 @@ class TestFormatRowValues:
     def test_format_na_values(self):
         """Test formatting of NA values"""
         import numpy as np
-        row = pd.Series({'id': 1, 'value': np.nan, 'name': None})
-        formatted = format_row_values(row, ['id', 'value', 'name'])
+
+        row = pd.Series({"id": 1, "value": np.nan, "name": None})
+        formatted = format_row_values(row, ["id", "value", "name"])
 
         assert formatted[0] == "1"
         assert formatted[1] == "N/A"
@@ -139,8 +127,8 @@ class TestFormatRowValues:
 
     def test_format_string_values(self):
         """Test formatting of string values"""
-        row = pd.Series({'name': 'Test Name', 'code': 'ABC123'})
-        formatted = format_row_values(row, ['name', 'code'])
+        row = pd.Series({"name": "Test Name", "code": "ABC123"})
+        formatted = format_row_values(row, ["name", "code"])
 
         assert formatted[0] == "Test Name"
         assert formatted[1] == "ABC123"
@@ -151,11 +139,7 @@ class TestSummaryStatistics:
 
     def test_numeric_summary(self):
         """Test summary for numeric columns"""
-        df = pd.DataFrame({
-            'acres': [100, 200, 300],
-            'count': [10, 20, 30],
-            'name': ['A', 'B', 'C']
-        })
+        df = pd.DataFrame({"acres": [100, 200, 300], "count": [10, 20, 30], "name": ["A", "B", "C"]})
         summary = get_summary_statistics(df)
 
         assert summary is not None
@@ -166,17 +150,14 @@ class TestSummaryStatistics:
 
     def test_no_numeric_columns(self):
         """Test summary for non-numeric dataframe"""
-        df = pd.DataFrame({
-            'name': ['A', 'B', 'C'],
-            'code': ['X', 'Y', 'Z']
-        })
+        df = pd.DataFrame({"name": ["A", "B", "C"], "code": ["X", "Y", "Z"]})
         summary = get_summary_statistics(df)
 
         assert summary is None
 
     def test_single_row(self):
         """Test summary for single row (no statistics)"""
-        df = pd.DataFrame({'value': [100]})
+        df = pd.DataFrame({"value": [100]})
         summary = get_summary_statistics(df)
 
         assert summary is None
@@ -187,11 +168,7 @@ class TestUIComponents:
 
     def test_create_welcome_panel(self):
         """Test welcome panel creation"""
-        panel = create_welcome_panel(
-            "test.db",
-            "gpt-4",
-            "Configured"
-        )
+        panel = create_welcome_panel("test.db", "gpt-4", "Configured")
 
         assert isinstance(panel, Panel)
         assert panel.renderable is not None

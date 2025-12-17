@@ -9,7 +9,7 @@ from typing import Any, Dict, Optional, Type, TypeVar
 from landuse.core.app_config import AppConfig
 from landuse.exceptions import ConfigurationError
 
-T = TypeVar('T')
+T = TypeVar("T")
 
 
 class ServiceFactory:
@@ -37,27 +37,29 @@ class ServiceFactory:
 
     def get_database_manager(self):
         """Get or create DatabaseManager instance."""
-        if 'database_manager' not in self._cache:
+        if "database_manager" not in self._cache:
             from landuse.agents.database_manager import DatabaseManager
-            self._cache['database_manager'] = DatabaseManager(self._config, None)
-        return self._cache['database_manager']
+
+            self._cache["database_manager"] = DatabaseManager(self._config, None)
+        return self._cache["database_manager"]
 
     def get_llm_manager(self):
         """Get or create LLMManager instance."""
-        if 'llm_manager' not in self._cache:
+        if "llm_manager" not in self._cache:
             from landuse.agents.llm_manager import LLMManager
-            self._cache['llm_manager'] = LLMManager(self._config, None)
-        return self._cache['llm_manager']
+
+            self._cache["llm_manager"] = LLMManager(self._config, None)
+        return self._cache["llm_manager"]
 
     def get_conversation_manager(self):
         """Get or create ConversationManager instance."""
-        if 'conversation_manager' not in self._cache:
+        if "conversation_manager" not in self._cache:
             from landuse.agents.conversation_manager import ConversationManager
-            self._cache['conversation_manager'] = ConversationManager(
-                max_history_length=self._config.agent.conversation_history_limit,
-                console=None
+
+            self._cache["conversation_manager"] = ConversationManager(
+                max_history_length=self._config.agent.conversation_history_limit, console=None
             )
-        return self._cache['conversation_manager']
+        return self._cache["conversation_manager"]
 
     def get_query_executor(self, db_connection=None):
         """Get or create QueryExecutor instance.
@@ -65,46 +67,48 @@ class ServiceFactory:
         Args:
             db_connection: Database connection (required on first call)
         """
-        if 'query_executor' not in self._cache:
+        if "query_executor" not in self._cache:
             if db_connection is None:
                 db_manager = self.get_database_manager()
                 db_connection = db_manager.get_connection()
             from landuse.agents.query_executor import QueryExecutor
-            self._cache['query_executor'] = QueryExecutor(
-                self._config, db_connection, None
-            )
-        return self._cache['query_executor']
+
+            self._cache["query_executor"] = QueryExecutor(self._config, db_connection, None)
+        return self._cache["query_executor"]
 
     def get_cache(self):
         """Get or create InMemoryCache instance."""
-        if 'cache' not in self._cache:
+        if "cache" not in self._cache:
             from landuse.infrastructure.cache import InMemoryCache
-            self._cache['cache'] = InMemoryCache()
-        return self._cache['cache']
+
+            self._cache["cache"] = InMemoryCache()
+        return self._cache["cache"]
 
     def get_logger(self):
         """Get or create StructuredLogger instance."""
-        if 'logger' not in self._cache:
+        if "logger" not in self._cache:
             from landuse.infrastructure.logging import StructuredLogger
-            self._cache['logger'] = StructuredLogger(self._config.logging)
-        return self._cache['logger']
+
+            self._cache["logger"] = StructuredLogger(self._config.logging)
+        return self._cache["logger"]
 
     def get_metrics(self):
         """Get or create InMemoryMetrics instance."""
-        if 'metrics' not in self._cache:
+        if "metrics" not in self._cache:
             from landuse.infrastructure.metrics import InMemoryMetrics
-            self._cache['metrics'] = InMemoryMetrics()
-        return self._cache['metrics']
+
+            self._cache["metrics"] = InMemoryMetrics()
+        return self._cache["metrics"]
 
     def cleanup(self) -> None:
         """Cleanup all cached services."""
         for service in self._cache.values():
-            if hasattr(service, 'cleanup'):
+            if hasattr(service, "cleanup"):
                 try:
                     service.cleanup()
                 except Exception:
                     pass
-            elif hasattr(service, 'close'):
+            elif hasattr(service, "close"):
                 try:
                     service.close()
                 except Exception:

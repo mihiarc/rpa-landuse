@@ -33,7 +33,7 @@ class TestSQLQueryValidator:
             "SELECT COUNT(*) FROM fact_landuse_transitions",
             "SELECT s.scenario_name, SUM(f.acres) FROM fact_landuse_transitions f JOIN dim_scenario s ON f.scenario_id = s.scenario_id GROUP BY s.scenario_name",
             "SELECT * FROM dim_time WHERE start_year >= 2020 ORDER BY start_year LIMIT 10",
-            "WITH cte AS (SELECT * FROM dim_scenario) SELECT * FROM cte"
+            "WITH cte AS (SELECT * FROM dim_scenario) SELECT * FROM cte",
         ]
 
         for query in valid_queries:
@@ -52,7 +52,7 @@ class TestSQLQueryValidator:
             ("UPDATE dim_scenario SET scenario_name = 'hacked'", "UPDATE"),
             ("INSERT INTO dim_scenario VALUES (999, 'hack')", "INSERT"),
             ("GRANT ALL ON dim_scenario TO PUBLIC", "GRANT"),
-            ("EXECUTE sp_configure", "EXECUTE")
+            ("EXECUTE sp_configure", "EXECUTE"),
         ]
 
         for query, keyword in dangerous_queries:
@@ -67,7 +67,7 @@ class TestSQLQueryValidator:
         multi_queries = [
             "SELECT * FROM dim_scenario; DROP TABLE dim_scenario",
             "SELECT * FROM dim_scenario; DELETE FROM dim_scenario WHERE 1=1",
-            "SELECT 1; SELECT 2; SELECT 3"
+            "SELECT 1; SELECT 2; SELECT 3",
         ]
 
         for query in multi_queries:
@@ -79,11 +79,7 @@ class TestSQLQueryValidator:
         """Test that non-SELECT queries are blocked"""
         validator = SQLQueryValidator()
 
-        non_select_queries = [
-            "SHOW TABLES",
-            "DESCRIBE dim_scenario",
-            "EXPLAIN SELECT * FROM dim_scenario"
-        ]
+        non_select_queries = ["SHOW TABLES", "DESCRIBE dim_scenario", "EXPLAIN SELECT * FROM dim_scenario"]
 
         for query in non_select_queries:
             is_valid, error = validator.validate_query(query)
@@ -99,7 +95,7 @@ class TestSQLQueryValidator:
             "SELECT * FROM users WHERE name = '' OR 1=1--",
             "SELECT 0x414141",  # Hex literal
             "SELECT CHAR(65,66,67)",  # CHAR function
-            "SELECT * FROM users INTO OUTFILE '/tmp/hack.txt'"
+            "SELECT * FROM users INTO OUTFILE '/tmp/hack.txt'",
         ]
 
         # Note: Some basic OR conditions are allowed, but suspicious functions are not
@@ -122,7 +118,7 @@ class TestSQLQueryValidator:
         queries_with_comments = [
             "SELECT * FROM dim_scenario -- This is a comment",
             "SELECT * FROM dim_scenario /* multi\nline\ncomment */",
-            "SELECT * FROM dim_scenario # MySQL style comment"
+            "SELECT * FROM dim_scenario # MySQL style comment",
         ]
 
         for query in queries_with_comments:
@@ -183,11 +179,7 @@ class TestInputValidator:
         validator = InputValidator()
 
         # Valid scenarios
-        valid_scenarios = [
-            "CNRM_CM5_rcp45_ssp1",
-            "GFDL_ESM4_rcp85_ssp5",
-            "IPSL_CM6A_LR_rcp45_ssp2"
-        ]
+        valid_scenarios = ["CNRM_CM5_rcp45_ssp1", "GFDL_ESM4_rcp85_ssp5", "IPSL_CM6A_LR_rcp45_ssp2"]
 
         for scenario in valid_scenarios:
             result = validator.validate_scenario_name(scenario)
@@ -197,9 +189,9 @@ class TestInputValidator:
         invalid_scenarios = [
             "invalid_format",
             "CNRM_CM5_rcp45",  # Missing ssp
-            "CNRM_CM5_ssp1",   # Missing rcp
+            "CNRM_CM5_ssp1",  # Missing rcp
             "cnrm_cm5_rcp45_ssp1",  # Lowercase
-            "CNRM_CM5_rcp450_ssp1"  # Wrong rcp format
+            "CNRM_CM5_rcp450_ssp1",  # Wrong rcp format
         ]
 
         for scenario in invalid_scenarios:
@@ -227,11 +219,7 @@ class TestInputValidator:
         validator = InputValidator()
 
         # Valid ranges
-        valid_ranges = [
-            ("2012-2020", (2012, 2020)),
-            ("2020-2030", (2020, 2030)),
-            ("1900-2100", (1900, 2100))
-        ]
+        valid_ranges = [("2012-2020", (2012, 2020)), ("2020-2030", (2020, 2030)), ("1900-2100", (1900, 2100))]
 
         for year_range, expected in valid_ranges:
             result = validator.validate_year_range(year_range)
@@ -243,9 +231,9 @@ class TestInputValidator:
             "2020-2020",  # Same year
             "1899-2020",  # Too early
             "2020-2201",  # Too late
-            "2020-30",    # Wrong format
-            "2020",       # Single year
-            "invalid"     # Not a year
+            "2020-30",  # Wrong format
+            "2020",  # Single year
+            "invalid",  # Not a year
         ]
 
         for year_range in invalid_ranges:
@@ -263,7 +251,7 @@ class TestRateLimiter:
         # First 3 calls should succeed
         for i in range(3):
             allowed, error = limiter.check_rate_limit("user1")
-            assert allowed, f"Call {i+1} should be allowed"
+            assert allowed, f"Call {i + 1} should be allowed"
             assert error is None
 
         # 4th call should fail
@@ -301,7 +289,7 @@ class TestRateLimiter:
 
         call_count = 0
 
-        @limiter.rate_limit_decorator(lambda *args, **kwargs: kwargs.get('user_id', 'anonymous'))
+        @limiter.rate_limit_decorator(lambda *args, **kwargs: kwargs.get("user_id", "anonymous"))
         def test_function(user_id="anonymous"):
             nonlocal call_count
             call_count += 1
@@ -329,7 +317,7 @@ class TestSecureConfig:
             landuse_model="gpt-4o-mini",
             temperature=0.5,
             max_tokens=2000,
-            database_path="data/processed/landuse_analytics.duckdb"
+            database_path="data/processed/landuse_analytics.duckdb",
         )
 
         assert config.openai_api_key.startswith("sk-")
@@ -350,7 +338,7 @@ class TestSecureConfig:
         with pytest.raises(ValueError):
             SecureConfig(log_level="INVALID")
 
-    @patch('pathlib.Path.exists')
+    @patch("pathlib.Path.exists")
     def test_database_path_validation(self, mock_exists):
         """Test database path validation"""
         mock_exists.return_value = False
@@ -358,19 +346,15 @@ class TestSecureConfig:
         with pytest.raises(ValueError, match="Database not found"):
             SecureConfig(database_path="nonexistent.db")
 
-    @patch.dict(os.environ, {
-        'OPENAI_API_KEY': 'sk-test' + 'a' * 44,
-        'TEMPERATURE': '0.7',
-        'MAX_TOKENS': '3000'
-    })
-    @patch('pathlib.Path.exists')
+    @patch.dict(os.environ, {"OPENAI_API_KEY": "sk-test" + "a" * 44, "TEMPERATURE": "0.7", "MAX_TOKENS": "3000"})
+    @patch("pathlib.Path.exists")
     def test_from_env(self, mock_exists):
         """Test loading configuration from environment"""
         mock_exists.return_value = True
 
         config = SecureConfig.from_env()
 
-        assert config.openai_api_key == os.environ['OPENAI_API_KEY']
+        assert config.openai_api_key == os.environ["OPENAI_API_KEY"]
         assert config.temperature == 0.7
         assert config.max_tokens == 3000
 
@@ -380,9 +364,7 @@ class TestSecurityLogger:
 
     def test_log_query(self):
         """Test query logging"""
-        with patch('logging.Logger.info') as mock_info, \
-             patch('logging.Logger.warning') as mock_warning:
-
+        with patch("logging.Logger.info") as mock_info, patch("logging.Logger.warning") as mock_warning:
             logger = SecurityLogger()
 
             # Successful query
@@ -395,14 +377,14 @@ class TestSecurityLogger:
 
     def test_log_access(self):
         """Test access logging"""
-        with patch('logging.Logger.info') as mock_info:
+        with patch("logging.Logger.info") as mock_info:
             logger = SecurityLogger()
             logger.log_access("user1", "/api/data", "GET", "allowed")
             mock_info.assert_called_once()
 
     def test_log_rate_limit(self):
         """Test rate limit logging"""
-        with patch('logging.Logger.warning') as mock_warning:
+        with patch("logging.Logger.warning") as mock_warning:
             logger = SecurityLogger()
             logger.log_rate_limit("user1", 60)
             mock_warning.assert_called_once()

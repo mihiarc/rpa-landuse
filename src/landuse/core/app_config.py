@@ -9,44 +9,24 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from landuse.exceptions import ConfigurationError
 
-T = TypeVar('T', bound='AppConfig')
+T = TypeVar("T", bound="AppConfig")
 
 
 class DatabaseConfig(BaseModel):
     """Database configuration settings."""
 
-    path: str = Field(
-        default='data/processed/landuse_analytics.duckdb',
-        description="Path to DuckDB database file"
-    )
-    read_only: bool = Field(
-        default=True,
-        description="Open database in read-only mode for security"
-    )
-    connection_timeout: int = Field(
-        default=30,
-        ge=1,
-        le=300,
-        description="Database connection timeout in seconds"
-    )
-    max_connections: int = Field(
-        default=10,
-        ge=1,
-        le=100,
-        description="Maximum number of database connections in pool"
-    )
-    cache_ttl: int = Field(
-        default=3600,
-        ge=0,
-        description="Default cache TTL for query results in seconds"
-    )
+    path: str = Field(default="data/processed/landuse_analytics.duckdb", description="Path to DuckDB database file")
+    read_only: bool = Field(default=True, description="Open database in read-only mode for security")
+    connection_timeout: int = Field(default=30, ge=1, le=300, description="Database connection timeout in seconds")
+    max_connections: int = Field(default=10, ge=1, le=100, description="Maximum number of database connections in pool")
+    cache_ttl: int = Field(default=3600, ge=0, description="Default cache TTL for query results in seconds")
 
-    @field_validator('path')
+    @field_validator("path")
     @classmethod
     def validate_path(cls, v: str) -> str:
         """Validate database path exists."""
         path = Path(v)
-        if not path.exists() and not v.startswith(':memory:'):
+        if not path.exists() and not v.startswith(":memory:"):
             raise ConfigurationError(f"Database file not found: {v}")
         return v
 
@@ -54,40 +34,17 @@ class DatabaseConfig(BaseModel):
 class LLMConfig(BaseModel):
     """LLM configuration settings."""
 
-    model_name: str = Field(
-        default='gpt-4o-mini',
-        description="Name of the LLM model to use"
-    )
-    temperature: float = Field(
-        default=0.2,
-        ge=0.0,
-        le=2.0,
-        description="Temperature for LLM responses"
-    )
-    max_tokens: int = Field(
-        default=4000,
-        ge=100,
-        le=32000,
-        description="Maximum tokens for LLM responses"
-    )
-    timeout: int = Field(
-        default=60,
-        ge=1,
-        le=600,
-        description="LLM request timeout in seconds"
-    )
-    max_retries: int = Field(
-        default=3,
-        ge=0,
-        le=10,
-        description="Maximum number of retry attempts for LLM calls"
-    )
+    model_name: str = Field(default="gpt-4o-mini", description="Name of the LLM model to use")
+    temperature: float = Field(default=0.2, ge=0.0, le=2.0, description="Temperature for LLM responses")
+    max_tokens: int = Field(default=4000, ge=100, le=32000, description="Maximum tokens for LLM responses")
+    timeout: int = Field(default=60, ge=1, le=600, description="LLM request timeout in seconds")
+    max_retries: int = Field(default=3, ge=0, le=10, description="Maximum number of retry attempts for LLM calls")
 
-    @field_validator('model_name')
+    @field_validator("model_name")
     @classmethod
     def validate_model_name(cls, v: str) -> str:
         """Validate model name and check API key availability."""
-        if not os.getenv('OPENAI_API_KEY'):
+        if not os.getenv("OPENAI_API_KEY"):
             raise ConfigurationError("OPENAI_API_KEY required for OpenAI models")
         return v
 
@@ -95,117 +52,50 @@ class LLMConfig(BaseModel):
 class AgentConfig(BaseModel):
     """Agent behavior configuration."""
 
-    max_iterations: int = Field(
-        default=8,
-        ge=1,
-        le=50,
-        description="Maximum iterations for agent execution"
-    )
-    max_execution_time: int = Field(
-        default=120,
-        ge=10,
-        le=600,
-        description="Maximum execution time in seconds"
-    )
-    max_query_rows: int = Field(
-        default=1000,
-        ge=1,
-        le=10000,
-        description="Maximum rows returned by queries"
-    )
-    default_display_limit: int = Field(
-        default=50,
-        ge=1,
-        le=1000,
-        description="Default number of rows to display"
-    )
-    enable_memory: bool = Field(
-        default=True,
-        description="Enable conversation memory and checkpointing"
-    )
+    max_iterations: int = Field(default=8, ge=1, le=50, description="Maximum iterations for agent execution")
+    max_execution_time: int = Field(default=120, ge=10, le=600, description="Maximum execution time in seconds")
+    max_query_rows: int = Field(default=1000, ge=1, le=10000, description="Maximum rows returned by queries")
+    default_display_limit: int = Field(default=50, ge=1, le=1000, description="Default number of rows to display")
+    enable_memory: bool = Field(default=True, description="Enable conversation memory and checkpointing")
     conversation_history_limit: int = Field(
-        default=20,
-        ge=1,
-        le=100,
-        description="Maximum number of conversation messages to keep"
+        default=20, ge=1, le=100, description="Maximum number of conversation messages to keep"
     )
 
 
 class SecurityConfig(BaseModel):
     """Security configuration settings."""
 
-    enable_sql_validation: bool = Field(
-        default=True,
-        description="Enable SQL injection validation"
-    )
+    enable_sql_validation: bool = Field(default=True, description="Enable SQL injection validation")
     strict_table_validation: bool = Field(
-        default=True,
-        description="Enable strict table name validation using allowlists"
+        default=True, description="Enable strict table name validation using allowlists"
     )
-    rate_limit_calls: int = Field(
-        default=60,
-        ge=1,
-        le=1000,
-        description="Maximum API calls per time window"
-    )
-    rate_limit_window: int = Field(
-        default=60,
-        ge=1,
-        le=3600,
-        description="Rate limiting time window in seconds"
-    )
-    log_security_events: bool = Field(
-        default=True,
-        description="Log security validation events"
-    )
+    rate_limit_calls: int = Field(default=60, ge=1, le=1000, description="Maximum API calls per time window")
+    rate_limit_window: int = Field(default=60, ge=1, le=3600, description="Rate limiting time window in seconds")
+    log_security_events: bool = Field(default=True, description="Log security validation events")
 
 
 class FeatureConfig(BaseModel):
     """Feature toggle configuration."""
 
-    enable_map_generation: bool = Field(
-        default=True,
-        description="Enable map generation capabilities"
-    )
-    enable_streaming: bool = Field(
-        default=True,
-        description="Enable streaming responses"
-    )
-    enable_graph_mode: bool = Field(
-        default=True,
-        description="Enable LangGraph workflow mode"
-    )
-    map_output_dir: str = Field(
-        default='maps/agent_generated',
-        description="Directory for generated maps"
-    )
+    enable_map_generation: bool = Field(default=True, description="Enable map generation capabilities")
+    enable_streaming: bool = Field(default=True, description="Enable streaming responses")
+    enable_graph_mode: bool = Field(default=True, description="Enable LangGraph workflow mode")
+    map_output_dir: str = Field(default="maps/agent_generated", description="Directory for generated maps")
 
 
 class LoggingConfig(BaseModel):
     """Logging configuration."""
 
-    level: str = Field(
-        default='INFO',
-        description="Logging level"
-    )
-    enable_debug: bool = Field(
-        default=False,
-        description="Enable debug logging"
-    )
-    enable_performance_logging: bool = Field(
-        default=False,
-        description="Enable performance logging"
-    )
-    log_file: Optional[str] = Field(
-        default=None,
-        description="Log file path (None for console only)"
-    )
+    level: str = Field(default="INFO", description="Logging level")
+    enable_debug: bool = Field(default=False, description="Enable debug logging")
+    enable_performance_logging: bool = Field(default=False, description="Enable performance logging")
+    log_file: Optional[str] = Field(default=None, description="Log file path (None for console only)")
 
-    @field_validator('level')
+    @field_validator("level")
     @classmethod
     def validate_level(cls, v: str) -> str:
         """Validate logging level."""
-        valid_levels = {'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'}
+        valid_levels = {"DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"}
         if v.upper() not in valid_levels:
             raise ConfigurationError(f"Invalid log level: {v}. Must be one of {valid_levels}")
         return v.upper()
@@ -224,10 +114,7 @@ class AppConfig(BaseSettings):
     """
 
     model_config = SettingsConfigDict(
-        env_prefix='LANDUSE_',
-        env_nested_delimiter='__',
-        case_sensitive=False,
-        extra='forbid'
+        env_prefix="LANDUSE_", env_nested_delimiter="__", case_sensitive=False, extra="forbid"
     )
 
     # Component configurations
@@ -239,12 +126,12 @@ class AppConfig(BaseSettings):
     logging: LoggingConfig = Field(default_factory=LoggingConfig)
 
     # Application metadata
-    app_name: str = Field(default='RPA Land Use Analytics')
-    app_version: str = Field(default='2025.1.0')
-    environment: str = Field(default='development')
+    app_name: str = Field(default="RPA Land Use Analytics")
+    app_version: str = Field(default="2025.1.0")
+    environment: str = Field(default="development")
 
-    @model_validator(mode='after')
-    def validate_configuration(self) -> 'AppConfig':
+    @model_validator(mode="after")
+    def validate_configuration(self) -> "AppConfig":
         """Validate configuration consistency and create required directories."""
         # Create map output directory if map generation is enabled
         if self.features.enable_map_generation:
@@ -277,8 +164,8 @@ class AppConfig(BaseSettings):
                 setattr(config, key, value)
             else:
                 # Handle nested overrides (e.g., database__path)
-                if '__' in key:
-                    section, field = key.split('__', 1)
+                if "__" in key:
+                    section, field = key.split("__", 1)
                     if hasattr(config, section):
                         section_config = getattr(config, section)
                         if hasattr(section_config, field):
@@ -305,29 +192,29 @@ class AppConfig(BaseSettings):
             AppConfig instance
         """
         env_configs = {
-            'development': {
-                'logging__level': 'DEBUG',
-                'logging__enable_debug': True,
-                'security__log_security_events': True,
-                'agent__max_execution_time': 300
+            "development": {
+                "logging__level": "DEBUG",
+                "logging__enable_debug": True,
+                "security__log_security_events": True,
+                "agent__max_execution_time": 300,
             },
-            'testing': {
-                'database__path': ':memory:',
-                'logging__level': 'WARNING',
-                'security__rate_limit_calls': 1000,
-                'features__enable_map_generation': False
+            "testing": {
+                "database__path": ":memory:",
+                "logging__level": "WARNING",
+                "security__rate_limit_calls": 1000,
+                "features__enable_map_generation": False,
             },
-            'production': {
-                'logging__level': 'INFO',
-                'logging__enable_performance_logging': True,
-                'security__strict_table_validation': True,
-                'agent__max_execution_time': 60
-            }
+            "production": {
+                "logging__level": "INFO",
+                "logging__enable_performance_logging": True,
+                "security__strict_table_validation": True,
+                "agent__max_execution_time": 60,
+            },
         }
 
         base_config = env_configs.get(env, {})
         base_config.update(overrides)
-        base_config['environment'] = env
+        base_config["environment"] = env
 
         return cls.from_env(**base_config)
 
@@ -340,31 +227,26 @@ class AppConfig(BaseSettings):
         """
         return {
             # Database
-            'db_path': self.database.path,
-
+            "db_path": self.database.path,
             # LLM
-            'model_name': self.llm.model_name,
-            'temperature': self.llm.temperature,
-            'max_tokens': self.llm.max_tokens,
-
+            "model_name": self.llm.model_name,
+            "temperature": self.llm.temperature,
+            "max_tokens": self.llm.max_tokens,
             # Agent
-            'max_iterations': self.agent.max_iterations,
-            'max_execution_time': self.agent.max_execution_time,
-            'max_query_rows': self.agent.max_query_rows,
-            'default_display_limit': self.agent.default_display_limit,
-            'enable_memory': self.agent.enable_memory,
-
+            "max_iterations": self.agent.max_iterations,
+            "max_execution_time": self.agent.max_execution_time,
+            "max_query_rows": self.agent.max_query_rows,
+            "default_display_limit": self.agent.default_display_limit,
+            "enable_memory": self.agent.enable_memory,
             # Features
-            'enable_map_generation': self.features.enable_map_generation,
-            'map_output_dir': self.features.map_output_dir,
-
+            "enable_map_generation": self.features.enable_map_generation,
+            "map_output_dir": self.features.map_output_dir,
             # Logging
-            'debug': self.logging.enable_debug,
-            'verbose': self.logging.level == 'DEBUG',
-
+            "debug": self.logging.enable_debug,
+            "verbose": self.logging.level == "DEBUG",
             # Security/Rate Limiting
-            'rate_limit_calls': self.security.rate_limit_calls,
-            'rate_limit_window': self.security.rate_limit_window
+            "rate_limit_calls": self.security.rate_limit_calls,
+            "rate_limit_window": self.security.rate_limit_window,
         }
 
     def to_dict(self) -> Dict[str, Any]:
@@ -377,7 +259,7 @@ class AppConfig(BaseSettings):
 
         # API keys are in environment, not config, but mask if present
         for key in config_dict:
-            if 'key' in key.lower() or 'secret' in key.lower() or 'token' in key.lower():
+            if "key" in key.lower() or "secret" in key.lower() or "token" in key.lower():
                 if isinstance(config_dict[key], str) and len(config_dict[key]) > 8:
                     config_dict[key] = f"{config_dict[key][:4]}...{config_dict[key][-4:]}"
 
@@ -392,17 +274,17 @@ class AppConfig(BaseSettings):
 # Convenience functions for common configurations
 def get_development_config(**overrides: Any) -> AppConfig:
     """Get configuration for development environment."""
-    return AppConfig.for_environment('development', **overrides)
+    return AppConfig.for_environment("development", **overrides)
 
 
 def get_testing_config(**overrides: Any) -> AppConfig:
     """Get configuration for testing environment."""
-    return AppConfig.for_environment('testing', **overrides)
+    return AppConfig.for_environment("testing", **overrides)
 
 
 def get_production_config(**overrides: Any) -> AppConfig:
     """Get configuration for production environment."""
-    return AppConfig.for_environment('production', **overrides)
+    return AppConfig.for_environment("production", **overrides)
 
 
 # Legacy compatibility function

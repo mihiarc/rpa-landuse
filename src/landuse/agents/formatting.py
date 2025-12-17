@@ -34,27 +34,25 @@ def clean_sql_query(sql_query: str) -> str:
         previous = sql_query
 
         # Remove markdown formatting
-        if sql_query.startswith('```sql'):
+        if sql_query.startswith("```sql"):
             sql_query = sql_query[6:].strip()
-        elif sql_query.startswith('```'):
+        elif sql_query.startswith("```"):
             sql_query = sql_query[3:].strip()
-        if sql_query.endswith('```'):
+        if sql_query.endswith("```"):
             sql_query = sql_query[:-3].strip()
 
         # Remove wrapping quotes
         if len(sql_query) >= 2:
-            if ((sql_query.startswith('"') and sql_query.endswith('"')) or
-                (sql_query.startswith("'") and sql_query.endswith("'"))):
+            if (sql_query.startswith('"') and sql_query.endswith('"')) or (
+                sql_query.startswith("'") and sql_query.endswith("'")
+            ):
                 sql_query = sql_query[1:-1].strip()
 
     return sql_query
 
 
 def format_query_results(
-    df: pd.DataFrame,
-    sql_query: str,
-    max_display_rows: int = 50,
-    include_summary: bool = True
+    df: pd.DataFrame, sql_query: str, max_display_rows: int = 50, include_summary: bool = True
 ) -> str:
     """
     Format query results in a professional, user-friendly way
@@ -75,15 +73,15 @@ def format_query_results(
     df_display = df.copy()
 
     # Convert state codes to names if present
-    if 'state_code' in df_display.columns:
-        df_display['state'] = df_display['state_code'].apply(
+    if "state_code" in df_display.columns:
+        df_display["state"] = df_display["state_code"].apply(
             lambda x: StateMapper.fips_to_name(str(x).zfill(2)) or f"Unknown ({x})"
         )
         # Reorder columns to put state name first, drop state_code
         cols = df_display.columns.tolist()
-        cols.remove('state_code')
-        cols.remove('state')
-        df_display = df_display[['state'] + cols]
+        cols.remove("state_code")
+        cols.remove("state")
+        df_display = df_display[["state"] + cols]
 
     # Create a string buffer to capture Rich output
     string_io = StringIO()
@@ -94,7 +92,7 @@ def format_query_results(
 
     # Add columns
     for col in df_display.columns:
-        col_display = col.replace('_', ' ').title()
+        col_display = col.replace("_", " ").title()
         table.add_column(col_display, style="white", overflow="fold")
 
     # Add rows (limited for readability)
@@ -156,7 +154,7 @@ def get_summary_statistics(df: pd.DataFrame) -> Optional[str]:
     Returns:
         Formatted summary statistics or None
     """
-    numeric_cols = df.select_dtypes(include=['number']).columns
+    numeric_cols = df.select_dtypes(include=["number"]).columns
     if len(numeric_cols) > 0 and len(df) > 1:
         summary = "📊 **Summary Statistics:**\n```\n"
         summary_df = df[numeric_cols].describe()
@@ -182,6 +180,7 @@ def create_welcome_panel(db_path: str, model_name: str, api_key_status: str = "C
     logo_content = ""
     try:
         from pathlib import Path
+
         logo_path = Path(__file__).parent.parent.parent.parent / "assets" / "branding" / "ascii_logo_simple.txt"
         if logo_path.exists():
             logo_content = logo_path.read_text() + "\n\n"
@@ -217,11 +216,7 @@ def create_examples_panel() -> Panel:
 
 [dim]Commands: 'exit' to quit | 'help' for examples | 'schema' for database info[/dim]"""
 
-    return Panel(
-        content,
-        title="💡 Try these queries",
-        border_style="blue"
-    )
+    return Panel(content, title="💡 Try these queries", border_style="blue")
 
 
 def format_error(error: Exception) -> Panel:
@@ -234,10 +229,7 @@ def format_error(error: Exception) -> Panel:
     Returns:
         Rich Panel with error message
     """
-    return Panel(
-        f"❌ Error: {str(error)}",
-        border_style="red"
-    )
+    return Panel(f"❌ Error: {str(error)}", border_style="red")
 
 
 def format_response(response: str, title: str = "📊 Analysis Results") -> Panel:
@@ -252,12 +244,7 @@ def format_response(response: str, title: str = "📊 Analysis Results") -> Pane
         Rich Panel with formatted response
     """
     response_md = Markdown(response)
-    return Panel(
-        response_md,
-        title=title,
-        border_style="green",
-        padding=(1, 2)
-    )
+    return Panel(response_md, title=title, border_style="green", padding=(1, 2))
 
 
 def format_raw_query_results(results: list, columns: list, max_display_rows: int = 50) -> str:

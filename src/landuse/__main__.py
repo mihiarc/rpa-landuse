@@ -10,5 +10,6 @@ def main():
     agent = LanduseAgent()
     agent.chat()
 
+
 if __name__ == "__main__":
     main()

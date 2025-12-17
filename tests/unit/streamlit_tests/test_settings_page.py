@@ -18,7 +18,7 @@ import pytest
 
 from tests.unit.streamlit_tests.mock_streamlit import mock_st
 
-sys.modules['streamlit'] = mock_st
+sys.modules["streamlit"] = mock_st
 import streamlit as st  # noqa: E402
 
 
@@ -28,22 +28,22 @@ class TestSettingsPage:
     @pytest.fixture
     def mock_env(self, monkeypatch):
         """Mock environment with required keys"""
-        monkeypatch.setenv('OPENAI_API_KEY', 'test-key-123')
-        monkeypatch.setenv('LANDUSE_DB_PATH', '/path/to/db')
-        return {'OPENAI_API_KEY': 'test-key-123', 'LANDUSE_DB_PATH': '/path/to/db'}
+        monkeypatch.setenv("OPENAI_API_KEY", "test-key-123")
+        monkeypatch.setenv("LANDUSE_DB_PATH", "/path/to/db")
+        return {"OPENAI_API_KEY": "test-key-123", "LANDUSE_DB_PATH": "/path/to/db"}
 
     def test_page_functions_exist(self):
         """Test that key page functions exist and are callable"""
         from views import settings
 
         # Test that key functions exist (current API)
-        assert hasattr(settings, 'check_system_status')
-        assert hasattr(settings, 'show_system_status')
-        assert hasattr(settings, 'show_configuration')
-        assert hasattr(settings, 'show_help_documentation')
-        assert hasattr(settings, 'show_troubleshooting')
-        assert hasattr(settings, 'show_feedback_form')
-        assert hasattr(settings, 'main')
+        assert hasattr(settings, "check_system_status")
+        assert hasattr(settings, "show_system_status")
+        assert hasattr(settings, "show_configuration")
+        assert hasattr(settings, "show_help_documentation")
+        assert hasattr(settings, "show_troubleshooting")
+        assert hasattr(settings, "show_feedback_form")
+        assert hasattr(settings, "main")
 
         # Test that they are callable
         assert callable(settings.check_system_status)
@@ -58,10 +58,10 @@ class TestSettingsPage:
         status = settings.check_system_status()
 
         assert isinstance(status, dict)
-        assert 'database' in status
-        assert 'api_keys' in status
-        assert 'dependencies' in status
-        assert 'agent' in status
+        assert "database" in status
+        assert "api_keys" in status
+        assert "dependencies" in status
+        assert "agent" in status
 
     def test_check_system_status_database_structure(self):
         """Test database status has required fields"""
@@ -69,11 +69,11 @@ class TestSettingsPage:
 
         status = settings.check_system_status()
 
-        db_status = status['database']
-        assert 'status' in db_status
-        assert 'message' in db_status
-        assert 'path' in db_status
-        assert isinstance(db_status['status'], bool)
+        db_status = status["database"]
+        assert "status" in db_status
+        assert "message" in db_status
+        assert "path" in db_status
+        assert isinstance(db_status["status"], bool)
 
     def test_check_system_status_api_keys_structure(self):
         """Test API keys status has required fields"""
@@ -81,11 +81,11 @@ class TestSettingsPage:
 
         status = settings.check_system_status()
 
-        api_status = status['api_keys']
-        assert 'status' in api_status
-        assert 'message' in api_status
-        assert 'details' in api_status
-        assert isinstance(api_status['status'], bool)
+        api_status = status["api_keys"]
+        assert "status" in api_status
+        assert "message" in api_status
+        assert "details" in api_status
+        assert isinstance(api_status["status"], bool)
 
     def test_check_system_status_dependencies_structure(self):
         """Test dependencies status has required fields"""
@@ -93,21 +93,21 @@ class TestSettingsPage:
 
         status = settings.check_system_status()
 
-        dep_status = status['dependencies']
-        assert 'status' in dep_status
-        assert 'message' in dep_status
-        assert 'details' in dep_status
+        dep_status = status["dependencies"]
+        assert "status" in dep_status
+        assert "message" in dep_status
+        assert "details" in dep_status
 
-    @patch.dict(os.environ, {'OPENAI_API_KEY': 'sk-test123456789'})
+    @patch.dict(os.environ, {"OPENAI_API_KEY": "sk-test123456789"})
     def test_check_system_status_detects_api_key(self):
         """Test status detection when API key is present"""
         from views import settings
 
         status = settings.check_system_status()
 
-        assert status['api_keys']['status'] is True
-        assert 'openai' in status['api_keys']['details']
-        assert status['api_keys']['details']['openai']['configured'] is True
+        assert status["api_keys"]["status"] is True
+        assert "openai" in status["api_keys"]["details"]
+        assert status["api_keys"]["details"]["openai"]["configured"] is True
 
     @patch.dict(os.environ, {}, clear=True)
     def test_check_system_status_detects_missing_api_key(self):
@@ -115,12 +115,12 @@ class TestSettingsPage:
         from views import settings
 
         # Ensure no API key is set
-        if 'OPENAI_API_KEY' in os.environ:
-            del os.environ['OPENAI_API_KEY']
+        if "OPENAI_API_KEY" in os.environ:
+            del os.environ["OPENAI_API_KEY"]
 
         status = settings.check_system_status()
 
-        assert status['api_keys']['status'] is False
+        assert status["api_keys"]["status"] is False
 
     def test_show_system_status_calls_check(self):
         """Test show_system_status calls check_system_status"""
@@ -177,11 +177,11 @@ class TestSettingsPage:
         status = settings.check_system_status()
 
         # If API key is present, it should be masked
-        if status['api_keys']['status']:
-            preview = status['api_keys']['details'].get('openai', {}).get('preview', '')
+        if status["api_keys"]["status"]:
+            preview = status["api_keys"]["details"].get("openai", {}).get("preview", "")
             # Should not contain full key
             if preview and len(preview) > 0:
-                assert test_key not in preview or '...' in preview
+                assert test_key not in preview or "..." in preview
 
     def test_database_path_configuration(self):
         """Test database path is configurable via environment"""
@@ -190,7 +190,7 @@ class TestSettingsPage:
         status = settings.check_system_status()
 
         # Path should be in the status
-        assert 'path' in status['database']
+        assert "path" in status["database"]
 
     def test_dependencies_check_imports(self):
         """Test dependencies check validates imports"""
@@ -199,11 +199,11 @@ class TestSettingsPage:
         status = settings.check_system_status()
 
         # Dependencies should be checked
-        dep_status = status['dependencies']
+        dep_status = status["dependencies"]
 
         # If imports succeed, we should have version info
-        if dep_status['status']:
-            details = dep_status['details']
+        if dep_status["status"]:
+            details = dep_status["details"]
             # Should have some package versions
             assert len(details) > 0
 
@@ -214,8 +214,8 @@ class TestSettingsPage:
         status = settings.check_system_status()
 
         # Agent status message should indicate dependency
-        agent_status = status['agent']
-        assert 'message' in agent_status
+        agent_status = status["agent"]
+        assert "message" in agent_status
 
     def test_environment_variable_descriptions(self):
         """Test configuration shows env var descriptions"""

@@ -51,9 +51,11 @@ def lookup_state_info(state_reference: str) -> str:
         return f"state_code = '{fips_code}' -- {state_ref} ({abbrev})"
 
     # If not found, return helpful error
-    return (f"Error: Could not find state '{state_ref}'. "
-            f"Try using the full state name (e.g., 'California'), "
-            f"abbreviation (e.g., 'CA'), or FIPS code (e.g., '06')")
+    return (
+        f"Error: Could not find state '{state_ref}'. "
+        f"Try using the full state name (e.g., 'California'), "
+        f"abbreviation (e.g., 'CA'), or FIPS code (e.g., '06')"
+    )
 
 
 @tool

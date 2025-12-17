@@ -24,14 +24,11 @@ import streamlit as st  # noqa: E402
 from landuse.tools.map_generation_tool import MapGenerationTool, MapRequest  # noqa: E402
 
 # Page configuration
-st.set_page_config(
-    page_title="🗺️ Map Visualizations - Landuse Analytics",
-    page_icon="🗺️",
-    layout="wide"
-)
+st.set_page_config(page_title="🗺️ Map Visualizations - Landuse Analytics", page_icon="🗺️", layout="wide")
 
 # Custom CSS for map display
-st.markdown("""
+st.markdown(
+    """
 <style>
     .map-container {
         background: #f8f9fa;
@@ -107,24 +104,28 @@ st.markdown("""
         color: #721c24;
     }
 </style>
-""", unsafe_allow_html=True)
+""",
+    unsafe_allow_html=True,
+)
+
 
 def init_session_state():
     """Initialize session state for map page"""
-    if 'map_history' not in st.session_state:
+    if "map_history" not in st.session_state:
         st.session_state.map_history = []
-    if 'selected_map_type' not in st.session_state:
+    if "selected_map_type" not in st.session_state:
         st.session_state.selected_map_type = None
-    if 'current_map' not in st.session_state:
+    if "current_map" not in st.session_state:
         st.session_state.current_map = None
-    if 'map_agent' not in st.session_state:
+    if "map_agent" not in st.session_state:
         # Map agent disabled for now due to recursion issues
         st.session_state.map_agent = None
+
 
 def get_available_options():
     """Get available options from the database"""
     try:
-        db_path = os.getenv('LANDUSE_DB_PATH', 'data/processed/landuse_analytics.duckdb')
+        db_path = os.getenv("LANDUSE_DB_PATH", "data/processed/landuse_analytics.duckdb")
         conn = duckdb.connect(str(db_path), read_only=True)
 
         # Get states
@@ -159,15 +160,16 @@ def get_available_options():
         conn.close()
 
         return {
-            'states': [s[0] for s in states],
-            'scenarios': scenarios,
-            'time_periods': time_periods,
-            'landuse_types': landuse_types
+            "states": [s[0] for s in states],
+            "scenarios": scenarios,
+            "time_periods": time_periods,
+            "landuse_types": landuse_types,
         }
 
     except Exception as e:
         st.error(f"Error loading options: {e}")
         return None
+
 
 def create_map_interface():
     """Create the interactive map generation interface"""
@@ -192,34 +194,47 @@ def create_map_interface():
     col1, col2, col3 = st.columns(3)
 
     with col1:
-        if st.button("🏛️ State County Maps", use_container_width=True, help="Detailed county-level maps for individual states"):
+        if st.button(
+            "🏛️ State County Maps", use_container_width=True, help="Detailed county-level maps for individual states"
+        ):
             st.session_state.selected_map_type = "state_counties"
 
-        st.markdown("""
+        st.markdown(
+            """
         <div class="example-query">
         "Show me forest coverage in Texas counties"
         </div>
-        """, unsafe_allow_html=True)
+        """,
+            unsafe_allow_html=True,
+        )
 
     with col2:
-        if st.button("🌎 Regional Maps", use_container_width=True, help="State-level overview maps showing regional patterns"):
+        if st.button(
+            "🌎 Regional Maps", use_container_width=True, help="State-level overview maps showing regional patterns"
+        ):
             st.session_state.selected_map_type = "regional"
 
-        st.markdown("""
+        st.markdown(
+            """
         <div class="example-query">
         "Display urban land use across all states"
         </div>
-        """, unsafe_allow_html=True)
+        """,
+            unsafe_allow_html=True,
+        )
 
     with col3:
         if st.button("🔄 Transition Maps", use_container_width=True, help="Maps showing land use conversions"):
             st.session_state.selected_map_type = "transitions"
 
-        st.markdown("""
+        st.markdown(
+            """
         <div class="example-query">
         "Map forest to urban transitions"
         </div>
-        """, unsafe_allow_html=True)
+        """,
+            unsafe_allow_html=True,
+        )
 
     # Show map generation form based on selection
     if st.session_state.selected_map_type:
@@ -229,7 +244,9 @@ def create_map_interface():
     # Natural language interface
     st.markdown("---")
     st.markdown("## 💬 Natural Language Map Generation")
-    st.markdown("Ask for maps using natural language! The AI agent will understand your request and generate appropriate visualizations.")
+    st.markdown(
+        "Ask for maps using natural language! The AI agent will understand your request and generate appropriate visualizations."
+    )
 
     # Create two columns for input and examples
     col1, col2 = st.columns([2, 1])
@@ -238,7 +255,7 @@ def create_map_interface():
         user_query = st.text_area(
             "Describe the map you want to see:",
             placeholder="Example: 'Create a map showing agricultural land in California counties' or 'Show me where forests are converting to urban areas'",
-            height=100
+            height=100,
         )
 
         if st.button("🚀 Generate Map from Query", type="primary", disabled=st.session_state.map_agent is None):
@@ -253,7 +270,7 @@ def create_map_interface():
             "Visualize agricultural land distribution across regions",
             "Map forest to urban transitions nationally",
             "Display crop land changes in the Midwest",
-            "Show urbanization patterns in Florida"
+            "Show urbanization patterns in Florida",
         ]
 
         for query in example_queries:
@@ -269,6 +286,7 @@ def create_map_interface():
     if st.session_state.map_history:
         display_map_history()
 
+
 def generate_map_form(map_type: str, options: dict):
     """Generate form for specific map type"""
     st.markdown(f"### 🎯 Configure {map_type.replace('_', ' ').title()} Map")
@@ -279,35 +297,30 @@ def generate_map_form(map_type: str, options: dict):
         # Common parameters
         with col1:
             if map_type == "state_counties":
-                state = st.selectbox("Select State", options['states'])
+                state = st.selectbox("Select State", options["states"])
                 landuse_type = st.selectbox(
                     "Land Use Type",
-                    [lt[0] for lt in options['landuse_types']],
-                    help="Choose which land use type to visualize"
+                    [lt[0] for lt in options["landuse_types"]],
+                    help="Choose which land use type to visualize",
                 )
             elif map_type == "regional":
                 landuse_type = st.selectbox(
                     "Land Use Type",
-                    [lt[0] for lt in options['landuse_types']],
-                    help="Choose which land use type to visualize"
+                    [lt[0] for lt in options["landuse_types"]],
+                    help="Choose which land use type to visualize",
                 )
                 state = None
             elif map_type == "transitions":
                 from_landuse = st.selectbox(
-                    "From Land Use",
-                    [lt[0] for lt in options['landuse_types']],
-                    help="Source land use type"
+                    "From Land Use", [lt[0] for lt in options["landuse_types"]], help="Source land use type"
                 )
                 to_landuse = st.selectbox(
-                    "To Land Use",
-                    [lt[0] for lt in options['landuse_types']],
-                    index=1,
-                    help="Target land use type"
+                    "To Land Use", [lt[0] for lt in options["landuse_types"]], index=1, help="Target land use type"
                 )
                 state = st.selectbox(
                     "State (Optional)",
-                    ["All States"] + options['states'],
-                    help="Leave as 'All States' for national view"
+                    ["All States"] + options["states"],
+                    help="Leave as 'All States' for national view",
                 )
                 if state == "All States":
                     state = None
@@ -315,21 +328,19 @@ def generate_map_form(map_type: str, options: dict):
 
         with col2:
             # Scenario selection
-            scenario_names = [s[0] for s in options['scenarios']]
+            scenario_names = [s[0] for s in options["scenarios"]]
             scenario = st.selectbox(
                 "Climate Scenario",
                 ["Default (First Available)"] + scenario_names,
-                help="Select a specific climate scenario or use default"
+                help="Select a specific climate scenario or use default",
             )
             if scenario == "Default (First Available)":
                 scenario = None
 
             # Time period selection
-            time_periods = [tp[0] for tp in options['time_periods']]
+            time_periods = [tp[0] for tp in options["time_periods"]]
             time_period = st.selectbox(
-                "Time Period",
-                ["Latest Available"] + time_periods,
-                help="Select time period for the data"
+                "Time Period", ["Latest Available"] + time_periods, help="Select time period for the data"
             )
             if time_period == "Latest Available":
                 time_period = None
@@ -346,24 +357,23 @@ def generate_map_form(map_type: str, options: dict):
             elif map_type == "transitions":
                 generate_transition_map(from_landuse, to_landuse, state, scenario, time_period)
 
+
 def generate_state_county_map(state: str, landuse_type: str, scenario: Optional[str], time_period: Optional[str]):
     """Generate a state county map"""
     with st.spinner(f"🎨 Creating county map for {state}..."):
         try:
-            db_path = os.getenv('LANDUSE_DB_PATH', 'data/processed/landuse_analytics.duckdb')
+            db_path = os.getenv("LANDUSE_DB_PATH", "data/processed/landuse_analytics.duckdb")
             output_dir = Path("maps/streamlit_generated")
             output_dir.mkdir(exist_ok=True, parents=True)
 
             tool = MapGenerationTool(str(db_path), str(output_dir))
             result = tool.create_state_county_map(state, landuse_type, scenario, time_period)
 
-            if result['success']:
+            if result["success"]:
                 st.session_state.current_map = result
-                st.session_state.map_history.append({
-                    **result,
-                    'timestamp': datetime.now().isoformat(),
-                    'query_type': 'form'
-                })
+                st.session_state.map_history.append(
+                    {**result, "timestamp": datetime.now().isoformat(), "query_type": "form"}
+                )
                 st.success("✅ Map generated successfully!")
                 st.rerun()
             else:
@@ -372,24 +382,23 @@ def generate_state_county_map(state: str, landuse_type: str, scenario: Optional[
         except Exception as e:
             st.error(f"❌ Failed to generate map: {str(e)}")
 
+
 def generate_regional_map(landuse_type: str, scenario: Optional[str], time_period: Optional[str]):
     """Generate a regional map"""
     with st.spinner(f"🎨 Creating regional {landuse_type} map..."):
         try:
-            db_path = os.getenv('LANDUSE_DB_PATH', 'data/processed/landuse_analytics.duckdb')
+            db_path = os.getenv("LANDUSE_DB_PATH", "data/processed/landuse_analytics.duckdb")
             output_dir = Path("maps/streamlit_generated")
             output_dir.mkdir(exist_ok=True, parents=True)
 
             tool = MapGenerationTool(str(db_path), str(output_dir))
             result = tool.create_regional_map(landuse_type)
 
-            if result['success']:
+            if result["success"]:
                 st.session_state.current_map = result
-                st.session_state.map_history.append({
-                    **result,
-                    'timestamp': datetime.now().isoformat(),
-                    'query_type': 'form'
-                })
+                st.session_state.map_history.append(
+                    {**result, "timestamp": datetime.now().isoformat(), "query_type": "form"}
+                )
                 st.success("✅ Map generated successfully!")
                 st.rerun()
             else:
@@ -398,25 +407,25 @@ def generate_regional_map(landuse_type: str, scenario: Optional[str], time_perio
         except Exception as e:
             st.error(f"❌ Failed to generate map: {str(e)}")
 
-def generate_transition_map(from_landuse: str, to_landuse: str, state: Optional[str],
-                          scenario: Optional[str], time_period: Optional[str]):
+
+def generate_transition_map(
+    from_landuse: str, to_landuse: str, state: Optional[str], scenario: Optional[str], time_period: Optional[str]
+):
     """Generate a transition map"""
     with st.spinner(f"🎨 Creating {from_landuse} to {to_landuse} transition map..."):
         try:
-            db_path = os.getenv('LANDUSE_DB_PATH', 'data/processed/landuse_analytics.duckdb')
+            db_path = os.getenv("LANDUSE_DB_PATH", "data/processed/landuse_analytics.duckdb")
             output_dir = Path("maps/streamlit_generated")
             output_dir.mkdir(exist_ok=True, parents=True)
 
             tool = MapGenerationTool(str(db_path), str(output_dir))
             result = tool.create_transition_map(from_landuse, to_landuse, state)
 
-            if result['success']:
+            if result["success"]:
                 st.session_state.current_map = result
-                st.session_state.map_history.append({
-                    **result,
-                    'timestamp': datetime.now().isoformat(),
-                    'query_type': 'form'
-                })
+                st.session_state.map_history.append(
+                    {**result, "timestamp": datetime.now().isoformat(), "query_type": "form"}
+                )
                 st.success("✅ Map generated successfully!")
                 st.rerun()
             else:
@@ -425,10 +434,13 @@ def generate_transition_map(from_landuse: str, to_landuse: str, state: Optional[
         except Exception as e:
             st.error(f"❌ Failed to generate map: {str(e)}")
 
+
 def generate_map_from_query(query: str):
     """Generate map using natural language query"""
     if not st.session_state.map_agent:
-        st.error("Natural language map generation is temporarily disabled. Please use the form-based interface above to create maps.")
+        st.error(
+            "Natural language map generation is temporarily disabled. Please use the form-based interface above to create maps."
+        )
         return
 
     with st.spinner("🤖 Understanding your request and generating map..."):
@@ -439,29 +451,32 @@ def generate_map_from_query(query: str):
             # Parse response to extract map information
             if "Generated Visualizations:" in response:
                 # Extract map path from response
-                lines = response.split('\n')
+                lines = response.split("\n")
                 for line in lines:
-                    if '.png' in line and '`' in line:
+                    if ".png" in line and "`" in line:
                         # Extract path between backticks
                         import re
-                        match = re.search(r'`([^`]+\.png)`', line)
+
+                        match = re.search(r"`([^`]+\.png)`", line)
                         if match:
                             map_path = match.group(1)
                             if Path(map_path).exists():
                                 # Create result object
                                 result = {
-                                    'success': True,
-                                    'map_path': map_path,
-                                    'description': query,
-                                    'response': response
+                                    "success": True,
+                                    "map_path": map_path,
+                                    "description": query,
+                                    "response": response,
                                 }
                                 st.session_state.current_map = result
-                                st.session_state.map_history.append({
-                                    **result,
-                                    'timestamp': datetime.now().isoformat(),
-                                    'query_type': 'natural_language',
-                                    'original_query': query
-                                })
+                                st.session_state.map_history.append(
+                                    {
+                                        **result,
+                                        "timestamp": datetime.now().isoformat(),
+                                        "query_type": "natural_language",
+                                        "original_query": query,
+                                    }
+                                )
                                 st.success("✅ Map generated successfully!")
                                 st.rerun()
                                 return
@@ -471,6 +486,7 @@ def generate_map_from_query(query: str):
 
         except Exception as e:
             st.error(f"❌ Error processing query: {str(e)}")
+
 
 def display_current_map():
     """Display the currently generated map"""
@@ -485,8 +501,8 @@ def display_current_map():
 
         with col1:
             # Display the map image
-            if 'map_path' in map_info and Path(map_info['map_path']).exists():
-                st.image(map_info['map_path'], use_column_width=True)
+            if "map_path" in map_info and Path(map_info["map_path"]).exists():
+                st.image(map_info["map_path"], use_column_width=True)
             else:
                 st.error("Map file not found!")
 
@@ -494,39 +510,39 @@ def display_current_map():
             # Map information
             st.markdown("### 📋 Map Details")
 
-            if map_info.get('success'):
+            if map_info.get("success"):
                 st.markdown('<span class="map-status status-success">✓ Success</span>', unsafe_allow_html=True)
             else:
                 st.markdown('<span class="map-status status-error">✗ Failed</span>', unsafe_allow_html=True)
 
             # Display map metadata
-            st.markdown("**Type:** " + map_info.get('map_type', 'Unknown').replace('_', ' ').title())
+            st.markdown("**Type:** " + map_info.get("map_type", "Unknown").replace("_", " ").title())
 
-            if 'state' in map_info and map_info['state']:
+            if "state" in map_info and map_info["state"]:
                 st.markdown(f"**State:** {map_info['state']}")
 
-            if 'landuse_type' in map_info and map_info['landuse_type']:
+            if "landuse_type" in map_info and map_info["landuse_type"]:
                 st.markdown(f"**Land Use:** {map_info['landuse_type']}")
 
-            if 'from_landuse' in map_info and map_info['from_landuse']:
+            if "from_landuse" in map_info and map_info["from_landuse"]:
                 st.markdown(f"**From:** {map_info['from_landuse']}")
                 st.markdown(f"**To:** {map_info['to_landuse']}")
 
-            if 'scenario' in map_info and map_info['scenario']:
+            if "scenario" in map_info and map_info["scenario"]:
                 st.markdown(f"**Scenario:** {map_info['scenario']}")
 
-            if 'time_period' in map_info and map_info['time_period']:
+            if "time_period" in map_info and map_info["time_period"]:
                 st.markdown(f"**Period:** {map_info['time_period']}")
 
             # Download button
-            if 'map_path' in map_info and Path(map_info['map_path']).exists():
-                with open(map_info['map_path'], 'rb') as f:
+            if "map_path" in map_info and Path(map_info["map_path"]).exists():
+                with open(map_info["map_path"], "rb") as f:
                     st.download_button(
                         label="📥 Download Map",
                         data=f.read(),
-                        file_name=Path(map_info['map_path']).name,
+                        file_name=Path(map_info["map_path"]).name,
                         mime="image/png",
-                        use_container_width=True
+                        use_container_width=True,
                     )
 
             # Clear button
@@ -535,9 +551,10 @@ def display_current_map():
                 st.rerun()
 
     # Show agent response if from natural language
-    if 'response' in map_info:
+    if "response" in map_info:
         with st.expander("🤖 AI Agent Response", expanded=False):
-            st.markdown(map_info['response'])
+            st.markdown(map_info["response"])
+
 
 def display_map_history():
     """Display history of generated maps"""
@@ -545,9 +562,7 @@ def display_map_history():
     st.markdown("## 📚 Map History")
 
     # Sort history by timestamp (newest first)
-    history = sorted(st.session_state.map_history,
-                    key=lambda x: x.get('timestamp', ''),
-                    reverse=True)
+    history = sorted(st.session_state.map_history, key=lambda x: x.get("timestamp", ""), reverse=True)
 
     # Create gallery
     cols = st.columns(3)
@@ -557,28 +572,26 @@ def display_map_history():
         with col:
             with st.container():
                 # Create clickable card
-                if st.button(
-                    f"🗺️ {map_info.get('description', 'Map')}",
-                    key=f"history_{idx}",
-                    use_container_width=True
-                ):
+                if st.button(f"🗺️ {map_info.get('description', 'Map')}", key=f"history_{idx}", use_container_width=True):
                     st.session_state.current_map = map_info
                     st.rerun()
 
                 # Show thumbnail if available
-                if 'map_path' in map_info and Path(map_info['map_path']).exists():
-                    st.image(map_info['map_path'], use_column_width=True)
+                if "map_path" in map_info and Path(map_info["map_path"]).exists():
+                    st.image(map_info["map_path"], use_column_width=True)
 
                 # Show metadata
                 st.caption(f"Type: {map_info.get('map_type', 'Unknown')}")
-                if 'timestamp' in map_info:
+                if "timestamp" in map_info:
                     from datetime import datetime
-                    ts = datetime.fromisoformat(map_info['timestamp'])
+
+                    ts = datetime.fromisoformat(map_info["timestamp"])
                     st.caption(f"Created: {ts.strftime('%Y-%m-%d %H:%M')}")
 
+
 # Initialize query text if passed from example
-if 'query_text' in st.session_state:
-    st.query_params['query'] = st.session_state.query_text
+if "query_text" in st.session_state:
+    st.query_params["query"] = st.session_state.query_text
     del st.session_state.query_text
 
 # Main execution

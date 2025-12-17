@@ -12,21 +12,21 @@ class SchemaVersion:
 
     # Version history with descriptions
     SCHEMA_VERSIONS: Dict[str, str] = {
-        '1.0.0': 'Original 20 GCM scenarios',
-        '2.0.0': 'Combined scenarios with OVERALL default',
-        '2.1.0': 'Added statistical fields (std_dev, min, max)',
-        '2.2.0': 'Added schema versioning system'
+        "1.0.0": "Original 20 GCM scenarios",
+        "2.0.0": "Combined scenarios with OVERALL default",
+        "2.1.0": "Added statistical fields (std_dev, min, max)",
+        "2.2.0": "Added schema versioning system",
     }
 
     # Current version
-    CURRENT_VERSION = '2.2.0'
+    CURRENT_VERSION = "2.2.0"
 
     # Compatibility matrix: which versions are compatible with each other
     COMPATIBILITY_MATRIX: Dict[str, Tuple[str, ...]] = {
-        '2.2.0': ('2.0.0', '2.1.0', '2.2.0'),  # Current version works with 2.0+
-        '2.1.0': ('2.0.0', '2.1.0'),
-        '2.0.0': ('2.0.0',),
-        '1.0.0': ('1.0.0',)
+        "2.2.0": ("2.0.0", "2.1.0", "2.2.0"),  # Current version works with 2.0+
+        "2.1.0": ("2.0.0", "2.1.0"),
+        "2.0.0": ("2.0.0",),
+        "1.0.0": ("1.0.0",),
     }
 
     @classmethod
@@ -58,17 +58,13 @@ class SchemaVersion:
             List of breaking changes between versions
         """
         breaking_changes = {
-            ('1.0.0', '2.0.0'): [
-                'Schema restructured for combined scenarios',
-                'dim_scenario table modified',
-                'New OVERALL scenario added'
+            ("1.0.0", "2.0.0"): [
+                "Schema restructured for combined scenarios",
+                "dim_scenario table modified",
+                "New OVERALL scenario added",
             ],
-            ('2.0.0', '2.1.0'): [
-                'Statistical fields added to fact table'
-            ],
-            ('2.1.0', '2.2.0'): [
-                'Schema versioning table added'
-            ]
+            ("2.0.0", "2.1.0"): ["Statistical fields added to fact table"],
+            ("2.1.0", "2.2.0"): ["Schema versioning table added"],
         }
 
         return breaking_changes.get((from_version, to_version), [])
@@ -99,7 +95,7 @@ class SchemaVersionManager:
             )
         """)
 
-    def apply_version(self, version: str, applied_by: str = 'system') -> None:
+    def apply_version(self, version: str, applied_by: str = "system") -> None:
         """Apply a version to the database.
 
         Args:
@@ -110,21 +106,27 @@ class SchemaVersionManager:
             ValueError: If version is already applied or invalid
         """
         # Check if version already exists first
-        existing = self.connection.execute("""
+        existing = self.connection.execute(
+            """
             SELECT COUNT(*) FROM schema_version WHERE version_number = ?
-        """, [version]).fetchone()[0]
+        """,
+            [version],
+        ).fetchone()[0]
 
         if existing > 0:
             # Log but don't fail - idempotent operation
             return
 
-        description = SchemaVersion.SCHEMA_VERSIONS.get(version, 'Unknown version')
+        description = SchemaVersion.SCHEMA_VERSIONS.get(version, "Unknown version")
 
-        self.connection.execute("""
+        self.connection.execute(
+            """
             INSERT INTO schema_version (version_id, version_number, description, applied_by)
             SELECT COALESCE(MAX(version_id), 0) + 1, ?, ?, ?
             FROM schema_version
-        """, [version, description, applied_by])
+        """,
+            [version, description, applied_by],
+        )
 
     def get_current_version(self) -> Optional[str]:
         """Get the current database schema version.
@@ -207,12 +209,12 @@ class SchemaVersionManager:
                 """).fetchone()
 
                 if result and result[0] > 0:
-                    return '2.1.0'  # Has statistical fields
+                    return "2.1.0"  # Has statistical fields
                 else:
-                    return '2.0.0'  # Combined scenarios but no stats
+                    return "2.0.0"  # Combined scenarios but no stats
             else:
                 # No OVERALL scenario - original version
-                return '1.0.0'
+                return "1.0.0"
 
         except duckdb.CatalogException:
             # Table doesn't exist - return None
@@ -220,5 +222,6 @@ class SchemaVersionManager:
         except Exception as e:
             # Log unexpected errors but don't fail
             import warnings
+
             warnings.warn(f"Unexpected error during schema detection: {e}", stacklevel=2)
             return None

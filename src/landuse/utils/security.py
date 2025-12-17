@@ -21,30 +21,76 @@ from rich.console import Console
 logger = logging.getLogger(__name__)
 console = Console()
 
+
 class SQLQueryValidator:
     """Validates and sanitizes SQL queries for security"""
 
     # Dangerous SQL keywords that should be blocked in user input
     DANGEROUS_KEYWORDS = {
-        'DROP', 'DELETE', 'TRUNCATE', 'ALTER', 'CREATE', 'REPLACE',
-        'INSERT', 'UPDATE', 'GRANT', 'REVOKE', 'EXECUTE', 'EXEC',
-        'SCRIPT', 'SHUTDOWN', 'KILL'
+        "DROP",
+        "DELETE",
+        "TRUNCATE",
+        "ALTER",
+        "CREATE",
+        "REPLACE",
+        "INSERT",
+        "UPDATE",
+        "GRANT",
+        "REVOKE",
+        "EXECUTE",
+        "EXEC",
+        "SCRIPT",
+        "SHUTDOWN",
+        "KILL",
     }
 
     # Allowed SQL keywords for read-only queries
     ALLOWED_KEYWORDS = {
-        'SELECT', 'FROM', 'WHERE', 'JOIN', 'LEFT', 'RIGHT', 'INNER',
-        'OUTER', 'ON', 'AS', 'WITH', 'GROUP', 'BY', 'ORDER', 'HAVING',
-        'LIMIT', 'OFFSET', 'UNION', 'DISTINCT', 'COUNT', 'SUM', 'AVG',
-        'MIN', 'MAX', 'CASE', 'WHEN', 'THEN', 'ELSE', 'END', 'AND',
-        'OR', 'NOT', 'IN', 'EXISTS', 'BETWEEN', 'LIKE', 'IS', 'NULL'
+        "SELECT",
+        "FROM",
+        "WHERE",
+        "JOIN",
+        "LEFT",
+        "RIGHT",
+        "INNER",
+        "OUTER",
+        "ON",
+        "AS",
+        "WITH",
+        "GROUP",
+        "BY",
+        "ORDER",
+        "HAVING",
+        "LIMIT",
+        "OFFSET",
+        "UNION",
+        "DISTINCT",
+        "COUNT",
+        "SUM",
+        "AVG",
+        "MIN",
+        "MAX",
+        "CASE",
+        "WHEN",
+        "THEN",
+        "ELSE",
+        "END",
+        "AND",
+        "OR",
+        "NOT",
+        "IN",
+        "EXISTS",
+        "BETWEEN",
+        "LIKE",
+        "IS",
+        "NULL",
     }
 
     # Pattern to detect SQL comments
     SQL_COMMENT_PATTERNS = [
-        re.compile(r'--.*$', re.MULTILINE),  # -- style comments
-        re.compile(r'/\*.*?\*/', re.DOTALL),  # /* */ style comments
-        re.compile(r'#.*$', re.MULTILINE)     # # style comments (MySQL)
+        re.compile(r"--.*$", re.MULTILINE),  # -- style comments
+        re.compile(r"/\*.*?\*/", re.DOTALL),  # /* */ style comments
+        re.compile(r"#.*$", re.MULTILINE),  # # style comments (MySQL)
     ]
 
     @classmethod
@@ -63,25 +109,25 @@ class SQLQueryValidator:
         query_upper = cleaned_query.upper()
 
         # Check for multiple statements (semicolon not at end)
-        if ';' in cleaned_query.rstrip(';'):
+        if ";" in cleaned_query.rstrip(";"):
             return False, "Multiple statements not allowed"
 
         # Check for dangerous keywords
         for keyword in cls.DANGEROUS_KEYWORDS:
-            if re.search(r'\b' + keyword + r'\b', query_upper):
+            if re.search(r"\b" + keyword + r"\b", query_upper):
                 return False, f"Dangerous keyword '{keyword}' not allowed"
 
         # Basic structure validation - allow WITH (CTE) or SELECT
-        if not (query_upper.strip().startswith('SELECT') or query_upper.strip().startswith('WITH')):
+        if not (query_upper.strip().startswith("SELECT") or query_upper.strip().startswith("WITH")):
             return False, "Only SELECT queries are allowed"
 
         # Check for suspicious patterns
         suspicious_patterns = [
-            (r'0x[0-9a-fA-F]+', "Hexadecimal literals not allowed"),
-            (r'char\s*\(', "CHAR function not allowed"),
-            (r'concat\s*\(', "CONCAT function not allowed for security"),
-            (r'into\s+outfile', "INTO OUTFILE not allowed"),
-            (r'into\s+dumpfile', "INTO DUMPFILE not allowed"),
+            (r"0x[0-9a-fA-F]+", "Hexadecimal literals not allowed"),
+            (r"char\s*\(", "CHAR function not allowed"),
+            (r"concat\s*\(", "CONCAT function not allowed for security"),
+            (r"into\s+outfile", "INTO OUTFILE not allowed"),
+            (r"into\s+dumpfile", "INTO DUMPFILE not allowed"),
         ]
 
         for pattern, message in suspicious_patterns:
@@ -95,7 +141,7 @@ class SQLQueryValidator:
         """Remove SQL comments from query"""
         result = query
         for pattern in cls.SQL_COMMENT_PATTERNS:
-            result = pattern.sub('', result)
+            result = pattern.sub("", result)
         return result
 
     @classmethod
@@ -108,10 +154,10 @@ class SQLQueryValidator:
             raise ValueError("Identifier cannot be empty")
 
         # Only allow alphanumeric and underscore
-        sanitized = re.sub(r'[^a-zA-Z0-9_]', '', identifier)
+        sanitized = re.sub(r"[^a-zA-Z0-9_]", "", identifier)
 
         # Must start with letter or underscore
-        if not re.match(r'^[a-zA-Z_]', sanitized):
+        if not re.match(r"^[a-zA-Z_]", sanitized):
             raise ValueError(f"Invalid identifier: {identifier}")
 
         # Length check
@@ -131,18 +177,14 @@ class InputValidator:
         Prevents directory traversal attacks
         """
         # Check for directory traversal attempts first
-        if '..' in path:
+        if ".." in path:
             raise ValueError("Directory traversal not allowed")
 
         # Convert to Path object
         file_path = Path(path).resolve()
 
         # Check if path is within allowed directories
-        allowed_dirs = [
-            Path.cwd() / "data",
-            Path.cwd() / "scripts",
-            Path.cwd() / "config"
-        ]
+        allowed_dirs = [Path.cwd() / "data", Path.cwd() / "scripts", Path.cwd() / "config"]
 
         if not any(str(file_path).startswith(str(allowed_dir)) for allowed_dir in allowed_dirs):
             raise ValueError(f"Access to path {file_path} not allowed")
@@ -157,7 +199,7 @@ class InputValidator:
     def validate_scenario_name(scenario: str) -> str:
         """Validate scenario name format"""
         # Expected format: MODEL_rcpXX_sspY
-        pattern = r'^[A-Z0-9_]+_rcp\d{2}_ssp\d$'
+        pattern = r"^[A-Z0-9_]+_rcp\d{2}_ssp\d$"
         if not re.match(pattern, scenario):
             raise ValueError(f"Invalid scenario name format: {scenario}")
         return scenario
@@ -166,14 +208,14 @@ class InputValidator:
     def validate_fips_code(fips: str) -> str:
         """Validate FIPS code format"""
         # FIPS codes should be 5 digits
-        if not re.match(r'^\d{5}$', fips):
+        if not re.match(r"^\d{5}$", fips):
             raise ValueError(f"Invalid FIPS code: {fips}")
         return fips
 
     @staticmethod
     def validate_year_range(year_range: str) -> tuple[int, int]:
         """Validate year range format and values"""
-        match = re.match(r'^(\d{4})-(\d{4})$', year_range)
+        match = re.match(r"^(\d{4})-(\d{4})$", year_range)
         if not match:
             raise ValueError(f"Invalid year range format: {year_range}")
 
@@ -212,8 +254,7 @@ class RateLimiter:
 
         # Clean old entries
         self.calls[identifier] = [
-            call_time for call_time in self.calls[identifier]
-            if now - call_time < self.time_window
+            call_time for call_time in self.calls[identifier] if now - call_time < self.time_window
         ]
 
         # Check limit
@@ -227,6 +268,7 @@ class RateLimiter:
 
     def rate_limit_decorator(self, get_identifier):
         """Decorator for rate limiting functions"""
+
         def decorator(func):
             @wraps(func)
             def wrapper(*args, **kwargs):
@@ -235,7 +277,9 @@ class RateLimiter:
                 if not allowed:
                     raise Exception(f"Rate limit exceeded: {error}")
                 return func(*args, **kwargs)
+
             return wrapper
+
         return decorator
 
 
@@ -251,14 +295,14 @@ class SecureConfig(BaseModel):
     enable_logging: bool = Field(True)
     log_level: str = Field("INFO", pattern="^(DEBUG|INFO|WARNING|ERROR|CRITICAL)$")
 
-    @field_validator('openai_api_key')
+    @field_validator("openai_api_key")
     def validate_api_key(cls, v, info):
         """Validate API key format"""
-        if v and not v.startswith('sk-'):
+        if v and not v.startswith("sk-"):
             logger.warning(f"Unusual {info.field_name} format detected")
         return v
 
-    @field_validator('database_path')
+    @field_validator("database_path")
     def validate_db_path(cls, v):
         """Validate database path exists"""
         path = Path(v)
@@ -277,14 +321,14 @@ class SecureConfig(BaseModel):
             load_dotenv(env_path)
 
         config_dict = {
-            'openai_api_key': os.getenv('OPENAI_API_KEY'),
-            'landuse_model': os.getenv('LANDUSE_MODEL', 'gpt-4o-mini'),
-            'temperature': float(os.getenv('TEMPERATURE', '0.1')),
-            'max_tokens': int(os.getenv('MAX_TOKENS', '4000')),
-            'database_path': os.getenv('LANDUSE_DB_PATH', 'data/processed/landuse_analytics.duckdb'),
-            'max_query_limit': int(os.getenv('DEFAULT_QUERY_LIMIT', '1000')),
-            'enable_logging': os.getenv('ENABLE_LOGGING', 'true').lower() == 'true',
-            'log_level': os.getenv('LOG_LEVEL', 'INFO')
+            "openai_api_key": os.getenv("OPENAI_API_KEY"),
+            "landuse_model": os.getenv("LANDUSE_MODEL", "gpt-4o-mini"),
+            "temperature": float(os.getenv("TEMPERATURE", "0.1")),
+            "max_tokens": int(os.getenv("MAX_TOKENS", "4000")),
+            "database_path": os.getenv("LANDUSE_DB_PATH", "data/processed/landuse_analytics.duckdb"),
+            "max_query_limit": int(os.getenv("DEFAULT_QUERY_LIMIT", "1000")),
+            "enable_logging": os.getenv("ENABLE_LOGGING", "true").lower() == "true",
+            "log_level": os.getenv("LOG_LEVEL", "INFO"),
         }
 
         # Filter out None values to avoid type issues
@@ -297,12 +341,10 @@ class SecurityLogger:
     """Centralized security logging"""
 
     def __init__(self, log_file: Optional[str] = None):
-        self.logger = logging.getLogger('security')
+        self.logger = logging.getLogger("security")
         if log_file:
             handler = logging.FileHandler(log_file)
-            handler.setFormatter(
-                logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-            )
+            handler.setFormatter(logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s"))
             self.logger.addHandler(handler)
 
     def log_query(self, user_id: str, query: str, status: str, error: Optional[str] = None):
@@ -341,6 +383,7 @@ def mask_api_key(api_key: str) -> str:
 # SQL Value Sanitization Functions
 # =============================================================================
 
+
 class SQLSanitizer:
     """SQL value sanitization utilities for safe query construction.
 
@@ -356,10 +399,7 @@ class SQLSanitizer:
     ALLOWED_TRANSITION_TYPES = frozenset(["change", "same"])
 
     # Valid time periods in the dataset
-    ALLOWED_TIME_PERIODS = frozenset([
-        "2012-2020", "2020-2030", "2030-2040",
-        "2040-2050", "2050-2060", "2060-2070"
-    ])
+    ALLOWED_TIME_PERIODS = frozenset(["2012-2020", "2020-2030", "2030-2040", "2040-2050", "2050-2060", "2060-2070"])
 
     @classmethod
     def escape_string(cls, value: str) -> str:
@@ -383,7 +423,7 @@ class SQLSanitizer:
             raise TypeError(f"Expected string, got {type(value).__name__}")
 
         # Remove null bytes (can cause truncation)
-        value = value.replace('\x00', '')
+        value = value.replace("\x00", "")
 
         # Escape single quotes by doubling them
         value = value.replace("'", "''")
@@ -458,9 +498,9 @@ class SQLSanitizer:
         Accepts both 2-digit state codes and 5-digit county FIPS codes.
         """
         # State codes should be 2 digits, county FIPS codes are 5 digits
-        if re.match(r'^\d{2}$', value):
+        if re.match(r"^\d{2}$", value):
             return value
-        if re.match(r'^\d{5}$', value):
+        if re.match(r"^\d{5}$", value):
             return value
         raise ValueError(f"Invalid state/FIPS code: {value}")
 
@@ -472,7 +512,7 @@ class SQLSanitizer:
         Expected format: MODEL_rcpXX_sspY (e.g., CNRM-CM5_rcp45_ssp1)
         """
         # Allow alphanumeric, underscores, and hyphens
-        if not re.match(r'^[A-Za-z0-9_-]+$', value):
+        if not re.match(r"^[A-Za-z0-9_-]+$", value):
             raise ValueError(f"Invalid scenario name: {value}")
         return value
 
@@ -529,7 +569,7 @@ if __name__ == "__main__":
         "SELECT * FROM dim_scenario WHERE scenario_id = 1",
         "DROP TABLE dim_scenario",
         "SELECT * FROM dim_scenario; DELETE FROM dim_scenario",
-        "SELECT * FROM dim_scenario WHERE name = 'test' OR '1'='1'"
+        "SELECT * FROM dim_scenario WHERE name = 'test' OR '1'='1'",
     ]
 
     validator = SQLQueryValidator()
@@ -542,5 +582,5 @@ if __name__ == "__main__":
     limiter = RateLimiter(max_calls=3, time_window=10)
     for i in range(5):
         allowed, error = limiter.check_rate_limit("test_user")
-        console.print(f"Call {i+1}: Allowed: {allowed}, Error: {error}")
+        console.print(f"Call {i + 1}: Allowed: {allowed}, Error: {error}")
         time.sleep(1)

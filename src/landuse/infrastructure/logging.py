@@ -121,9 +121,9 @@ class StructuredLogger(LoggerInterface):
 
     def _setup_logger(self) -> logging.Logger:
         """Set up main application logger."""
-        logger_name = 'landuse'
+        logger_name = "landuse"
         if self._component:
-            logger_name = f'landuse.{self._component}'
+            logger_name = f"landuse.{self._component}"
 
         logger = logging.getLogger(logger_name)
         logger.setLevel(getattr(logging, self.config.level))
@@ -133,16 +133,9 @@ class StructuredLogger(LoggerInterface):
             # Add console handler with Rich for non-file logging
             if not self.config.log_file:
                 rich_handler = RichHandler(
-                    console=self.console,
-                    show_time=True,
-                    show_path=False,
-                    rich_tracebacks=True,
-                    markup=True
+                    console=self.console, show_time=True, show_path=False, rich_tracebacks=True, markup=True
                 )
-                rich_handler.setFormatter(logging.Formatter(
-                    fmt='%(message)s',
-                    datefmt='%H:%M:%S'
-                ))
+                rich_handler.setFormatter(logging.Formatter(fmt="%(message)s", datefmt="%H:%M:%S"))
                 rich_handler.setLevel(getattr(logging, self.config.level))
                 logger.addHandler(rich_handler)
 
@@ -158,10 +151,9 @@ class StructuredLogger(LoggerInterface):
 
                 # Also add a console handler for visibility
                 console_handler = logging.StreamHandler(sys.stderr)
-                console_handler.setFormatter(logging.Formatter(
-                    fmt='%(asctime)s [%(levelname)s] %(name)s: %(message)s',
-                    datefmt='%H:%M:%S'
-                ))
+                console_handler.setFormatter(
+                    logging.Formatter(fmt="%(asctime)s [%(levelname)s] %(name)s: %(message)s", datefmt="%H:%M:%S")
+                )
                 console_handler.setLevel(getattr(logging, self.config.level))
                 logger.addHandler(console_handler)
 
@@ -169,11 +161,11 @@ class StructuredLogger(LoggerInterface):
 
     def _setup_security_logger(self) -> logging.Logger:
         """Set up security event logger."""
-        security_logger = logging.getLogger('landuse.security')
+        security_logger = logging.getLogger("landuse.security")
         security_logger.setLevel(logging.INFO)
 
         if self.config.log_file and not security_logger.handlers:
-            security_log_path = Path(self.config.log_file).parent / 'security.log'
+            security_log_path = Path(self.config.log_file).parent / "security.log"
             security_log_path.parent.mkdir(parents=True, exist_ok=True)
 
             security_handler = logging.FileHandler(security_log_path)
@@ -184,12 +176,12 @@ class StructuredLogger(LoggerInterface):
 
     def _setup_performance_logger(self) -> logging.Logger:
         """Set up performance metrics logger."""
-        perf_logger = logging.getLogger('landuse.performance')
+        perf_logger = logging.getLogger("landuse.performance")
         perf_logger.setLevel(logging.INFO)
 
         if self.config.enable_performance_logging and self.config.log_file:
             if not perf_logger.handlers:
-                perf_log_path = Path(self.config.log_file).parent / 'performance.log'
+                perf_log_path = Path(self.config.log_file).parent / "performance.log"
                 perf_log_path.parent.mkdir(parents=True, exist_ok=True)
 
                 perf_handler = logging.FileHandler(perf_log_path)
@@ -217,7 +209,7 @@ class StructuredLogger(LoggerInterface):
             child.console = self.console
             child._children = {}
             child._component = component
-            child.logger = logging.getLogger(f'landuse.{component}')
+            child.logger = logging.getLogger(f"landuse.{component}")
             child.logger.setLevel(getattr(logging, self.config.level))
             child.security_logger = self.security_logger
             child.performance_logger = self.performance_logger
@@ -254,7 +246,7 @@ class StructuredLogger(LoggerInterface):
         """Build extra dict for log record."""
         extra = {}
         if self._component:
-            extra['component'] = self._component
+            extra["component"] = self._component
         extra.update(kwargs)
         return extra
 
@@ -268,14 +260,7 @@ class StructuredLogger(LoggerInterface):
             **context: Additional context fields
         """
         full_message = f"[SECURITY:{event_type}] {message}"
-        self.security_logger.info(
-            full_message,
-            extra={
-                'event_type': event_type,
-                'security_event': True,
-                **context
-            }
-        )
+        self.security_logger.info(full_message, extra={"event_type": event_type, "security_event": True, **context})
         # Also log to main logger at warning level
         self.warning(full_message, event_type=event_type, **context)
 
@@ -291,21 +276,10 @@ class StructuredLogger(LoggerInterface):
         if self.config.enable_performance_logging:
             self.performance_logger.info(
                 f"[PERF] {operation}: {duration:.3f}s",
-                extra={
-                    'operation': operation,
-                    'duration_ms': duration * 1000,
-                    'performance_event': True,
-                    **context
-                }
+                extra={"operation": operation, "duration_ms": duration * 1000, "performance_event": True, **context},
             )
 
-    def log_query_execution(
-        self,
-        query: str,
-        duration: float,
-        row_count: int,
-        success: bool = True
-    ) -> None:
+    def log_query_execution(self, query: str, duration: float, row_count: int, success: bool = True) -> None:
         """
         Log database query execution.
 
@@ -316,16 +290,16 @@ class StructuredLogger(LoggerInterface):
             success: Whether query succeeded
         """
         # Truncate query for logging
-        query_preview = query[:100] + '...' if len(query) > 100 else query
-        query_preview = query_preview.replace('\n', ' ')
+        query_preview = query[:100] + "..." if len(query) > 100 else query
+        query_preview = query_preview.replace("\n", " ")
 
         self.performance_event(
-            'database_query',
+            "database_query",
             duration,
             query_preview=query_preview,
             query_length=len(query),
             row_count=row_count,
-            success=success
+            success=success,
         )
 
         if success:
@@ -334,11 +308,7 @@ class StructuredLogger(LoggerInterface):
             self.warning(f"Query failed after {duration:.3f}s")
 
     def log_llm_call(
-        self,
-        model: str,
-        duration: float,
-        token_count: Optional[int] = None,
-        success: bool = True
+        self, model: str, duration: float, token_count: Optional[int] = None, success: bool = True
     ) -> None:
         """
         Log LLM API call.
@@ -349,14 +319,11 @@ class StructuredLogger(LoggerInterface):
             token_count: Number of tokens used (if available)
             success: Whether call succeeded
         """
-        context = {
-            'model': model,
-            'success': success
-        }
+        context = {"model": model, "success": success}
         if token_count is not None:
-            context['token_count'] = token_count
+            context["token_count"] = token_count
 
-        self.performance_event('llm_call', duration, **context)
+        self.performance_event("llm_call", duration, **context)
 
         if success:
             self.debug(f"LLM call to {model}: {duration:.3f}s")
@@ -386,22 +353,39 @@ class StructuredFormatter(logging.Formatter):
     def format(self, record: logging.LogRecord) -> str:
         """Format log record as JSON."""
         log_data = {
-            'timestamp': datetime.fromtimestamp(record.created).isoformat(),
-            'level': record.levelname,
-            'logger': record.name,
-            'message': record.getMessage(),
-            'module': record.module,
-            'function': record.funcName,
-            'line': record.lineno
+            "timestamp": datetime.fromtimestamp(record.created).isoformat(),
+            "level": record.levelname,
+            "logger": record.name,
+            "message": record.getMessage(),
+            "module": record.module,
+            "function": record.funcName,
+            "line": record.lineno,
         }
 
         # Add extra fields (excluding standard LogRecord attributes)
         standard_attrs = {
-            'name', 'msg', 'args', 'levelname', 'levelno', 'pathname',
-            'filename', 'module', 'lineno', 'funcName', 'created',
-            'msecs', 'relativeCreated', 'thread', 'threadName',
-            'processName', 'process', 'message', 'exc_info', 'exc_text',
-            'stack_info', 'taskName'
+            "name",
+            "msg",
+            "args",
+            "levelname",
+            "levelno",
+            "pathname",
+            "filename",
+            "module",
+            "lineno",
+            "funcName",
+            "created",
+            "msecs",
+            "relativeCreated",
+            "thread",
+            "threadName",
+            "processName",
+            "process",
+            "message",
+            "exc_info",
+            "exc_text",
+            "stack_info",
+            "taskName",
         }
         for key, value in record.__dict__.items():
             if key not in standard_attrs:
@@ -413,7 +397,7 @@ class StructuredFormatter(logging.Formatter):
 
         # Add exception info if present
         if record.exc_info:
-            log_data['exception'] = self.formatException(record.exc_info)
+            log_data["exception"] = self.formatException(record.exc_info)
 
         return json.dumps(log_data, default=str)
 

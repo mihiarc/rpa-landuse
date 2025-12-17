@@ -19,16 +19,18 @@ from landuse.utils.state_mappings import StateMapper  # noqa: E402
 
 console = Console()
 
+
 def add_state_names_to_geography(db_path: str):
     """Add state names to the dim_geography table"""
 
     state_names = StateMapper.FIPS_TO_NAME
 
-    console.print(Panel.fit(
-        "🔧 [bold blue]Enhancing Database[/bold blue]\n"
-        "[yellow]Adding state names to geography dimension[/yellow]",
-        border_style="blue"
-    ))
+    console.print(
+        Panel.fit(
+            "🔧 [bold blue]Enhancing Database[/bold blue]\n[yellow]Adding state names to geography dimension[/yellow]",
+            border_style="blue",
+        )
+    )
 
     try:
         conn = duckdb.connect(db_path)
@@ -49,11 +51,14 @@ def add_state_names_to_geography(db_path: str):
 
             # Update with state names
             for code, name in state_names.items():
-                conn.execute("""
+                conn.execute(
+                    """
                     UPDATE dim_geography
                     SET state_name = ?
                     WHERE state_code = ?
-                """, (name, code))
+                """,
+                    (name, code),
+                )
 
             # Create a view that includes state names
             conn.execute("""
@@ -93,6 +98,7 @@ def add_state_names_to_geography(db_path: str):
         return False
 
     return True
+
 
 def create_enhanced_views(db_path: str):
     """Create views that include human-readable names"""
@@ -139,6 +145,7 @@ def create_enhanced_views(db_path: str):
         return False
 
     return True
+
 
 if __name__ == "__main__":
     db_path = "data/processed/landuse_analytics.duckdb"

@@ -20,7 +20,7 @@ from shapely import wkt
 
 from landuse.utils.state_mappings import StateMapper
 
-matplotlib.use('Agg')  # Use non-GUI backend for threading safety
+matplotlib.use("Agg")  # Use non-GUI backend for threading safety
 import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
 import plotly.express as px
@@ -30,37 +30,25 @@ from plotly.subplots import make_subplots
 
 class MapRequest(BaseModel):
     """Schema for map generation requests"""
+
     map_type: Literal["state_counties", "regional", "national", "transitions", "scenario_comparison"] = Field(
         description="Type of map to generate"
     )
     state_name: Optional[str] = Field(
-        default=None,
-        description="State name for state-level maps (e.g., 'Texas', 'California')"
+        default=None, description="State name for state-level maps (e.g., 'Texas', 'California')"
     )
     landuse_type: Optional[str] = Field(
-        default="Forest",
-        description="Land use type to visualize: 'Forest', 'Urban', 'Crop', 'Pasture', 'Rangeland'"
+        default="Forest", description="Land use type to visualize: 'Forest', 'Urban', 'Crop', 'Pasture', 'Rangeland'"
     )
-    from_landuse: Optional[str] = Field(
-        default=None,
-        description="Source land use type for transition maps"
-    )
-    to_landuse: Optional[str] = Field(
-        default=None,
-        description="Target land use type for transition maps"
-    )
+    from_landuse: Optional[str] = Field(default=None, description="Source land use type for transition maps")
+    to_landuse: Optional[str] = Field(default=None, description="Target land use type for transition maps")
     scenario: Optional[str] = Field(
-        default=None,
-        description="Climate scenario name (if not specified, uses first available)"
+        default=None, description="Climate scenario name (if not specified, uses first available)"
     )
     time_period: Optional[str] = Field(
-        default=None,
-        description="Time period (e.g., '2060-2070'). If not specified, uses latest."
+        default=None, description="Time period (e.g., '2060-2070'). If not specified, uses latest."
     )
-    output_format: Literal["png", "html"] = Field(
-        default="png",
-        description="Output format for the map"
-    )
+    output_format: Literal["png", "html"] = Field(default="png", description="Output format for the map")
 
 
 class MapGenerationTool:
@@ -83,24 +71,33 @@ class MapGenerationTool:
         timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
         parts = [map_type, timestamp]
 
-        if kwargs.get('state_name'):
-            parts.insert(1, kwargs['state_name'].lower().replace(' ', '_'))
-        if kwargs.get('landuse_type'):
-            parts.insert(1, kwargs['landuse_type'].lower())
+        if kwargs.get("state_name"):
+            parts.insert(1, kwargs["state_name"].lower().replace(" ", "_"))
+        if kwargs.get("landuse_type"):
+            parts.insert(1, kwargs["landuse_type"].lower())
 
         return "_".join(parts)
 
-    def create_state_county_map(self, state_name: str, landuse_type: str = "Forest",
-                               scenario: Optional[str] = None, time_period: Optional[str] = None) -> dict[str, Any]:
+    def create_state_county_map(
+        self,
+        state_name: str,
+        landuse_type: str = "Forest",
+        scenario: Optional[str] = None,
+        time_period: Optional[str] = None,
+    ) -> dict[str, Any]:
         """Create a county-level map for a specific state"""
         conn = self._get_db_connection()
 
         try:
             # Get default scenario and time period if not specified
             if not scenario:
-                scenario = conn.execute("SELECT scenario_name FROM dim_scenario ORDER BY scenario_name LIMIT 1").fetchone()[0]
+                scenario = conn.execute(
+                    "SELECT scenario_name FROM dim_scenario ORDER BY scenario_name LIMIT 1"
+                ).fetchone()[0]
             if not time_period:
-                time_period = conn.execute("SELECT year_range FROM dim_time ORDER BY end_year DESC LIMIT 1").fetchone()[0]
+                time_period = conn.execute("SELECT year_range FROM dim_time ORDER BY end_year DESC LIMIT 1").fetchone()[
+                    0
+                ]
 
             # Query county data with geometries
             query = """
@@ -135,44 +132,44 @@ class MapGenerationTool:
             conn.close()
 
             if df.empty:
-                return {
-                    "success": False,
-                    "error": f"No data found for {state_name}",
-                    "map_path": None
-                }
+                return {"success": False, "error": f"No data found for {state_name}", "map_path": None}
 
             # Convert to GeoDataFrame
-            df['geometry'] = df['geometry_wkt'].apply(wkt.loads)
-            gdf = gpd.GeoDataFrame(df, geometry='geometry', crs='EPSG:4326')
+            df["geometry"] = df["geometry_wkt"].apply(wkt.loads)
+            gdf = gpd.GeoDataFrame(df, geometry="geometry", crs="EPSG:4326")
 
             # Create map
             fig, ax = plt.subplots(1, 1, figsize=(12, 10))
 
             # Plot counties
-            gdf.plot(column='landuse_pct',
-                    cmap='YlOrRd' if landuse_type == 'Urban' else 'Greens',
-                    linewidth=0.5,
-                    edgecolor='white',
-                    ax=ax,
-                    legend=True,
-                    legend_kwds={'label': f'{landuse_type} Land Use (%)',
-                                'orientation': 'horizontal',
-                                'pad': 0.05})
+            gdf.plot(
+                column="landuse_pct",
+                cmap="YlOrRd" if landuse_type == "Urban" else "Greens",
+                linewidth=0.5,
+                edgecolor="white",
+                ax=ax,
+                legend=True,
+                legend_kwds={"label": f"{landuse_type} Land Use (%)", "orientation": "horizontal", "pad": 0.05},
+            )
 
             # Add county boundaries
-            gdf.boundary.plot(ax=ax, linewidth=0.2, edgecolor='gray')
+            gdf.boundary.plot(ax=ax, linewidth=0.2, edgecolor="gray")
 
             # Set title and clean up
-            ax.set_title(f'{state_name} - {landuse_type} Land Use by County\n{scenario} | {time_period}',
-                        fontsize=14, fontweight='bold', pad=20)
-            ax.axis('off')
+            ax.set_title(
+                f"{state_name} - {landuse_type} Land Use by County\n{scenario} | {time_period}",
+                fontsize=14,
+                fontweight="bold",
+                pad=20,
+            )
+            ax.axis("off")
 
             plt.tight_layout()
 
             # Save map
             filename = self._generate_filename("county_map", state_name=state_name, landuse_type=landuse_type)
             output_path = self.output_dir / f"{filename}.png"
-            plt.savefig(output_path, dpi=150, bbox_inches='tight', facecolor='white')
+            plt.savefig(output_path, dpi=150, bbox_inches="tight", facecolor="white")
             plt.close()
 
             return {
@@ -183,16 +180,12 @@ class MapGenerationTool:
                 "landuse_type": landuse_type,
                 "scenario": scenario,
                 "time_period": time_period,
-                "description": f"County-level {landuse_type} land use map for {state_name}"
+                "description": f"County-level {landuse_type} land use map for {state_name}",
             }
 
         except Exception as e:
             conn.close()
-            return {
-                "success": False,
-                "error": str(e),
-                "map_path": None
-            }
+            return {"success": False, "error": str(e), "map_path": None}
 
     def create_regional_map(self, landuse_type: str = "Forest") -> dict[str, Any]:
         """Create a regional map showing land use by state"""
@@ -231,29 +224,22 @@ class MapGenerationTool:
             conn.close()
 
             # Convert state codes to abbreviations using centralized mapper
-            df['state_abbrev'] = df['state_code'].map(StateMapper.FIPS_TO_ABBREV)
+            df["state_abbrev"] = df["state_code"].map(StateMapper.FIPS_TO_ABBREV)
 
             # Create choropleth map
             fig = px.choropleth(
                 df,
-                locations='state_abbrev',
-                locationmode='USA-states',
-                color='landuse_pct',
-                scope='usa',
-                title=f'{landuse_type} Land Use by State and Region',
-                color_continuous_scale='Greens' if landuse_type == 'Forest' else 'YlOrRd',
-                labels={'landuse_pct': f'{landuse_type} %'},
-                hover_data=['state_name', 'region']
+                locations="state_abbrev",
+                locationmode="USA-states",
+                color="landuse_pct",
+                scope="usa",
+                title=f"{landuse_type} Land Use by State and Region",
+                color_continuous_scale="Greens" if landuse_type == "Forest" else "YlOrRd",
+                labels={"landuse_pct": f"{landuse_type} %"},
+                hover_data=["state_name", "region"],
             )
 
-            fig.update_layout(
-                width=1000,
-                height=600,
-                geo={
-                    'showlakes': True,
-                    'lakecolor': 'rgb(255, 255, 255)'
-                }
-            )
+            fig.update_layout(width=1000, height=600, geo={"showlakes": True, "lakecolor": "rgb(255, 255, 255)"})
 
             # Save map
             filename = self._generate_filename("regional_map", landuse_type=landuse_type)
@@ -265,19 +251,16 @@ class MapGenerationTool:
                 "map_path": str(output_path),
                 "map_type": "regional",
                 "landuse_type": landuse_type,
-                "description": f"Regional {landuse_type} land use map showing all US states"
+                "description": f"Regional {landuse_type} land use map showing all US states",
             }
 
         except Exception as e:
             conn.close()
-            return {
-                "success": False,
-                "error": str(e),
-                "map_path": None
-            }
+            return {"success": False, "error": str(e), "map_path": None}
 
-    def create_transition_map(self, from_landuse: str, to_landuse: str,
-                            state_name: Optional[str] = None) -> dict[str, Any]:
+    def create_transition_map(
+        self, from_landuse: str, to_landuse: str, state_name: Optional[str] = None
+    ) -> dict[str, Any]:
         """Create a map showing land use transitions"""
         conn = self._get_db_connection()
 
@@ -315,7 +298,7 @@ class MapGenerationTool:
                 return {
                     "success": False,
                     "error": f"No transitions found from {from_landuse} to {to_landuse}",
-                    "map_path": None
+                    "map_path": None,
                 }
 
             # Create appropriate map based on scope
@@ -328,43 +311,29 @@ class MapGenerationTool:
 
         except Exception as e:
             conn.close()
-            return {
-                "success": False,
-                "error": str(e),
-                "map_path": None
-            }
+            return {"success": False, "error": str(e), "map_path": None}
 
-    def _create_national_transition_map(self, df: pd.DataFrame, from_landuse: str,
-                                      to_landuse: str) -> dict[str, Any]:
+    def _create_national_transition_map(self, df: pd.DataFrame, from_landuse: str, to_landuse: str) -> dict[str, Any]:
         """Create national transition map"""
         # Convert state codes to abbreviations using centralized mapper
-        df['state_abbrev'] = df['state_code'].map(StateMapper.FIPS_TO_ABBREV)
+        df["state_abbrev"] = df["state_code"].map(StateMapper.FIPS_TO_ABBREV)
 
         fig = px.choropleth(
             df,
-            locations='state_abbrev',
-            locationmode='USA-states',
-            color='transition_acres',
-            scope='usa',
-            title=f'Projected {from_landuse} to {to_landuse} Transitions (2060-2070)',
-            color_continuous_scale='Reds',
-            labels={'transition_acres': 'Acres Converting'},
-            hover_data=['state_name']
+            locations="state_abbrev",
+            locationmode="USA-states",
+            color="transition_acres",
+            scope="usa",
+            title=f"Projected {from_landuse} to {to_landuse} Transitions (2060-2070)",
+            color_continuous_scale="Reds",
+            labels={"transition_acres": "Acres Converting"},
+            hover_data=["state_name"],
         )
 
-        fig.update_layout(
-            width=1000,
-            height=600,
-            geo={
-                'showlakes': True,
-                'lakecolor': 'rgb(255, 255, 255)'
-            }
-        )
+        fig.update_layout(width=1000, height=600, geo={"showlakes": True, "lakecolor": "rgb(255, 255, 255)"})
 
         # Save map
-        filename = self._generate_filename("transition_map",
-                                         from_landuse=from_landuse,
-                                         to_landuse=to_landuse)
+        filename = self._generate_filename("transition_map", from_landuse=from_landuse, to_landuse=to_landuse)
         output_path = self.output_dir / f"{filename}.png"
         fig.write_image(str(output_path), width=1000, height=600, scale=2)
 
@@ -375,7 +344,7 @@ class MapGenerationTool:
             "from_landuse": from_landuse,
             "to_landuse": to_landuse,
             "scope": "national",
-            "description": f"National map showing {from_landuse} to {to_landuse} transitions"
+            "description": f"National map showing {from_landuse} to {to_landuse} transitions",
         }
 
 
@@ -391,7 +360,7 @@ def create_map_generation_tool(db_path: str, output_dir: Optional[str] = None):
         from_landuse: Optional[str] = None,
         to_landuse: Optional[str] = None,
         scenario: Optional[str] = None,
-        time_period: Optional[str] = None
+        time_period: Optional[str] = None,
     ) -> tuple[str, dict[str, Any]]:
         """
         Generate various types of land use maps based on the database data.
@@ -419,7 +388,7 @@ def create_map_generation_tool(db_path: str, output_dir: Optional[str] = None):
                 from_landuse=from_landuse,
                 to_landuse=to_landuse,
                 scenario=scenario,
-                time_period=time_period
+                time_period=time_period,
             )
 
             # Generate appropriate map based on type
@@ -427,9 +396,7 @@ def create_map_generation_tool(db_path: str, output_dir: Optional[str] = None):
                 if not state_name:
                     error_msg = "state_name is required for state_counties map type"
                     return error_msg, {"success": False, "error": error_msg}
-                result = map_tool.create_state_county_map(
-                    state_name, landuse_type, scenario, time_period
-                )
+                result = map_tool.create_state_county_map(state_name, landuse_type, scenario, time_period)
             elif map_type == "regional":
                 result = map_tool.create_regional_map(landuse_type)
             elif map_type == "transitions":
@@ -442,7 +409,7 @@ def create_map_generation_tool(db_path: str, output_dir: Optional[str] = None):
                 return error_msg, {"success": False, "error": error_msg}
 
             # Format response for model and artifact
-            if result['success']:
+            if result["success"]:
                 content = f"✅ Successfully generated {result.get('description', 'map')}. The map has been saved to: {result['map_path']}"
                 return content, result
             else:
@@ -451,10 +418,6 @@ def create_map_generation_tool(db_path: str, output_dir: Optional[str] = None):
 
         except Exception as e:
             error_msg = f"Error generating map: {str(e)}"
-            return error_msg, {
-                "success": False,
-                "error": str(e),
-                "map_path": None
-            }
+            return error_msg, {"success": False, "error": str(e), "map_path": None}
 
     return generate_landuse_map

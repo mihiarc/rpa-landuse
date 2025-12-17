@@ -26,6 +26,7 @@ console = Console()
 @dataclass
 class BenchmarkResult:
     """Results from a performance benchmark"""
+
     method_name: str
     total_records: int
     processing_time: float
@@ -58,14 +59,14 @@ class PerformanceBenchmark:
 
         # Generate realistic landuse transition data
         data = {
-            'transition_id': range(1, num_records + 1),
-            'scenario_id': np.random.randint(1, 21, num_records),  # 20 scenarios
-            'time_id': np.random.randint(1, 7, num_records),       # 6 time periods
-            'geography_id': np.random.randint(1, 3076, num_records),  # ~3075 counties
-            'from_landuse_id': np.random.randint(1, 6, num_records),  # 5 landuse types
-            'to_landuse_id': np.random.randint(1, 6, num_records),    # 5 landuse types
-            'acres': np.random.uniform(0.1, 10000.0, num_records),
-            'transition_type': np.random.choice(['change', 'same'], num_records, p=[0.3, 0.7])
+            "transition_id": range(1, num_records + 1),
+            "scenario_id": np.random.randint(1, 21, num_records),  # 20 scenarios
+            "time_id": np.random.randint(1, 7, num_records),  # 6 time periods
+            "geography_id": np.random.randint(1, 3076, num_records),  # ~3075 counties
+            "from_landuse_id": np.random.randint(1, 6, num_records),  # 5 landuse types
+            "to_landuse_id": np.random.randint(1, 6, num_records),  # 5 landuse types
+            "acres": np.random.uniform(0.1, 10000.0, num_records),
+            "transition_type": np.random.choice(["change", "same"], num_records, p=[0.3, 0.7]),
         }
 
         return pd.DataFrame(data)
@@ -104,15 +105,18 @@ class PerformanceBenchmark:
                 # Insert in batches
                 total_inserted = 0
                 for i in range(0, len(df), batch_size):
-                    batch = df.iloc[i:i+batch_size]
+                    batch = df.iloc[i : i + batch_size]
                     values = [tuple(row) for row in batch.values]
 
-                    conn.executemany("""
+                    conn.executemany(
+                        """
                         INSERT INTO fact_landuse_transitions
                         (transition_id, scenario_id, time_id, geography_id,
                          from_landuse_id, to_landuse_id, acres, transition_type)
                         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-                    """, values)
+                    """,
+                        values,
+                    )
 
                     total_inserted += len(batch)
 
@@ -128,7 +132,7 @@ class PerformanceBenchmark:
                     records_per_second=records_per_second,
                     memory_peak_mb=peak_memory,
                     file_size_mb=file_size,
-                    success=True
+                    success=True,
                 )
 
         except Exception as e:
@@ -140,7 +144,7 @@ class PerformanceBenchmark:
                 memory_peak_mb=0,
                 file_size_mb=0,
                 success=False,
-                error_message=str(e)
+                error_message=str(e),
             )
 
     def benchmark_bulk_copy(self, df: pd.DataFrame) -> BenchmarkResult:
@@ -161,9 +165,15 @@ class PerformanceBenchmark:
                     df,
                     "fact_landuse_transitions",
                     columns=[
-                        'transition_id', 'scenario_id', 'time_id', 'geography_id',
-                        'from_landuse_id', 'to_landuse_id', 'acres', 'transition_type'
-                    ]
+                        "transition_id",
+                        "scenario_id",
+                        "time_id",
+                        "geography_id",
+                        "from_landuse_id",
+                        "to_landuse_id",
+                        "acres",
+                        "transition_type",
+                    ],
                 )
 
                 peak_memory = self._get_memory_usage() - start_memory
@@ -176,7 +186,7 @@ class PerformanceBenchmark:
                     records_per_second=stats.records_per_second(),
                     memory_peak_mb=peak_memory,
                     file_size_mb=file_size,
-                    success=True
+                    success=True,
                 )
 
         except Exception as e:
@@ -188,7 +198,7 @@ class PerformanceBenchmark:
                 memory_peak_mb=0,
                 file_size_mb=0,
                 success=False,
-                error_message=str(e)
+                error_message=str(e),
             )
 
     def benchmark_pandas_to_sql(self, df: pd.DataFrame) -> BenchmarkResult:
@@ -205,12 +215,7 @@ class PerformanceBenchmark:
 
                 # Use pandas to_sql
                 df.to_sql(
-                    'fact_landuse_transitions',
-                    conn,
-                    if_exists='append',
-                    index=False,
-                    method='multi',
-                    chunksize=10000
+                    "fact_landuse_transitions", conn, if_exists="append", index=False, method="multi", chunksize=10000
                 )
 
                 processing_time = time.time() - start_time
@@ -225,7 +230,7 @@ class PerformanceBenchmark:
                     records_per_second=records_per_second,
                     memory_peak_mb=peak_memory,
                     file_size_mb=file_size,
-                    success=True
+                    success=True,
                 )
 
         except Exception as e:
@@ -237,7 +242,7 @@ class PerformanceBenchmark:
                 memory_peak_mb=0,
                 file_size_mb=0,
                 success=False,
-                error_message=str(e)
+                error_message=str(e),
             )
 
     def run_benchmark_suite(self, record_counts: list[int] = None) -> dict[int, list[BenchmarkResult]]:
@@ -245,11 +250,13 @@ class PerformanceBenchmark:
         if record_counts is None:
             record_counts = [10000, 50000, 100000, 500000]
 
-        console.print(Panel.fit(
-            "🏁 [bold blue]DuckDB Performance Benchmark Suite[/bold blue]\n"
-            f"[yellow]Testing with record counts: {record_counts}[/yellow]",
-            border_style="blue"
-        ))
+        console.print(
+            Panel.fit(
+                "🏁 [bold blue]DuckDB Performance Benchmark Suite[/bold blue]\n"
+                f"[yellow]Testing with record counts: {record_counts}[/yellow]",
+                border_style="blue",
+            )
+        )
 
         all_results = {}
 
@@ -305,7 +312,7 @@ class PerformanceBenchmark:
                 f"{result.records_per_second:,.0f}",
                 f"{result.memory_peak_mb:.1f}",
                 f"{result.file_size_mb:.1f}",
-                status
+                status,
             )
 
         console.print(table)
@@ -341,7 +348,9 @@ class PerformanceBenchmark:
 
             for result in results:
                 status = "✅ Success" if result.success else f"❌ {result.error_message}"
-                report.append(f"| {result.method_name} | {result.processing_time:.2f} | {result.records_per_second:,.0f} | {result.memory_peak_mb:.1f} | {result.file_size_mb:.1f} | {status} |\n")
+                report.append(
+                    f"| {result.method_name} | {result.processing_time:.2f} | {result.records_per_second:,.0f} | {result.memory_peak_mb:.1f} | {result.file_size_mb:.1f} | {status} |\n"
+                )
 
         # Performance recommendations
         report.append("\n## Recommendations\n")
@@ -356,6 +365,7 @@ class PerformanceBenchmark:
         """Get current memory usage in MB"""
         try:
             import psutil
+
             process = psutil.Process()
             return float(process.memory_info().rss / 1024 / 1024)  # Convert to MB
         except ImportError:
@@ -397,7 +407,7 @@ def run_performance_benchmark(output_file: Optional[str] = None) -> dict[int, li
         # Generate and optionally save report
         if output_file:
             report = benchmark.generate_performance_report(results)
-            with open(output_file, 'w') as f:
+            with open(output_file, "w") as f:
                 f.write(report)
             console.print(f"📄 Performance report saved to: {output_file}")
 
@@ -412,9 +422,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description="Run DuckDB performance benchmarks")
     parser.add_argument("--output", help="Output file for performance report")
-    parser.add_argument("--records", nargs="+", type=int,
-                       default=[10000, 50000, 100000],
-                       help="Record counts to test")
+    parser.add_argument("--records", nargs="+", type=int, default=[10000, 50000, 100000], help="Record counts to test")
 
     args = parser.parse_args()
 
@@ -424,7 +432,7 @@ if __name__ == "__main__":
 
     if args.output:
         report = benchmark.generate_performance_report(results)
-        with open(args.output, 'w') as f:
+        with open(args.output, "w") as f:
             f.write(report)
         console.print(f"📄 Report saved to: {args.output}")
 

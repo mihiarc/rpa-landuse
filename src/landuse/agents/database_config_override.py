@@ -7,34 +7,36 @@ This module helps the agent use the new combined scenario tables.
 # Table mappings for combined scenarios
 COMBINED_TABLE_MAPPINGS = {
     # Map original table names to combined versions
-    'dim_scenario': 'dim_scenario_combined',
-    'fact_landuse_transitions': 'fact_landuse_combined',
+    "dim_scenario": "dim_scenario_combined",
+    "fact_landuse_transitions": "fact_landuse_combined",
 }
 
 # Views to prioritize
 PREFERRED_VIEWS = [
-    'v_default_transitions',  # Uses OVERALL scenario
-    'v_scenario_comparisons',  # Excludes OVERALL for comparisons
+    "v_default_transitions",  # Uses OVERALL scenario
+    "v_scenario_comparisons",  # Excludes OVERALL for comparisons
 ]
+
 
 def get_combined_schema_override():
     """Return schema configuration for combined scenarios."""
     return {
-        'primary_tables': {
-            'scenarios': 'dim_scenario_combined',
-            'transitions': 'fact_landuse_combined',
-            'geography': 'dim_geography',
-            'time': 'dim_time',
-            'landuse': 'dim_landuse'
+        "primary_tables": {
+            "scenarios": "dim_scenario_combined",
+            "transitions": "fact_landuse_combined",
+            "geography": "dim_geography",
+            "time": "dim_time",
+            "landuse": "dim_landuse",
         },
-        'views': PREFERRED_VIEWS,
-        'exclude_tables': [
-            'dim_scenario',  # Original scenario table
-            'fact_landuse_transitions',  # Original transitions
-            'dim_scenario_original',  # Backup tables
-            'fact_landuse_transitions_original'
-        ]
+        "views": PREFERRED_VIEWS,
+        "exclude_tables": [
+            "dim_scenario",  # Original scenario table
+            "fact_landuse_transitions",  # Original transitions
+            "dim_scenario_original",  # Backup tables
+            "fact_landuse_transitions_original",
+        ],
     }
+
 
 def transform_query_to_combined(query: str) -> str:
     """Transform a query to use combined tables instead of original ones."""
@@ -43,14 +45,15 @@ def transform_query_to_combined(query: str) -> str:
     # Replace table names
     for original, combined in COMBINED_TABLE_MAPPINGS.items():
         # Only replace if it's a table reference, not part of another word
-        modified_query = modified_query.replace(f' {original} ', f' {combined} ')
-        modified_query = modified_query.replace(f' {original}\n', f' {combined}\n')
-        modified_query = modified_query.replace(f'FROM {original}', f'FROM {combined}')
-        modified_query = modified_query.replace(f'JOIN {original}', f'JOIN {combined}')
-        modified_query = modified_query.replace(f' {original},', f' {combined},')
-        modified_query = modified_query.replace(f'({original})', f'({combined})')
+        modified_query = modified_query.replace(f" {original} ", f" {combined} ")
+        modified_query = modified_query.replace(f" {original}\n", f" {combined}\n")
+        modified_query = modified_query.replace(f"FROM {original}", f"FROM {combined}")
+        modified_query = modified_query.replace(f"JOIN {original}", f"JOIN {combined}")
+        modified_query = modified_query.replace(f" {original},", f" {combined},")
+        modified_query = modified_query.replace(f"({original})", f"({combined})")
 
     return modified_query
+
 
 def get_scenario_guidance():
     """Return guidance for using combined scenarios."""

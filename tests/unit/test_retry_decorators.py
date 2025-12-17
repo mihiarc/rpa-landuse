@@ -68,6 +68,7 @@ class TestRetryDecorators:
 
         # Tenacity wraps exceptions in RetryError
         from tenacity import RetryError
+
         with pytest.raises(RetryError):
             mock_db_operation()
 
@@ -121,11 +122,7 @@ class TestRetryDecorators:
         """Test retry based on result value"""
         call_count = 0
 
-        @retry_on_result(
-            result_predicate=lambda x: x is None,
-            max_attempts=3,
-            wait_time=0.1
-        )
+        @retry_on_result(result_predicate=lambda x: x is None, max_attempts=3, wait_time=0.1)
         def mock_operation():
             nonlocal call_count
             call_count += 1
@@ -141,11 +138,7 @@ class TestRetryDecorators:
         """Test retry on result when all attempts return bad result"""
         call_count = 0
 
-        @retry_on_result(
-            result_predicate=lambda x: x is None,
-            max_attempts=2,
-            wait_time=0.1
-        )
+        @retry_on_result(result_predicate=lambda x: x is None, max_attempts=2, wait_time=0.1)
         def mock_operation():
             nonlocal call_count
             call_count += 1
@@ -153,6 +146,7 @@ class TestRetryDecorators:
 
         # Tenacity raises RetryError when all attempts exhausted
         from tenacity import RetryError
+
         with pytest.raises(RetryError):
             mock_operation()
 
@@ -168,7 +162,7 @@ class TestRetryDecorators:
         @custom_retry(
             stop_condition=stop_after_attempt(3),
             wait_strategy=wait_fixed(0.1),
-            retry_condition=retry_if_exception_type(ValueError)
+            retry_condition=retry_if_exception_type(ValueError),
         )
         def mock_operation():
             nonlocal call_count
@@ -186,7 +180,7 @@ class TestRetryDecorators:
         call_count = 0
 
         # Simulate tenacity not being available
-        with patch('landuse.utils.retry_decorators.HAS_TENACITY', False):
+        with patch("landuse.utils.retry_decorators.HAS_TENACITY", False):
             from landuse.utils.retry_decorators import database_retry
 
             @database_retry(max_attempts=3, min_wait=0.1)
@@ -207,12 +201,7 @@ class TestRetryableOperation:
 
     def test_retryable_operation_success(self):
         """Test successful operation with RetryableOperation"""
-        with RetryableOperation(
-            "Test operation",
-            max_attempts=3,
-            wait_strategy="fixed",
-            min_wait=0.1
-        ) as op:
+        with RetryableOperation("Test operation", max_attempts=3, wait_strategy="fixed", min_wait=0.1) as op:
             result = op.execute(lambda: "success")
             assert result == "success"
             assert op.attempt_count == 1
@@ -229,11 +218,7 @@ class TestRetryableOperation:
             return "success"
 
         with RetryableOperation(
-            "Test operation",
-            max_attempts=3,
-            wait_strategy="fixed",
-            min_wait=0.1,
-            exceptions=(ConnectionError,)
+            "Test operation", max_attempts=3, wait_strategy="fixed", min_wait=0.1, exceptions=(ConnectionError,)
         ) as op:
             result = op.execute(failing_operation)
             assert result == "success"
@@ -241,27 +226,20 @@ class TestRetryableOperation:
 
     def test_retryable_operation_exhausted(self):
         """Test RetryableOperation when all attempts fail"""
+
         def always_failing_operation():
             raise ConnectionError("Always fails")
 
         with pytest.raises(ConnectionError):
             with RetryableOperation(
-                "Test operation",
-                max_attempts=2,
-                wait_strategy="fixed",
-                min_wait=0.1,
-                exceptions=(ConnectionError,)
+                "Test operation", max_attempts=2, wait_strategy="fixed", min_wait=0.1, exceptions=(ConnectionError,)
             ) as op:
                 op.execute(always_failing_operation)
 
     def test_wait_time_calculation(self):
         """Test different wait time calculation strategies"""
         op = RetryableOperation(
-            "Test operation",
-            max_attempts=5,
-            wait_strategy="exponential",
-            min_wait=1.0,
-            max_wait=10.0
+            "Test operation", max_attempts=5, wait_strategy="exponential", min_wait=1.0, max_wait=10.0
         )
 
         # Test exponential backoff
@@ -297,11 +275,7 @@ class TestExecuteWithRetry:
             return "success"
 
         result = execute_with_retry(
-            test_function,
-            operation_name="Test operation",
-            max_attempts=3,
-            wait_strategy="fixed",
-            min_wait=0.1
+            test_function, operation_name="Test operation", max_attempts=3, wait_strategy="fixed", min_wait=0.1
         )
 
         assert result == "success"
@@ -309,6 +283,7 @@ class TestExecuteWithRetry:
 
     def test_execute_with_retry_with_args(self):
         """Test execute_with_retry with function arguments"""
+
         def test_function(x, y, multiplier=1):
             return (x + y) * multiplier
 
@@ -320,7 +295,7 @@ class TestExecuteWithRetry:
             min_wait=0.1,
             x=5,
             y=3,
-            multiplier=2
+            multiplier=2,
         )
 
         assert result == 16  # (5 + 3) * 2
@@ -342,7 +317,7 @@ class TestExecuteWithRetry:
             max_attempts=3,
             wait_strategy="fixed",
             min_wait=0.1,
-            exceptions=(ConnectionError,)
+            exceptions=(ConnectionError,),
         )
 
         assert result == "success"

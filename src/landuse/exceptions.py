@@ -23,6 +23,7 @@ class LanduseError(Exception):
 # Database Exceptions
 # =============================================================================
 
+
 class DatabaseError(LanduseError):
     """Base class for database-related errors."""
 
@@ -67,6 +68,7 @@ class QueryValidationError(DatabaseError):
 # Configuration Exceptions
 # =============================================================================
 
+
 class ConfigurationError(LanduseError):
     """Configuration-related errors."""
 
@@ -78,6 +80,7 @@ class ConfigurationError(LanduseError):
 # =============================================================================
 # Agent Exceptions
 # =============================================================================
+
 
 class AgentError(LanduseError):
     """Base class for agent-related errors."""
@@ -91,7 +94,7 @@ class LLMError(AgentError):
     """LLM API errors (rate limits, invalid responses, etc.)."""
 
     def __init__(self, message: str, model_name: str = None, error_code: str = None):
-        super().__init__(message, component='llm', error_code=error_code)
+        super().__init__(message, component="llm", error_code=error_code)
         self.model_name = model_name
 
 
@@ -99,7 +102,7 @@ class APIKeyError(AgentError):
     """API key validation errors."""
 
     def __init__(self, message: str, key_type: str = None, error_code: str = None):
-        super().__init__(message, component='api_key', error_code=error_code)
+        super().__init__(message, component="api_key", error_code=error_code)
         self.key_type = key_type
 
 
@@ -107,7 +110,7 @@ class ToolExecutionError(AgentError):
     """Tool execution failures."""
 
     def __init__(self, message: str, tool_name: str = None, error_code: str = None):
-        super().__init__(message, component='tool', error_code=error_code)
+        super().__init__(message, component="tool", error_code=error_code)
         self.tool_name = tool_name
 
 
@@ -115,7 +118,7 @@ class GraphExecutionError(AgentError):
     """LangGraph workflow execution errors."""
 
     def __init__(self, message: str, node_name: str = None, error_code: str = None):
-        super().__init__(message, component='graph', error_code=error_code)
+        super().__init__(message, component="graph", error_code=error_code)
         self.node_name = node_name
 
 
@@ -123,7 +126,7 @@ class ConversationError(AgentError):
     """Conversation memory/history errors."""
 
     def __init__(self, message: str, thread_id: str = None, error_code: str = None):
-        super().__init__(message, component='conversation', error_code=error_code)
+        super().__init__(message, component="conversation", error_code=error_code)
         self.thread_id = thread_id
 
 
@@ -131,13 +134,14 @@ class MapGenerationError(AgentError):
     """Map generation/visualization errors."""
 
     def __init__(self, message: str, map_type: str = None, error_code: str = None):
-        super().__init__(message, component='map', error_code=error_code)
+        super().__init__(message, component="map", error_code=error_code)
         self.map_type = map_type
 
 
 # =============================================================================
 # Security Exceptions
 # =============================================================================
+
 
 class SecurityError(LanduseError):
     """Security-related errors (SQL injection, unauthorized access, etc.)."""
@@ -151,13 +155,14 @@ class RateLimitError(SecurityError):
     """Rate limit exceeded errors."""
 
     def __init__(self, message: str, retry_after: float = None, error_code: str = None):
-        super().__init__(message, security_context='rate_limit', error_code=error_code)
+        super().__init__(message, security_context="rate_limit", error_code=error_code)
         self.retry_after = retry_after
 
 
 # =============================================================================
 # Validation Exceptions
 # =============================================================================
+
 
 class ValidationError(LanduseError):
     """Data validation errors."""
@@ -182,35 +187,31 @@ class DataProcessingError(ValidationError):
 # Mapping of common exception types to our custom exceptions
 EXCEPTION_MAPPING = {
     # Database exceptions
-    'duckdb.Error': DatabaseError,
-    'duckdb.CatalogException': SchemaError,
-    'duckdb.SyntaxException': QueryValidationError,
-    'duckdb.BinderException': QueryValidationError,
-    'duckdb.ConversionException': ValidationError,
-    'sqlite3.Error': DatabaseError,
-    'sqlite3.OperationalError': DatabaseConnectionError,
-
+    "duckdb.Error": DatabaseError,
+    "duckdb.CatalogException": SchemaError,
+    "duckdb.SyntaxException": QueryValidationError,
+    "duckdb.BinderException": QueryValidationError,
+    "duckdb.ConversionException": ValidationError,
+    "sqlite3.Error": DatabaseError,
+    "sqlite3.OperationalError": DatabaseConnectionError,
     # Network/API exceptions
-    'requests.exceptions.RequestException': LLMError,
-    'requests.exceptions.ConnectionError': DatabaseConnectionError,
-    'requests.exceptions.Timeout': LLMError,
-    'requests.exceptions.HTTPError': LLMError,
-
+    "requests.exceptions.RequestException": LLMError,
+    "requests.exceptions.ConnectionError": DatabaseConnectionError,
+    "requests.exceptions.Timeout": LLMError,
+    "requests.exceptions.HTTPError": LLMError,
     # File/IO exceptions
-    'FileNotFoundError': ValidationError,
-    'PermissionError': SecurityError,
-    'OSError': ValidationError,
-    'IOError': ValidationError,
-
+    "FileNotFoundError": ValidationError,
+    "PermissionError": SecurityError,
+    "OSError": ValidationError,
+    "IOError": ValidationError,
     # JSON/Data exceptions
-    'json.JSONDecodeError': ValidationError,
-    'ValueError': ValidationError,
-    'KeyError': ValidationError,
-    'TypeError': ValidationError,
-
+    "json.JSONDecodeError": ValidationError,
+    "ValueError": ValidationError,
+    "KeyError": ValidationError,
+    "TypeError": ValidationError,
     # LangChain exceptions
-    'langchain.schema.LLMError': LLMError,
-    'langchain_core.exceptions.LangChainException': AgentError,
+    "langchain.schema.LLMError": LLMError,
+    "langchain_core.exceptions.LangChainException": AgentError,
 }
 
 
@@ -227,7 +228,7 @@ def wrap_exception(original_exception: Exception, context: str = None) -> Landus
     """
     exception_type = type(original_exception).__name__
     exception_module = type(original_exception).__module__
-    full_type = f"{exception_module}.{exception_type}" if exception_module != 'builtins' else exception_type
+    full_type = f"{exception_module}.{exception_type}" if exception_module != "builtins" else exception_type
 
     # Look for specific mapping
     if full_type in EXCEPTION_MAPPING:
@@ -271,7 +272,7 @@ def handle_database_exception(func):
             raise
         except Exception as e:
             # Convert to our custom exception hierarchy
-            if 'duckdb' in str(type(e)).lower():
+            if "duckdb" in str(type(e)).lower():
                 raise wrap_exception(e, f"Database error in {func.__name__}")
             elif isinstance(e, OSError):
                 raise DatabaseConnectionError(f"Connection failed in {func.__name__}: {str(e)}")
@@ -300,10 +301,7 @@ def handle_tool_exception(func):
             # Re-raise our custom exceptions as-is
             raise
         except Exception as e:
-            raise ToolExecutionError(
-                f"Tool '{func.__name__}' failed: {str(e)}",
-                tool_name=func.__name__
-            )
+            raise ToolExecutionError(f"Tool '{func.__name__}' failed: {str(e)}", tool_name=func.__name__)
 
     return wrapper
 
@@ -343,12 +341,7 @@ def handle_query_error(error: Exception, query: str = None, context: str = None)
     if context:
         error_msg = f"{context}: {error_msg}"
 
-    return {
-        "success": False,
-        "error": error_msg,
-        "query": query,
-        "suggestion": suggestion
-    }
+    return {"success": False, "error": error_msg, "query": query, "suggestion": suggestion}
 
 
 def safe_execute(func, *args, default=None, context: str = None, **kwargs):

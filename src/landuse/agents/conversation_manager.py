@@ -22,7 +22,7 @@ class ConversationManager(ConversationInterface):
         self,
         config: Optional[AppConfig] = None,
         max_history_length: Optional[int] = None,
-        console: Optional[Console] = None
+        console: Optional[Console] = None,
     ):
         """
         Initialize conversation manager.

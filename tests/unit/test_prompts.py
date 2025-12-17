@@ -35,10 +35,7 @@ class TestGetSystemPrompt:
     def test_standard_prompt(self):
         """Test standard prompt generation."""
         prompt = get_system_prompt(
-            include_maps=False,
-            analysis_style="standard",
-            domain_focus=None,
-            schema_info="TEST_SCHEMA"
+            include_maps=False, analysis_style="standard", domain_focus=None, schema_info="TEST_SCHEMA"
         )
 
         assert "land use analytics expert" in prompt
@@ -58,17 +55,11 @@ class TestGetSystemPrompt:
         """Test that additional parameters are ignored (since functionality was removed)."""
         # All these should return the same base prompt
         prompt1 = get_system_prompt(
-            include_maps=True,
-            analysis_style="detailed",
-            domain_focus="climate",
-            schema_info="TEST"
+            include_maps=True, analysis_style="detailed", domain_focus="climate", schema_info="TEST"
         )
 
         prompt2 = get_system_prompt(
-            include_maps=False,
-            analysis_style="standard",
-            domain_focus=None,
-            schema_info="TEST"
+            include_maps=False, analysis_style="standard", domain_focus=None, schema_info="TEST"
         )
 
         # Both should be identical (just base prompt with schema)

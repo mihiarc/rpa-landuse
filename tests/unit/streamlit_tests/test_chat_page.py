@@ -16,7 +16,7 @@ import pytest
 
 from tests.unit.streamlit_tests.mock_streamlit import mock_st
 
-sys.modules['streamlit'] = mock_st
+sys.modules["streamlit"] = mock_st
 import streamlit as st  # noqa: E402
 
 
@@ -44,16 +44,16 @@ class TestChatPage:
         from views import chat
 
         # Test that key functions exist (current API)
-        assert hasattr(chat, 'get_agent')
-        assert hasattr(chat, 'initialize_session_state')
-        assert hasattr(chat, 'display_chat_history')
-        assert hasattr(chat, 'handle_user_input')
-        assert hasattr(chat, 'main')
-        assert hasattr(chat, 'show_welcome_message')
-        assert hasattr(chat, 'show_scenario_guide')
-        assert hasattr(chat, 'show_first_time_onboarding')
-        assert hasattr(chat, 'show_persistent_context_bar')
-        assert hasattr(chat, 'show_smart_example_queries')
+        assert hasattr(chat, "get_agent")
+        assert hasattr(chat, "initialize_session_state")
+        assert hasattr(chat, "display_chat_history")
+        assert hasattr(chat, "handle_user_input")
+        assert hasattr(chat, "main")
+        assert hasattr(chat, "show_welcome_message")
+        assert hasattr(chat, "show_scenario_guide")
+        assert hasattr(chat, "show_first_time_onboarding")
+        assert hasattr(chat, "show_persistent_context_bar")
+        assert hasattr(chat, "show_smart_example_queries")
 
         # Test that they are callable
         assert callable(chat.get_agent)
@@ -113,7 +113,7 @@ class TestChatPage:
         mock_st.session_state = MagicMock()
         mock_st.session_state.messages = [
             {"role": "user", "content": "Hello"},
-            {"role": "assistant", "content": "Hi there!"}
+            {"role": "assistant", "content": "Hi there!"},
         ]
 
         # Call should not raise
@@ -145,7 +145,7 @@ class TestChatPage:
         from views import chat
 
         # Verify function exists
-        assert hasattr(chat, 'show_smart_example_queries')
+        assert hasattr(chat, "show_smart_example_queries")
         assert callable(chat.show_smart_example_queries)
 
     def test_show_persistent_context_bar(self):
@@ -171,7 +171,7 @@ class TestChatPage:
         assert assistant_msg["role"] == "assistant"
         assert isinstance(assistant_msg["content"], str)
 
-    @patch('views.chat.get_agent')
+    @patch("views.chat.get_agent")
     def test_handle_user_input_with_valid_agent(self, mock_get_agent):
         """Test handle_user_input when agent is available"""
         from landuse.utils.security import RateLimiter
@@ -190,7 +190,7 @@ class TestChatPage:
         # Just verify it can be called without error
         chat.handle_user_input()
 
-    @patch('views.chat.get_agent')
+    @patch("views.chat.get_agent")
     def test_handle_user_input_with_agent_error(self, mock_get_agent):
         """Test handle_user_input when agent has error"""
         from landuse.utils.security import RateLimiter
@@ -210,7 +210,7 @@ class TestChatPage:
         """Test that main function exists and is the entry point"""
         from views import chat
 
-        assert hasattr(chat, 'main')
+        assert hasattr(chat, "main")
         assert callable(chat.main)
 
     def test_scenario_guide_dialog_function(self):

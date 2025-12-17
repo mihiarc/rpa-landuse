@@ -47,17 +47,17 @@ class TestSchemaVersionEdgeCases:
     def test_version_manager_with_corrupted_database(self):
         """Test version manager behavior with corrupted database."""
         with tempfile.TemporaryDirectory() as temp_dir:
-            db_path = Path(temp_dir) / 'corrupted.duckdb'
+            db_path = Path(temp_dir) / "corrupted.duckdb"
 
             # Create a valid database first
             conn = duckdb.connect(str(db_path))
             manager = SchemaVersionManager(conn)
-            manager.apply_version('2.0.0', 'test')
+            manager.apply_version("2.0.0", "test")
             conn.close()
 
             # Simulate corruption by truncating the file
-            with open(db_path, 'wb') as f:
-                f.write(b'corrupted')
+            with open(db_path, "wb") as f:
+                f.write(b"corrupted")
 
             # Should handle corruption gracefully
             with pytest.raises(duckdb.Error):
@@ -67,12 +67,12 @@ class TestSchemaVersionEdgeCases:
     def test_read_only_database_operations(self):
         """Test version manager operations on read-only database."""
         with tempfile.TemporaryDirectory() as temp_dir:
-            db_path = Path(temp_dir) / 'readonly.duckdb'
+            db_path = Path(temp_dir) / "readonly.duckdb"
 
             # Create database with some data
             conn = duckdb.connect(str(db_path))
             manager = SchemaVersionManager(conn)
-            manager.apply_version('2.1.0', 'setup')
+            manager.apply_version("2.1.0", "setup")
             conn.close()
 
             # Test that read-only connection fails gracefully when trying to create version table
@@ -87,7 +87,7 @@ class TestSchemaVersionEdgeCases:
     def test_concurrent_version_application(self):
         """Test concurrent version application scenarios."""
         with tempfile.TemporaryDirectory() as temp_dir:
-            db_path = Path(temp_dir) / 'concurrent.duckdb'
+            db_path = Path(temp_dir) / "concurrent.duckdb"
 
             # Pre-create the database and version table to avoid creation conflicts
             conn = duckdb.connect(str(db_path))
@@ -110,10 +110,7 @@ class TestSchemaVersionEdgeCases:
             # Start multiple threads trying to apply the same version
             threads = []
             for i in range(5):
-                thread = threading.Thread(
-                    target=apply_version_worker,
-                    args=('2.2.0', f'user_{i}')
-                )
+                thread = threading.Thread(target=apply_version_worker, args=("2.2.0", f"user_{i}"))
                 threads.append(thread)
                 thread.start()
 
@@ -131,7 +128,7 @@ class TestSchemaVersionEdgeCases:
 
             # Only one version record should exist (due to UNIQUE constraint)
             assert len(history) == 1
-            assert history[0][0] == '2.2.0'
+            assert history[0][0] == "2.2.0"
 
             # At least one thread should have succeeded
             assert len(results) >= 1
@@ -140,7 +137,7 @@ class TestSchemaVersionEdgeCases:
     def test_schema_detection_edge_cases(self):
         """Test schema detection with edge cases."""
         with tempfile.TemporaryDirectory() as temp_dir:
-            db_path = Path(temp_dir) / 'edge_cases.duckdb'
+            db_path = Path(temp_dir) / "edge_cases.duckdb"
             conn = duckdb.connect(str(db_path))
 
             # Test detection with minimal schema
@@ -158,28 +155,28 @@ class TestSchemaVersionEdgeCases:
 
             # Should detect as 1.0.0
             manager_v1 = SchemaVersionManager(conn)
-            assert manager_v1.detect_schema_version() == '1.0.0'
+            assert manager_v1.detect_schema_version() == "1.0.0"
 
             # Test with OVERALL scenario but missing fact table
             conn.execute("INSERT INTO dim_scenario VALUES (2, 'OVERALL')")
             manager_v2 = SchemaVersionManager(conn)
             # Should still detect as 2.0.0 even without fact table
-            assert manager_v2.detect_schema_version() == '2.0.0'
+            assert manager_v2.detect_schema_version() == "2.0.0"
 
             conn.close()
 
     def test_version_history_with_large_dataset(self):
         """Test version history operations with many version records."""
         with tempfile.TemporaryDirectory() as temp_dir:
-            db_path = Path(temp_dir) / 'large_history.duckdb'
+            db_path = Path(temp_dir) / "large_history.duckdb"
             conn = duckdb.connect(str(db_path))
 
             manager = SchemaVersionManager(conn)
 
             # Apply many versions (simulate migration history)
-            versions = ['1.0.0', '2.0.0', '2.1.0', '2.2.0']
+            versions = ["1.0.0", "2.0.0", "2.1.0", "2.2.0"]
             for i, version in enumerate(versions):
-                manager.apply_version(version, f'user_{i}')
+                manager.apply_version(version, f"user_{i}")
 
             # Get history
             history = manager.get_version_history()
@@ -190,14 +187,14 @@ class TestSchemaVersionEdgeCases:
             assert version_numbers == versions
 
             # Current version should be the last one
-            assert manager.get_current_version() == '2.2.0'
+            assert manager.get_current_version() == "2.2.0"
 
             conn.close()
 
     def test_malformed_version_table(self):
         """Test behavior with malformed version table."""
         with tempfile.TemporaryDirectory() as temp_dir:
-            db_path = Path(temp_dir) / 'malformed.duckdb'
+            db_path = Path(temp_dir) / "malformed.duckdb"
             conn = duckdb.connect(str(db_path))
 
             # Create malformed version table (missing required columns)
@@ -227,7 +224,7 @@ class TestSchemaVersionIntegration:
     def test_database_manager_version_checking(self):
         """Test schema version checking in DatabaseManager."""
         with tempfile.TemporaryDirectory() as temp_dir:
-            db_path = Path(temp_dir) / 'integration.duckdb'
+            db_path = Path(temp_dir) / "integration.duckdb"
 
             # Create database with version info
             conn = duckdb.connect(str(db_path))
@@ -251,7 +248,7 @@ class TestSchemaVersionIntegration:
             """)
 
             manager = SchemaVersionManager(conn)
-            manager.apply_version('2.0.0', 'test')
+            manager.apply_version("2.0.0", "test")
             conn.close()
 
             # Test DatabaseManager integration
@@ -272,7 +269,7 @@ class TestSchemaVersionIntegration:
     def test_database_manager_error_handling(self):
         """Test DatabaseManager graceful error handling for version checking."""
         with tempfile.TemporaryDirectory() as temp_dir:
-            db_path = Path(temp_dir) / 'error_handling.duckdb'
+            db_path = Path(temp_dir) / "error_handling.duckdb"
 
             # Create database with schema but no version table
             conn = duckdb.connect(str(db_path))
@@ -303,7 +300,7 @@ class TestSchemaVersionIntegration:
     def test_schema_version_direct_operations(self):
         """Test schema version operations without read-only restrictions."""
         with tempfile.TemporaryDirectory() as temp_dir:
-            db_path = Path(temp_dir) / 'direct_ops.duckdb'
+            db_path = Path(temp_dir) / "direct_ops.duckdb"
 
             # Create database with schema for direct testing
             conn = duckdb.connect(str(db_path))
@@ -331,19 +328,19 @@ class TestSchemaVersionIntegration:
 
             # Should auto-detect v2.1.0
             detected_version = manager.detect_schema_version()
-            assert detected_version == '2.1.0'
+            assert detected_version == "2.1.0"
 
             # Apply detected version
-            manager.apply_version(detected_version, 'integration_test')
+            manager.apply_version(detected_version, "integration_test")
 
             # Verify version was applied
             current_version = manager.get_current_version()
-            assert current_version == '2.1.0'
+            assert current_version == "2.1.0"
 
             # Test compatibility
             is_compatible, version = manager.check_compatibility()
             assert is_compatible
-            assert version == '2.1.0'
+            assert version == "2.1.0"
 
             conn.close()
 
@@ -354,14 +351,14 @@ class TestSchemaVersionPerformance:
     def test_version_operations_performance(self):
         """Test performance of version operations with realistic data."""
         with tempfile.TemporaryDirectory() as temp_dir:
-            db_path = Path(temp_dir) / 'performance.duckdb'
+            db_path = Path(temp_dir) / "performance.duckdb"
             conn = duckdb.connect(str(db_path))
 
             manager = SchemaVersionManager(conn)
 
             # Time version application
             start_time = time.time()
-            manager.apply_version('2.2.0', 'perf_test')
+            manager.apply_version("2.2.0", "perf_test")
             apply_time = time.time() - start_time
 
             # Should be very fast (< 100ms)
@@ -372,7 +369,7 @@ class TestSchemaVersionPerformance:
             current_version = manager.get_current_version()
             get_time = time.time() - start_time
 
-            assert current_version == '2.2.0'
+            assert current_version == "2.2.0"
             assert get_time < 0.01  # Should be very fast
 
             # Time history retrieval
@@ -388,7 +385,7 @@ class TestSchemaVersionPerformance:
     def test_schema_detection_performance(self):
         """Test performance of schema detection with realistic database size."""
         with tempfile.TemporaryDirectory() as temp_dir:
-            db_path = Path(temp_dir) / 'large_schema.duckdb'
+            db_path = Path(temp_dir) / "large_schema.duckdb"
             conn = duckdb.connect(str(db_path))
 
             # Create realistic schema size
@@ -422,7 +419,7 @@ class TestSchemaVersionPerformance:
             detected_version = manager.detect_schema_version()
             detection_time = time.time() - start_time
 
-            assert detected_version == '2.1.0'
+            assert detected_version == "2.1.0"
             # Should be reasonably fast even with large data
             assert detection_time < 1.0
 

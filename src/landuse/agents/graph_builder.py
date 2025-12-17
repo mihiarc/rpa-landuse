@@ -29,7 +29,7 @@ class GraphBuilder:
         llm: BaseChatModel,
         tools: List[BaseTool],
         system_prompt: str,
-        console: Optional[Console] = None
+        console: Optional[Console] = None,
     ):
         """
         Initialize graph builder.
@@ -71,12 +71,7 @@ class GraphBuilder:
         workflow.add_conditional_edges(
             "agent",
             self._should_continue,
-            {
-                "tools": "tools",
-                "analyzer": "analyzer",
-                "human_review": "human_review",
-                "end": END
-            }
+            {"tools": "tools", "analyzer": "analyzer", "human_review": "human_review", "end": END},
         )
 
         # Add edges from tools back to agent
@@ -100,26 +95,17 @@ class GraphBuilder:
 
         # Add system prompt as first message if needed
         has_system = any(
-            isinstance(m, (HumanMessage, AIMessage)) and
-            self.system_prompt[:50] in str(m.content)
-            for m in messages[:1]
+            isinstance(m, (HumanMessage, AIMessage)) and self.system_prompt[:50] in str(m.content) for m in messages[:1]
         )
 
         if not has_system:
             messages = [HumanMessage(content=self.system_prompt)] + messages
 
         # Get LLM response with tools bound and retry logic
-        response = invoke_llm_with_retry(
-            self.llm.bind_tools(self.tools),
-            messages,
-            max_attempts=3
-        )
+        response = invoke_llm_with_retry(self.llm.bind_tools(self.tools), messages, max_attempts=3)
 
         # Update state with new message
-        return {
-            "messages": messages + [response],
-            "iteration_count": state.get("iteration_count", 0) + 1
-        }
+        return {"messages": messages + [response], "iteration_count": state.get("iteration_count", 0) + 1}
 
     def _analyzer_node(self, state: AgentState) -> Dict[str, Any]:
         """Analyzer node for providing insights on query results."""
@@ -146,9 +132,9 @@ Focus on:
                 self.llm,
                 [
                     {"role": "system", "content": "You are a land use science expert."},
-                    {"role": "user", "content": analysis_prompt}
+                    {"role": "user", "content": analysis_prompt},
                 ],
-                max_attempts=3
+                max_attempts=3,
             )
 
             return {"messages": messages + [analysis]}

@@ -37,8 +37,8 @@ class TestLanduseConfig:
 
     def test_default_config(self, mock_db_path):
         """Test default configuration values"""
-        with patch.dict(os.environ, {'OPENAI_API_KEY': 'sk-test123456789012345678901234567890123456789012345'}):
-            config = AppConfig(database={'path': str(mock_db_path)})
+        with patch.dict(os.environ, {"OPENAI_API_KEY": "sk-test123456789012345678901234567890123456789012345"}):
+            config = AppConfig(database={"path": str(mock_db_path)})
 
             assert config.database.path == str(mock_db_path)
             assert config.llm.model_name == "gpt-4o-mini"  # Default is gpt-4o-mini now
@@ -50,12 +50,12 @@ class TestLanduseConfig:
 
     def test_custom_config(self, mock_db_path):
         """Test custom configuration values"""
-        with patch.dict(os.environ, {'OPENAI_API_KEY': 'sk-test123456789012345678901234567890123456789012345'}):
+        with patch.dict(os.environ, {"OPENAI_API_KEY": "sk-test123456789012345678901234567890123456789012345"}):
             config = AppConfig(
-                database={'path': str(mock_db_path)},
-                llm={'model_name': 'gpt-4o', 'temperature': 0.5, 'max_tokens': 2000},
-                agent={'max_iterations': 5, 'enable_memory': False},
-                logging={'level': 'DEBUG'}
+                database={"path": str(mock_db_path)},
+                llm={"model_name": "gpt-4o", "temperature": 0.5, "max_tokens": 2000},
+                agent={"max_iterations": 5, "enable_memory": False},
+                logging={"level": "DEBUG"},
             )
 
             assert config.database.path == str(mock_db_path)
@@ -77,6 +77,7 @@ class TestLanduseAgent:
         yield db_path
         # Cleanup
         import shutil
+
         if os.path.exists(tmpdir):
             shutil.rmtree(tmpdir)
 
@@ -90,19 +91,21 @@ class TestLanduseAgent:
         conn.execute("CREATE TABLE dim_time (time_id INTEGER, year INTEGER)")
         conn.execute("CREATE TABLE dim_geography (geography_id INTEGER, county_name VARCHAR, state_code VARCHAR)")
         conn.execute("CREATE TABLE dim_landuse (landuse_id INTEGER, landuse_name VARCHAR)")
-        conn.execute("CREATE TABLE fact_landuse_transitions (scenario_id INTEGER, time_id INTEGER, geography_id INTEGER, from_landuse_id INTEGER, to_landuse_id INTEGER, acres DOUBLE)")
+        conn.execute(
+            "CREATE TABLE fact_landuse_transitions (scenario_id INTEGER, time_id INTEGER, geography_id INTEGER, from_landuse_id INTEGER, to_landuse_id INTEGER, acres DOUBLE)"
+        )
         conn.close()
 
-        with patch.dict(os.environ, {'OPENAI_API_KEY': 'sk-test123456789012345678901234567890123456789012345'}):
+        with patch.dict(os.environ, {"OPENAI_API_KEY": "sk-test123456789012345678901234567890123456789012345"}):
             return AppConfig(
-                database={'path': str(mock_db_path)},
-                llm={'model_name': 'gpt-4o-mini'},
-                agent={'max_iterations': 3, 'enable_memory': False},
-                logging={'level': 'WARNING'}
+                database={"path": str(mock_db_path)},
+                llm={"model_name": "gpt-4o-mini"},
+                agent={"max_iterations": 3, "enable_memory": False},
+                logging={"level": "WARNING"},
             )
 
-    @patch.dict(os.environ, {'OPENAI_API_KEY': 'test-key-123'})
-    @patch('landuse.agents.llm_manager.ChatOpenAI')
+    @patch.dict(os.environ, {"OPENAI_API_KEY": "test-key-123"})
+    @patch("landuse.agents.llm_manager.ChatOpenAI")
     def test_agent_initialization(self, mock_llm, test_config):
         """Test agent initialization"""
         # Mock LLM
@@ -118,14 +121,14 @@ class TestLanduseAgent:
 
         # Verify LLM was created with correct parameters
         mock_llm.assert_called_once_with(
-            openai_api_key='test-key-123',
+            openai_api_key="test-key-123",
             model=test_config.llm.model_name,
             temperature=test_config.llm.temperature,
-            max_tokens=test_config.llm.max_tokens
+            max_tokens=test_config.llm.max_tokens,
         )
 
-    @patch.dict(os.environ, {'OPENAI_API_KEY': 'test-key-456'})
-    @patch('landuse.agents.llm_manager.ChatOpenAI')
+    @patch.dict(os.environ, {"OPENAI_API_KEY": "test-key-456"})
+    @patch("landuse.agents.llm_manager.ChatOpenAI")
     def test_openai_initialization(self, mock_llm, test_config):
         """Test agent initialization with OpenAI"""
         # Mock LLM
@@ -134,9 +137,9 @@ class TestLanduseAgent:
 
         # Create config with GPT model
         config = AppConfig(
-            database={'path': test_config.database.path},
-            llm={'model_name': 'gpt-4o-mini'},
-            agent={'enable_memory': False}
+            database={"path": test_config.database.path},
+            llm={"model_name": "gpt-4o-mini"},
+            agent={"enable_memory": False},
         )
 
         # Initialize agent
@@ -144,10 +147,10 @@ class TestLanduseAgent:
 
         # Verify OpenAI LLM was created
         mock_llm.assert_called_once_with(
-            openai_api_key='test-key-456',
+            openai_api_key="test-key-456",
             model="gpt-4o-mini",
             temperature=config.llm.temperature,
-            max_tokens=config.llm.max_tokens
+            max_tokens=config.llm.max_tokens,
         )
 
     def test_missing_api_key(self, mock_db_path):
@@ -155,10 +158,10 @@ class TestLanduseAgent:
         # AppConfig requires OPENAI_API_KEY - should raise ConfigurationError when missing
         with patch.dict(os.environ, {}, clear=True):
             with pytest.raises(ConfigurationError):
-                AppConfig(database={'path': str(mock_db_path)})
+                AppConfig(database={"path": str(mock_db_path)})
 
-    @patch.dict(os.environ, {'OPENAI_API_KEY': 'test-key'})
-    @patch('landuse.agents.llm_manager.ChatOpenAI')
+    @patch.dict(os.environ, {"OPENAI_API_KEY": "test-key"})
+    @patch("landuse.agents.llm_manager.ChatOpenAI")
     def test_schema_info_generation(self, mock_llm, test_config):
         """Test schema information generation"""
         # STALE TEST: The schema property now returns a formatted string from database_manager.get_schema()
@@ -166,8 +169,8 @@ class TestLanduseAgent:
         # TODO: Rewrite to test actual schema format or use production database fixture
         pytest.skip("Stale test: schema format changed to formatted string from database_manager")
 
-    @patch.dict(os.environ, {'OPENAI_API_KEY': 'test-key'})
-    @patch('landuse.agents.llm_manager.ChatOpenAI')
+    @patch.dict(os.environ, {"OPENAI_API_KEY": "test-key"})
+    @patch("landuse.agents.llm_manager.ChatOpenAI")
     def test_tools_creation(self, mock_llm, test_config):
         """Test tools are created correctly"""
         # Mock dependencies
@@ -180,17 +183,13 @@ class TestLanduseAgent:
         assert len(agent.tools) >= 3
 
         tool_names = [tool.name for tool in agent.tools]
-        expected_tools = [
-            "execute_landuse_query",
-            "analyze_landuse_results",
-            "explore_landuse_schema"
-        ]
+        expected_tools = ["execute_landuse_query", "analyze_landuse_results", "explore_landuse_schema"]
 
         for expected_tool in expected_tools:
             assert expected_tool in tool_names
 
-    @patch.dict(os.environ, {'OPENAI_API_KEY': 'test-key'})
-    @patch('landuse.agents.llm_manager.ChatOpenAI')
+    @patch.dict(os.environ, {"OPENAI_API_KEY": "test-key"})
+    @patch("landuse.agents.llm_manager.ChatOpenAI")
     def test_query_processing(self, mock_llm, test_config):
         """Test query processing workflow"""
         # Mock LLM
@@ -201,15 +200,15 @@ class TestLanduseAgent:
         agent = LanduseAgent(test_config)
 
         # Mock the simple_query method since that's what's used by default
-        with patch.object(agent, 'simple_query', return_value="Test response about agricultural land loss"):
+        with patch.object(agent, "simple_query", return_value="Test response about agricultural land loss"):
             # Test query
             result = agent.query("How much agricultural land is being lost?")
 
             # Verify
             assert result == "Test response about agricultural land loss"
 
-    @patch.dict(os.environ, {'OPENAI_API_KEY': 'test-key'})
-    @patch('landuse.agents.llm_manager.ChatOpenAI')
+    @patch.dict(os.environ, {"OPENAI_API_KEY": "test-key"})
+    @patch("landuse.agents.llm_manager.ChatOpenAI")
     def test_query_with_thread_id(self, mock_llm, test_config):
         """Test query processing with thread ID for memory"""
         # STALE TEST: Agent now uses simple_query by default, not graph.invoke
@@ -218,8 +217,8 @@ class TestLanduseAgent:
         # TODO: Rewrite to test thread_id support with current simple_query flow
         pytest.skip("Stale test: agent query method now uses simple_query, not graph.invoke")
 
-    @patch.dict(os.environ, {'OPENAI_API_KEY': 'test-key'})
-    @patch('landuse.agents.llm_manager.ChatOpenAI')
+    @patch.dict(os.environ, {"OPENAI_API_KEY": "test-key"})
+    @patch("landuse.agents.llm_manager.ChatOpenAI")
     def test_error_handling(self, mock_llm, test_config):
         """Test error handling in query processing"""
         # Mock LLM
@@ -229,7 +228,7 @@ class TestLanduseAgent:
         agent = LanduseAgent(test_config)
 
         # Mock simple_query to raise exception
-        with patch.object(agent, 'simple_query', return_value="Error processing query: Test error"):
+        with patch.object(agent, "simple_query", return_value="Error processing query: Test error"):
             # Test query
             result = agent.query("Test query")
 
@@ -237,8 +236,8 @@ class TestLanduseAgent:
             assert "Error processing query" in result
             assert "Test error" in result
 
-    @patch.dict(os.environ, {'OPENAI_API_KEY': 'test-key'})
-    @patch('landuse.agents.llm_manager.ChatOpenAI')
+    @patch.dict(os.environ, {"OPENAI_API_KEY": "test-key"})
+    @patch("landuse.agents.llm_manager.ChatOpenAI")
     def test_stream_query(self, mock_llm, test_config):
         """Test streaming query functionality"""
         # STALE TEST: Agent no longer has _build_graph method exposed publicly
@@ -256,11 +255,9 @@ class TestAgentState:
         # We can't instantiate TypedDict directly but can verify the structure
 
         # Verify the class exists and has the expected structure
-        assert hasattr(AgentState, '__annotations__')
+        assert hasattr(AgentState, "__annotations__")
 
-        expected_fields = {
-            'messages', 'context', 'iteration_count', 'max_iterations'
-        }
+        expected_fields = {"messages", "context", "iteration_count", "max_iterations"}
 
         actual_fields = set(AgentState.__annotations__.keys())
         assert expected_fields == actual_fields

@@ -26,11 +26,11 @@ def check_system_status():
         "database": {"status": False, "message": "", "path": ""},
         "api_keys": {"status": False, "message": "", "details": {}},
         "dependencies": {"status": False, "message": "", "details": {}},
-        "agent": {"status": False, "message": ""}
+        "agent": {"status": False, "message": ""},
     }
 
     # Check database
-    db_path = Path(os.getenv('LANDUSE_DB_PATH', 'data/processed/landuse_analytics.duckdb'))
+    db_path = Path(os.getenv("LANDUSE_DB_PATH", "data/processed/landuse_analytics.duckdb"))
     if db_path.exists():
         status["database"]["status"] = True
         status["database"]["message"] = "Database found and accessible"
@@ -48,7 +48,7 @@ def check_system_status():
     if openai_key:
         status["api_keys"]["details"]["openai"] = {
             "configured": True,
-            "preview": f"{openai_key[:8]}...{openai_key[-4:]}" if len(openai_key) > 12 else "****"
+            "preview": f"{openai_key[:8]}...{openai_key[-4:]}" if len(openai_key) > 12 else "****",
         }
         status["api_keys"]["status"] = True
         status["api_keys"]["message"] = "OpenAI API key configured"
@@ -79,6 +79,7 @@ def check_system_status():
     if status["database"]["status"] and status["api_keys"]["status"]:
         try:
             from landuse.agents import LanduseAgent
+
             # Don't actually initialize to avoid overhead, just check imports
             status["agent"]["status"] = True
             status["agent"]["message"] = "Agent can be initialized"
@@ -89,6 +90,7 @@ def check_system_status():
 
     return status
 
+
 def show_system_status():
     """Display system status dashboard"""
     st.markdown("### 🔧 System Status")
@@ -96,12 +98,14 @@ def show_system_status():
     status = check_system_status()
 
     # Overall status
-    all_good = all([
-        status["database"]["status"],
-        status["api_keys"]["status"],
-        status["dependencies"]["status"],
-        status["agent"]["status"]
-    ])
+    all_good = all(
+        [
+            status["database"]["status"],
+            status["api_keys"]["status"],
+            status["dependencies"]["status"],
+            status["agent"]["status"],
+        ]
+    )
 
     if all_good:
         st.success("✅ **System Ready** - All components are properly configured!")
@@ -179,10 +183,11 @@ def show_system_status():
             st.success(f"✅ {status['agent']['message']}")
 
             # Show model configuration
-            model_name = os.getenv('LANDUSE_MODEL', 'gpt-4o-mini')
+            model_name = os.getenv("LANDUSE_MODEL", "gpt-4o-mini")
             st.info(f"🧠 **Model:** {model_name}")
         else:
             st.error(f"❌ {status['agent']['message']}")
+
 
 def show_configuration():
     """Display configuration options"""
@@ -193,29 +198,26 @@ def show_configuration():
 
     env_vars = {
         "LANDUSE_DB_PATH": {
-            "current": os.getenv('LANDUSE_DB_PATH', 'data/processed/landuse_analytics.duckdb'),
-            "description": "Path to the DuckDB database file"
+            "current": os.getenv("LANDUSE_DB_PATH", "data/processed/landuse_analytics.duckdb"),
+            "description": "Path to the DuckDB database file",
         },
         "LANDUSE_MODEL": {
-            "current": os.getenv('LANDUSE_MODEL', 'gpt-4o-mini'),
-            "description": "AI model to use (gpt-4o-mini, gpt-4o, gpt-3.5-turbo)"
+            "current": os.getenv("LANDUSE_MODEL", "gpt-4o-mini"),
+            "description": "AI model to use (gpt-4o-mini, gpt-4o, gpt-3.5-turbo)",
         },
         "TEMPERATURE": {
-            "current": os.getenv('TEMPERATURE', '0.1'),
-            "description": "Model temperature (0.0-1.0, lower = more deterministic)"
+            "current": os.getenv("TEMPERATURE", "0.1"),
+            "description": "Model temperature (0.0-1.0, lower = more deterministic)",
         },
-        "MAX_TOKENS": {
-            "current": os.getenv('MAX_TOKENS', '4000'),
-            "description": "Maximum tokens for model responses"
-        },
+        "MAX_TOKENS": {"current": os.getenv("MAX_TOKENS", "4000"), "description": "Maximum tokens for model responses"},
         "LANDUSE_MAX_ITERATIONS": {
-            "current": os.getenv('LANDUSE_MAX_ITERATIONS', '5'),
-            "description": "Maximum agent iterations per query"
+            "current": os.getenv("LANDUSE_MAX_ITERATIONS", "5"),
+            "description": "Maximum agent iterations per query",
         },
         "LANDUSE_MAX_EXECUTION_TIME": {
-            "current": os.getenv('LANDUSE_MAX_EXECUTION_TIME', '120'),
-            "description": "Maximum query execution time (seconds)"
-        }
+            "current": os.getenv("LANDUSE_MAX_EXECUTION_TIME", "120"),
+            "description": "Maximum query execution time (seconds)",
+        },
     }
 
     for var_name, var_info in env_vars.items():
@@ -224,12 +226,13 @@ def show_configuration():
             st.code(var_name)
         with col2:
             st.text(f"Current: {var_info['current']}")
-            st.caption(var_info['description'])
+            st.caption(var_info["description"])
 
     # Configuration file example
     st.markdown("#### 📝 Configuration File Example")
     with st.expander("Example config/.env file"):
-        st.code("""
+        st.code(
+            """
 # API Keys (required)
 OPENAI_API_KEY=your_openai_api_key_here
 
@@ -250,7 +253,10 @@ LANDUSE_DEFAULT_DISPLAY_LIMIT=50
 # Rate Limiting
 LANDUSE_RATE_LIMIT_CALLS=60
 LANDUSE_RATE_LIMIT_WINDOW=60
-""", language="bash")
+""",
+            language="bash",
+        )
+
 
 def show_help_documentation():
     """Display help and documentation"""
@@ -290,26 +296,26 @@ def show_help_documentation():
     features = {
         "💬 Natural Language Chat": {
             "description": "Ask questions in plain English about land use data",
-            "details": "Our AI assistant understands natural language queries and converts them to data analysis. Perfect for quick insights without needing SQL knowledge."
+            "details": "Our AI assistant understands natural language queries and converts them to data analysis. Perfect for quick insights without needing SQL knowledge.",
         },
         "📊 Analytics Dashboard": {
             "description": "Interactive visualizations and pre-built insights",
-            "details": "Explore 6 different visualization types including agricultural impact analysis, forest transitions, climate comparisons, and geographic patterns."
+            "details": "Explore 6 different visualization types including agricultural impact analysis, forest transitions, climate comparisons, and geographic patterns.",
         },
         "🔄 Data Extraction": {
             "description": "Export land use data in multiple formats",
-            "details": "Access predefined extracts, create custom filters, or bulk export entire datasets. Supports CSV, Excel, and Parquet formats."
+            "details": "Access predefined extracts, create custom filters, or bulk export entire datasets. Supports CSV, Excel, and Parquet formats.",
         },
         "🔍 Data Explorer": {
             "description": "Advanced SQL queries for technical users",
-            "details": "Direct database access with schema browser, example queries, and export capabilities for custom analysis."
-        }
+            "details": "Direct database access with schema browser, example queries, and export capabilities for custom analysis.",
+        },
     }
 
     for feature, info in features.items():
         with st.expander(f"{feature}"):
             st.markdown(f"**{info['description']}**")
-            st.markdown(info['details'])
+            st.markdown(info["details"])
             st.markdown("")
 
     # Example queries
@@ -357,6 +363,7 @@ def show_help_documentation():
         Fort Collins, CO: Forest Service Research Data Archive. https://doi.org/10.2737/RDS-2023-0026
         """)
 
+
 def show_troubleshooting():
     """Display troubleshooting guide"""
     st.markdown("### 🔧 Troubleshooting")
@@ -368,41 +375,42 @@ def show_troubleshooting():
             "solutions": [
                 "Check that the database file exists at the configured path",
                 "Run the data conversion script: `uv run python scripts/converters/convert_to_duckdb.py`",
-                "Set LANDUSE_DB_PATH environment variable to correct location"
-            ]
+                "Set LANDUSE_DB_PATH environment variable to correct location",
+            ],
         },
         "API key errors": {
             "symptoms": "Authentication errors or missing API key messages",
             "solutions": [
                 "Create config/.env file with your API keys",
                 "Ensure API keys are valid and have sufficient credits",
-                "Check that environment variables are loaded correctly"
-            ]
+                "Check that environment variables are loaded correctly",
+            ],
         },
         "Query timeouts": {
             "symptoms": "Queries taking too long or timing out",
             "solutions": [
                 "Increase LANDUSE_MAX_EXECUTION_TIME environment variable",
                 "Add more specific WHERE clauses to limit data",
-                "Use LIMIT clauses in custom SQL queries"
-            ]
+                "Use LIMIT clauses in custom SQL queries",
+            ],
         },
         "Import errors": {
             "symptoms": "Module not found or import errors",
             "solutions": [
                 "Run `uv sync` to install all dependencies",
                 "Check that virtual environment is activated",
-                "Verify Python path includes src directory"
-            ]
-        }
+                "Verify Python path includes src directory",
+            ],
+        },
     }
 
     for issue, details in issues.items():
         with st.expander(f"❓ {issue}"):
             st.markdown(f"**Symptoms:** {details['symptoms']}")
             st.markdown("**Solutions:**")
-            for solution in details['solutions']:
+            for solution in details["solutions"]:
                 st.markdown(f"- {solution}")
+
 
 def show_feedback_form():
     """Display feedback form for users to submit questions or issues"""
@@ -411,34 +419,24 @@ def show_feedback_form():
 
     with st.form("feedback_form", clear_on_submit=True):
         # Feedback type
-        feedback_type = st.selectbox(
-            "Feedback Type",
-            ["Question", "Bug Report", "Feature Request", "General Feedback"]
-        )
+        feedback_type = st.selectbox("Feedback Type", ["Question", "Bug Report", "Feature Request", "General Feedback"])
 
         # User contact (optional)
         user_email = st.text_input(
             "Your Email (optional)",
             placeholder="your.email@example.com",
             help="Provide your email if you'd like a response",
-            max_chars=100
+            max_chars=100,
         )
 
         # Subject - REQUIRED
         subject = st.text_input(
-            "Subject *",
-            placeholder="Brief description of your feedback",
-            help="Required field",
-            max_chars=100
+            "Subject *", placeholder="Brief description of your feedback", help="Required field", max_chars=100
         )
 
         # Message - REQUIRED
         message = st.text_area(
-            "Message *",
-            placeholder="Please provide details...",
-            help="Required field",
-            height=150,
-            max_chars=2000
+            "Message *", placeholder="Please provide details...", help="Required field", height=150, max_chars=2000
         )
 
         # Submit button
@@ -475,7 +473,7 @@ def show_feedback_form():
                     issue_title = f"[{feedback_type}] {subject_clean}"
                     issue_body = f"""**Feedback Type:** {feedback_type}
 
-**Contact:** {user_email_clean if user_email_clean else 'Not provided'}
+**Contact:** {user_email_clean if user_email_clean else "Not provided"}
 
 **Description:**
 {message_clean}
@@ -485,15 +483,14 @@ def show_feedback_form():
 """
 
                     # Encode parameters for URL with error handling
-                    params = urllib.parse.urlencode({
-                        'title': issue_title,
-                        'body': issue_body
-                    })
+                    params = urllib.parse.urlencode({"title": issue_title, "body": issue_body})
                     full_url = f"{github_issue_url}?{params}"
 
                     # Validate URL length (GitHub has limits)
                     if len(full_url) > 8192:
-                        st.error("Your feedback is too long for direct submission. Please shorten your message or submit directly on GitHub.")
+                        st.error(
+                            "Your feedback is too long for direct submission. Please shorten your message or submit directly on GitHub."
+                        )
                         return
 
                     st.success("✅ Thank you for your feedback!")
@@ -508,7 +505,10 @@ def show_feedback_form():
 
                 except Exception as e:
                     st.error(f"An error occurred while preparing your feedback: {str(e)}")
-                    st.info("Please try submitting your feedback directly on [GitHub Issues](https://github.com/mihiarc/rpa-landuse/issues/new).")
+                    st.info(
+                        "Please try submitting your feedback directly on [GitHub Issues](https://github.com/mihiarc/rpa-landuse/issues/new)."
+                    )
+
 
 def main():
     """Main settings interface"""
@@ -542,6 +542,7 @@ def main():
     - Check the troubleshooting guide for common problems
     - Review system status for configuration details
     """)
+
 
 if __name__ == "__main__":
     main()

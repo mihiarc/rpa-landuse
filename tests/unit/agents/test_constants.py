@@ -21,10 +21,10 @@ from landuse.agents.constants import (
 def test_state_names_mapping():
     """Test state names mapping has expected values"""
     # Test some key states
-    assert STATE_NAMES['06'] == 'California'
-    assert STATE_NAMES['48'] == 'Texas'
-    assert STATE_NAMES['36'] == 'New York'
-    assert STATE_NAMES['12'] == 'Florida'
+    assert STATE_NAMES["06"] == "California"
+    assert STATE_NAMES["48"] == "Texas"
+    assert STATE_NAMES["36"] == "New York"
+    assert STATE_NAMES["12"] == "Florida"
 
     # Verify all state codes are 2 digits
     for code in STATE_NAMES:

@@ -18,7 +18,7 @@ import pytest
 
 from tests.unit.streamlit_tests.mock_streamlit import mock_st
 
-sys.modules['streamlit'] = mock_st
+sys.modules["streamlit"] = mock_st
 import streamlit as st  # noqa: E402
 
 
@@ -36,89 +36,97 @@ class TestAnalyticsPage:
     def sample_agricultural_data(self):
         """Sample agricultural analysis data matching analytics.py API"""
         # df_loss - what agriculture becomes (grouped by to_landuse)
-        df_loss = pd.DataFrame({
-            'to_landuse': ['Urban', 'Forest', 'Rangeland'],
-            'rcp_scenario': ['rcp45', 'rcp85', 'rcp45'],
-            'total_acres': [1000000, 800000, 600000],
-            'avg_acres_per_county': [500, 400, 300],
-            'states_affected': [50, 48, 45]
-        })
+        df_loss = pd.DataFrame(
+            {
+                "to_landuse": ["Urban", "Forest", "Rangeland"],
+                "rcp_scenario": ["rcp45", "rcp85", "rcp45"],
+                "total_acres": [1000000, 800000, 600000],
+                "avg_acres_per_county": [500, 400, 300],
+                "states_affected": [50, 48, 45],
+            }
+        )
         # df_gain - what becomes agriculture (grouped by from_landuse)
-        df_gain = pd.DataFrame({
-            'from_landuse': ['Forest', 'Rangeland', 'Pasture'],
-            'rcp_scenario': ['rcp45', 'rcp85', 'rcp45'],
-            'total_acres': [500000, 400000, 300000],
-            'avg_acres_per_county': [250, 200, 150],
-            'states_affected': [40, 35, 30]
-        })
+        df_gain = pd.DataFrame(
+            {
+                "from_landuse": ["Forest", "Rangeland", "Pasture"],
+                "rcp_scenario": ["rcp45", "rcp85", "rcp45"],
+                "total_acres": [500000, 400000, 300000],
+                "avg_acres_per_county": [250, 200, 150],
+                "states_affected": [40, 35, 30],
+            }
+        )
         # df_states - state-level summary
-        df_states = pd.DataFrame({
-            'state_code': ['06', '48', '36'],
-            'state_name': ['California', 'Texas', 'New York'],
-            'baseline_acres': [10000000, 15000000, 5000000],
-            'ag_loss': [500000, 400000, 300000],
-            'ag_gain': [200000, 150000, 100000],
-            'net_change': [-300000, -250000, -200000]
-        })
+        df_states = pd.DataFrame(
+            {
+                "state_code": ["06", "48", "36"],
+                "state_name": ["California", "Texas", "New York"],
+                "baseline_acres": [10000000, 15000000, 5000000],
+                "ag_loss": [500000, 400000, 300000],
+                "ag_gain": [200000, 150000, 100000],
+                "net_change": [-300000, -250000, -200000],
+            }
+        )
         return df_loss, df_gain, df_states
 
     @pytest.fixture
     def sample_urbanization_data(self):
         """Sample urbanization data"""
-        return pd.DataFrame({
-            'state_code': ['06', '48', '36'],
-            'from_landuse': ['Crop', 'Forest', 'Pasture'],
-            'total_acres_urbanized': [500000, 300000, 200000]
-        })
+        return pd.DataFrame(
+            {
+                "state_code": ["06", "48", "36"],
+                "from_landuse": ["Crop", "Forest", "Pasture"],
+                "total_acres_urbanized": [500000, 300000, 200000],
+            }
+        )
 
     @pytest.fixture
     def sample_forest_data(self):
         """Sample forest analysis data"""
-        df_loss = pd.DataFrame({
-            'to_landuse': ['Urban', 'Crop', 'Pasture'],
-            'total_acres': [1000000, 800000, 600000]
-        })
+        df_loss = pd.DataFrame({"to_landuse": ["Urban", "Crop", "Pasture"], "total_acres": [1000000, 800000, 600000]})
 
-        df_gain = pd.DataFrame({
-            'from_landuse': ['Crop', 'Pasture', 'Rangeland'],
-            'total_acres': [400000, 300000, 200000]
-        })
+        df_gain = pd.DataFrame(
+            {"from_landuse": ["Crop", "Pasture", "Rangeland"], "total_acres": [400000, 300000, 200000]}
+        )
 
-        df_states = pd.DataFrame({
-            'state_code': ['06', '48', '36'],
-            'forest_loss': [500000, 400000, 300000],
-            'forest_gain': [200000, 150000, 100000],
-            'net_change': [-300000, -250000, -200000]
-        })
+        df_states = pd.DataFrame(
+            {
+                "state_code": ["06", "48", "36"],
+                "forest_loss": [500000, 400000, 300000],
+                "forest_gain": [200000, 150000, 100000],
+                "net_change": [-300000, -250000, -200000],
+            }
+        )
 
         return df_loss, df_gain, df_states
 
     @pytest.fixture
     def sample_sankey_data(self):
         """Sample Sankey diagram data"""
-        return pd.DataFrame({
-            'source': ['Forest', 'Crop', 'Pasture'],
-            'target': ['Urban', 'Urban', 'Urban'],
-            'value': [1000000, 800000, 600000],
-            'scenario_count': [20, 20, 20]
-        })
+        return pd.DataFrame(
+            {
+                "source": ["Forest", "Crop", "Pasture"],
+                "target": ["Urban", "Urban", "Urban"],
+                "value": [1000000, 800000, 600000],
+                "scenario_count": [20, 20, 20],
+            }
+        )
 
     def test_page_functions_exist(self):
         """Test that key page functions exist and are callable"""
         from views import analytics
 
         # Test that key functions exist (current API)
-        assert hasattr(analytics, 'get_database_connection')
-        assert hasattr(analytics, 'load_agricultural_analysis_data')
-        assert hasattr(analytics, 'load_urbanization_data')
-        assert hasattr(analytics, 'load_forest_analysis_data')
-        assert hasattr(analytics, 'load_climate_comparison_data')
-        assert hasattr(analytics, 'create_urbanization_chart')
-        assert hasattr(analytics, 'create_agricultural_flow_chart')
-        assert hasattr(analytics, 'create_forest_flow_chart')
-        assert hasattr(analytics, 'create_choropleth_map')
-        assert hasattr(analytics, 'create_sankey_diagram')
-        assert hasattr(analytics, 'main')
+        assert hasattr(analytics, "get_database_connection")
+        assert hasattr(analytics, "load_agricultural_analysis_data")
+        assert hasattr(analytics, "load_urbanization_data")
+        assert hasattr(analytics, "load_forest_analysis_data")
+        assert hasattr(analytics, "load_climate_comparison_data")
+        assert hasattr(analytics, "create_urbanization_chart")
+        assert hasattr(analytics, "create_agricultural_flow_chart")
+        assert hasattr(analytics, "create_forest_flow_chart")
+        assert hasattr(analytics, "create_choropleth_map")
+        assert hasattr(analytics, "create_sankey_diagram")
+        assert hasattr(analytics, "main")
 
         # Test that they are callable
         assert callable(analytics.get_database_connection)
@@ -126,7 +134,7 @@ class TestAnalyticsPage:
         assert callable(analytics.create_urbanization_chart)
         assert callable(analytics.main)
 
-    @patch('views.analytics.st.connection')
+    @patch("views.analytics.st.connection")
     def test_get_database_connection(self, mock_st_connection):
         """Test database connection caching"""
         mock_conn = Mock()
@@ -142,10 +150,10 @@ class TestAnalyticsPage:
         # Verify connection was created with correct parameters
         assert mock_st_connection.call_count >= 1
         call_kwargs = mock_st_connection.call_args[1]
-        assert call_kwargs['name'] == 'landuse_db_analytics'
-        assert call_kwargs['read_only'] is True
+        assert call_kwargs["name"] == "landuse_db_analytics"
+        assert call_kwargs["read_only"] is True
 
-    @patch('views.analytics.get_database_connection')
+    @patch("views.analytics.get_database_connection")
     def test_load_agricultural_analysis_data(self, mock_get_conn, mock_connection, sample_agricultural_data):
         """Test loading agricultural analysis data"""
         mock_get_conn.return_value = (mock_connection, None)
@@ -179,7 +187,7 @@ class TestAnalyticsPage:
 
         assert fig is not None
         # Check that state codes are in the figure data
-        assert '06' in str(fig.data[0].y) or '48' in str(fig.data[0].y)
+        assert "06" in str(fig.data[0].y) or "48" in str(fig.data[0].y)
 
     def test_create_agricultural_flow_chart(self, sample_agricultural_data):
         """Test agricultural flow chart creation"""
@@ -201,7 +209,7 @@ class TestAnalyticsPage:
         # Should return None when given None inputs
         assert fig is None
 
-    @patch('views.analytics.get_database_connection')
+    @patch("views.analytics.get_database_connection")
     def test_load_forest_analysis_data(self, mock_get_conn, mock_connection, sample_forest_data):
         """Test loading forest analysis data"""
         mock_get_conn.return_value = (mock_connection, None)
@@ -217,8 +225,8 @@ class TestAnalyticsPage:
         assert len(result_loss) == 3
         assert len(result_gain) == 3
         assert len(result_states) == 3
-        assert 'state_abbr' in result_states.columns
-        assert 'state_name' in result_states.columns
+        assert "state_abbr" in result_states.columns
+        assert "state_name" in result_states.columns
 
     def test_create_sankey_diagram(self, sample_sankey_data):
         """Test Sankey diagram creation"""
@@ -229,7 +237,7 @@ class TestAnalyticsPage:
         assert fig is not None
         assert isinstance(fig, go.Figure)
         assert len(fig.data) > 0
-        assert fig.data[0].type == 'sankey'
+        assert fig.data[0].type == "sankey"
 
     def test_create_sankey_diagram_has_correct_structure(self, sample_sankey_data):
         """Test Sankey diagram has correct node structure"""
@@ -239,33 +247,35 @@ class TestAnalyticsPage:
 
         # Sankey should have node and link data
         sankey_data = fig.data[0]
-        assert hasattr(sankey_data, 'node')
-        assert hasattr(sankey_data, 'link')
+        assert hasattr(sankey_data, "node")
+        assert hasattr(sankey_data, "link")
 
     def test_create_choropleth_map_with_valid_data(self):
         """Test choropleth map creation with valid data"""
         from views.analytics import create_choropleth_map
 
-        df = pd.DataFrame({
-            'state_code': ['06', '48', '36'],
-            'state_abbr': ['CA', 'TX', 'NY'],
-            'state_name': ['California', 'Texas', 'New York'],
-            'net_change': [-300000, -250000, -200000],
-            'baseline': [1000000, 900000, 800000],
-            'forest_loss': [500000, 400000, 300000],
-            'forest_gain': [200000, 150000, 100000],
-            'percent_change': [-30.0, -27.8, -25.0],
-            'future': [700000, 650000, 600000],
-            'dominant_transition': ['To Urban', 'To Crop', 'To Pasture']
-        })
+        df = pd.DataFrame(
+            {
+                "state_code": ["06", "48", "36"],
+                "state_abbr": ["CA", "TX", "NY"],
+                "state_name": ["California", "Texas", "New York"],
+                "net_change": [-300000, -250000, -200000],
+                "baseline": [1000000, 900000, 800000],
+                "forest_loss": [500000, 400000, 300000],
+                "forest_gain": [200000, 150000, 100000],
+                "percent_change": [-30.0, -27.8, -25.0],
+                "future": [700000, 650000, 600000],
+                "dominant_transition": ["To Urban", "To Crop", "To Pasture"],
+            }
+        )
 
         fig = create_choropleth_map(df)
 
         assert fig is not None
         assert isinstance(fig, go.Figure)
 
-    @patch('views.analytics.load_agricultural_analysis_data')
-    @patch('views.analytics.create_agricultural_flow_chart')
+    @patch("views.analytics.load_agricultural_analysis_data")
+    @patch("views.analytics.create_agricultural_flow_chart")
     def test_agricultural_charts_integration(self, mock_create_chart, mock_load_data, sample_agricultural_data):
         """Test agricultural data loading and chart creation integration"""
         df_loss, df_gain, df_states = sample_agricultural_data
@@ -280,19 +290,16 @@ class TestAnalyticsPage:
         assert error is None
         assert chart == mock_chart
 
-    @patch('views.analytics.load_forest_analysis_data')
+    @patch("views.analytics.load_forest_analysis_data")
     def test_forest_analysis_data_integration(self, mock_load):
         """Test forest analysis data loading integration"""
         mock_load.return_value = (
-            pd.DataFrame({'to_landuse': ['Urban'], 'total_acres': [1000000]}),
-            pd.DataFrame({'from_landuse': ['Crop'], 'total_acres': [500000]}),
-            pd.DataFrame({
-                'state_code': ['06'],
-                'net_change': [-500000],
-                'state_abbr': ['CA'],
-                'state_name': ['California']
-            }),
-            None
+            pd.DataFrame({"to_landuse": ["Urban"], "total_acres": [1000000]}),
+            pd.DataFrame({"from_landuse": ["Crop"], "total_acres": [500000]}),
+            pd.DataFrame(
+                {"state_code": ["06"], "net_change": [-500000], "state_abbr": ["CA"], "state_name": ["California"]}
+            ),
+            None,
         )
 
         loss, gain, states, error = mock_load()
@@ -302,7 +309,7 @@ class TestAnalyticsPage:
         assert len(gain) == 1
         assert len(states) == 1
 
-    @patch('views.analytics.get_database_connection')
+    @patch("views.analytics.get_database_connection")
     def test_load_sankey_data_with_filters(self, mock_get_conn, mock_connection, sample_sankey_data):
         """Test load_sankey_data with filter parameters"""
         mock_get_conn.return_value = (mock_connection, None)
@@ -315,7 +322,7 @@ class TestAnalyticsPage:
 
         # Should execute without error (may return data or validation error)
 
-    @patch('views.analytics.get_database_connection')
+    @patch("views.analytics.get_database_connection")
     def test_load_sankey_data_validates_landuse(self, mock_get_conn, mock_connection):
         """Test load_sankey_data validates land use types"""
         mock_get_conn.return_value = (mock_connection, None)
@@ -333,14 +340,12 @@ class TestAnalyticsPage:
         """Test load_urbanization_data returns expected structure"""
         from views import analytics
 
-        with patch.object(analytics, 'get_database_connection') as mock_get_conn:
+        with patch.object(analytics, "get_database_connection") as mock_get_conn:
             mock_conn = Mock()
             mock_get_conn.return_value = (mock_conn, None)
-            mock_conn.query.return_value = pd.DataFrame({
-                'state_code': ['06'],
-                'from_landuse': ['Crop'],
-                'total_acres_urbanized': [500000]
-            })
+            mock_conn.query.return_value = pd.DataFrame(
+                {"state_code": ["06"], "from_landuse": ["Crop"], "total_acres_urbanized": [500000]}
+            )
 
             df, error = analytics.load_urbanization_data()
 
@@ -351,36 +356,34 @@ class TestAnalyticsPage:
         """Test that main function exists and is callable"""
         from views import analytics
 
-        assert hasattr(analytics, 'main')
+        assert hasattr(analytics, "main")
         assert callable(analytics.main)
 
     def test_show_enhanced_visualizations_exists(self):
         """Test that show_enhanced_visualizations function exists"""
         from views import analytics
 
-        assert hasattr(analytics, 'show_enhanced_visualizations')
+        assert hasattr(analytics, "show_enhanced_visualizations")
         assert callable(analytics.show_enhanced_visualizations)
 
     def test_create_scenario_spider_chart_exists(self):
         """Test that create_scenario_spider_chart function exists"""
         from views import analytics
 
-        assert hasattr(analytics, 'create_scenario_spider_chart')
+        assert hasattr(analytics, "create_scenario_spider_chart")
         assert callable(analytics.create_scenario_spider_chart)
 
-    @patch('views.analytics.get_database_connection')
+    @patch("views.analytics.get_database_connection")
     def test_create_scenario_spider_chart_validates_scenarios(self, mock_get_conn, mock_connection):
         """Test create_scenario_spider_chart validates scenario names"""
         mock_get_conn.return_value = (mock_connection, None)
-        mock_connection.query.return_value = pd.DataFrame({
-            'scenario_name': ['test'],
-            'to_landuse': ['Urban'],
-            'total_acres_gained': [100]
-        })
+        mock_connection.query.return_value = pd.DataFrame(
+            {"scenario_name": ["test"], "to_landuse": ["Urban"], "total_acres_gained": [100]}
+        )
 
         from views.analytics import create_scenario_spider_chart
 
         # Test with valid scenarios - should not error
-        result, error = create_scenario_spider_chart(['CNRM-CM5_rcp45_ssp1'])
+        result, error = create_scenario_spider_chart(["CNRM-CM5_rcp45_ssp1"])
 
         # Function should handle both success and validation errors

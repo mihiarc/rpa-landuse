@@ -54,21 +54,19 @@ class LanduseAgent:
     def __init__(self, config: Optional[AppConfig] = None):
         """Initialize the landuse agent with configuration using dependency injection."""
         self.config = config or AppConfig()
-        self.debug = self.config.logging.level == 'DEBUG'
+        self.debug = self.config.logging.level == "DEBUG"
         self.console = Console()
 
         # Initialize rate limiter using security config
         self.rate_limiter = RateLimiter(
-            max_calls=self.config.security.rate_limit_calls,
-            time_window=self.config.security.rate_limit_window
+            max_calls=self.config.security.rate_limit_calls, time_window=self.config.security.rate_limit_window
         )
 
         # Initialize component managers
         self.llm_manager = LLMManager(self.config, self.console)
         self.database_manager = DatabaseManager(self.config, self.console)
         self.conversation_manager = ConversationManager(
-            max_history_length=self.config.agent.conversation_history_limit,
-            console=self.console
+            max_history_length=self.config.agent.conversation_history_limit, console=self.console
         )
 
         # Create core components
@@ -86,9 +84,7 @@ class LanduseAgent:
         if PromptManager is not None:
             try:
                 self.prompt_manager = PromptManager()
-                self.system_prompt = self.prompt_manager.get_prompt_with_schema(
-                    schema_info=self.schema
-                )
+                self.system_prompt = self.prompt_manager.get_prompt_with_schema(schema_info=self.schema)
                 # Log which version is being used
                 self.console.print(f"[green]✓ Using prompt version: {self.prompt_manager.active_version}[/green]")
             except Exception as e:
@@ -96,29 +92,22 @@ class LanduseAgent:
                 self.console.print(f"[yellow]⚠ PromptManager not available, using legacy prompts: {e}[/yellow]")
                 self.system_prompt = get_system_prompt(
                     include_maps=self.config.features.enable_map_generation,
-                    analysis_style='detailed',
+                    analysis_style="detailed",
                     domain_focus=None,
-                    schema_info=self.schema
+                    schema_info=self.schema,
                 )
         else:
             # Legacy prompt system
             self.system_prompt = get_system_prompt(
                 include_maps=self.config.features.enable_map_generation,
-                analysis_style='detailed',
+                analysis_style="detailed",
                 domain_focus=None,
-                schema_info=self.schema
+                schema_info=self.schema,
             )
 
         # Initialize graph builder
-        self.graph_builder = GraphBuilder(
-            self.config,
-            self.llm,
-            self.tools,
-            self.system_prompt,
-            self.console
-        )
+        self.graph_builder = GraphBuilder(self.config, self.llm, self.tools, self.system_prompt, self.console)
         self.graph = None
-
 
     def _create_tools(self) -> list[BaseTool]:
         """Create tools for the agent."""
@@ -126,9 +115,8 @@ class LanduseAgent:
             create_execute_query_tool(self.config, self.db_connection, self.schema),
             create_analysis_tool(),
             create_schema_tool(self.schema),
-            create_state_lookup_tool()
+            create_state_lookup_tool(),
         ]
-
 
         return tools
 
@@ -151,8 +139,7 @@ class LanduseAgent:
         allowed, error_msg = self.rate_limiter.check_rate_limit(identifier)
         if not allowed:
             raise RateLimitError(
-                message=f"Rate limit exceeded: {error_msg}",
-                retry_after=self.config.security.rate_limit_window
+                message=f"Rate limit exceeded: {error_msg}", retry_after=self.config.security.rate_limit_window
             )
 
     def simple_query(self, question: str) -> str:
@@ -173,17 +160,13 @@ class LanduseAgent:
             messages.append(HumanMessage(content=question))
 
             # Get initial response with retry logic
-            response = invoke_llm_with_retry(
-                self.llm.bind_tools(self.tools),
-                messages,
-                max_attempts=3
-            )
+            response = invoke_llm_with_retry(self.llm.bind_tools(self.tools), messages, max_attempts=3)
             messages.append(response)
 
             if self.debug:
                 print(f"DEBUG: Initial response type: {type(response)}")
                 print(f"DEBUG: Has tool calls: {hasattr(response, 'tool_calls') and bool(response.tool_calls)}")
-                if hasattr(response, 'content'):
+                if hasattr(response, "content"):
                     print(f"DEBUG: Initial content: {response.content[:200] if response.content else 'Empty'}")
 
             # Handle tool calls if any
@@ -194,7 +177,7 @@ class LanduseAgent:
             query_results = []
             analysis_results = []
 
-            while hasattr(response, 'tool_calls') and response.tool_calls and iteration < max_iterations:
+            while hasattr(response, "tool_calls") and response.tool_calls and iteration < max_iterations:
                 iteration += 1
 
                 # Execute each tool call and add proper ToolMessage
@@ -225,7 +208,8 @@ class LanduseAgent:
                                         if "rows returned" in result_str:
                                             # Extract row count
                                             import re
-                                            row_match = re.search(r'(\d+) rows returned', result_str)
+
+                                            row_match = re.search(r"(\d+) rows returned", result_str)
                                             if row_match:
                                                 print(f"DEBUG: Query returned {row_match.group(1)} rows")
                                         if "No results found" in result_str:
@@ -255,6 +239,7 @@ class LanduseAgent:
                                 if self.debug:
                                     print(f"DEBUG: Tool error: {error_msg}")
                                     import traceback
+
                                     traceback.print_exc()
                                 tool_result = error_msg
 
@@ -262,22 +247,15 @@ class LanduseAgent:
                         tool_result = f"Unknown tool: {tool_name}"
 
                     # Add tool result using proper ToolMessage format
-                    messages.append(ToolMessage(
-                        content=str(tool_result),
-                        tool_call_id=tool_id
-                    ))
+                    messages.append(ToolMessage(content=str(tool_result), tool_call_id=tool_id))
 
                 # Get next response with retry logic
-                response = invoke_llm_with_retry(
-                    self.llm.bind_tools(self.tools),
-                    messages,
-                    max_attempts=3
-                )
+                response = invoke_llm_with_retry(self.llm.bind_tools(self.tools), messages, max_attempts=3)
                 messages.append(response)
 
                 if self.debug:
                     print(f"DEBUG: Response after tool execution: {type(response)}")
-                    if hasattr(response, 'content'):
+                    if hasattr(response, "content"):
                         print(f"DEBUG: Response content type: {type(response.content)}")
                         print(f"DEBUG: Response content: {response.content[:200] if response.content else 'None'}")
 
@@ -289,7 +267,7 @@ class LanduseAgent:
                 print(f"DEBUG: Has text attr: {hasattr(response, 'text')}")
 
             final_content = ""
-            if hasattr(response, 'content'):
+            if hasattr(response, "content"):
                 content = response.content
                 if self.debug:
                     print(f"DEBUG: Content type: {type(content)}")
@@ -302,17 +280,17 @@ class LanduseAgent:
                     for i, item in enumerate(content):
                         if self.debug:
                             print(f"DEBUG: Content item {i}: type={type(item)}, value={str(item)[:100]}")
-                        if isinstance(item, dict) and item.get('type') == 'text':
-                            text_parts.append(item.get('text', ''))
+                        if isinstance(item, dict) and item.get("type") == "text":
+                            text_parts.append(item.get("text", ""))
                         elif isinstance(item, str):
                             text_parts.append(item)
                         else:
                             # Skip non-text items like tool calls
                             continue
-                    final_content = ' '.join(text_parts)
+                    final_content = " ".join(text_parts)
                 else:
                     final_content = str(content)
-            elif hasattr(response, 'text'):
+            elif hasattr(response, "text"):
                 final_content = str(response.text)
             else:
                 final_content = str(response)
@@ -384,7 +362,7 @@ class LanduseAgent:
                 "messages": initial_messages,
                 "context": {},
                 "iteration_count": 0,
-                "max_iterations": self.config.agent.max_iterations
+                "max_iterations": self.config.agent.max_iterations,
             }
 
             # Prepare config with thread_id for memory
@@ -400,21 +378,21 @@ class LanduseAgent:
                 messages = result["messages"]
                 # Find the last AI message that's not a tool call
                 for msg in reversed(messages):
-                    if isinstance(msg, AIMessage) and not hasattr(msg, 'tool_calls'):
+                    if isinstance(msg, AIMessage) and not hasattr(msg, "tool_calls"):
                         return str(msg.content)
-                    elif isinstance(msg, AIMessage) and hasattr(msg, 'content'):
+                    elif isinstance(msg, AIMessage) and hasattr(msg, "content"):
                         # Handle AIMessage with content even if it has tool_calls
                         content = msg.content
                         if isinstance(content, list):
                             # Extract text content from list
                             text_parts = []
                             for item in content:
-                                if isinstance(item, dict) and item.get('type') == 'text':
-                                    text_parts.append(item.get('text', ''))
+                                if isinstance(item, dict) and item.get("type") == "text":
+                                    text_parts.append(item.get("text", ""))
                                 elif isinstance(item, str):
                                     text_parts.append(item)
                             if text_parts:
-                                final_response = ' '.join(text_parts)
+                                final_response = " ".join(text_parts)
                                 self.conversation_manager.add_conversation(question, final_response)
                                 return final_response
                         elif content:
@@ -438,6 +416,7 @@ class LanduseAgent:
             error_msg = f"Unexpected error in graph execution: {str(wrapped_error)}"
             if self.debug:
                 import traceback
+
                 self.console.print(f"[red]DEBUG: {error_msg}[/red]")
                 self.console.print(f"[red]{traceback.format_exc()}[/red]")
             error_response = f"I encountered an unexpected error: {str(wrapped_error)}"
@@ -484,7 +463,7 @@ class LanduseAgent:
             "messages": [HumanMessage(content=question)],
             "context": {},
             "iteration_count": 0,
-            "max_iterations": self.config.agent.max_iterations
+            "max_iterations": self.config.agent.max_iterations,
         }
 
         # Prepare config
@@ -535,7 +514,7 @@ class LanduseAgent:
             create_execute_query_tool(self.config, self.db_connection, self.schema),
             create_choropleth_tool(),
             create_heatmap_tool(),
-            create_analysis_tool()
+            create_analysis_tool(),
         ]
 
         return self.create_subgraph("map_analysis", map_tools)
@@ -565,13 +544,15 @@ class LanduseAgent:
 
     def chat(self) -> None:
         """Interactive chat interface for the agent."""
-        self.console.print(Panel.fit(
-            "[bold green]RPA Land Use Analytics Agent[/bold green]\n"
-            "Ask questions about land use projections and transitions.\n"
-            "Type 'exit' to quit, 'help' for examples, 'clear' to reset conversation.",
-            title="Welcome",
-            border_style="green"
-        ))
+        self.console.print(
+            Panel.fit(
+                "[bold green]RPA Land Use Analytics Agent[/bold green]\n"
+                "Ask questions about land use projections and transitions.\n"
+                "Type 'exit' to quit, 'help' for examples, 'clear' to reset conversation.",
+                title="Welcome",
+                border_style="green",
+            )
+        )
 
         while True:
             try:
@@ -580,15 +561,15 @@ class LanduseAgent:
                 if not question:
                     continue
 
-                if question.lower() in ['exit', 'quit', 'q']:
+                if question.lower() in ["exit", "quit", "q"]:
                     self.console.print("[yellow]Goodbye![/yellow]")
                     break
 
-                if question.lower() in ['help', '?']:
+                if question.lower() in ["help", "?"]:
                     self._show_help()
                     continue
 
-                if question.lower() == 'clear':
+                if question.lower() == "clear":
                     self.clear_history()
                     continue
 
@@ -612,14 +593,12 @@ class LanduseAgent:
             "Compare forest transitions between RCP45 and RCP85 scenarios",
             "Show urbanization trends in California counties",
             "What land use types are converting to urban?",
-            "Analyze cropland changes in the Midwest by 2070"
+            "Analyze cropland changes in the Midwest by 2070",
         ]
 
-        self.console.print(Panel.fit(
-            "\n".join([f"• {ex}" for ex in examples]),
-            title="Example Questions",
-            border_style="blue"
-        ))
+        self.console.print(
+            Panel.fit("\n".join([f"• {ex}" for ex in examples]), title="Example Questions", border_style="blue")
+        )
 
     @property
     def model_name(self) -> str:
@@ -637,13 +616,14 @@ class LanduseAgent:
     def __exit__(self, exc_type, exc_val, exc_tb):
         """Context manager exit - clean up resources."""
         # Clean up database connection using manager
-        if hasattr(self, 'database_manager'):
+        if hasattr(self, "database_manager"):
             self.database_manager.close()
 
 
 def main() -> None:
     """Main entry point when run as module."""
     from landuse.agents.agent import main as agent_main
+
     agent_main()
 
 

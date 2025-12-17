@@ -13,6 +13,7 @@ from rich.table import Table
 
 console = Console()
 
+
 def add_change_views(db_path):
     """Add views that focus only on land use changes"""
 
@@ -234,19 +235,22 @@ def add_change_views(db_path):
   WHERE from_land_use = 'Agriculture' AND to_land_use = 'Urban'
   GROUP BY scenario""",
         title="📋 Summary",
-        border_style="green"
+        border_style="green",
     )
 
     console.print("\n", summary)
 
     conn.close()
 
+
 if __name__ == "__main__":
     db_path = "./data/landuse_transitions_with_ag.db"
 
-    console.print(Panel.fit(
-        "🚀 [bold blue]Land Use Change Views Creator[/bold blue]\n[cyan]Filters out same-to-same transitions to focus on actual changes[/cyan]",
-        border_style="blue"
-    ))
+    console.print(
+        Panel.fit(
+            "🚀 [bold blue]Land Use Change Views Creator[/bold blue]\n[cyan]Filters out same-to-same transitions to focus on actual changes[/cyan]",
+            border_style="blue",
+        )
+    )
 
     add_change_views(db_path)

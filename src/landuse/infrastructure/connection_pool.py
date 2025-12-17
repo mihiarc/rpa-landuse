@@ -22,7 +22,7 @@ from rich.console import Console
 from landuse.exceptions import DatabaseConnectionError, DatabaseError
 
 # Module-level logger for connection pool
-_pool_logger = logging.getLogger('landuse.pool')
+_pool_logger = logging.getLogger("landuse.pool")
 
 
 @dataclass
@@ -48,9 +48,7 @@ class PoolStatistics:
             "total_releases": self.total_releases,
             "failed_acquisitions": self.failed_acquisitions,
             "avg_wait_time_ms": (
-                self.total_wait_time_ms / self.total_acquisitions
-                if self.total_acquisitions > 0
-                else 0.0
+                self.total_wait_time_ms / self.total_acquisitions if self.total_acquisitions > 0 else 0.0
             ),
             "max_wait_time_ms": self.max_wait_time_ms,
         }
@@ -162,33 +160,22 @@ class DatabaseConnectionPool:
             DatabaseConnectionError: If connection creation fails
         """
         try:
-            conn = duckdb.connect(
-                database=self.database_path,
-                read_only=self.read_only
-            )
+            conn = duckdb.connect(database=self.database_path, read_only=self.read_only)
             pooled = PooledConnection(connection=conn)
 
             with self._lock:
                 self._stats.total_connections += 1
-                _pool_logger.debug(
-                    "Created connection #%d to %s",
-                    self._stats.total_connections,
-                    self.database_path
-                )
+                _pool_logger.debug("Created connection #%d to %s", self._stats.total_connections, self.database_path)
 
             return pooled
 
         except duckdb.Error as e:
             _pool_logger.error("Failed to create DuckDB connection: %s", e)
-            raise DatabaseConnectionError(
-                f"Failed to create DuckDB connection: {e}",
-                host=self.database_path
-            )
+            raise DatabaseConnectionError(f"Failed to create DuckDB connection: {e}", host=self.database_path)
         except Exception as e:
             _pool_logger.exception("Unexpected error creating connection")
             raise DatabaseConnectionError(
-                f"Unexpected error creating connection: {type(e).__name__}: {e}",
-                host=self.database_path
+                f"Unexpected error creating connection: {type(e).__name__}: {e}", host=self.database_path
             )
 
     def acquire(self, timeout: Optional[float] = None) -> duckdb.DuckDBPyConnection:
@@ -276,8 +263,7 @@ class DatabaseConnectionPool:
                 self._stats.failed_acquisitions += 1
 
             raise DatabaseConnectionError(
-                f"Connection pool exhausted (max: {self.max_connections}, "
-                f"timeout: {timeout}s)"
+                f"Connection pool exhausted (max: {self.max_connections}, timeout: {timeout}s)"
             )
 
     def release(self, connection: duckdb.DuckDBPyConnection) -> None:

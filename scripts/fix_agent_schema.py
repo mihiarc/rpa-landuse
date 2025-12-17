@@ -11,7 +11,7 @@ import duckdb
 def fix_agent_schema():
     """Create aliases so agent uses combined scenarios."""
     try:
-        conn = duckdb.connect('data/processed/landuse_analytics.duckdb')
+        conn = duckdb.connect("data/processed/landuse_analytics.duckdb")
 
         # Create views that alias combined tables to expected names
         # This ensures the agent uses combined scenarios by default
@@ -53,6 +53,7 @@ def fix_agent_schema():
     except Exception as e:
         print(f"Error: {e}")
         return False
+
 
 if __name__ == "__main__":
     success = fix_agent_schema()
