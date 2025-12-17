@@ -247,8 +247,8 @@ class TestDatabaseManagerPooling:
 
     @patch('landuse.agents.database_manager.DatabaseConnectionPool')
     @patch('landuse.agents.database_manager.SchemaVersionManager')
-    def test_pool_mode_initialization(self, mock_version_mgr, mock_pool_cls, mock_config):
-        """Test DatabaseManager initializes pool when use_pool=True."""
+    def test_pool_initialization(self, mock_version_mgr, mock_pool_cls, mock_config):
+        """Test DatabaseManager initializes connection pool."""
         from landuse.agents.database_manager import DatabaseManager
 
         # Setup mock pool
@@ -257,26 +257,10 @@ class TestDatabaseManagerPooling:
         mock_pool.connection.return_value.__exit__ = MagicMock(return_value=False)
         mock_pool_cls.return_value = mock_pool
 
-        db_manager = DatabaseManager(config=mock_config, use_pool=True)
+        db_manager = DatabaseManager(config=mock_config)
 
-        assert db_manager.use_pool is True
+        assert db_manager._pool is not None
         mock_pool_cls.assert_called_once()
-
-        db_manager.close()
-
-    @patch('landuse.agents.database_manager.duckdb')
-    @patch('landuse.agents.database_manager.SchemaVersionManager')
-    def test_single_mode_no_pool(self, mock_version_mgr, mock_duckdb, mock_config):
-        """Test DatabaseManager doesn't create pool when use_pool=False."""
-        from landuse.agents.database_manager import DatabaseManager
-
-        mock_conn = MagicMock()
-        mock_duckdb.connect.return_value = mock_conn
-
-        db_manager = DatabaseManager(config=mock_config, use_pool=False)
-
-        assert db_manager.use_pool is False
-        assert db_manager._pool is None
 
         db_manager.close()
 
@@ -292,7 +276,7 @@ class TestDatabaseManagerPooling:
         mock_pool.get_statistics.return_value = {"total_connections": 5}
         mock_pool_cls.return_value = mock_pool
 
-        db_manager = DatabaseManager(config=mock_config, use_pool=True)
+        db_manager = DatabaseManager(config=mock_config)
         stats = db_manager.get_pool_statistics()
 
         assert stats is not None
@@ -300,18 +284,38 @@ class TestDatabaseManagerPooling:
 
         db_manager.close()
 
-    @patch('landuse.agents.database_manager.duckdb')
+    @patch('landuse.agents.database_manager.DatabaseConnectionPool')
     @patch('landuse.agents.database_manager.SchemaVersionManager')
-    def test_get_pool_statistics_single_mode(self, mock_version_mgr, mock_duckdb, mock_config):
-        """Test get_pool_statistics returns None in single mode."""
+    def test_is_pool_healthy(self, mock_version_mgr, mock_pool_cls, mock_config):
+        """Test pool health check."""
+        from landuse.agents.database_manager import DatabaseManager
+
+        mock_pool = MagicMock()
+        mock_pool.connection.return_value.__enter__ = MagicMock(return_value=MagicMock())
+        mock_pool.connection.return_value.__exit__ = MagicMock(return_value=False)
+        mock_pool.is_healthy.return_value = True
+        mock_pool_cls.return_value = mock_pool
+
+        db_manager = DatabaseManager(config=mock_config)
+        assert db_manager.is_pool_healthy() is True
+
+        db_manager.close()
+
+    @patch('landuse.agents.database_manager.DatabaseConnectionPool')
+    @patch('landuse.agents.database_manager.SchemaVersionManager')
+    def test_connection_context_manager(self, mock_version_mgr, mock_pool_cls, mock_config):
+        """Test connection context manager delegates to pool."""
         from landuse.agents.database_manager import DatabaseManager
 
         mock_conn = MagicMock()
-        mock_duckdb.connect.return_value = mock_conn
+        mock_pool = MagicMock()
+        mock_pool.connection.return_value.__enter__ = MagicMock(return_value=mock_conn)
+        mock_pool.connection.return_value.__exit__ = MagicMock(return_value=False)
+        mock_pool_cls.return_value = mock_pool
 
-        db_manager = DatabaseManager(config=mock_config, use_pool=False)
-        stats = db_manager.get_pool_statistics()
+        db_manager = DatabaseManager(config=mock_config)
 
-        assert stats is None
+        with db_manager.connection() as conn:
+            assert conn is mock_conn
 
         db_manager.close()

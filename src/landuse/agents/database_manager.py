@@ -1,6 +1,6 @@
 """Database management functionality extracted from monolithic agent class.
 
-Provides database connection management with connection pooling support for
+Provides database connection management with connection pooling for
 improved performance and resource utilization in multi-threaded environments.
 """
 
@@ -14,7 +14,7 @@ from rich.console import Console
 from landuse.core.app_config import AppConfig
 from landuse.core.interfaces import DatabaseInterface
 from landuse.database.schema_version import SchemaVersion, SchemaVersionManager
-from landuse.exceptions import DatabaseConnectionError, DatabaseError, SchemaError
+from landuse.exceptions import DatabaseConnectionError, SchemaError
 from landuse.infrastructure.connection_pool import DatabaseConnectionPool
 from landuse.infrastructure.performance import time_database_operation
 from landuse.utils.retry_decorators import database_retry
@@ -24,48 +24,33 @@ class DatabaseManager(DatabaseInterface):
     """
     Manages database connections and schema operations with connection pooling.
 
-    Supports both pooled and single-connection modes:
-    - Pooled mode (default): Uses connection pool for thread-safe connection sharing
-    - Single mode: Uses single persistent connection (for backward compatibility)
-
-    Extracted from the monolithic LanduseAgent class to follow Single Responsibility Principle.
-    Handles database connection creation, schema retrieval, and connection management.
+    Uses a thread-safe connection pool for efficient connection sharing across
+    concurrent requests. Extracted from the monolithic LanduseAgent class to
+    follow Single Responsibility Principle.
 
     Example:
-        >>> # Pooled mode (recommended for multi-threaded use)
-        >>> with DatabaseManager(config, use_pool=True) as db:
+        >>> with DatabaseManager(config) as db:
         ...     schema = db.get_schema()
         ...     with db.connection() as conn:
         ...         result = conn.execute("SELECT * FROM table")
-
-        >>> # Single connection mode (backward compatible)
-        >>> with DatabaseManager(config, use_pool=False) as db:
-        ...     conn = db.get_connection()
-        ...     result = conn.execute("SELECT * FROM table")
     """
 
     def __init__(
         self,
         config: Optional[AppConfig] = None,
         console: Optional[Console] = None,
-        use_pool: bool = True
     ):
         """Initialize database manager with configuration.
 
         Args:
             config: Application configuration (uses defaults if not provided)
             console: Rich console for output (creates new one if not provided)
-            use_pool: Whether to use connection pooling (default: True)
+
+        Raises:
+            DatabaseConnectionError: If connection pool initialization fails
         """
         self.config = config or AppConfig()
         self.console = console or Console()
-        self.use_pool = use_pool
-
-        # Connection pool (if enabled)
-        self._pool: Optional[DatabaseConnectionPool] = None
-
-        # Single connection (for backward compatibility)
-        self._connection: Optional[duckdb.DuckDBPyConnection] = None
 
         # Cached schema and version info
         self._schema: Optional[str] = None
@@ -73,14 +58,20 @@ class DatabaseManager(DatabaseInterface):
         self._db_version: Optional[str] = None
         self._version_checked: bool = False
 
-        # Initialize pool if enabled
-        if self.use_pool:
-            self._initialize_pool()
+        # Initialize connection pool
+        self._pool = self._create_pool()
 
-    def _initialize_pool(self) -> None:
-        """Initialize the connection pool."""
+    def _create_pool(self) -> DatabaseConnectionPool:
+        """Create and initialize the connection pool.
+
+        Returns:
+            Initialized connection pool
+
+        Raises:
+            DatabaseConnectionError: If pool creation fails
+        """
         try:
-            self._pool = DatabaseConnectionPool(
+            pool = DatabaseConnectionPool(
                 database_path=self.config.database.path,
                 max_connections=self.config.database.max_connections,
                 connection_timeout=self.config.database.connection_timeout,
@@ -93,47 +84,39 @@ class DatabaseManager(DatabaseInterface):
             )
 
             # Check schema version with a pooled connection
-            with self._pool.connection() as conn:
+            with pool.connection() as conn:
                 self._check_schema_version(conn)
 
+            return pool
+
+        except DatabaseConnectionError:
+            raise
         except Exception as e:
-            self.console.print(f"[yellow]⚠ Pool initialization failed: {e}[/yellow]")
-            self.console.print("[yellow]  Falling back to single connection mode[/yellow]")
-            self.use_pool = False
-            self._pool = None
+            raise DatabaseConnectionError(
+                f"Failed to initialize connection pool: {e}",
+                host=self.config.database.path
+            )
 
     def get_connection(self) -> duckdb.DuckDBPyConnection:
         """
-        Get a database connection.
-
-        In pooled mode, acquires a connection from the pool (caller should release).
-        In single mode, returns the persistent connection.
+        Acquire a database connection from the pool.
 
         Returns:
             DuckDB connection instance
 
         Note:
-            In pooled mode, prefer using the connection() context manager
-            to ensure proper connection release.
+            Prefer using the connection() context manager to ensure
+            proper connection release.
         """
-        if self.use_pool and self._pool:
-            return self._pool.acquire()
-        else:
-            if self._connection is None:
-                self._connection = self.create_connection()
-            return self._connection
+        return self._pool.acquire()
 
     def release_connection(self, connection: duckdb.DuckDBPyConnection) -> None:
         """Release a connection back to the pool.
 
         Args:
             connection: Connection to release
-
-        Note:
-            Only has effect in pooled mode. In single mode, this is a no-op.
         """
-        if self.use_pool and self._pool:
-            self._pool.release(connection)
+        self._pool.release(connection)
 
     def connection(self, timeout: Optional[float] = None):
         """Context manager for safely acquiring and releasing connections.
@@ -148,32 +131,7 @@ class DatabaseManager(DatabaseInterface):
             >>> with db_manager.connection() as conn:
             ...     result = conn.execute("SELECT * FROM table")
         """
-        if self.use_pool and self._pool:
-            return self._pool.connection(timeout=timeout)
-        else:
-            # For single connection mode, return a context manager that does nothing on exit
-            from contextlib import contextmanager
-
-            @contextmanager
-            def single_connection():
-                yield self.get_connection()
-
-            return single_connection()
-
-    def create_connection(self) -> duckdb.DuckDBPyConnection:
-        """
-        Create a new database connection and check schema version.
-
-        Returns:
-            DuckDB connection in read-only mode
-        """
-        connection = duckdb.connect(
-            database=self.config.database.path,
-            read_only=self.config.database.read_only
-        )
-        if not self._version_checked:
-            self._check_schema_version(connection)
-        return connection
+        return self._pool.connection(timeout=timeout)
 
     @database_retry(max_attempts=3)
     @time_database_operation("get_schema", track_row_count=False)
@@ -261,16 +219,10 @@ class DatabaseManager(DatabaseInterface):
         return "\n".join(schema_lines)
 
     def close(self) -> None:
-        """Close database connections and pool."""
-        # Close pool if using pooled mode
+        """Close the connection pool and release all connections."""
         if self._pool is not None:
             self._pool.close()
             self._pool = None
-
-        # Close single connection if in single mode
-        if self._connection is not None:
-            self._connection.close()
-            self._connection = None
 
     def __enter__(self):
         """Context manager entry."""
@@ -389,28 +341,18 @@ class DatabaseManager(DatabaseInterface):
             return self._version_manager.get_version_history()
         return []
 
-    def get_pool_statistics(self) -> Optional[dict]:
+    def get_pool_statistics(self) -> dict:
         """Get connection pool statistics.
 
         Returns:
-            Dictionary of pool statistics, or None if not using pooling
+            Dictionary of pool statistics
         """
-        if self._pool:
-            return self._pool.get_statistics()
-        return None
+        return self._pool.get_statistics()
 
     def is_pool_healthy(self) -> bool:
         """Check if connection pool is healthy.
 
         Returns:
-            True if pool is healthy, False if unhealthy or not using pooling
+            True if pool is healthy, False otherwise
         """
-        if self._pool:
-            return self._pool.is_healthy()
-        # For single connection mode, check if connection works
-        try:
-            with self.connection() as conn:
-                conn.execute("SELECT 1").fetchone()
-            return True
-        except Exception:
-            return False
+        return self._pool.is_healthy()
