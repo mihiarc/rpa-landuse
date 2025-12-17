@@ -16,6 +16,7 @@ from landuse.core.interfaces import DatabaseInterface
 from landuse.database.schema_version import SchemaVersion, SchemaVersionManager
 from landuse.exceptions import DatabaseConnectionError, SchemaError
 from landuse.infrastructure.connection_pool import DatabaseConnectionPool
+from landuse.infrastructure.logging import get_logger
 from landuse.infrastructure.performance import time_database_operation
 from landuse.utils.retry_decorators import database_retry
 
@@ -51,12 +52,15 @@ class DatabaseManager(DatabaseInterface):
         """
         self.config = config or AppConfig()
         self.console = console or Console()
+        self._logger = get_logger('database')
 
         # Cached schema and version info
         self._schema: Optional[str] = None
         self._version_manager: Optional[SchemaVersionManager] = None
         self._db_version: Optional[str] = None
         self._version_checked: bool = False
+
+        self._logger.info("Initializing DatabaseManager", path=self.config.database.path)
 
         # Initialize connection pool
         self._pool = self._create_pool()
@@ -78,6 +82,11 @@ class DatabaseManager(DatabaseInterface):
                 read_only=self.config.database.read_only,
                 console=self.console
             )
+            self._logger.info(
+                "Connection pool initialized",
+                max_connections=self.config.database.max_connections,
+                read_only=self.config.database.read_only
+            )
             self.console.print(
                 f"[green]✓ Connection pool initialized "
                 f"(max: {self.config.database.max_connections})[/green]"
@@ -90,8 +99,10 @@ class DatabaseManager(DatabaseInterface):
             return pool
 
         except DatabaseConnectionError:
+            self._logger.error("Failed to create connection pool", path=self.config.database.path)
             raise
         except Exception as e:
+            self._logger.exception("Unexpected error creating connection pool")
             raise DatabaseConnectionError(
                 f"Failed to initialize connection pool: {e}",
                 host=self.config.database.path

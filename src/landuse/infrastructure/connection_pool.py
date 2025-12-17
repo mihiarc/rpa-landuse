@@ -8,6 +8,7 @@ Provides a pool of reusable database connections with:
 - Statistics and monitoring capabilities
 """
 
+import logging
 import threading
 import time
 from contextlib import contextmanager
@@ -19,6 +20,9 @@ import duckdb
 from rich.console import Console
 
 from landuse.exceptions import DatabaseConnectionError, DatabaseError
+
+# Module-level logger for connection pool
+_pool_logger = logging.getLogger('landuse.pool')
 
 
 @dataclass
@@ -139,11 +143,13 @@ class DatabaseConnectionPool:
         Args:
             min_connections: Minimum connections to create (default: 1)
         """
+        _pool_logger.debug("Initializing pool with %d connections", min_connections)
         for _ in range(min(min_connections, self.max_connections)):
             try:
                 pooled_conn = self._create_connection()
                 self._pool.put_nowait(pooled_conn)
             except Exception as e:
+                _pool_logger.warning("Failed to pre-create connection: %s", e)
                 self.console.print(f"[yellow]⚠ Failed to pre-create connection: {e}[/yellow]")
 
     def _create_connection(self) -> PooledConnection:
@@ -164,15 +170,22 @@ class DatabaseConnectionPool:
 
             with self._lock:
                 self._stats.total_connections += 1
+                _pool_logger.debug(
+                    "Created connection #%d to %s",
+                    self._stats.total_connections,
+                    self.database_path
+                )
 
             return pooled
 
         except duckdb.Error as e:
+            _pool_logger.error("Failed to create DuckDB connection: %s", e)
             raise DatabaseConnectionError(
                 f"Failed to create DuckDB connection: {e}",
                 host=self.database_path
             )
         except Exception as e:
+            _pool_logger.exception("Unexpected error creating connection")
             raise DatabaseConnectionError(
                 f"Unexpected error creating connection: {type(e).__name__}: {e}",
                 host=self.database_path

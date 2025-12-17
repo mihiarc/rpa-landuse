@@ -10,6 +10,7 @@ from rich.console import Console
 from landuse.core.app_config import AppConfig, LLMConfig
 from landuse.core.interfaces import LLMInterface
 from landuse.exceptions import APIKeyError, LLMError
+from landuse.infrastructure.logging import get_logger
 from landuse.infrastructure.performance import time_llm_operation
 
 
@@ -26,6 +27,7 @@ class LLMManager(LLMInterface):
         """Initialize LLM manager with configuration."""
         self.config = config or AppConfig()
         self.console = console or Console()
+        self._logger = get_logger('llm')
 
     @time_llm_operation("create_llm", track_tokens=False)
     def create_llm(self) -> BaseChatModel:
@@ -39,6 +41,7 @@ class LLMManager(LLMInterface):
             ValueError: If required API keys are missing
         """
         model_name = self.config.llm.model_name
+        self._logger.info("Creating LLM", model=model_name)
         self.console.print(f"[blue]Initializing LLM: {model_name}[/blue]")
         return self._create_openai_llm(model_name)
 
@@ -47,8 +50,15 @@ class LLMManager(LLMInterface):
         api_key = os.getenv('OPENAI_API_KEY')
 
         if not api_key:
+            self._logger.error("OpenAI API key not configured", model=model_name)
             raise APIKeyError("OPENAI_API_KEY environment variable is required for OpenAI models", model_name)
 
+        self._logger.debug(
+            "OpenAI LLM configured",
+            model=model_name,
+            temperature=self.config.llm.temperature,
+            max_tokens=self.config.llm.max_tokens
+        )
         self.console.print("[dim]Using OpenAI API key: ✓ Configured[/dim]")
 
         return ChatOpenAI(
