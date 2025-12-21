@@ -24,9 +24,16 @@ class DatabaseConfig(BaseModel):
     @field_validator("path")
     @classmethod
     def validate_path(cls, v: str) -> str:
-        """Validate database path exists."""
+        """Validate database path exists or is a valid connection string."""
+        # Allow in-memory databases
+        if v.startswith(":memory:"):
+            return v
+        # Allow MotherDuck cloud databases
+        if v.startswith("md:"):
+            return v
+        # For local files, check if path exists
         path = Path(v)
-        if not path.exists() and not v.startswith(":memory:"):
+        if not path.exists():
             raise ConfigurationError(f"Database file not found: {v}")
         return v
 

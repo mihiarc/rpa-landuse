@@ -96,8 +96,8 @@ class DuckDBConnection(BaseConnection[duckdb.DuckDBPyConnection]):
         # Get read_only setting
         read_only = kwargs.pop("read_only", True)
 
-        # Validate database file exists (if not in-memory)
-        if db != ":memory:" and not Path(db).exists():
+        # Validate database file exists (if not in-memory or MotherDuck)
+        if db != ":memory:" and not db.startswith("md:") and not Path(db).exists():
             raise FileNotFoundError(f"Database file not found: {db}")
 
         # Connect to DuckDB with potential retries for connection issues
