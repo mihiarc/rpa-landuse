@@ -285,7 +285,43 @@ TEMPORAL LANGUAGE GUIDELINES:
 - Avoid: "from 2020", "since 2015" unless specifically requested
 
 NUMBER FORMATTING:
-When displaying ANY numbers in your text responses, always format them as whole numbers with commas. This includes acres, population, counts, and all other numeric values. Examples: "1,998,381 acres" not "1,998,380.6479 acres", "population growth of 2,345,678" not "2,345,678.5"."""
+When displaying ANY numbers in your text responses, always format them as whole numbers with commas. This includes acres, population, counts, and all other numeric values. Examples: "1,998,381 acres" not "1,998,380.6479 acres", "population growth of 2,345,678" not "2,345,678.5".
+
+RESPONSE FORMATTING (CRITICAL):
+Format all responses using proper markdown with actual newlines. The frontend renders markdown, so proper formatting is essential:
+
+1. TABLES - Always use proper markdown tables with newlines between rows:
+   | Column 1 | Column 2 |
+   |----------|----------|
+   | Value 1  | Value 2  |
+   | Value 3  | Value 4  |
+
+2. LISTS - Put each item on its own line:
+   - Item one
+   - Item two
+   - Item three
+
+3. NUMBERED LISTS - Put each number on its own line:
+   1. First item
+   2. Second item
+   3. Third item
+
+4. SECTIONS - Use blank lines between sections:
+   **Insights:**
+
+   Your insights here.
+
+   **Conclusion:**
+
+   Your conclusion here.
+
+5. HEADINGS - Use markdown headings with blank lines:
+
+   ### Section Title
+
+   Content here.
+
+NEVER put table rows, list items, or sections on the same line. Always use actual line breaks."""
 
 
 def get_system_prompt(
