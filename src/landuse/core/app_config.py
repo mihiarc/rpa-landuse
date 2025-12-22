@@ -82,12 +82,36 @@ class SecurityConfig(BaseModel):
 
 
 class FeatureConfig(BaseModel):
-    """Feature toggle configuration."""
+    """Feature toggle configuration for gradual rollout of new features."""
 
+    # Map generation
     enable_map_generation: bool = Field(default=True, description="Enable map generation capabilities")
-    enable_streaming: bool = Field(default=True, description="Enable streaming responses")
-    enable_graph_mode: bool = Field(default=True, description="Enable LangGraph workflow mode")
     map_output_dir: str = Field(default="maps/agent_generated", description="Directory for generated maps")
+
+    # Streaming
+    enable_streaming: bool = Field(default=True, description="Enable streaming responses")
+
+    # LangGraph mode flags (for gradual rollout)
+    enable_graph_mode: bool = Field(
+        default=True,
+        description="Enable basic LangGraph workflow mode (legacy simple graph)",
+    )
+    enable_full_graph_mode: bool = Field(
+        default=False,
+        description="Enable full LangGraph mode with context-aware nodes (new enhanced graph)",
+    )
+    enable_sql_approval: bool = Field(
+        default=False,
+        description="Enable human-in-the-loop SQL approval for large queries",
+    )
+    enable_context_enrichment: bool = Field(
+        default=True,
+        description="Enable progressive disclosure of RPA domain context",
+    )
+    enable_rpa_context_tracking: bool = Field(
+        default=True,
+        description="Enable RPA-aware state tracking (scenarios, geography, explained concepts)",
+    )
 
 
 class LoggingConfig(BaseModel):

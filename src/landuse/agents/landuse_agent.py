@@ -337,8 +337,22 @@ class LanduseAgent:
             self.conversation_manager.add_conversation(question, error_msg)
             return error_msg
 
-    def _graph_query(self, question: str, thread_id: Optional[str] = None) -> str:
-        """Execute a query using the LangGraph workflow."""
+    def _graph_query(
+        self,
+        question: str,
+        thread_id: str | None = None,
+        user_expertise: str = "novice",
+    ) -> str:
+        """Execute a query using the enhanced LangGraph workflow with RPA context.
+
+        Args:
+            question: Natural language question.
+            thread_id: Optional thread ID for conversation memory.
+            user_expertise: User expertise level (novice, intermediate, expert).
+
+        Returns:
+            The agent's response as a string.
+        """
         # Check rate limit before processing
         self._check_rate_limit(thread_id or "default")
 
@@ -347,8 +361,7 @@ class LanduseAgent:
             if not self.graph:
                 self.graph = self.graph_builder.build_graph()
 
-            # Prepare initial state with conversation history
-            # Use dynamic prompt selection based on query content
+            # Prepare initial messages with conversation history
             dynamic_prompt = self.get_dynamic_system_prompt(question)
             initial_messages = [HumanMessage(content=dynamic_prompt)]
 
@@ -358,17 +371,31 @@ class LanduseAgent:
             # Add current question
             initial_messages.append(HumanMessage(content=question))
 
+            # Use enhanced state with RPA context tracking
             initial_state = {
                 "messages": initial_messages,
                 "context": {},
                 "iteration_count": 0,
                 "max_iterations": self.config.agent.max_iterations,
+                # RPA context fields
+                "user_expertise": user_expertise,
+                "explained_concepts": [],
+                "preferred_scenarios": [],
+                "focus_states": [],
+                "focus_time_range": None,
+                "current_query_type": None,
+                "detected_scenarios": [],
+                "detected_geography": [],
+                "pending_sql_approval": None,
+                "thread_id": thread_id,
+                "user_id": None,
             }
 
             # Prepare config with thread_id for memory
-            config = {}
-            if thread_id and self.config.agent.enable_memory:
-                config = {"configurable": {"thread_id": thread_id}}
+            # MemorySaver requires thread_id, so generate one if not provided
+            import time
+            effective_thread_id = thread_id or f"landuse-{int(time.time() * 1000)}"
+            config = {"configurable": {"thread_id": effective_thread_id}}
 
             # Execute the graph
             result = self.graph.invoke(initial_state, config=config)
@@ -376,29 +403,34 @@ class LanduseAgent:
             # Extract the final response from messages
             if result and "messages" in result:
                 messages = result["messages"]
-                # Find the last AI message that's not a tool call
+                # Find the last AI message with content
                 for msg in reversed(messages):
-                    if isinstance(msg, AIMessage) and not hasattr(msg, "tool_calls"):
-                        return str(msg.content)
-                    elif isinstance(msg, AIMessage) and hasattr(msg, "content"):
-                        # Handle AIMessage with content even if it has tool_calls
-                        content = msg.content
-                        if isinstance(content, list):
-                            # Extract text content from list
-                            text_parts = []
-                            for item in content:
-                                if isinstance(item, dict) and item.get("type") == "text":
-                                    text_parts.append(item.get("text", ""))
-                                elif isinstance(item, str):
-                                    text_parts.append(item)
-                            if text_parts:
-                                final_response = " ".join(text_parts)
-                                self.conversation_manager.add_conversation(question, final_response)
-                                return final_response
-                        elif content:
-                            final_response = str(content)
+                    if not isinstance(msg, AIMessage):
+                        continue
+
+                    # Check if this is a tool call without content
+                    tool_calls = getattr(msg, "tool_calls", None)
+                    if tool_calls and not msg.content:
+                        continue
+
+                    # Extract content
+                    content = msg.content
+                    if isinstance(content, list):
+                        # Extract text content from list
+                        text_parts = []
+                        for item in content:
+                            if isinstance(item, dict) and item.get("type") == "text":
+                                text_parts.append(item.get("text", ""))
+                            elif isinstance(item, str):
+                                text_parts.append(item)
+                        if text_parts:
+                            final_response = " ".join(text_parts)
                             self.conversation_manager.add_conversation(question, final_response)
                             return final_response
+                    elif content:
+                        final_response = str(content)
+                        self.conversation_manager.add_conversation(question, final_response)
+                        return final_response
 
             default_response = "I couldn't generate a proper response. Please try rephrasing your question."
             self.conversation_manager.add_conversation(question, default_response)
@@ -423,20 +455,32 @@ class LanduseAgent:
             self.conversation_manager.add_conversation(question, error_response)
             return error_response
 
-    def query(self, question: str, use_graph: bool = False, thread_id: Optional[str] = None) -> str:
-        """
-        Execute a natural language query using the agent.
+    def query(
+        self,
+        question: str,
+        use_graph: bool | None = None,
+        thread_id: str | None = None,
+        user_expertise: str = "novice",
+    ) -> str:
+        """Execute a natural language query using the agent.
 
         Args:
-            question: The natural language question to answer
-            use_graph: Whether to use the full LangGraph workflow (default: False for stability)
-            thread_id: Optional thread ID for conversation memory (only used with graph)
+            question: The natural language question to answer.
+            use_graph: Override for graph mode (None uses feature flag).
+            thread_id: Optional thread ID for conversation memory.
+            user_expertise: User expertise level for response calibration.
 
         Returns:
-            The agent's response as a string
+            The agent's response as a string.
         """
-        if use_graph:
-            return self._graph_query(question, thread_id)
+        # Determine whether to use graph mode based on feature flags
+        should_use_graph = use_graph
+        if should_use_graph is None:
+            # Check feature flags - use full graph mode if enabled
+            should_use_graph = self.config.features.enable_full_graph_mode
+
+        if should_use_graph:
+            return self._graph_query(question, thread_id, user_expertise)
         else:
             # Use the simple approach for stability
             return self.simple_query(question)
