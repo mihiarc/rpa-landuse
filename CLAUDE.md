@@ -6,6 +6,34 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 RPA Land Use Analytics is an AI-powered analytics tool for USDA Forest Service RPA Assessment data. Built with a modern data stack (DuckDB, LangChain, GPT-4), it processes county-level land use projections and enables users to ask questions in plain English about land use changes across different climate scenarios from the 2020 RPA Assessment.
 
+## Production Deployment
+
+### Architecture
+The application is deployed as a modern full-stack system:
+
+| Component | Platform | URL |
+|-----------|----------|-----|
+| **Frontend** | Netlify | https://rpa-landuse-frontend.netlify.app |
+| **Backend API** | Render | https://rpa-landuse-backend.onrender.com |
+
+### Frontend (Netlify)
+- **Dashboard**: https://app.netlify.com/projects/rpa-landuse-frontend
+- **Framework**: Next.js 16 + React 19
+- **Auto-deploy**: Enabled (from main branch)
+- **Features**: Chat, Analytics, SQL Explorer, Data Extraction
+
+### Backend (Render)
+- **Dashboard**: https://dashboard.render.com/web/srv-d547o675r7bs73e8oocg
+- **Repository**: https://github.com/mihiarc/rpa-landuse-backend
+- **Runtime**: Python (FastAPI + Uvicorn)
+- **Region**: Oregon
+- **Plan**: Starter
+- **Auto-deploy**: Enabled (from main branch)
+
+### Environment Variables
+Frontend requires `NEXT_PUBLIC_API_URL` pointing to the backend.
+Backend requires `OPENAI_API_KEY` and database configuration.
+
 ## Key Commands
 
 ### Installation & Setup
@@ -19,9 +47,38 @@ uv run python setup_agents.py
 
 ### Running the Applications
 
-#### Streamlit Dashboard (Recommended)
+#### Next.js Frontend (Production)
 ```bash
-# Modern web dashboard with chat interface and visualizations
+# Navigate to frontend directory
+cd ../rpa-landuse-frontend
+
+# Install dependencies
+npm install
+
+# Run development server (http://localhost:3000)
+npm run dev
+
+# Build for production
+npm run build
+```
+
+#### FastAPI Backend (Production)
+```bash
+# Navigate to backend directory
+cd ../rpa-landuse-backend
+
+# Install dependencies
+uv sync
+
+# Run development server (http://localhost:8000)
+uvicorn app.main:app --reload --port 8000
+
+# API documentation available at http://localhost:8000/docs
+```
+
+#### Streamlit Dashboard (Legacy/Development)
+```bash
+# Local development dashboard with chat interface and visualizations
 uv run streamlit run landuse_app.py
 
 # Features:
@@ -73,11 +130,30 @@ duckdb data/processed/landuse_analytics.duckdb
 
 ## Architecture
 
-### Modern Data Stack (Current)
+### Full-Stack Architecture (Production)
+```
+┌─────────────────────┐     ┌─────────────────────┐     ┌─────────────────────┐
+│   Next.js Frontend  │────▶│   FastAPI Backend   │────▶│   DuckDB Database   │
+│      (Netlify)      │     │      (Render)       │     │    (1.2GB Star)     │
+└─────────────────────┘     └─────────────────────┘     └─────────────────────┘
+                                      │
+                                      ▼
+                            ┌─────────────────────┐
+                            │  LangChain/LangGraph│
+                            │   + OpenAI GPT-4    │
+                            └─────────────────────┘
+```
+
+### Repository Structure (Monorepo)
+- **rpa-landuse-core/**: Python analytics engine, agents, and Streamlit (legacy)
+- **rpa-landuse-backend/**: FastAPI REST API (deployed on Render)
+- **rpa-landuse-frontend/**: Next.js web frontend (deployed on Netlify)
+
+### Data Stack
 1. **Raw Data**: 20M+ line JSON file in `data/raw/` with county landuse projections
 2. **DuckDB Processing**: `convert_to_duckdb.py` creates optimized star schema
 3. **Analytics Database**: `data/processed/landuse_analytics.duckdb` (1.2GB)
-4. **Natural Language Agent**: `landuse_query_agent.py` converts questions to SQL
+4. **Natural Language Agent**: LangGraph agent converts questions to SQL
 
 ### Star Schema Design
 - **fact_landuse_transitions**: 5.4M records of land use changes
@@ -88,20 +164,32 @@ duckdb data/processed/landuse_analytics.duckdb
 
 ### Key Components
 
-**Streamlit Dashboard** (`landuse_app.py`):
-- Modern web interface with multipage navigation using st.Page and st.navigation
-- 💬 **Chat Interface**: Natural language queries with conversation history
-- 📊 **Analytics Dashboard**: 
-  - Overview metrics and KPIs
-  - Agricultural impact analysis
-  - Forest transition analysis
-  - Climate scenario comparisons
-  - Geographic visualizations (choropleth maps)
-  - Land use flow diagrams (Sankey charts)
-- 🔍 **Data Explorer**: Interactive SQL query interface with schema browser
-- 📥 **Data Extraction**: Export query results in multiple formats (CSV, JSON, Parquet)
-- ⚙️ **Settings Page**: System status, configuration, and troubleshooting
-- Mobile-responsive design with modern UI patterns
+**Next.js Frontend** (`rpa-landuse-frontend/`):
+- Modern React 19 application with Next.js 16 App Router
+- **Tech Stack**: Tailwind CSS, shadcn/ui, Zustand, TanStack Query, Plotly.js
+- **Pages**:
+  - `/login` - Password authentication
+  - `/chat` - Natural language AI chat with SSE streaming
+  - `/analytics` - Interactive dashboard with Plotly visualizations
+  - `/explorer` - SQL query editor with schema browser
+  - `/extraction` - Data export (CSV/JSON)
+- Session-based authentication with cookies
+- Responsive design with dark/light theme support
+
+**FastAPI Backend** (`rpa-landuse-backend/`):
+- REST API with OpenAPI documentation at `/docs`
+- **Endpoints**: `/api/v1/auth`, `/api/v1/chat`, `/api/v1/analytics`, `/api/v1/explorer`, `/api/v1/extraction`
+- SSE streaming for real-time chat responses
+- JWT token-based authentication
+- Integrates with LangGraph agent for natural language processing
+
+**Streamlit Dashboard** (`landuse_app.py`) - *Legacy/Development*:
+- Local development interface with multipage navigation using st.Page and st.navigation
+- Chat Interface: Natural language queries with conversation history
+- Analytics Dashboard: Pre-built visualizations with Plotly
+- Data Explorer: Interactive SQL query interface with schema browser
+- Data Extraction: Export query results in multiple formats (CSV, JSON, Parquet)
+- Settings Page: System status, configuration, and troubleshooting
 - Custom DuckDB connection using st.connection pattern
 
 **Refactored LangGraph Agent** (`src/landuse/agents/landuse_agent.py`) - **RECOMMENDED**:
