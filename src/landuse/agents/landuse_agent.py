@@ -65,9 +65,12 @@ class LanduseAgent:
         # Initialize component managers
         self.llm_manager = LLMManager(self.config, self.console)
         self.database_manager = DatabaseManager(self.config, self.console)
-        self.conversation_manager = ConversationManager(
-            max_history_length=self.config.agent.conversation_history_limit, console=self.console
-        )
+
+        # Per-session conversation managers for proper multi-user isolation
+        # Each thread_id gets its own ConversationManager instance
+        self._conversation_managers: dict[str, ConversationManager] = {}
+        self._default_thread_id = "default"
+        self._max_history_length = self.config.agent.conversation_history_limit
 
         # Create core components
         self.llm = self.llm_manager.create_llm()
@@ -109,6 +112,56 @@ class LanduseAgent:
         self.graph_builder = GraphBuilder(self.config, self.llm, self.tools, self.system_prompt, self.console)
         self.graph = None
 
+    def _get_conversation_manager(self, thread_id: str | None = None) -> ConversationManager:
+        """Get or create a ConversationManager for the given thread_id.
+
+        This ensures each thread/session has its own isolated conversation history,
+        preventing cross-contamination between different users or sessions.
+
+        Args:
+            thread_id: Unique identifier for the conversation thread.
+                      If None, uses the default thread.
+
+        Returns:
+            ConversationManager instance for the specified thread.
+        """
+        effective_thread_id = thread_id or self._default_thread_id
+
+        if effective_thread_id not in self._conversation_managers:
+            self._conversation_managers[effective_thread_id] = ConversationManager(
+                max_history_length=self._max_history_length,
+                console=self.console
+            )
+
+        return self._conversation_managers[effective_thread_id]
+
+    @property
+    def conversation_manager(self) -> ConversationManager:
+        """Backward compatibility: Get the default conversation manager.
+
+        For new code, use _get_conversation_manager(thread_id) instead.
+        """
+        return self._get_conversation_manager(self._default_thread_id)
+
+    def clear_thread_history(self, thread_id: str | None = None) -> bool:
+        """Clear conversation history for a specific thread.
+
+        Args:
+            thread_id: The thread to clear. If None, clears the default thread.
+
+        Returns:
+            True if history was cleared, False if thread didn't exist.
+        """
+        effective_thread_id = thread_id or self._default_thread_id
+
+        if effective_thread_id in self._conversation_managers:
+            self._conversation_managers[effective_thread_id].clear_history()
+            # Remove the manager to free memory
+            del self._conversation_managers[effective_thread_id]
+            return True
+
+        return False
+
     def _create_tools(self) -> list[BaseTool]:
         """Create tools for the agent."""
         tools = [
@@ -142,10 +195,22 @@ class LanduseAgent:
                 message=f"Rate limit exceeded: {error_msg}", retry_after=self.config.security.rate_limit_window
             )
 
-    def simple_query(self, question: str) -> str:
-        """Execute a query using simple direct LLM interaction without LangGraph state management."""
+    def simple_query(self, question: str, thread_id: str | None = None) -> str:
+        """Execute a query using simple direct LLM interaction without LangGraph state management.
+
+        Args:
+            question: The natural language question to answer.
+            thread_id: Optional thread ID for session-isolated conversation history.
+                      Each thread_id gets its own conversation history.
+
+        Returns:
+            The agent's response as a string.
+        """
         # Check rate limit before processing
-        self._check_rate_limit()
+        self._check_rate_limit(thread_id or "default")
+
+        # Get the conversation manager for this thread (creates one if needed)
+        conversation_manager = self._get_conversation_manager(thread_id)
 
         try:
             # Build conversation with history using conversation manager
@@ -153,8 +218,8 @@ class LanduseAgent:
             dynamic_prompt = self.get_dynamic_system_prompt(question)
             messages = [HumanMessage(content=dynamic_prompt)]
 
-            # Add conversation history from manager
-            messages.extend(self.conversation_manager.get_conversation_messages())
+            # Add conversation history from the thread-specific manager
+            messages.extend(conversation_manager.get_conversation_messages())
 
             # Add current question
             messages.append(HumanMessage(content=question))
@@ -314,8 +379,8 @@ class LanduseAgent:
                 if not final_content.strip():
                     final_content = "I executed the query but couldn't generate a formatted response. The query completed successfully but may have returned no results."
 
-            # Update conversation history using manager
-            self.conversation_manager.add_conversation(question, final_content)
+            # Update conversation history using thread-specific manager
+            conversation_manager.add_conversation(question, final_content)
 
             # Return clean final content without any special formatting
             if self.debug:
@@ -327,14 +392,14 @@ class LanduseAgent:
 
         except (LanduseError, ToolExecutionError) as e:
             error_msg = f"Query processing error: {str(e)}"
-            # Still update history even on error
-            self.conversation_manager.add_conversation(question, error_msg)
+            # Still update history even on error (using thread-specific manager)
+            conversation_manager.add_conversation(question, error_msg)
             return error_msg
         except Exception as e:
             wrapped_error = wrap_exception(e, "Simple query processing")
             error_msg = f"Unexpected error: {str(wrapped_error)}"
-            # Still update history even on error
-            self.conversation_manager.add_conversation(question, error_msg)
+            # Still update history even on error (using thread-specific manager)
+            conversation_manager.add_conversation(question, error_msg)
             return error_msg
 
     def _graph_query(
@@ -356,6 +421,9 @@ class LanduseAgent:
         # Check rate limit before processing
         self._check_rate_limit(thread_id or "default")
 
+        # Get the conversation manager for this thread (creates one if needed)
+        conversation_manager = self._get_conversation_manager(thread_id)
+
         try:
             # Build graph if not already built using graph builder
             if not self.graph:
@@ -365,8 +433,8 @@ class LanduseAgent:
             dynamic_prompt = self.get_dynamic_system_prompt(question)
             initial_messages = [HumanMessage(content=dynamic_prompt)]
 
-            # Add conversation history from manager
-            initial_messages.extend(self.conversation_manager.get_conversation_messages())
+            # Add conversation history from thread-specific manager
+            initial_messages.extend(conversation_manager.get_conversation_messages())
 
             # Add current question
             initial_messages.append(HumanMessage(content=question))
@@ -425,15 +493,15 @@ class LanduseAgent:
                                 text_parts.append(item)
                         if text_parts:
                             final_response = " ".join(text_parts)
-                            self.conversation_manager.add_conversation(question, final_response)
+                            conversation_manager.add_conversation(question, final_response)
                             return final_response
                     elif content:
                         final_response = str(content)
-                        self.conversation_manager.add_conversation(question, final_response)
+                        conversation_manager.add_conversation(question, final_response)
                         return final_response
 
             default_response = "I couldn't generate a proper response. Please try rephrasing your question."
-            self.conversation_manager.add_conversation(question, default_response)
+            conversation_manager.add_conversation(question, default_response)
             return default_response
 
         except GraphExecutionError as e:
@@ -441,7 +509,7 @@ class LanduseAgent:
             if self.debug:
                 self.console.print(f"[red]DEBUG: {error_msg}[/red]")
             error_response = f"I encountered a workflow error: {str(e)}"
-            self.conversation_manager.add_conversation(question, error_response)
+            conversation_manager.add_conversation(question, error_response)
             return error_response
         except Exception as e:
             wrapped_error = wrap_exception(e, "Graph query execution")
@@ -452,7 +520,7 @@ class LanduseAgent:
                 self.console.print(f"[red]DEBUG: {error_msg}[/red]")
                 self.console.print(f"[red]{traceback.format_exc()}[/red]")
             error_response = f"I encountered an unexpected error: {str(wrapped_error)}"
-            self.conversation_manager.add_conversation(question, error_response)
+            conversation_manager.add_conversation(question, error_response)
             return error_response
 
     def query(
@@ -483,7 +551,8 @@ class LanduseAgent:
             return self._graph_query(question, thread_id, user_expertise)
         else:
             # Use the simple approach for stability
-            return self.simple_query(question)
+            # Pass thread_id for proper session isolation
+            return self.simple_query(question, thread_id)
 
     def stream_query(self, question: str, thread_id: Optional[str] = None) -> Any:
         """
@@ -582,9 +651,21 @@ class LanduseAgent:
 
         self.console.print(table)
 
-    def clear_history(self) -> None:
-        """Clear conversation history."""
-        self.conversation_manager.clear_history()
+    def clear_history(self, thread_id: str | None = None) -> None:
+        """Clear conversation history for a specific thread or all threads.
+
+        Args:
+            thread_id: If provided, clears only that thread's history.
+                      If None, clears ALL threads (backward compatible behavior).
+        """
+        if thread_id:
+            # Clear specific thread
+            self.clear_thread_history(thread_id)
+        else:
+            # Clear all threads (backward compatible)
+            for tid in list(self._conversation_managers.keys()):
+                self._conversation_managers[tid].clear_history()
+            self._conversation_managers.clear()
 
     def chat(self) -> None:
         """Interactive chat interface for the agent."""
