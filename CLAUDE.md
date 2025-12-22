@@ -206,8 +206,81 @@ duckdb data/processed/landuse_analytics.duckdb
 - **DatabaseManager** (`src/landuse/agents/database_manager.py`): Connection management, schema retrieval, resource cleanup
 - **ConversationManager** (`src/landuse/agents/conversation_manager.py`): Sliding window memory, message formatting
 - **QueryExecutor** (`src/landuse/agents/query_executor.py`): SQL execution with security validation and error handling
-- **GraphBuilder** (`src/landuse/agents/graph_builder.py`): LangGraph workflow construction and node management
+- **GraphBuilder** (`src/landuse/agents/graph_builder.py`): LangGraph workflow construction with context-aware nodes
+- **RPAContext** (`src/landuse/agents/rpa_context.py`): RPA domain knowledge library with 15+ concepts
+- **DynamicPrompts** (`src/landuse/agents/dynamic_prompts.py`): Progressive disclosure prompt builder
 - **DatabaseSecurity** (`src/landuse/security/database_security.py`): Allowlist-based validation, SQL injection prevention
+
+### Full LangGraph Mode with RPA Context Embedding
+
+The agent supports an enhanced LangGraph mode that provides rich domain context from the 2020 RPA Assessment through progressive disclosure.
+
+**Key Features**:
+- **Query Analysis**: Automatically detects scenarios (LM/HM/HL/HH), geography (all 50 US states), and time ranges
+- **Progressive Disclosure**: Only explains RPA concepts when first relevant (avoids information overload)
+- **Context-Aware Responses**: Agent uses detected context to provide better, more relevant answers
+- **Human-in-the-Loop**: Optional SQL approval for potentially large queries using LangGraph's `interrupt()`
+- **Expertise Calibration**: Adjusts response detail level based on user expertise (novice/intermediate/expert)
+
+**Enhanced Graph Structure**:
+```
+query_analyzer → context_enricher → agent → router
+                                              │
+                    ┌─────────────┬───────────┼───────────┐
+                    │             │           │           │
+                    ▼             ▼           ▼           ▼
+                  tools       analyzer   sql_approval    END
+                    │             │           │
+                    └─────────────┴───────────┘
+                              │
+                              ▼
+                            agent
+```
+
+**New Nodes**:
+- **QueryAnalyzerNode**: Detects scenarios, geography, time ranges, and query type
+- **ContextEnricherNode**: Injects relevant RPA domain knowledge based on query
+- **SQLApprovalNode**: Uses `interrupt()` for human approval of large queries
+
+**RPA Context Library** (`src/landuse/agents/rpa_context.py`):
+Contains 15+ domain concepts including:
+- Development irreversibility assumption
+- Scenario framework (LM, HM, HL, HH)
+- Private land focus
+- Forest-to-urban conversion patterns
+- Regional dynamics (Southeast hotspot, Midwest agriculture)
+
+**Enabling Full Graph Mode**:
+```python
+from landuse.agents.landuse_agent import LanduseAgent
+from landuse.core.app_config import AppConfig
+
+# Enable via configuration
+config = AppConfig()
+config.features.enable_full_graph_mode = True
+
+with LanduseAgent(config) as agent:
+    # Query with user expertise level
+    response = agent.query(
+        "Compare forest-to-urban conversion between LM and HH in California",
+        user_expertise="novice"  # or "intermediate", "expert"
+    )
+```
+
+**Environment Variable**:
+```bash
+LANDUSE_FEATURES__ENABLE_FULL_GRAPH_MODE=true
+```
+
+**Enhanced AgentState** (`src/landuse/agents/state.py`):
+The state now tracks 15 fields including:
+- `user_expertise`: Response calibration (novice/intermediate/expert)
+- `explained_concepts`: Concepts already explained (prevents repetition)
+- `detected_scenarios`: Scenarios mentioned in query (LM, HM, HL, HH)
+- `detected_geography`: States/regions mentioned (all 50 US states)
+- `focus_time_range`: Time period focus (2020-2070)
+- `current_query_type`: Query classification (aggregate, comparison, geographic, temporal)
+- `pending_sql_approval`: For human-in-the-loop approval
 
 **Data Converter** (`src/landuse/converters/convert_to_duckdb.py`):
 - Processes nested JSON to normalized star schema
@@ -437,6 +510,12 @@ LANDUSE_LOGGING__ENABLE_PERFORMANCE_LOGGING=false
 LANDUSE_FEATURES__ENABLE_MAP_GENERATION=true
 LANDUSE_FEATURES__ENABLE_CONVERSATION_MEMORY=true
 LANDUSE_FEATURES__MAP_OUTPUT_DIR=maps/agent_generated
+
+# Full LangGraph Mode (LANDUSE_FEATURES__ prefix)
+LANDUSE_FEATURES__ENABLE_FULL_GRAPH_MODE=false    # Enable enhanced graph with RPA context
+LANDUSE_FEATURES__ENABLE_SQL_APPROVAL=false       # Human-in-the-loop for large queries
+LANDUSE_FEATURES__ENABLE_CONTEXT_ENRICHMENT=true  # Progressive disclosure of RPA concepts
+LANDUSE_FEATURES__ENABLE_RPA_CONTEXT_TRACKING=true # Track scenarios, geography in state
 ```
 
 #### Programmatic Configuration
@@ -1062,6 +1141,17 @@ Key packages (managed via `uv`):
   - Thread-safe metrics collection with tag-based filtering and aggregation
 - **Real-Time Observability**: Live performance metrics with statistical analysis (min, max, mean, count)
 - **Production Ready**: Performance monitoring with configurable retention and automatic cleanup
+
+### Full LangGraph Mode with RPA Context (2025)
+- **Enhanced Graph Workflow**: Added query_analyzer, context_enricher, and sql_approval nodes
+- **RPA Context Library**: 15+ domain concepts with trigger-based detection
+- **Progressive Disclosure**: Only explains concepts when first relevant to avoid info overload
+- **Query Intelligence**: Automatically detects scenarios (LM/HM/HL/HH), geography (50 states), time ranges
+- **Expertise Calibration**: Adjusts response detail for novice/intermediate/expert users
+- **Human-in-the-Loop**: Optional SQL approval for large queries using LangGraph `interrupt()`
+- **Enhanced State**: 15 fields tracking RPA context, explained concepts, detected entities
+- **Feature Flags**: Gradual rollout via `enable_full_graph_mode` (disabled by default)
+- **Dynamic Prompts**: Context-aware prompt builder with progressive disclosure
 
 ### Modern Infrastructure Enhancements
 - **Pydantic v2 Models**: Type-safe data structures with validation for all components
