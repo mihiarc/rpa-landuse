@@ -97,7 +97,7 @@ class FeatureConfig(BaseModel):
         description="Enable basic LangGraph workflow mode (legacy simple graph)",
     )
     enable_full_graph_mode: bool = Field(
-        default=False,
+        default=True,
         description="Enable full LangGraph mode with context-aware nodes (new enhanced graph)",
     )
     enable_sql_approval: bool = Field(
