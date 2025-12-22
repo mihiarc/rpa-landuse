@@ -8,6 +8,7 @@ from typing import Any, Optional
 
 from langchain_core.language_models import BaseChatModel
 from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, ToolMessage
+from langchain_core.messages.utils import trim_messages, count_tokens_approximately
 from langchain_core.tools import BaseTool
 from langgraph.graph import StateGraph
 from rich.console import Console
@@ -36,6 +37,12 @@ from landuse.tools.common_tools import create_analysis_tool, create_execute_quer
 from landuse.tools.state_lookup_tool import create_state_lookup_tool
 from landuse.utils.retry_decorators import invoke_llm_with_retry
 from landuse.utils.security import RateLimiter
+
+# Hard token limits to prevent runaway context accumulation
+# GPT-4o has 128K context, but we want to stay well under to leave room for response
+MAX_CONTEXT_TOKENS = 100_000  # Hard cap - will trim if exceeded
+MAX_HISTORY_TOKENS = 8_000    # Max tokens for conversation history
+ENABLE_CONVERSATION_HISTORY = False  # DISABLED by default for stateless operation
 
 
 class LanduseAgent:
@@ -162,6 +169,56 @@ class LanduseAgent:
 
         return False
 
+    def _trim_messages_safely(
+        self,
+        messages: list[BaseMessage],
+        max_tokens: int = MAX_CONTEXT_TOKENS
+    ) -> list[BaseMessage]:
+        """Trim messages to stay under token limit.
+
+        This is a safety net to prevent token accumulation errors.
+        Uses approximate token counting for speed.
+
+        Args:
+            messages: List of messages to trim
+            max_tokens: Maximum token count allowed
+
+        Returns:
+            Trimmed list of messages
+        """
+        try:
+            # Count current tokens
+            current_tokens = count_tokens_approximately(messages)
+
+            if current_tokens <= max_tokens:
+                return messages
+
+            # Log warning about trimming
+            if self.console:
+                self.console.print(
+                    f"[yellow]WARNING: Trimming messages from {current_tokens} to {max_tokens} tokens[/yellow]"
+                )
+
+            # Trim to max tokens, keeping the most recent messages
+            trimmed = trim_messages(
+                messages,
+                strategy="last",
+                token_counter=count_tokens_approximately,
+                max_tokens=max_tokens,
+                start_on="human",
+                end_on=("human", "tool"),
+                allow_partial=False,
+            )
+
+            return list(trimmed)
+
+        except Exception as e:
+            # If trimming fails, return original messages
+            # Better to try with full context than fail completely
+            if self.debug:
+                print(f"DEBUG: Message trimming failed: {e}")
+            return messages
+
     def _create_tools(self) -> list[BaseTool]:
         """Create tools for the agent."""
         tools = [
@@ -195,13 +252,23 @@ class LanduseAgent:
                 message=f"Rate limit exceeded: {error_msg}", retry_after=self.config.security.rate_limit_window
             )
 
-    def simple_query(self, question: str, thread_id: str | None = None) -> str:
+    def simple_query(
+        self,
+        question: str,
+        thread_id: str | None = None,
+        include_history: bool = ENABLE_CONVERSATION_HISTORY,
+    ) -> str:
         """Execute a query using simple direct LLM interaction without LangGraph state management.
+
+        IMPORTANT: By default, this is STATELESS - no conversation history is included.
+        Each query is independent. This prevents token accumulation across sessions.
 
         Args:
             question: The natural language question to answer.
             thread_id: Optional thread ID for session-isolated conversation history.
-                      Each thread_id gets its own conversation history.
+                      Only used if include_history=True.
+            include_history: Whether to include conversation history. Default is False
+                           for stateless operation. Set to True to enable memory.
 
         Returns:
             The agent's response as a string.
@@ -209,20 +276,40 @@ class LanduseAgent:
         # Check rate limit before processing
         self._check_rate_limit(thread_id or "default")
 
-        # Get the conversation manager for this thread (creates one if needed)
-        conversation_manager = self._get_conversation_manager(thread_id)
-
         try:
-            # Build conversation with history using conversation manager
+            # Build conversation - STATELESS by default
             # Use dynamic prompt selection based on query content
             dynamic_prompt = self.get_dynamic_system_prompt(question)
             messages = [HumanMessage(content=dynamic_prompt)]
 
-            # Add conversation history from the thread-specific manager
-            messages.extend(conversation_manager.get_conversation_messages())
+            # Only add conversation history if explicitly enabled
+            if include_history and thread_id:
+                conversation_manager = self._get_conversation_manager(thread_id)
+                history_messages = conversation_manager.get_conversation_messages()
+
+                # Trim history to prevent token explosion
+                if history_messages:
+                    history_messages = self._trim_messages_safely(
+                        history_messages,
+                        max_tokens=MAX_HISTORY_TOKENS
+                    )
+                    messages.extend(history_messages)
+
+                    if self.debug:
+                        token_count = count_tokens_approximately(history_messages)
+                        print(f"DEBUG: Added {len(history_messages)} history messages ({token_count} tokens)")
+            else:
+                conversation_manager = None  # No history tracking
 
             # Add current question
             messages.append(HumanMessage(content=question))
+
+            # SAFETY: Apply hard token limit before sending to LLM
+            messages = self._trim_messages_safely(messages, max_tokens=MAX_CONTEXT_TOKENS)
+
+            if self.debug:
+                total_tokens = count_tokens_approximately(messages)
+                print(f"DEBUG: Sending {len(messages)} messages ({total_tokens} tokens) to LLM")
 
             # Get initial response with retry logic
             response = invoke_llm_with_retry(self.llm.bind_tools(self.tools), messages, max_attempts=3)
@@ -379,8 +466,9 @@ class LanduseAgent:
                 if not final_content.strip():
                     final_content = "I executed the query but couldn't generate a formatted response. The query completed successfully but may have returned no results."
 
-            # Update conversation history using thread-specific manager
-            conversation_manager.add_conversation(question, final_content)
+            # Only update conversation history if history tracking is enabled
+            if conversation_manager is not None:
+                conversation_manager.add_conversation(question, final_content)
 
             # Return clean final content without any special formatting
             if self.debug:
@@ -392,14 +480,16 @@ class LanduseAgent:
 
         except (LanduseError, ToolExecutionError) as e:
             error_msg = f"Query processing error: {str(e)}"
-            # Still update history even on error (using thread-specific manager)
-            conversation_manager.add_conversation(question, error_msg)
+            # Only update history if enabled
+            if conversation_manager is not None:
+                conversation_manager.add_conversation(question, error_msg)
             return error_msg
         except Exception as e:
             wrapped_error = wrap_exception(e, "Simple query processing")
             error_msg = f"Unexpected error: {str(wrapped_error)}"
-            # Still update history even on error (using thread-specific manager)
-            conversation_manager.add_conversation(question, error_msg)
+            # Only update history if enabled
+            if 'conversation_manager' in dir() and conversation_manager is not None:
+                conversation_manager.add_conversation(question, error_msg)
             return error_msg
 
     def _graph_query(
@@ -529,14 +619,19 @@ class LanduseAgent:
         use_graph: bool | None = None,
         thread_id: str | None = None,
         user_expertise: str = "novice",
+        include_history: bool = ENABLE_CONVERSATION_HISTORY,
     ) -> str:
         """Execute a natural language query using the agent.
+
+        IMPORTANT: By default, queries are STATELESS - no conversation history.
+        Set include_history=True to enable conversation memory.
 
         Args:
             question: The natural language question to answer.
             use_graph: Override for graph mode (None uses feature flag).
             thread_id: Optional thread ID for conversation memory.
             user_expertise: User expertise level for response calibration.
+            include_history: Whether to include conversation history. Default is False.
 
         Returns:
             The agent's response as a string.
@@ -550,9 +645,8 @@ class LanduseAgent:
         if should_use_graph:
             return self._graph_query(question, thread_id, user_expertise)
         else:
-            # Use the simple approach for stability
-            # Pass thread_id for proper session isolation
-            return self.simple_query(question, thread_id)
+            # Use the simple approach - STATELESS by default
+            return self.simple_query(question, thread_id, include_history=include_history)
 
     def stream_query(self, question: str, thread_id: Optional[str] = None) -> Any:
         """
