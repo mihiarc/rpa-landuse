@@ -80,20 +80,32 @@ class SchemaVersionManager:
             connection: DuckDB connection
         """
         self.connection = connection
+        self._is_read_only = False
         self._ensure_version_table()
 
     def _ensure_version_table(self):
-        """Ensure the schema_version table exists."""
-        self.connection.execute("""
-            CREATE TABLE IF NOT EXISTS schema_version (
-                version_id INTEGER PRIMARY KEY,
-                version_number VARCHAR(20) NOT NULL,
-                description TEXT,
-                applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                applied_by VARCHAR(100),
-                UNIQUE(version_number)
-            )
-        """)
+        """Ensure the schema_version table exists.
+
+        Handles read-only databases gracefully by detecting the constraint
+        and setting a flag instead of failing.
+        """
+        try:
+            self.connection.execute("""
+                CREATE TABLE IF NOT EXISTS schema_version (
+                    version_id INTEGER PRIMARY KEY,
+                    version_number VARCHAR(20) NOT NULL,
+                    description TEXT,
+                    applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    applied_by VARCHAR(100),
+                    UNIQUE(version_number)
+                )
+            """)
+        except duckdb.InvalidInputException as e:
+            # Handle read-only database (e.g., MotherDuck in read-only mode)
+            if "read-only" in str(e).lower():
+                self._is_read_only = True
+            else:
+                raise
 
     def apply_version(self, version: str, applied_by: str = "system") -> None:
         """Apply a version to the database.
@@ -104,7 +116,12 @@ class SchemaVersionManager:
 
         Raises:
             ValueError: If version is already applied or invalid
+            RuntimeError: If database is read-only
         """
+        if self._is_read_only:
+            # Cannot apply version to read-only database
+            return
+
         # Check if version already exists first
         existing = self.connection.execute(
             """
