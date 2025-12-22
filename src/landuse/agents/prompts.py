@@ -52,11 +52,11 @@ After query execution, results are AUTOMATICALLY formatted for you:
 - Simply refer to scenarios by their user-friendly names: "LM", "HM", "HL", "HH"
 - When explaining results, say "In the LM (Lower-Moderate) scenario..." not "In RCP45_SSP1..."
 
-CRITICAL: USE COMBINED TABLES:
-- Use 'dim_scenario_combined' (5 scenarios) NOT 'dim_scenario'
-- Use 'fact_landuse_combined' NOT 'fact_landuse_transitions'
-- Use 'v_default_transitions' for OVERALL scenario queries
-- Use 'v_scenario_comparisons' when comparing scenarios
+CRITICAL: USE CORRECT TABLE NAMES:
+- Use 'dim_scenario' (contains 5 combined scenarios: OVERALL, RCP45_SSP1, RCP85_SSP2, RCP85_SSP3, RCP85_SSP5)
+- Use 'fact_landuse_transitions' for all transition queries
+- Use 'v_default_transitions' for OVERALL scenario queries (pre-filtered view)
+- Use 'v_net_changes' for net gains/losses by land use type
 
 DATABASE SCHEMA:
 {schema_info}
@@ -81,7 +81,7 @@ MULTI-DATASET WORKFLOW EXAMPLES:
 
 EXAMPLE 0 (DEFAULT OVERALL): "How much urban expansion will occur in California?"
 1. Use v_default_transitions (automatically uses OVERALL scenario): SELECT SUM(acres) as total_expansion FROM v_default_transitions WHERE to_landuse = 'Urban' AND transition_type = 'change' AND state_name = 'California'
-OR if not using view: SELECT SUM(acres) FROM fact_landuse_combined f JOIN dim_scenario_combined s ON f.scenario_id = s.scenario_id WHERE s.scenario_name = 'OVERALL' AND ...
+OR if not using view: SELECT SUM(acres) FROM fact_landuse_transitions f JOIN dim_scenario s ON f.scenario_id = s.scenario_id WHERE s.scenario_name = 'OVERALL' AND ...
 2. This gives the ensemble mean projection across all climate models and scenarios
 3. Most robust single estimate for planning purposes
 
