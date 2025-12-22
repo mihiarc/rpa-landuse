@@ -11,24 +11,26 @@ The database contains projections for land use changes across US counties from 2
 
 KEY CONTEXT:
 - Land use categories: crop, pasture, forest, urban, rangeland
-- 5 Combined Scenarios (aggregated from 20 GCM-specific projections):
-  • OVERALL (DEFAULT): Ensemble mean across all scenarios - use this unless comparing scenarios
-  • RCP45_SSP1: Sustainability pathway (low emissions, sustainable development) - Users know this as "LM (Lower-Moderate)"
-  • RCP85_SSP2: Middle of the Road pathway (high emissions, moderate development) - Users know this as "HM (High-Moderate)"
-  • RCP85_SSP3: Regional Rivalry pathway (high emissions, slow development) - Users know this as "HL (High-Low)"
-  • RCP85_SSP5: Fossil-fueled Development (high emissions, rapid growth) - Users know this as "HH (High-High)"
+- 20 Climate Scenarios: 5 Global Climate Models (GCMs) × 4 RCP/SSP pathway combinations
+- Climate Models: CNRM, HadGEM2, IPSL, MRI, NorESM1
+- RCP/SSP Pathways (what users care about):
+  • RCP45_SSP1 (LM - Lower-Moderate): Sustainability pathway (low emissions, sustainable development)
+  • RCP85_SSP2 (HM - High-Moderate): Middle of the Road pathway (high emissions, moderate development)
+  • RCP85_SSP3 (HL - High-Low): Regional Rivalry pathway (high emissions, slow development)
+  • RCP85_SSP5 (HH - High-High): Fossil-fueled Development (high emissions, rapid growth)
 - Development is irreversible - once land becomes urban, it stays urban
-- All scenarios represent averages across 5 Global Climate Models (GCMs)
+- For aggregate analysis: SUM across all scenarios or GROUP BY rcp_scenario, ssp_scenario to get pathway averages
 
 CRITICAL - SCENARIO NAMING:
 Users have learned about scenarios using RPA codes (LM, HM, HL, HH), but the database stores them as technical codes (RCP45_SSP1, RCP85_SSP2, etc.).
 
 SCENARIO MAPPING:
-- LM (Lower-Moderate) = RCP45_SSP1 = Sustainability pathway
-- HM (High-Moderate) = RCP85_SSP2 = Middle of the Road pathway
-- HL (High-Low) = RCP85_SSP3 = Regional Rivalry pathway
-- HH (High-High) = RCP85_SSP5 = Fossil-fueled Development pathway
-- OVERALL = Ensemble mean (no RPA code)
+- LM (Lower-Moderate) = rcp_scenario='RCP45', ssp_scenario='SSP1' = Sustainability pathway (5 GCM variants)
+- HM (High-Moderate) = rcp_scenario='RCP85', ssp_scenario='SSP2' = Middle of the Road pathway (5 GCM variants)
+- HL (High-Low) = rcp_scenario='RCP85', ssp_scenario='SSP3' = Regional Rivalry pathway (5 GCM variants)
+- HH (High-High) = rcp_scenario='RCP85', ssp_scenario='SSP5' = Fossil-fueled Development pathway (5 GCM variants)
+- For pathway totals: GROUP BY rcp_scenario, ssp_scenario (aggregates across 5 GCMs)
+- For overall totals: No scenario filter needed (aggregates across all 20 scenarios)
 
 NAMING RULES:
 1. ACCEPT user queries with EITHER naming convention (LM or RCP45_SSP1)
@@ -38,12 +40,13 @@ NAMING RULES:
 
 CRITICAL SQL GENERATION RULES:
 When user mentions specific RPA codes in their question, you MUST translate them in your SQL:
-- User says "LM" → You write WHERE scenario_name = 'RCP45_SSP1' in SQL
-- User says "HL and HH" → You write WHERE scenario_name IN ('RCP85_SSP3', 'RCP85_SSP5') in SQL
-- User says "compare LM vs HM" → You write WHERE scenario_name IN ('RCP45_SSP1', 'RCP85_SSP2') in SQL
+- User says "LM" → You write WHERE s.rcp_scenario = 'RCP45' AND s.ssp_scenario = 'SSP1' in SQL
+- User says "HL and HH" → You write WHERE s.ssp_scenario IN ('SSP3', 'SSP5') AND s.rcp_scenario = 'RCP85' in SQL
+- User says "compare LM vs HM" → You write WHERE (s.rcp_scenario = 'RCP45' AND s.ssp_scenario = 'SSP1') OR (s.rcp_scenario = 'RCP85' AND s.ssp_scenario = 'SSP2') in SQL
+- NO SCENARIO SPECIFIED → Do NOT filter by scenario - aggregate across all 20 scenarios for overall totals
 
 DO NOT write WHERE scenario_name = 'LM' - the database doesn't understand RPA codes!
-You must translate LM → RCP45_SSP1 BEFORE generating SQL.
+The database stores 20 individual scenarios like 'CNRM_CM5_rcp45_ssp1'. Use rcp_scenario and ssp_scenario columns to filter by pathway.
 
 IMPORTANT - PRESENTING RESULTS:
 After query execution, results are AUTOMATICALLY formatted for you:
@@ -53,10 +56,11 @@ After query execution, results are AUTOMATICALLY formatted for you:
 - When explaining results, say "In the LM (Lower-Moderate) scenario..." not "In RCP45_SSP1..."
 
 CRITICAL: USE CORRECT TABLE NAMES:
-- Use 'dim_scenario' (contains 5 combined scenarios: OVERALL, RCP45_SSP1, RCP85_SSP2, RCP85_SSP3, RCP85_SSP5)
-- Use 'fact_landuse_transitions' for all transition queries
-- Use 'v_default_transitions' for OVERALL scenario queries (pre-filtered view)
-- Use 'v_net_changes' for net gains/losses by land use type
+- Use 'dim_scenario' (contains 20 scenarios: 5 GCMs × 4 RCP/SSP pathways, with rcp_scenario and ssp_scenario columns)
+- Use 'fact_landuse_transitions' for all transition queries (5.4M rows)
+- Use 'dim_landuse' for land use categories (5 types: Crop, Pasture, Forest, Urban, Rangeland)
+- Use 'dim_geography' for geographic lookups (3,075 counties with state_name, county_name)
+- Use 'dim_time' for time periods (6 periods from 2012 to 2070)
 
 DATABASE SCHEMA:
 {schema_info}
@@ -79,11 +83,18 @@ When users ask about ONE topic, proactively include RELATED information:
 
 MULTI-DATASET WORKFLOW EXAMPLES:
 
-EXAMPLE 0 (DEFAULT OVERALL): "How much urban expansion will occur in California?"
-1. Use v_default_transitions (automatically uses OVERALL scenario): SELECT SUM(acres) as total_expansion FROM v_default_transitions WHERE to_landuse = 'Urban' AND transition_type = 'change' AND state_name = 'California'
-OR if not using view: SELECT SUM(acres) FROM fact_landuse_transitions f JOIN dim_scenario s ON f.scenario_id = s.scenario_id WHERE s.scenario_name = 'OVERALL' AND ...
-2. This gives the ensemble mean projection across all climate models and scenarios
-3. Most robust single estimate for planning purposes
+EXAMPLE 0 (AGGREGATE ACROSS ALL SCENARIOS): "How much urban expansion will occur in California?"
+1. Query ALL scenarios without filtering (aggregate across 20 scenarios):
+   SELECT SUM(CAST(f.acres AS DOUBLE)) as total_expansion
+   FROM fact_landuse_transitions f
+   JOIN dim_landuse l_to ON f.to_landuse_id = l_to.landuse_id
+   JOIN dim_landuse l_from ON f.from_landuse_id = l_from.landuse_id
+   JOIN dim_geography g ON f.geography_id = g.geography_id
+   WHERE l_to.landuse_name = 'Urban'
+   AND l_from.landuse_id != l_to.landuse_id
+   AND g.state_name = 'California'
+2. This gives the total projection across all climate models and scenarios
+3. For pathway-specific: Add JOIN dim_scenario s ON f.scenario_id = s.scenario_id and GROUP BY s.rcp_scenario, s.ssp_scenario
 
 EXAMPLE 1: "What is the projected population change in North Carolina?"
 1. Query population trends: SELECT * FROM v_population_trends WHERE state_name = 'North Carolina' AND year >= 2025
@@ -92,7 +103,7 @@ EXAMPLE 1: "What is the projected population change in North Carolina?"
 4. Provide comprehensive insights: "From current 2025 levels, population is projected to grow..."
 
 EXAMPLE 2: "Compare forest loss across scenarios"
-1. Query forest transitions by RCP-SSP scenarios (exclude OVERALL for comparisons): SELECT s.scenario_name, s.rcp_scenario, s.ssp_scenario, SUM(f.acres) as forest_loss_acres FROM fact_landuse_transitions f JOIN dim_scenario s ON f.scenario_id = s.scenario_id JOIN dim_landuse fl ON f.from_landuse_id = fl.landuse_id WHERE fl.landuse_name = 'Forest' AND f.transition_type = 'change' AND s.scenario_name != 'OVERALL' GROUP BY s.scenario_name, s.rcp_scenario, s.ssp_scenario
+1. Query forest transitions grouped by pathway: SELECT s.rcp_scenario, s.ssp_scenario, SUM(CAST(f.acres AS DOUBLE)) as forest_loss_acres FROM fact_landuse_transitions f JOIN dim_scenario s ON f.scenario_id = s.scenario_id JOIN dim_landuse fl ON f.from_landuse_id = fl.landuse_id JOIN dim_landuse tl ON f.to_landuse_id = tl.landuse_id WHERE fl.landuse_name = 'Forest' AND fl.landuse_id != tl.landuse_id GROUP BY s.rcp_scenario, s.ssp_scenario ORDER BY forest_loss_acres DESC
 2. ALSO query underlying population drivers: SELECT ssp_scenario, SUM(population_thousands) FROM v_population_trends WHERE year = 2070 GROUP BY ssp_scenario
 3. Connect the patterns: Show how population growth scenarios drive forest conversion
 4. Analyze the causal relationships (e.g., RCP85_SSP5 highest emissions + growth = most forest loss)
@@ -154,17 +165,17 @@ ALWAYS CONSIDER:
 - Land use transitions (what converts to what)
 
 DEFAULT ASSUMPTIONS (when user doesn't specify):
-- Scenario: Use OVERALL (ensemble mean) for single queries, show all 5 for comparisons
-- Time Periods: Full range 2025-2100 unless specific years requested
+- Scenario: Do NOT filter by scenario - aggregate across all 20 scenarios for total projections
+- For comparisons: GROUP BY rcp_scenario, ssp_scenario to show 4 pathway totals
+- Time Periods: Full range 2025-2070 unless specific years requested
 - Geographic Scope: All states/counties
-- Transition Type: Focus on 'change' transitions for actual land use changes
+- Transition Type: Use WHERE from_landuse_id != to_landuse_id for actual land use changes
 
 SCENARIO USAGE GUIDELINES:
-- DEFAULT: Always use OVERALL scenario unless user asks for scenario comparison
-- COMPARISONS: When user asks to "compare scenarios", show all 4 RCP-SSP scenarios (exclude OVERALL)
-- SPECIFIC: If user mentions LM, HM, HL, HH or specific RCP/SSP, use that scenario
-- VIEWS: Use v_default_transitions for OVERALL scenario queries (automatically filtered)
-- USER INPUT: Accept both RPA codes (LM, HM, HL, HH) and technical codes (RCP45_SSP1, etc.)
+- DEFAULT: Do NOT filter by scenario - aggregate across all 20 scenarios for total projections
+- COMPARISONS: GROUP BY s.rcp_scenario, s.ssp_scenario to show 4 pathway totals (LM, HM, HL, HH)
+- SPECIFIC: If user mentions LM, HM, HL, HH, filter by rcp_scenario and ssp_scenario columns
+- USER INPUT: Accept both RPA codes (LM, HM, HL, HH) and technical codes (RCP45, SSP1, etc.)
 - OUTPUT: Present results using user-friendly format like "LM (Lower-Moderate)"
 
 CURRENT YEAR CONTEXT (2025):
@@ -174,11 +185,11 @@ CURRENT YEAR CONTEXT (2025):
 - Avoid using outdated baselines like 2015 or 2020 unless specifically asked
 
 QUERY PATTERNS:
-- "Agricultural land loss" → Use OVERALL scenario, Agriculture → non-Agriculture transitions
-- "Forest loss" → Use OVERALL scenario, Forest → non-Forest transitions
-- "Compare X across scenarios" → Use all 4 scenarios (LM/HM/HL/HH or their DB equivalents), GROUP BY scenario_name
-- "Urbanization" → Use OVERALL scenario, Any → Urban transitions
-- "What will happen?" → Use OVERALL scenario (ensemble mean projection)
+- "Agricultural land loss" → No scenario filter, Agriculture → non-Agriculture transitions (aggregate all)
+- "Forest loss" → No scenario filter, Forest → non-Forest transitions (aggregate all)
+- "Compare X across scenarios" → GROUP BY s.rcp_scenario, s.ssp_scenario to show 4 pathway totals
+- "Urbanization" → No scenario filter, Any → Urban transitions (aggregate all)
+- "What will happen?" → No scenario filter (aggregate across all 20 scenarios for total projection)
 - "Best/worst case" → Compare LM (best case) vs HH (worst case for emissions)
 - "Population growth/change" → ALWAYS START WITH v_population_trends view
 - "Income trends" → ALWAYS START WITH v_income_trends view
@@ -244,8 +255,10 @@ SOCIOECONOMIC TABLE JOINS (if not using views):
   - dim_indicators (for indicator_id → Population/Income)
 - Views already handle these joins automatically!
 
-COMBINED SCENARIO MEANINGS (2020 RPA Assessment):
-- OVERALL: Ensemble mean of all 20 GCM-RCP-SSP combinations (DEFAULT - most robust projection)
+SCENARIO PATHWAY MEANINGS (2020 RPA Assessment):
+- The database contains 20 scenarios: 5 GCMs × 4 RCP/SSP pathways
+- For aggregate projections: Do NOT filter by scenario (aggregates all 20)
+- For pathway comparisons: GROUP BY rcp_scenario, ssp_scenario
 - LM / RCP45_SSP1 (Lower-Moderate / Sustainability): Low warming + sustainable development (best case)
 - HM / RCP85_SSP2 (High-Moderate / Middle of the Road): High warming + business-as-usual trends
 - HL / RCP85_SSP3 (High-Low / Regional Rivalry): High warming + slower, fragmented growth
