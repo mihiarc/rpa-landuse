@@ -170,7 +170,8 @@ class DatabaseManager(DatabaseInterface):
 
             self.console.print(f"[green]✓ Found {table_count} tables in database[/green]")
 
-            # Get schema information - prioritize combined tables
+            # Get schema information - ONLY RPA landuse tables
+            # Filter to avoid picking up FIA or other project tables in shared MotherDuck
             schema_query = """
             SELECT
                 table_name,
@@ -179,21 +180,24 @@ class DatabaseManager(DatabaseInterface):
                 is_nullable
             FROM information_schema.columns
             WHERE table_schema = 'main'
+            -- CRITICAL: Only include RPA landuse tables (dim_*, fact_*, v_* patterns)
+            AND (
+                table_name LIKE 'dim_%'
+                OR table_name LIKE 'fact_%'
+                OR table_name LIKE 'v_%'
+            )
             -- Exclude original tables if combined versions exist
             AND table_name NOT IN ('dim_scenario_original', 'fact_landuse_transitions_original')
-            -- Prioritize combined tables by excluding originals when both exist
-            AND (
-                (table_name = 'dim_scenario_combined' OR table_name NOT LIKE 'dim_scenario')
-                AND (table_name = 'fact_landuse_combined' OR table_name NOT LIKE 'fact_landuse_transitions')
-            )
             ORDER BY
-                -- Prioritize combined tables and views
+                -- Prioritize core tables
                 CASE
-                    WHEN table_name = 'dim_scenario_combined' THEN 1
-                    WHEN table_name = 'fact_landuse_combined' THEN 2
-                    WHEN table_name LIKE 'v_default_transitions' THEN 3
-                    WHEN table_name LIKE 'v_scenario_comparisons' THEN 4
-                    ELSE 5
+                    WHEN table_name = 'fact_landuse_transitions' THEN 1
+                    WHEN table_name = 'dim_scenario' THEN 2
+                    WHEN table_name = 'dim_geography' THEN 3
+                    WHEN table_name = 'dim_landuse' THEN 4
+                    WHEN table_name = 'dim_time' THEN 5
+                    WHEN table_name LIKE 'v_%' THEN 6
+                    ELSE 7
                 END,
                 table_name, ordinal_position
             """
