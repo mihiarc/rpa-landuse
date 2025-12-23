@@ -1,35 +1,15 @@
 #!/usr/bin/env python3
 """
-Custom DuckDB Connection for Streamlit
-Implements st.connection pattern for efficient database access
+DuckDB Connection Manager
+
+Provides efficient database access with connection pooling, caching, and retry logic.
 """
 
-try:
-    from streamlit.connections import BaseConnection
-    from streamlit.runtime.caching import cache_data
-
-    HAS_STREAMLIT = True
-except ImportError:
-    # For testing environments where streamlit might not be fully available
-    from typing import Generic, TypeVar
-
-    T = TypeVar("T")
-
-    class BaseConnection(Generic[T]):
-        def __init__(self, connection_name: str, **kwargs):
-            self.connection_name = connection_name
-            self._secrets = None
-            self._instance = None
-
-    def cache_data(ttl=None):
-        def decorator(func):
-            return func
-
-        return decorator
-
-    HAS_STREAMLIT = False
 import os
+import time
+from functools import lru_cache
 from pathlib import Path
+from threading import Lock
 from typing import Any, Optional
 
 import duckdb
@@ -39,85 +19,136 @@ from pydantic import BaseModel, Field
 from ..exceptions import DatabaseConnectionError, DatabaseError, wrap_exception
 from ..models import QueryResult, SQLQuery
 from ..security.database_security import DatabaseSecurity
-from ..utils.retry_decorators import database_retry, network_retry
+from ..utils.retry_decorators import database_retry
 
 
 class ConnectionConfig(BaseModel):
     """Configuration for DuckDB connection"""
 
     database: str = Field(
-        default="data/processed/landuse_analytics.duckdb", description="Path to DuckDB file or ':memory:'"
+        default="data/processed/landuse_analytics.duckdb",
+        description="Path to DuckDB file or ':memory:'",
     )
     read_only: bool = Field(default=True, description="Open in read-only mode")
-    memory_limit: Optional[str] = Field(default=None, description="Memory limit for DuckDB")
-    threads: Optional[int] = Field(default=None, description="Number of threads for DuckDB")
+    memory_limit: Optional[str] = Field(
+        default=None, description="Memory limit for DuckDB"
+    )
+    threads: Optional[int] = Field(
+        default=None, description="Number of threads for DuckDB"
+    )
 
 
-class DuckDBConnection(BaseConnection[duckdb.DuckDBPyConnection]):
+class DuckDBConnection:
     """
-    A Streamlit connection implementation for DuckDB databases.
+    A connection manager for DuckDB databases.
 
     This connection supports:
     - Local DuckDB files
     - In-memory databases
-    - Automatic caching of query results
     - Thread-safe operations
+    - Automatic retry on transient failures
+
+    Example:
+        >>> config = ConnectionConfig(database="data/analytics.duckdb")
+        >>> conn = DuckDBConnection(config)
+        >>> df = conn.query("SELECT * FROM dim_scenario LIMIT 10")
+        >>> conn.close()
     """
 
+    _instance: Optional[duckdb.DuckDBPyConnection] = None
+    _lock: Lock = Lock()
+    _query_cache: dict = {}
+    _cache_ttl: dict = {}
+
+    def __init__(
+        self,
+        config: Optional[ConnectionConfig] = None,
+        database: Optional[str] = None,
+        read_only: bool = True,
+    ):
+        """
+        Initialize DuckDB connection.
+
+        Args:
+            config: ConnectionConfig object with database settings
+            database: Path to database file (overrides config)
+            read_only: Open in read-only mode (overrides config)
+        """
+        if config:
+            self._config = config
+        else:
+            db_path = database or os.getenv(
+                "LANDUSE_DB_PATH", "data/processed/landuse_analytics.duckdb"
+            )
+            self._config = ConnectionConfig(database=db_path, read_only=read_only)
+
+        self._instance = None
+
     @database_retry(max_attempts=3, min_wait=1.0, max_wait=10.0)
-    def _connect(self, **kwargs) -> duckdb.DuckDBPyConnection:
+    def _connect(self) -> duckdb.DuckDBPyConnection:
         """
         Connect to DuckDB database with retry logic.
 
-        Parameters from kwargs or secrets:
-        - database: Path to DuckDB file or ':memory:' for in-memory database
-        - read_only: Whether to open in read-only mode (default: True)
+        Returns:
+            DuckDB connection object
+
+        Raises:
+            DatabaseConnectionError: If connection fails after retries
         """
-        # Get database path from kwargs or secrets
-        if "database" in kwargs:
-            db = kwargs.pop("database")
-        elif hasattr(self, "_secrets") and self._secrets:
-            if hasattr(self._secrets, "database"):
-                db = self._secrets.database
-            elif hasattr(self._secrets, "__getitem__"):
-                try:
-                    db = self._secrets["database"]
-                except (KeyError, TypeError):
-                    db = None
-            else:
-                db = None
-
-            if not db:
-                db = os.getenv("LANDUSE_DB_PATH", "data/processed/landuse_analytics.duckdb")
-        else:
-            # Default to environment variable or standard path
-            db = os.getenv("LANDUSE_DB_PATH", "data/processed/landuse_analytics.duckdb")
-
-        # Get read_only setting
-        read_only = kwargs.pop("read_only", True)
+        db = self._config.database
 
         # Validate database file exists (if not in-memory or MotherDuck)
         if db != ":memory:" and not db.startswith("md:") and not Path(db).exists():
             raise FileNotFoundError(f"Database file not found: {db}")
 
-        # Connect to DuckDB with potential retries for connection issues
+        # Build connection kwargs
+        kwargs = {"read_only": self._config.read_only}
+        if self._config.memory_limit:
+            kwargs["config"] = {"memory_limit": self._config.memory_limit}
+        if self._config.threads:
+            kwargs.setdefault("config", {})["threads"] = self._config.threads
+
         try:
-            return duckdb.connect(database=db, read_only=read_only, **kwargs)
+            return duckdb.connect(database=db, **kwargs)
         except Exception as e:
-            # Add context to connection errors
-            raise DatabaseConnectionError(f"Failed to connect to DuckDB at {db}: {e}") from e
+            raise DatabaseConnectionError(
+                f"Failed to connect to DuckDB at {db}: {e}"
+            ) from e
+
+    def connect(self) -> "DuckDBConnection":
+        """
+        Establish database connection.
+
+        Returns:
+            Self for method chaining
+        """
+        if self._instance is None:
+            with self._lock:
+                if self._instance is None:
+                    self._instance = self._connect()
+        return self
 
     def cursor(self) -> duckdb.DuckDBPyConnection:
-        """Return a cursor (DuckDB connections are their own cursors)"""
+        """
+        Return a cursor (DuckDB connections are their own cursors).
+
+        Returns:
+            DuckDB connection object
+        """
+        if self._instance is None:
+            self.connect()
         return self._instance
 
-    def query(self, query: str, ttl: Optional[int] = 3600, **kwargs) -> pd.DataFrame:
+    def query(
+        self, query: str, ttl: Optional[int] = 3600, use_cache: bool = True, **kwargs
+    ) -> pd.DataFrame:
         """
         Execute a query and return results as a DataFrame.
 
         Args:
             query: SQL query to execute
             ttl: Time-to-live for cached results in seconds (default: 3600)
+            use_cache: Whether to use query caching (default: True)
             **kwargs: Additional parameters to pass to the query
 
         Returns:
@@ -129,22 +160,35 @@ class DuckDBConnection(BaseConnection[duckdb.DuckDBPyConnection]):
         # Validate query security before execution
         DatabaseSecurity.validate_query_safety(query)
 
-        @cache_data(ttl=ttl)
-        def _query(query: str, **kwargs) -> pd.DataFrame:
-            cursor = self.cursor()
-            if kwargs:
-                # DuckDB uses positional parameters ($1, $2, etc.)
-                # Convert kwargs to list in the order they appear
-                params = list(kwargs.values())
-                result = cursor.execute(query, params)
-            else:
-                # Execute without parameters
-                result = cursor.execute(query)
-            return result.df()
+        # Check cache
+        cache_key = (query, tuple(sorted(kwargs.items())))
+        current_time = time.time()
 
-        return _query(query, **kwargs)
+        if use_cache and cache_key in self._query_cache:
+            cached_time = self._cache_ttl.get(cache_key, 0)
+            if current_time - cached_time < (ttl or 3600):
+                return self._query_cache[cache_key].copy()
 
-    def query_with_result(self, query: str, ttl: Optional[int] = 3600) -> QueryResult:
+        # Execute query
+        cursor = self.cursor()
+        if kwargs:
+            params = list(kwargs.values())
+            result = cursor.execute(query, params)
+        else:
+            result = cursor.execute(query)
+
+        df = result.df()
+
+        # Cache result
+        if use_cache and ttl:
+            self._query_cache[cache_key] = df.copy()
+            self._cache_ttl[cache_key] = current_time
+
+        return df
+
+    def query_with_result(
+        self, query: str, ttl: Optional[int] = 3600
+    ) -> QueryResult:
         """
         Execute a query and return a QueryResult object with metadata.
 
@@ -158,8 +202,6 @@ class DuckDBConnection(BaseConnection[duckdb.DuckDBPyConnection]):
         Raises:
             ValueError: If query fails security validation
         """
-        import time
-
         try:
             # Validate query security before execution
             DatabaseSecurity.validate_query_safety(query)
@@ -172,23 +214,24 @@ class DuckDBConnection(BaseConnection[duckdb.DuckDBPyConnection]):
             df = self.query(sql_obj.sql, ttl=ttl)
             execution_time = time.time() - start_time
 
-            # Create QueryResult
-            return QueryResult(success=True, data=df, execution_time=execution_time, query=sql_obj.sql)
+            return QueryResult(
+                success=True, data=df, execution_time=execution_time, query=sql_obj.sql
+            )
         except ValueError as e:
-            # SQL validation error
-            return QueryResult(success=False, error=f"SQL validation error: {str(e)}", query=query)
+            return QueryResult(
+                success=False, error=f"SQL validation error: {str(e)}", query=query
+            )
         except (duckdb.Error, duckdb.CatalogException, duckdb.SyntaxException) as e:
-            # Database-specific errors
-            return QueryResult(success=False, error=f"Database error: {str(e)}", query=query)
+            return QueryResult(
+                success=False, error=f"Database error: {str(e)}", query=query
+            )
         except Exception as e:
-            # Wrap other unexpected errors
             wrapped_error = wrap_exception(e, "Query execution")
             return QueryResult(success=False, error=str(wrapped_error), query=query)
 
     def execute(self, query: str, **kwargs) -> None:
         """
         Execute a query without returning results.
-        Useful for DDL statements or updates.
 
         Args:
             query: SQL query to execute
@@ -196,8 +239,6 @@ class DuckDBConnection(BaseConnection[duckdb.DuckDBPyConnection]):
         """
         cursor = self.cursor()
         if kwargs:
-            # DuckDB uses positional parameters ($1, $2, etc.)
-            # Convert kwargs to list in the order they appear
             params = list(kwargs.values())
             cursor.execute(query, params)
         else:
@@ -214,9 +255,7 @@ class DuckDBConnection(BaseConnection[duckdb.DuckDBPyConnection]):
         Returns:
             pd.DataFrame: Table schema information
         """
-        # Validate table name using security allowlist
         DatabaseSecurity.validate_table_name(table_name)
-
         query = f"DESCRIBE {table_name}"
         return self.query(query, ttl=ttl)
 
@@ -249,10 +288,7 @@ class DuckDBConnection(BaseConnection[duckdb.DuckDBPyConnection]):
         Returns:
             int: Number of rows in the table
         """
-        # Validate table name using security allowlist
         DatabaseSecurity.validate_table_name(table_name)
-
-        # Safe: table_name is validated using allowlist
         query = f"SELECT COUNT(*) as count FROM {table_name}"
         result = self.query(query, ttl=ttl)
         return result["count"].iloc[0]
@@ -265,7 +301,33 @@ class DuckDBConnection(BaseConnection[duckdb.DuckDBPyConnection]):
             bool: True if connection is healthy
         """
         try:
-            self.query("SELECT 1", ttl=0)
+            self.query("SELECT 1", ttl=0, use_cache=False)
             return True
         except Exception:
             return False
+
+    def clear_cache(self) -> None:
+        """Clear all cached query results."""
+        self._query_cache.clear()
+        self._cache_ttl.clear()
+
+    def close(self) -> None:
+        """Close the database connection."""
+        if self._instance is not None:
+            with self._lock:
+                if self._instance is not None:
+                    self._instance.close()
+                    self._instance = None
+
+    def __enter__(self) -> "DuckDBConnection":
+        """Context manager entry."""
+        self.connect()
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
+        """Context manager exit."""
+        self.close()
+
+    def __del__(self):
+        """Cleanup on deletion."""
+        self.close()

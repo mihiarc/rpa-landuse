@@ -76,19 +76,6 @@ uvicorn app.main:app --reload --port 8000
 # API documentation available at http://localhost:8000/docs
 ```
 
-#### Streamlit Dashboard (Legacy/Development)
-```bash
-# Local development dashboard with chat interface and visualizations
-uv run streamlit run landuse_app.py
-
-# Features:
-# - Natural language chat interface
-# - Interactive analytics dashboard with 6 visualization types
-# - Data explorer with SQL query interface
-# - Data extraction tool for custom analysis
-# - System settings and configuration
-```
-
 #### Command Line Agents
 ```bash
 # Primary: RPA Analytics Natural Language Agent (command line)
@@ -145,7 +132,7 @@ duckdb data/processed/landuse_analytics.duckdb
 ```
 
 ### Repository Structure (Monorepo)
-- **rpa-landuse-core/**: Python analytics engine, agents, and Streamlit (legacy)
+- **rpa-landuse-core/**: Python analytics engine and LangGraph agents
 - **rpa-landuse-backend/**: FastAPI REST API (deployed on Render)
 - **rpa-landuse-frontend/**: Next.js web frontend (deployed on Netlify)
 
@@ -182,15 +169,6 @@ duckdb data/processed/landuse_analytics.duckdb
 - SSE streaming for real-time chat responses
 - JWT token-based authentication
 - Integrates with LangGraph agent for natural language processing
-
-**Streamlit Dashboard** (`landuse_app.py`) - *Legacy/Development*:
-- Local development interface with multipage navigation using st.Page and st.navigation
-- Chat Interface: Natural language queries with conversation history
-- Analytics Dashboard: Pre-built visualizations with Plotly
-- Data Explorer: Interactive SQL query interface with schema browser
-- Data Extraction: Export query results in multiple formats (CSV, JSON, Parquet)
-- Settings Page: System status, configuration, and troubleshooting
-- Custom DuckDB connection using st.connection pattern
 
 **Refactored LangGraph Agent** (`src/landuse/agents/landuse_agent.py`) - **RECOMMENDED**:
 - **Modern Modular Architecture**: Follows SOLID principles with separated concerns
@@ -289,7 +267,7 @@ The state now tracks 15 fields including:
 - Handles 20M+ lines efficiently with progress tracking
 
 **DuckDB Connection** (`src/landuse/connections/duckdb_connection.py`):
-- **Custom st.connection Implementation**: Extends Streamlit's BaseConnection pattern
+- **Thread-Safe Connection Manager**: Standalone connection class with proper lifecycle management
 - **Automatic Caching**: Query results cached with configurable TTL (default: 3600s)
 - **Database Retry Logic**: Robust connection handling with exponential backoff
 - **Thread Safety**: Read-only mode by default with concurrent access support
@@ -298,7 +276,7 @@ The state now tracks 15 fields including:
   - Automatic path resolution with environment variable fallback
   - Query validation and parameterization support
   - Health check and monitoring capabilities
-  - Compatible with testing environments (graceful Streamlit import fallback)
+  - Context manager support for clean resource management
 
 **Agent Tools** (`src/landuse/tools/`):
 - **Common Tools** (`common_tools.py`):
@@ -583,20 +561,6 @@ db_manager = DatabaseManager(legacy_config) # Legacy config
 - **Conversion Modes**: Streaming, batch, parallel, and optimized bulk copy operations
 
 ## Development Patterns
-
-### Streamlit Development Guidelines
-
-**IMPORTANT: Use Streamlit Built-in Features**
-- Always prefer Streamlit's built-in functionality over custom solutions
-- Do NOT over-engineer custom implementations when Streamlit provides native support
-- Examples:
-  - Use Streamlit's built-in theme system (Settings menu) instead of custom theme toggles
-  - Use st.connection for database connections instead of custom connection managers
-  - Use st.cache_data and st.cache_resource instead of custom caching solutions
-  - Use st.session_state for state management instead of custom state handlers
-  - Use Streamlit's native widgets and layouts instead of custom HTML/CSS when possible
-- Only create custom solutions when Streamlit genuinely lacks the required functionality
-- This approach ensures better maintainability, compatibility, and performance
 
 ### Modern Architecture Development (2025)
 
@@ -974,38 +938,6 @@ duckdb data/processed/landuse_analytics.duckdb
 
 ## Key Features
 
-### Web Dashboard (Streamlit)
-**Modern Multipage Architecture** (`landuse_app.py`):
-- **Navigation**: Uses modern `st.navigation()` API with organized page groups
-- **Responsive Design**: Optimized CSS for wide layouts and mobile compatibility
-- **Error Handling**: Comprehensive error catching with helpful diagnostics
-
-**Dashboard Pages**:
-1. **Home Page**: Feature overview with dataset statistics and navigation cards
-2. **Natural Language Chat** (`views/chat.py`): 
-   - Real-time streaming responses with agent conversation
-   - Model selection (GPT-4o-mini, GPT-4o, GPT-3.5 Turbo)
-   - Conversation history with agent reasoning display
-   - Error handling with rate limit detection
-3. **Analytics Dashboard** (`views/analytics.py`):
-   - Pre-built visualizations using Plotly
-   - Agricultural impact analysis
-   - Climate scenario comparisons
-   - Geographic trend maps with choropleth visualization
-4. **Data Explorer** (`views/explorer.py`):
-   - Interactive SQL query interface
-   - Schema browser with table information
-   - Example queries and documentation
-   - Export capabilities (CSV, JSON, Parquet)
-5. **Data Extraction** (`views/extraction.py`):
-   - Custom query builder
-   - Bulk data export functionality
-   - Format selection and download
-6. **Settings & Help** (`views/settings.py`):
-   - System status monitoring
-   - Configuration management
-   - Troubleshooting tools and diagnostics
-
 ### Command Line Interface
 1. **Natural Language Understanding**: Converts questions to optimized SQL
 2. **Business Intelligence**: Automatic insights and summary statistics
@@ -1052,7 +984,6 @@ uv run python -m pytest tests/integration/   # Integration tests
   - Natural language processing tests
   - Database connection tests (with real DuckDB)
   - Security and validation tests
-  - Streamlit component tests (with mocked decorators)
   - Data conversion tests
 
 ### Testing Philosophy
@@ -1066,8 +997,8 @@ uv run python -m pytest tests/integration/   # Integration tests
 Key packages (managed via `uv`):
 - **Core**: langchain, langchain-openai, langchain-community, langgraph
 - **Modern Agent Framework**: langgraph (for state-based agents)
-- **Data**: pandas, duckdb (0.11.0+), pyarrow, ijson
-- **Web UI**: streamlit (1.40.0+), plotly  
+- **Data**: pandas, duckdb (1.1.0+), pyarrow, ijson
+- **Visualization**: plotly, matplotlib, geopandas
 - **Terminal UI**: rich
 - **Retry Logic**: tenacity
 - **Validation**: pydantic v2
@@ -1076,17 +1007,9 @@ Key packages (managed via `uv`):
 
 ## Recent Updates (2024-2025)
 
-### Streamlit Dashboard
-- Added comprehensive multipage dashboard with 5 main sections
-- Implemented custom DuckDB connection with st.connection pattern
-- Created rich analytics visualizations using Plotly
-- Added data extraction functionality with multiple export formats
-- Mobile-responsive design with modern UI patterns
-
 ### Testing Infrastructure
 - Achieved 89.75% test coverage with 142+ tests
 - Added comprehensive unit tests for all core components
-- Created mock Streamlit module for testing without full installation
 - All tests use real functionality (no mocking of business logic)
 
 ### Data Processing
@@ -1158,4 +1081,3 @@ Key packages (managed via `uv`):
 - **DuckDB COPY Optimization**: 5-10x performance improvement using bulk loading with Parquet
 - **Retry Logic with Tenacity**: Robust error handling with exponential backoff strategies
 - **CI/CD Pipeline**: Comprehensive GitHub Actions for testing, security, and releases
-- **Streamlit Fragments**: Performance optimization with @st.fragment decorators

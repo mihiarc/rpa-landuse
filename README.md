@@ -5,8 +5,8 @@ AI-powered analytics tool for USDA Forest Service RPA Assessment land use data. 
 ## ✨ Features
 
 - **🤖 Natural Language Queries**: Ask questions like "Which scenarios show the most agricultural land loss?"
-- **📊 Interactive Dashboard**: Modern Streamlit web interface with chat, analytics, and data explorer
-- **🦆 Modern Data Stack**: DuckDB star schema optimized for analytics  
+- **🌐 Modern Web Frontend**: Next.js + React application with chat, analytics, and data explorer
+- **🦆 Modern Data Stack**: DuckDB star schema optimized for analytics
 - **📈 Rich Visualizations**: Choropleth maps, time series, and interactive charts
 - **🎨 Beautiful UI**: Rich terminal and web interfaces with professional formatting
 - **🌍 Climate Analysis**: Compare RCP/SSP scenarios and geographic patterns
@@ -41,15 +41,20 @@ uv run python scripts/converters/convert_to_duckdb.py
 
 ### 4. Run Applications
 
-#### Option A: Streamlit Dashboard (Recommended)
-```bash
-# Launch the modern web dashboard  
-uv run streamlit run landuse_app.py
+#### Option A: Web Frontend (Recommended)
+See the [rpa-landuse-frontend](../rpa-landuse-frontend) directory for the Next.js web application.
 
-# Open http://localhost:8501 in your browser
+```bash
+# Navigate to frontend directory
+cd ../rpa-landuse-frontend
+
+# Install dependencies and run
+npm install && npm run dev
+
+# Open http://localhost:3000 in your browser
 ```
 
-#### Option B: Command Line Agent  
+#### Option B: Command Line Agent
 ```bash
 # Interactive terminal-based analysis
 uv run rpa-analytics
@@ -120,7 +125,6 @@ uv run rpa-analytics --max-iterations 10 --temperature 0.2
 
 ```
 rpa-landuse/
-├── 🖥️ landuse_app.py           # Streamlit dashboard (main web UI)
 ├── 🤖 src/landuse/             # Core application modules
 │   ├── agents/                 # AI-powered analysis agents
 │   │   ├── agent.py           # Main CLI entry point (rpa-analytics)
@@ -138,7 +142,7 @@ rpa-landuse/
 │   │   ├── metrics.py        # Performance metrics collection
 │   │   └── performance.py    # Decorator-based monitoring
 │   ├── connections/           # Database connection management
-│   │   └── duckdb_connection.py # Custom Streamlit connection
+│   │   └── duckdb_connection.py # Thread-safe DuckDB connection
 │   ├── tools/                # LangGraph agent tools
 │   │   ├── common_tools.py   # SQL execution and analysis tools
 │   │   └── map_generation_tool.py # Choropleth map generation
@@ -148,11 +152,6 @@ rpa-landuse/
 │   ├── converters/           # Data transformation utilities
 │   │   └── convert_to_duckdb.py # JSON → DuckDB star schema conversion
 │   └── setup/               # Database enhancement scripts
-├── 🌐 views/                 # Streamlit page components
-│   ├── chat.py              # Natural language chat interface
-│   ├── analytics.py         # Pre-built analytics dashboard
-│   ├── explorer.py          # Interactive SQL query interface
-│   └── extraction.py        # Data export functionality  
 ├── 📊 data/
 │   ├── processed/           # Optimized database
 │   │   └── landuse_analytics.duckdb # 1.2GB star schema database
@@ -188,12 +187,12 @@ rpa-landuse/
 
 ## 🎯 Key Capabilities
 
-### 📊 Streamlit Dashboard
-- **💬 Natural Language Chat**: Real-time conversation with AI agent, streaming responses
-- **📈 Analytics Dashboard**: Pre-built visualizations with 6 chart types (overview, agricultural, forest, climate, geographic, flow)
-- **🔍 Data Explorer**: Interactive SQL query interface with schema browser and example queries  
-- **📥 Data Extraction**: Export query results in multiple formats (CSV, JSON, Parquet)
-- **⚙️ Settings & Monitoring**: System status, configuration management, troubleshooting tools
+### 🌐 Web Application
+The Next.js frontend provides:
+- **💬 Natural Language Chat**: Real-time conversation with AI agent, SSE streaming
+- **📈 Analytics Dashboard**: Interactive visualizations with Plotly.js
+- **🔍 Data Explorer**: SQL query interface with schema browser
+- **📥 Data Extraction**: Export query results in CSV/JSON formats
 
 ### 🤖 Natural Language Analysis
 ```
@@ -367,8 +366,8 @@ This project showcases modern software engineering practices with a production-r
 
 ### 🏗️ Core Technologies
 - **🤖 LangGraph + LangChain**: Advanced AI agent workflows with state management
-- **🦆 DuckDB**: High-performance analytical database with columnar storage  
-- **🎨 Streamlit**: Modern web dashboard with interactive components
+- **🦆 DuckDB**: High-performance analytical database with columnar storage
+- **🌐 FastAPI**: REST API backend with SSE streaming support
 - **🐍 Pydantic v2**: Type-safe data validation and configuration management
 - **📊 Rich Terminal UI**: Beautiful command-line interface with colors and formatting
 - **🧪 Comprehensive Testing**: 89.75% test coverage with 142+ unit and integration tests
@@ -447,4 +446,4 @@ mkdocs serve                                 # Local documentation server
 
 **RPA Land Use Analytics** - Transforming America's land use data into actionable insights with modern AI 🌲
 
-*Ready to explore? Start with the Streamlit dashboard: `uv run streamlit run landuse_app.py`*
+*Ready to explore? Start with the command line agent: `uv run rpa-analytics`*

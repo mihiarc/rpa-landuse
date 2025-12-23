@@ -6,24 +6,17 @@ Unit tests for DuckDBConnection class
 import os
 import tempfile
 from pathlib import Path
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import Mock
 
 import duckdb
 import pandas as pd
 import pytest
 
-from landuse.connections.duckdb_connection import DuckDBConnection
+from landuse.connections.duckdb_connection import DuckDBConnection, ConnectionConfig
 
 
 class TestDuckDBConnection:
-    """Test the custom DuckDB connection for Streamlit"""
-
-    @pytest.fixture
-    def mock_secrets(self):
-        """Mock Streamlit secrets"""
-        mock = MagicMock()
-        mock.database = ":memory:"
-        return mock
+    """Test the DuckDB connection manager"""
 
     @pytest.fixture
     def temp_db_path(self):
@@ -40,148 +33,128 @@ class TestDuckDBConnection:
             yield db_path
             # Cleanup happens automatically when exiting the context
 
-    def test_connect_with_kwargs(self, temp_db_path):
-        """Test connection with database path in kwargs"""
-        connection = DuckDBConnection(connection_name="test")
+    def test_connect_with_config(self, temp_db_path):
+        """Test connection with ConnectionConfig"""
+        config = ConnectionConfig(database=temp_db_path, read_only=True)
+        connection = DuckDBConnection(config=config)
+        connection.connect()
 
-        # Mock the connection
-        db_conn = connection._connect(database=temp_db_path, read_only=True)
-
-        assert db_conn is not None
-        assert isinstance(db_conn, duckdb.DuckDBPyConnection)
+        assert connection._instance is not None
+        assert isinstance(connection._instance, duckdb.DuckDBPyConnection)
 
         # Verify we can query
-        result = db_conn.execute("SELECT COUNT(*) FROM test_table").fetchone()
+        result = connection._instance.execute("SELECT COUNT(*) FROM test_table").fetchone()
         assert result[0] == 2
 
-        db_conn.close()
+        connection.close()
 
-    def test_connect_with_secrets(self, mock_secrets, temp_db_path):
-        """Test connection with database path in secrets"""
-        mock_secrets.database = temp_db_path
-        mock_secrets.__getitem__ = lambda self, key: temp_db_path if key == "database" else None
+    def test_connect_with_database_path(self, temp_db_path):
+        """Test connection with database path parameter"""
+        connection = DuckDBConnection(database=temp_db_path, read_only=True)
+        connection.connect()
 
-        connection = DuckDBConnection(connection_name="test")
-        connection._secrets = mock_secrets
-
-        db_conn = connection._connect()
-
-        assert db_conn is not None
-        result = db_conn.execute("SELECT COUNT(*) FROM test_table").fetchone()
+        assert connection._instance is not None
+        result = connection._instance.execute("SELECT COUNT(*) FROM test_table").fetchone()
         assert result[0] == 2
 
-        db_conn.close()
+        connection.close()
 
     def test_connect_with_env_variable(self, monkeypatch, temp_db_path):
         """Test connection with environment variable fallback"""
         monkeypatch.setenv("LANDUSE_DB_PATH", temp_db_path)
 
-        connection = DuckDBConnection(connection_name="test")
-        # Create a mock that doesn't have database attribute
-        mock_secrets = Mock(spec=[])  # Empty spec means no attributes
-        connection._secrets = mock_secrets
+        connection = DuckDBConnection()
+        connection.connect()
 
-        db_conn = connection._connect()
-
-        assert db_conn is not None
-        result = db_conn.execute("SELECT COUNT(*) FROM test_table").fetchone()
+        assert connection._instance is not None
+        result = connection._instance.execute("SELECT COUNT(*) FROM test_table").fetchone()
         assert result[0] == 2
 
-        db_conn.close()
+        connection.close()
 
     def test_connect_missing_database(self):
         """Test connection with non-existent database file"""
         from tenacity import RetryError
 
-        connection = DuckDBConnection(connection_name="test")
+        connection = DuckDBConnection(database="/nonexistent/path.duckdb")
 
         # The method has a retry decorator, so it raises RetryError
         with pytest.raises(RetryError):
-            connection._connect(database="/nonexistent/path.duckdb")
+            connection.connect()
 
     def test_connect_memory_database(self):
         """Test connection with in-memory database"""
-        connection = DuckDBConnection(connection_name="test")
+        connection = DuckDBConnection(database=":memory:", read_only=False)
+        connection.connect()
 
-        # In-memory databases cannot be opened in read-only mode
-        db_conn = connection._connect(database=":memory:", read_only=False)
-
-        assert db_conn is not None
+        assert connection._instance is not None
         # Create and query a test table
-        db_conn.execute("CREATE TABLE test (id INTEGER)")
-        db_conn.execute("INSERT INTO test VALUES (1), (2), (3)")
-        result = db_conn.execute("SELECT COUNT(*) FROM test").fetchone()
+        connection._instance.execute("CREATE TABLE test (id INTEGER)")
+        connection._instance.execute("INSERT INTO test VALUES (1), (2), (3)")
+        result = connection._instance.execute("SELECT COUNT(*) FROM test").fetchone()
         assert result[0] == 3
 
-        db_conn.close()
+        connection.close()
 
     def test_cursor_method(self, temp_db_path):
         """Test cursor method returns connection itself"""
-        connection = DuckDBConnection(connection_name="test")
-        connection._instance = connection._connect(database=temp_db_path)
+        connection = DuckDBConnection(database=temp_db_path)
+        connection.connect()
 
         cursor = connection.cursor()
         assert cursor == connection._instance
 
-        connection._instance.close()
+        connection.close()
 
-    @patch("landuse.connections.duckdb_connection.cache_data")
-    def test_query_method(self, mock_cache_data, temp_db_path):
-        """Test query method with caching"""
-        # Mock the cache decorator to just return the function
-        mock_cache_data.return_value = lambda func: func
-
-        connection = DuckDBConnection(connection_name="test")
-        connection._instance = connection._connect(database=temp_db_path)
+    def test_query_method(self, temp_db_path):
+        """Test query method"""
+        connection = DuckDBConnection(database=temp_db_path)
+        connection.connect()
 
         # Test basic query
-        df = connection.query("SELECT * FROM test_table")
+        df = connection.query("SELECT * FROM test_table", use_cache=False)
 
         assert isinstance(df, pd.DataFrame)
         assert len(df) == 2
         assert list(df.columns) == ["id", "name"]
 
-        # Verify cache decorator was called with correct TTL
-        mock_cache_data.assert_called_with(ttl=3600)
+        connection.close()
 
-        connection._instance.close()
+    def test_query_with_caching(self, temp_db_path):
+        """Test query caching functionality"""
+        connection = DuckDBConnection(database=temp_db_path)
+        connection.connect()
 
-    @patch("landuse.connections.duckdb_connection.cache_data")
-    def test_query_with_parameters(self, mock_cache_data, temp_db_path):
+        # First query - should cache
+        df1 = connection.query("SELECT * FROM test_table", ttl=3600, use_cache=True)
+
+        # Second query - should hit cache
+        df2 = connection.query("SELECT * FROM test_table", ttl=3600, use_cache=True)
+
+        assert len(df1) == 2
+        assert len(df2) == 2
+        # Cache should have one entry
+        assert len(connection._query_cache) == 1
+
+        connection.close()
+
+    def test_query_with_parameters(self, temp_db_path):
         """Test query with parameters"""
-        mock_cache_data.return_value = lambda func: func
-
-        connection = DuckDBConnection(connection_name="test")
-        connection._instance = connection._connect(database=temp_db_path)
+        connection = DuckDBConnection(database=temp_db_path)
+        connection.connect()
 
         # Test query with parameters
-        df = connection.query("SELECT * FROM test_table WHERE id = $1", id=1)
+        df = connection.query("SELECT * FROM test_table WHERE id = $1", use_cache=False, id=1)
 
         assert len(df) == 1
         assert df.iloc[0]["name"] == "test1"
 
-        connection._instance.close()
-
-    @patch("landuse.connections.duckdb_connection.cache_data")
-    def test_query_custom_ttl(self, mock_cache_data, temp_db_path):
-        """Test query with custom TTL"""
-        mock_cache_data.return_value = lambda func: func
-
-        connection = DuckDBConnection(connection_name="test")
-        connection._instance = connection._connect(database=temp_db_path)
-
-        # Test with custom TTL
-        df = connection.query("SELECT * FROM test_table", ttl=300)
-
-        assert len(df) == 2
-        mock_cache_data.assert_called_with(ttl=300)
-
-        connection._instance.close()
+        connection.close()
 
     def test_execute_method(self, temp_db_path):
         """Test execute method for DDL/DML statements"""
-        connection = DuckDBConnection(connection_name="test")
-        connection._instance = connection._connect(database=temp_db_path, read_only=False)
+        connection = DuckDBConnection(database=temp_db_path, read_only=False)
+        connection.connect()
 
         # Test CREATE TABLE
         connection.execute("CREATE TABLE new_table (id INTEGER, value FLOAT)")
@@ -193,12 +166,12 @@ class TestDuckDBConnection:
         result = connection._instance.execute("SELECT COUNT(*) FROM new_table").fetchone()
         assert result[0] == 2
 
-        connection._instance.close()
+        connection.close()
 
     def test_execute_with_parameters(self, temp_db_path):
         """Test execute with parameters"""
-        connection = DuckDBConnection(connection_name="test")
-        connection._instance = connection._connect(database=temp_db_path, read_only=False)
+        connection = DuckDBConnection(database=temp_db_path, read_only=False)
+        connection.connect()
 
         # Create table
         connection.execute("CREATE TABLE param_test (id INTEGER, name VARCHAR)")
@@ -210,23 +183,12 @@ class TestDuckDBConnection:
         result = connection._instance.execute("SELECT name FROM param_test WHERE id = 1").fetchone()
         assert result[0] == "test"
 
-        connection._instance.close()
+        connection.close()
 
-    @patch("landuse.connections.duckdb_connection.cache_data")
-    def test_get_table_info(self, mock_cache_data, temp_db_path):
-        """Test get_table_info method"""
-        # STALE TEST: get_table_info now has security validation that restricts table names
-        # This test uses 'test_table' which is not in the allowed tables list
-        # TODO: Update test to use production database with allowed tables
-        pytest.skip("Stale test: get_table_info now has security validation, needs allowed table name")
-
-    @patch("landuse.connections.duckdb_connection.cache_data")
-    def test_list_tables(self, mock_cache_data, temp_db_path):
+    def test_list_tables(self, temp_db_path):
         """Test list_tables method"""
-        mock_cache_data.return_value = lambda func: func
-
-        connection = DuckDBConnection(connection_name="test")
-        connection._instance = connection._connect(database=temp_db_path)
+        connection = DuckDBConnection(database=temp_db_path)
+        connection.connect()
 
         df = connection.list_tables()
 
@@ -234,36 +196,22 @@ class TestDuckDBConnection:
         assert "table_name" in df.columns
         assert "test_table" in df["table_name"].values
 
-        connection._instance.close()
+        connection.close()
 
-    @patch("landuse.connections.duckdb_connection.cache_data")
-    def test_get_row_count(self, mock_cache_data, temp_db_path):
-        """Test get_row_count method"""
-        # STALE TEST: get_row_count now has security validation that restricts table names
-        # This test uses 'test_table' which is not in the allowed tables list
-        # TODO: Update test to use production database with allowed tables
-        pytest.skip("Stale test: get_row_count now has security validation, needs allowed table name")
-
-    @patch("landuse.connections.duckdb_connection.cache_data")
-    def test_health_check_success(self, mock_cache_data, temp_db_path):
+    def test_health_check_success(self, temp_db_path):
         """Test health_check when connection is healthy"""
-        mock_cache_data.return_value = lambda func: func
-
-        connection = DuckDBConnection(connection_name="test")
-        connection._instance = connection._connect(database=temp_db_path)
+        connection = DuckDBConnection(database=temp_db_path)
+        connection.connect()
 
         is_healthy = connection.health_check()
 
         assert is_healthy is True
 
-        connection._instance.close()
+        connection.close()
 
-    @patch("landuse.connections.duckdb_connection.cache_data")
-    def test_health_check_failure(self, mock_cache_data):
+    def test_health_check_failure(self):
         """Test health_check when connection fails"""
-        mock_cache_data.return_value = lambda func: func
-
-        connection = DuckDBConnection(connection_name="test")
+        connection = DuckDBConnection(database=":memory:", read_only=False)
         # Mock a broken connection
         connection._instance = Mock()
         connection._instance.execute.side_effect = Exception("Connection lost")
@@ -274,30 +222,48 @@ class TestDuckDBConnection:
 
     def test_read_only_mode(self, temp_db_path):
         """Test read-only mode enforcement"""
-        connection = DuckDBConnection(connection_name="test")
-        connection._instance = connection._connect(database=temp_db_path, read_only=True)
+        connection = DuckDBConnection(database=temp_db_path, read_only=True)
+        connection.connect()
 
         # Try to create a table in read-only mode
         with pytest.raises(duckdb.InvalidInputException):
             connection._instance.execute("CREATE TABLE should_fail (id INTEGER)")
 
-        connection._instance.close()
+        connection.close()
 
-    def test_connection_kwargs_passthrough(self):
-        """Test that additional kwargs are passed to duckdb.connect"""
-        connection = DuckDBConnection(connection_name="test")
+    def test_context_manager(self, temp_db_path):
+        """Test context manager functionality"""
+        with DuckDBConnection(database=temp_db_path) as connection:
+            result = connection._instance.execute("SELECT COUNT(*) FROM test_table").fetchone()
+            assert result[0] == 2
 
-        # Test with additional config
-        db_conn = connection._connect(
-            database=":memory:",
-            read_only=False,  # In-memory databases cannot be read-only
-            config={"threads": 4, "memory_limit": "1GB"},
-        )
+        # Connection should be closed after context exit
+        assert connection._instance is None
 
-        assert db_conn is not None
-        # Note: We can't easily verify the config was applied, but we can verify
-        # the connection works
-        result = db_conn.execute("SELECT 1").fetchone()
-        assert result[0] == 1
+    def test_clear_cache(self, temp_db_path):
+        """Test cache clearing functionality"""
+        connection = DuckDBConnection(database=temp_db_path)
+        connection.connect()
 
-        db_conn.close()
+        # Start with clean cache
+        connection.clear_cache()
+        assert len(connection._query_cache) == 0
+
+        # Add something to cache
+        connection.query("SELECT * FROM test_table", use_cache=True)
+        assert len(connection._query_cache) == 1
+
+        # Clear cache
+        connection.clear_cache()
+        assert len(connection._query_cache) == 0
+
+        connection.close()
+
+    def test_connection_config_defaults(self):
+        """Test ConnectionConfig default values"""
+        config = ConnectionConfig()
+
+        assert config.database == "data/processed/landuse_analytics.duckdb"
+        assert config.read_only is True
+        assert config.memory_limit is None
+        assert config.threads is None
