@@ -201,8 +201,8 @@ class TestLanduseAgent:
 
         # Mock the simple_query method since that's what's used by default
         with patch.object(agent, "simple_query", return_value="Test response about agricultural land loss"):
-            # Test query
-            result = agent.query("How much agricultural land is being lost?")
+            # Test query - explicitly use_graph=False to ensure simple_query is used
+            result = agent.query("How much agricultural land is being lost?", use_graph=False)
 
             # Verify
             assert result == "Test response about agricultural land loss"
@@ -227,10 +227,10 @@ class TestLanduseAgent:
         # Initialize agent
         agent = LanduseAgent(test_config)
 
-        # Mock simple_query to raise exception
+        # Mock simple_query to return error message
         with patch.object(agent, "simple_query", return_value="Error processing query: Test error"):
-            # Test query
-            result = agent.query("Test query")
+            # Test query - explicitly use_graph=False to ensure simple_query is used
+            result = agent.query("Test query", use_graph=False)
 
             # Verify error is handled gracefully
             assert "Error processing query" in result
@@ -257,10 +257,25 @@ class TestAgentState:
         # Verify the class exists and has the expected structure
         assert hasattr(AgentState, "__annotations__")
 
-        expected_fields = {"messages", "context", "iteration_count", "max_iterations"}
+        # Core fields that must be present (subset check for future-proofing)
+        core_fields = {"messages", "context", "iteration_count", "max_iterations"}
+
+        # Full expected fields matching the enhanced AgentState
+        expected_fields = {
+            "messages", "context", "iteration_count", "max_iterations",
+            "user_expertise", "explained_concepts", "preferred_scenarios",
+            "focus_states", "focus_time_range", "current_query_type",
+            "detected_scenarios", "detected_geography", "pending_sql_approval",
+            "thread_id", "user_id"
+        }
 
         actual_fields = set(AgentState.__annotations__.keys())
-        assert expected_fields == actual_fields
+
+        # Verify all expected fields are present
+        assert expected_fields == actual_fields, f"State fields mismatch: expected {expected_fields}, got {actual_fields}"
+
+        # Verify core fields are always present (backwards compatibility check)
+        assert core_fields.issubset(actual_fields), "Core fields missing from AgentState"
 
 
 class TestToolFunctions:

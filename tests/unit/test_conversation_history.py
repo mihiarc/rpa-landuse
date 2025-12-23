@@ -52,20 +52,21 @@ class TestConversationHistory:
         assert agent.conversation_manager.conversation_history[1] == ("assistant", "Hi there!")
 
     def test_history_included_in_simple_query(self, agent):
-        """Test that history is included in simple queries."""
+        """Test that history is included in simple queries when enabled."""
         # Add some history
         agent.conversation_manager.add_conversation("What is forest land?", "Forest land is...")
 
-        # Mock the LLM response
-        mock_response = Mock()
-        mock_response.tool_calls = []
-        mock_response.content = "Based on our previous discussion about forest land..."
+        # Mock the LLM response with proper AIMessage (not Mock)
+        mock_response = AIMessage(content="Based on our previous discussion about forest land...")
 
         agent._test_llm.bind_tools.return_value.invoke.return_value = mock_response
 
-        # Run a follow-up query
-        with patch.object(agent.conversation_manager, "add_conversation"):
-            response = agent.simple_query("Tell me more about that")
+        # Mock _get_conversation_manager to return the default conversation manager
+        # (since simple_query uses thread-isolated managers by design)
+        with patch.object(agent, "_get_conversation_manager", return_value=agent.conversation_manager):
+            with patch.object(agent.conversation_manager, "add_conversation"):
+                # Run a follow-up query with history enabled
+                response = agent.simple_query("Tell me more about that", thread_id="test", include_history=True)
 
         # Check that the LLM was called with history
         call_args = agent._test_llm.bind_tools.return_value.invoke.call_args
@@ -107,32 +108,36 @@ class TestConversationHistory:
         assert agent.conversation_manager.conversation_history == []
 
     def test_history_persists_across_queries(self, agent):
-        """Test that history persists across multiple queries."""
-        # Mock responses
+        """Test that history persists across multiple queries when enabled."""
+        # Mock responses with proper AIMessage objects (not Mock)
         responses = [
-            Mock(tool_calls=[], content="Texas has large forest areas."),
-            Mock(tool_calls=[], content="California has even more forest area than Texas."),
+            AIMessage(content="Texas has large forest areas."),
+            AIMessage(content="California has even more forest area than Texas."),
         ]
 
         agent._test_llm.bind_tools.return_value.invoke.side_effect = responses
 
-        # First query
-        response1 = agent.query("Tell me about Texas forests")
-        assert "Texas" in response1
+        # Mock _get_conversation_manager to return the default conversation manager
+        with patch.object(agent, "_get_conversation_manager", return_value=agent.conversation_manager):
+            # First query - use include_history=True to enable history tracking
+            response1 = agent.query("Tell me about Texas forests", use_graph=False,
+                                   include_history=True, thread_id="test")
+            assert "Texas" in response1
 
-        # Check history was updated
-        assert len(agent.conversation_manager.conversation_history) == 2
-        assert agent.conversation_manager.conversation_history[0] == ("user", "Tell me about Texas forests")
-        assert "Texas" in agent.conversation_manager.conversation_history[1][1]
+            # Check history was updated
+            assert len(agent.conversation_manager.conversation_history) == 2
+            assert agent.conversation_manager.conversation_history[0] == ("user", "Tell me about Texas forests")
+            assert "Texas" in agent.conversation_manager.conversation_history[1][1]
 
-        # Second query - should have context
-        response2 = agent.query("How about California?")
-        assert "California" in response2
+            # Second query - should have context
+            response2 = agent.query("How about California?", use_graph=False,
+                                   include_history=True, thread_id="test")
+            assert "California" in response2
 
-        # Check history now has both conversations
-        assert len(agent.conversation_manager.conversation_history) == 4
-        assert agent.conversation_manager.conversation_history[2] == ("user", "How about California?")
-        assert "California" in agent.conversation_manager.conversation_history[3][1]
+            # Check history now has both conversations
+            assert len(agent.conversation_manager.conversation_history) == 4
+            assert agent.conversation_manager.conversation_history[2] == ("user", "How about California?")
+            assert "California" in agent.conversation_manager.conversation_history[3][1]
 
     def test_graph_query_includes_history(self, agent):
         """Test that graph queries also include conversation history."""
@@ -142,8 +147,8 @@ class TestConversationHistory:
         # Build the graph
         agent.graph = agent.graph_builder.build_graph()
 
-        # Mock graph invoke
-        mock_result = {"messages": [Mock(content="Based on the scenarios we discussed...")]}
+        # Mock graph invoke with proper AIMessage (not Mock)
+        mock_result = {"messages": [AIMessage(content="Based on the scenarios we discussed...")]}
 
         with patch.object(agent.graph, "invoke", return_value=mock_result) as mock_invoke:
             response = agent._graph_query("Tell me more about RCP scenarios")
@@ -158,12 +163,15 @@ class TestConversationHistory:
             assert any("Scenarios are..." in str(msg.content) for msg in messages if isinstance(msg, AIMessage))
 
     def test_error_updates_history(self, agent):
-        """Test that errors still update conversation history."""
+        """Test that errors still update conversation history when enabled."""
         # Mock an error
         agent._test_llm.bind_tools.return_value.invoke.side_effect = Exception("Test error")
 
-        # Query should fail but still update history
-        response = agent.query("This will fail")
+        # Mock _get_conversation_manager to return the default conversation manager
+        with patch.object(agent, "_get_conversation_manager", return_value=agent.conversation_manager):
+            # Query should fail but still update history - enable history tracking
+            response = agent.query("This will fail", use_graph=False,
+                                  include_history=True, thread_id="test")
 
         assert "error" in response.lower()
         assert len(agent.conversation_manager.conversation_history) == 2
