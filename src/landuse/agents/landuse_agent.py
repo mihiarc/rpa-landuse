@@ -1,760 +1,255 @@
-"""Refactored landuse agent with modern architecture and separated concerns."""
+"""
+Simplified LangChain tool-calling agent for RPA Land Use Analytics.
 
-# Import PromptManager for versioned prompts
-import sys
+Uses Claude Sonnet 4.5 with domain-specific tools instead of SQL generation.
+Follows the proven AskFIA pattern for better performance.
+"""
+
+import asyncio
+import logging
+import os
 import time
+from collections.abc import AsyncGenerator
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
-from langchain_core.language_models import BaseChatModel
-from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, ToolMessage
-from langchain_core.messages.utils import count_tokens_approximately, trim_messages
-from langchain_core.tools import BaseTool
-from langgraph.graph import StateGraph
+from dotenv import load_dotenv
+from langchain_anthropic import ChatAnthropic
+
+# Load environment variables from .env files
+# Try multiple locations in order of priority
+_env_paths = [
+    Path.cwd() / ".env",  # Current working directory
+    Path.cwd() / "config" / ".env",  # config/.env
+    Path(__file__).parent.parent.parent.parent / ".env",  # Project root
+    Path(__file__).parent.parent.parent.parent / "config" / ".env",  # Project config/
+]
+
+for env_path in _env_paths:
+    if env_path.exists():
+        load_dotenv(env_path)
+        break
+from langchain_core.messages import AIMessage, HumanMessage, SystemMessage, ToolMessage
 from rich.console import Console
 from rich.panel import Panel
-from rich.table import Table
 
-from landuse.agents.conversation_manager import ConversationManager
-from landuse.agents.database_manager import DatabaseManager
-from landuse.agents.graph_builder import GraphBuilder
-from landuse.agents.llm_manager import LLMManager
-from landuse.agents.prompts import get_system_prompt
-from landuse.agents.query_executor import QueryExecutor
-
-# Add prompts directory to path if needed
-project_root = Path(__file__).parent.parent.parent.parent
-sys.path.insert(0, str(project_root))
-try:
-    from prompts.prompt_manager import PromptManager
-except ImportError:
-    # Fallback if PromptManager not available
-    PromptManager = None
-from landuse.agents.state import AgentState
+from landuse.agents.prompts import SYSTEM_PROMPT
+from landuse.agents.tools import TOOLS
 from landuse.core.app_config import AppConfig
-from landuse.exceptions import GraphExecutionError, LanduseError, RateLimitError, ToolExecutionError, wrap_exception
-from landuse.tools.common_tools import create_analysis_tool, create_execute_query_tool, create_schema_tool
-from landuse.tools.state_lookup_tool import create_state_lookup_tool
-from landuse.utils.retry_decorators import invoke_llm_with_retry
-from landuse.utils.security import RateLimiter
+from landuse.services.landuse_service import landuse_service
 
-# Hard token limits to prevent runaway context accumulation
-# GPT-4o has 128K context, but we want to stay well under to leave room for response
-MAX_CONTEXT_TOKENS = 100_000  # Hard cap - will trim if exceeded
-MAX_HISTORY_TOKENS = 8_000  # Max tokens for conversation history
-ENABLE_CONVERSATION_HISTORY = False  # DISABLED by default for stateless operation
+logger = logging.getLogger(__name__)
 
 
-class LanduseAgent:
+class LandUseAgent:
     """
-    Refactored landuse agent with separated concerns and modern architecture.
+    Simple tool-calling agent for RPA land use queries.
 
-    Uses dependency injection and follows Single Responsibility Principle by delegating
-    specific responsibilities to specialized manager classes:
-    - LLMManager: Handles LLM creation and configuration
-    - DatabaseManager: Manages database connections and schema
-    - ConversationManager: Handles conversation history
-    - QueryExecutor: Executes SQL queries with error handling
-    - GraphBuilder: Constructs LangGraph workflows
+    Uses Claude Sonnet 4.5 with domain-specific tools that encapsulate
+    all SQL queries. The LLM never generates SQL directly.
     """
 
-    def __init__(self, config: Optional[AppConfig] = None):
-        """Initialize the landuse agent with configuration using dependency injection."""
+    def __init__(self, config: AppConfig | None = None):
+        """
+        Initialize the agent.
+
+        Args:
+            config: Optional AppConfig. If not provided, uses defaults.
+        """
         self.config = config or AppConfig()
-        self.debug = self.config.logging.level == "DEBUG"
         self.console = Console()
 
-        # Initialize rate limiter using security config
-        self.rate_limiter = RateLimiter(
-            max_calls=self.config.security.rate_limit_calls, time_window=self.config.security.rate_limit_window
+        # Get API key
+        api_key = os.getenv("ANTHROPIC_API_KEY")
+        if not api_key:
+            raise ValueError(
+                "ANTHROPIC_API_KEY environment variable is required. "
+                "Please set it in your environment or .env file."
+            )
+
+        # Initialize Claude
+        self.llm = ChatAnthropic(
+            model="claude-sonnet-4-5-20250929",
+            api_key=api_key,
+            temperature=0,
+            max_tokens=4096,
         )
+        self.llm_with_tools = self.llm.bind_tools(TOOLS)
 
-        # Initialize component managers
-        self.llm_manager = LLMManager(self.config, self.console)
-        self.database_manager = DatabaseManager(self.config, self.console)
-
-        # Per-session conversation managers for proper multi-user isolation
-        # Each thread_id gets its own ConversationManager instance
-        self._conversation_managers: dict[str, ConversationManager] = {}
-        self._default_thread_id = "default"
-        self._max_history_length = self.config.agent.conversation_history_limit
-
-        # Create core components
-        self.llm = self.llm_manager.create_llm()
-        self.db_connection = self.database_manager.get_connection()
-        self.schema = self.database_manager.get_schema()
-
-        # Initialize query executor
-        self.query_executor = QueryExecutor(self.config, self.db_connection, self.console)
-
-        # Create tools and system prompt
-        self.tools = self._create_tools()
-
-        # Use PromptManager if available, otherwise fall back to legacy
-        if PromptManager is not None:
-            try:
-                self.prompt_manager = PromptManager()
-                self.system_prompt = self.prompt_manager.get_prompt_with_schema(schema_info=self.schema)
-                # Log which version is being used
-                self.console.print(f"[green]✓ Using prompt version: {self.prompt_manager.active_version}[/green]")
-            except Exception as e:
-                # Fall back to legacy if PromptManager fails
-                self.console.print(f"[yellow]⚠ PromptManager not available, using legacy prompts: {e}[/yellow]")
-                self.system_prompt = get_system_prompt(
-                    include_maps=self.config.features.enable_map_generation,
-                    analysis_style="detailed",
-                    domain_focus=None,
-                    schema_info=self.schema,
-                )
-        else:
-            # Legacy prompt system
-            self.system_prompt = get_system_prompt(
-                include_maps=self.config.features.enable_map_generation,
-                analysis_style="detailed",
-                domain_focus=None,
-                schema_info=self.schema,
-            )
-
-        # Initialize graph builder
-        self.graph_builder = GraphBuilder(self.config, self.llm, self.tools, self.system_prompt, self.console)
-        self.graph = None
-
-    def _get_conversation_manager(self, thread_id: str | None = None) -> ConversationManager:
-        """Get or create a ConversationManager for the given thread_id.
-
-        This ensures each thread/session has its own isolated conversation history,
-        preventing cross-contamination between different users or sessions.
-
-        Args:
-            thread_id: Unique identifier for the conversation thread.
-                      If None, uses the default thread.
-
-        Returns:
-            ConversationManager instance for the specified thread.
-        """
-        effective_thread_id = thread_id or self._default_thread_id
-
-        if effective_thread_id not in self._conversation_managers:
-            self._conversation_managers[effective_thread_id] = ConversationManager(
-                max_history_length=self._max_history_length, console=self.console
-            )
-
-        return self._conversation_managers[effective_thread_id]
+        # Conversation history for multi-turn
+        self._messages: list[dict] = []
+        self._max_history = 20
 
     @property
-    def conversation_manager(self) -> ConversationManager:
-        """Backward compatibility: Get the default conversation manager.
+    def model_name(self) -> str:
+        """Get the model name."""
+        return "claude-sonnet-4-5-20250929"
 
-        For new code, use _get_conversation_manager(thread_id) instead.
-        """
-        return self._get_conversation_manager(self._default_thread_id)
+    def clear_history(self) -> None:
+        """Clear conversation history."""
+        self._messages.clear()
+        self.console.print("[yellow]Conversation history cleared.[/yellow]")
 
-    def clear_thread_history(self, thread_id: str | None = None) -> bool:
-        """Clear conversation history for a specific thread.
-
-        Args:
-            thread_id: The thread to clear. If None, clears the default thread.
-
-        Returns:
-            True if history was cleared, False if thread didn't exist.
-        """
-        effective_thread_id = thread_id or self._default_thread_id
-
-        if effective_thread_id in self._conversation_managers:
-            self._conversation_managers[effective_thread_id].clear_history()
-            # Remove the manager to free memory
-            del self._conversation_managers[effective_thread_id]
-            return True
-
-        return False
-
-    def _trim_messages_safely(
-        self, messages: list[BaseMessage], max_tokens: int = MAX_CONTEXT_TOKENS
-    ) -> list[BaseMessage]:
-        """Trim messages to stay under token limit.
-
-        This is a safety net to prevent token accumulation errors.
-        Uses approximate token counting for speed.
-
-        Args:
-            messages: List of messages to trim
-            max_tokens: Maximum token count allowed
-
-        Returns:
-            Trimmed list of messages
-        """
-        try:
-            # Count current tokens
-            current_tokens = count_tokens_approximately(messages)
-
-            if current_tokens <= max_tokens:
-                return messages
-
-            # Log warning about trimming
-            if self.console:
-                self.console.print(
-                    f"[yellow]WARNING: Trimming messages from {current_tokens} to {max_tokens} tokens[/yellow]"
-                )
-
-            # Trim to max tokens, keeping the most recent messages
-            trimmed = trim_messages(
-                messages,
-                strategy="last",
-                token_counter=count_tokens_approximately,
-                max_tokens=max_tokens,
-                start_on="human",
-                end_on=("human", "tool"),
-                allow_partial=False,
-            )
-
-            return list(trimmed)
-
-        except Exception as e:
-            # If trimming fails, return original messages
-            # Better to try with full context than fail completely
-            if self.debug:
-                print(f"DEBUG: Message trimming failed: {e}")
-            return messages
-
-    def _create_tools(self) -> list[BaseTool]:
-        """Create tools for the agent."""
-        tools = [
-            create_execute_query_tool(self.config, self.db_connection, self.schema),
-            create_analysis_tool(),
-            create_schema_tool(self.schema),
-            create_state_lookup_tool(),
-        ]
-
-        return tools
-
-    def get_dynamic_system_prompt(self, question: str) -> str:
-        """
-        Get appropriate system prompt based on query content.
-
-        Args:
-            question: User's natural language question
-
-        Returns:
-            Specialized system prompt for the query
-        """
-        # Always use the standard system prompt
-        # (Dynamic prompt selection was removed as specialized prompts were not effective)
-        return self.system_prompt
-
-    def _check_rate_limit(self, identifier: str = "default") -> None:
-        """Check rate limit and raise RateLimitError if exceeded."""
-        allowed, error_msg = self.rate_limiter.check_rate_limit(identifier)
-        if not allowed:
-            raise RateLimitError(
-                message=f"Rate limit exceeded: {error_msg}", retry_after=self.config.security.rate_limit_window
-            )
-
-    def simple_query(
+    async def stream(
         self,
-        question: str,
-        thread_id: str | None = None,
-        include_history: bool = ENABLE_CONVERSATION_HISTORY,
-    ) -> str:
-        """Execute a query using simple direct LLM interaction without LangGraph state management.
-
-        IMPORTANT: By default, this is STATELESS - no conversation history is included.
-        Each query is independent. This prevents token accumulation across sessions.
+        messages: list[dict],
+        user_id: str | None = None,
+        session_id: str | None = None,
+    ) -> AsyncGenerator[dict, None]:
+        """
+        Stream a response with tool use, supporting multi-turn tool calling.
 
         Args:
-            question: The natural language question to answer.
-            thread_id: Optional thread ID for session-isolated conversation history.
-                      Only used if include_history=True.
-            include_history: Whether to include conversation history. Default is False
-                           for stateless operation. Set to True to enable memory.
-
-        Returns:
-            The agent's response as a string.
-        """
-        # Check rate limit before processing
-        self._check_rate_limit(thread_id or "default")
-
-        try:
-            # Build conversation - STATELESS by default
-            # Use dynamic prompt selection based on query content
-            dynamic_prompt = self.get_dynamic_system_prompt(question)
-            messages = [HumanMessage(content=dynamic_prompt)]
-
-            # Only add conversation history if explicitly enabled
-            if include_history and thread_id:
-                conversation_manager = self._get_conversation_manager(thread_id)
-                history_messages = conversation_manager.get_conversation_messages()
-
-                # Trim history to prevent token explosion
-                if history_messages:
-                    history_messages = self._trim_messages_safely(history_messages, max_tokens=MAX_HISTORY_TOKENS)
-                    messages.extend(history_messages)
-
-                    if self.debug:
-                        token_count = count_tokens_approximately(history_messages)
-                        print(f"DEBUG: Added {len(history_messages)} history messages ({token_count} tokens)")
-            else:
-                conversation_manager = None  # No history tracking
-
-            # Add current question
-            messages.append(HumanMessage(content=question))
-
-            # SAFETY: Apply hard token limit before sending to LLM
-            messages = self._trim_messages_safely(messages, max_tokens=MAX_CONTEXT_TOKENS)
-
-            if self.debug:
-                total_tokens = count_tokens_approximately(messages)
-                print(f"DEBUG: Sending {len(messages)} messages ({total_tokens} tokens) to LLM")
-
-            # Get initial response with retry logic
-            response = invoke_llm_with_retry(self.llm.bind_tools(self.tools), messages, max_attempts=3)
-            messages.append(response)
-
-            if self.debug:
-                print(f"DEBUG: Initial response type: {type(response)}")
-                print(f"DEBUG: Has tool calls: {hasattr(response, 'tool_calls') and bool(response.tool_calls)}")
-                if hasattr(response, "content"):
-                    print(f"DEBUG: Initial content: {response.content[:200] if response.content else 'Empty'}")
-
-            # Handle tool calls if any
-            max_iterations = 3
-            iteration = 0
-
-            # Store tool results for creative formatting
-            query_results = []
-            analysis_results = []
-
-            while hasattr(response, "tool_calls") and response.tool_calls and iteration < max_iterations:
-                iteration += 1
-
-                # Execute each tool call and add proper ToolMessage
-                for tool_call in response.tool_calls:
-                    # Find the matching tool
-                    tool_name = tool_call["name"]
-                    tool_args = tool_call["args"]
-                    tool_id = tool_call["id"]  # Important: use the tool call ID
-
-                    # Execute the tool
-                    tool_result = None
-                    for tool in self.tools:
-                        if tool.name == tool_name:
-                            try:
-                                if self.debug:
-                                    print(f"\nDEBUG: Executing tool '{tool_name}'")
-                                    print(f"DEBUG: Tool args: {tool_args}")
-
-                                tool_result = tool.invoke(tool_args)
-
-                                if self.debug:
-                                    result_str = str(tool_result)
-                                    print(f"DEBUG: Tool result length: {len(result_str)} chars")
-
-                                    # Show more details for query execution
-                                    if tool_name == "execute_landuse_query" and "query" in tool_args:
-                                        print(f"DEBUG: SQL Query: {tool_args['query']}")
-                                        if "rows returned" in result_str:
-                                            # Extract row count
-                                            import re
-
-                                            row_match = re.search(r"(\d+) rows returned", result_str)
-                                            if row_match:
-                                                print(f"DEBUG: Query returned {row_match.group(1)} rows")
-                                        if "No results found" in result_str:
-                                            print("DEBUG: Query returned NO RESULTS")
-                                        # Show first 300 chars of results
-                                        print(f"DEBUG: Query result preview: {result_str[:300]}...")
-
-                                    # Show analysis details
-                                    elif tool_name == "analyze_landuse_results":
-                                        print(f"DEBUG: Analysis preview: {result_str[:200]}...")
-
-                                # Store results for formatting
-                                if tool_name == "execute_landuse_query":
-                                    query_results.append(str(tool_result))
-                                elif tool_name == "analyze_landuse_results":
-                                    analysis_results.append(str(tool_result))
-
-                                break
-                            except ToolExecutionError as e:
-                                error_msg = f"Tool execution error: {str(e)}"
-                                if self.debug:
-                                    print(f"DEBUG: Tool execution error: {error_msg}")
-                                tool_result = error_msg
-                            except Exception as e:
-                                wrapped_error = wrap_exception(e, f"Tool '{tool_name}' execution")
-                                error_msg = f"Tool error: {str(wrapped_error)}"
-                                if self.debug:
-                                    print(f"DEBUG: Tool error: {error_msg}")
-                                    import traceback
-
-                                    traceback.print_exc()
-                                tool_result = error_msg
-
-                    if tool_result is None:
-                        tool_result = f"Unknown tool: {tool_name}"
-
-                    # Add tool result using proper ToolMessage format
-                    messages.append(ToolMessage(content=str(tool_result), tool_call_id=tool_id))
-
-                # Get next response with retry logic
-                response = invoke_llm_with_retry(self.llm.bind_tools(self.tools), messages, max_attempts=3)
-                messages.append(response)
-
-                if self.debug:
-                    print(f"DEBUG: Response after tool execution: {type(response)}")
-                    if hasattr(response, "content"):
-                        print(f"DEBUG: Response content type: {type(response.content)}")
-                        print(f"DEBUG: Response content: {response.content[:200] if response.content else 'None'}")
-
-            # Extract the final text content from the response
-            if self.debug:
-                print("\nDEBUG: Extracting final content from response")
-                print(f"DEBUG: Response type: {type(response)}")
-                print(f"DEBUG: Has content attr: {hasattr(response, 'content')}")
-                print(f"DEBUG: Has text attr: {hasattr(response, 'text')}")
-
-            final_content = ""
-            if hasattr(response, "content"):
-                content = response.content
-                if self.debug:
-                    print(f"DEBUG: Content type: {type(content)}")
-                    print(f"DEBUG: Content value: {content[:200] if content else 'None'}")
-
-                # Handle different content formats
-                if isinstance(content, list):
-                    # Extract text from list of content blocks
-                    text_parts = []
-                    for i, item in enumerate(content):
-                        if self.debug:
-                            print(f"DEBUG: Content item {i}: type={type(item)}, value={str(item)[:100]}")
-                        if isinstance(item, dict) and item.get("type") == "text":
-                            text_parts.append(item.get("text", ""))
-                        elif isinstance(item, str):
-                            text_parts.append(item)
-                        else:
-                            # Skip non-text items like tool calls
-                            continue
-                    final_content = " ".join(text_parts)
-                else:
-                    final_content = str(content)
-            elif hasattr(response, "text"):
-                final_content = str(response.text)
-            else:
-                final_content = str(response)
-
-            # If we still have no content, check if we have tool results we can summarize
-            if not final_content.strip() and (query_results or analysis_results):
-                if self.debug:
-                    print("\nDEBUG: Final content is empty, checking tool results")
-                    print(f"DEBUG: Query results count: {len(query_results)}")
-                    print(f"DEBUG: Analysis results count: {len(analysis_results)}")
-
-                # Build a response from the tool results
-                if query_results and analysis_results:
-                    final_content = f"{query_results[-1]}\n\n{analysis_results[-1]}"
-                elif query_results:
-                    final_content = query_results[-1]
-                elif analysis_results:
-                    final_content = analysis_results[-1]
-
-                # If still empty, provide helpful message
-                if not final_content.strip():
-                    final_content = "I executed the query but couldn't generate a formatted response. The query completed successfully but may have returned no results."
-
-            # Only update conversation history if history tracking is enabled
-            if conversation_manager is not None:
-                conversation_manager.add_conversation(question, final_content)
-
-            # Return clean final content without any special formatting
-            if self.debug:
-                print(f"\nDEBUG: Final content length: {len(final_content)}")
-                print(f"DEBUG: Final content preview: {final_content[:200]}...")
-                print("DEBUG: === End of simple_query execution ===")
-
-            return final_content
-
-        except (LanduseError, ToolExecutionError) as e:
-            error_msg = f"Query processing error: {str(e)}"
-            # Only update history if enabled
-            if conversation_manager is not None:
-                conversation_manager.add_conversation(question, error_msg)
-            return error_msg
-        except Exception as e:
-            wrapped_error = wrap_exception(e, "Simple query processing")
-            error_msg = f"Unexpected error: {str(wrapped_error)}"
-            # Only update history if enabled
-            if "conversation_manager" in dir() and conversation_manager is not None:
-                conversation_manager.add_conversation(question, error_msg)
-            return error_msg
-
-    def _graph_query(
-        self,
-        question: str,
-        thread_id: str | None = None,
-        user_expertise: str = "novice",
-    ) -> str:
-        """Execute a query using the enhanced LangGraph workflow with RPA context.
-
-        Args:
-            question: Natural language question.
-            thread_id: Optional thread ID for conversation memory.
-            user_expertise: User expertise level (novice, intermediate, expert).
-
-        Returns:
-            The agent's response as a string.
-        """
-        # Check rate limit before processing
-        self._check_rate_limit(thread_id or "default")
-
-        # Get the conversation manager for this thread (creates one if needed)
-        conversation_manager = self._get_conversation_manager(thread_id)
-
-        try:
-            # Build graph if not already built using graph builder
-            if not self.graph:
-                self.graph = self.graph_builder.build_graph()
-
-            # Prepare initial messages with conversation history
-            dynamic_prompt = self.get_dynamic_system_prompt(question)
-            initial_messages = [HumanMessage(content=dynamic_prompt)]
-
-            # Add conversation history from thread-specific manager
-            initial_messages.extend(conversation_manager.get_conversation_messages())
-
-            # Add current question
-            initial_messages.append(HumanMessage(content=question))
-
-            # Use enhanced state with RPA context tracking
-            initial_state = {
-                "messages": initial_messages,
-                "context": {},
-                "iteration_count": 0,
-                "max_iterations": self.config.agent.max_iterations,
-                # RPA context fields
-                "user_expertise": user_expertise,
-                "explained_concepts": [],
-                "preferred_scenarios": [],
-                "focus_states": [],
-                "focus_time_range": None,
-                "current_query_type": None,
-                "detected_scenarios": [],
-                "detected_geography": [],
-                "pending_sql_approval": None,
-                "thread_id": thread_id,
-                "user_id": None,
-            }
-
-            # Prepare config with thread_id for memory
-            # MemorySaver requires thread_id, so generate one if not provided
-            import time
-
-            effective_thread_id = thread_id or f"landuse-{int(time.time() * 1000)}"
-            config = {"configurable": {"thread_id": effective_thread_id}}
-
-            # Execute the graph
-            result = self.graph.invoke(initial_state, config=config)
-
-            # Extract the final response from messages
-            if result and "messages" in result:
-                messages = result["messages"]
-                # Find the last AI message with content
-                for msg in reversed(messages):
-                    if not isinstance(msg, AIMessage):
-                        continue
-
-                    # Check if this is a tool call without content
-                    tool_calls = getattr(msg, "tool_calls", None)
-                    if tool_calls and not msg.content:
-                        continue
-
-                    # Extract content
-                    content = msg.content
-                    if isinstance(content, list):
-                        # Extract text content from list
-                        text_parts = []
-                        for item in content:
-                            if isinstance(item, dict) and item.get("type") == "text":
-                                text_parts.append(item.get("text", ""))
-                            elif isinstance(item, str):
-                                text_parts.append(item)
-                        if text_parts:
-                            final_response = " ".join(text_parts)
-                            conversation_manager.add_conversation(question, final_response)
-                            return final_response
-                    elif content:
-                        final_response = str(content)
-                        conversation_manager.add_conversation(question, final_response)
-                        return final_response
-
-            default_response = "I couldn't generate a proper response. Please try rephrasing your question."
-            conversation_manager.add_conversation(question, default_response)
-            return default_response
-
-        except GraphExecutionError as e:
-            error_msg = f"Graph execution error: {str(e)}"
-            if self.debug:
-                self.console.print(f"[red]DEBUG: {error_msg}[/red]")
-            error_response = f"I encountered a workflow error: {str(e)}"
-            conversation_manager.add_conversation(question, error_response)
-            return error_response
-        except Exception as e:
-            wrapped_error = wrap_exception(e, "Graph query execution")
-            error_msg = f"Unexpected error in graph execution: {str(wrapped_error)}"
-            if self.debug:
-                import traceback
-
-                self.console.print(f"[red]DEBUG: {error_msg}[/red]")
-                self.console.print(f"[red]{traceback.format_exc()}[/red]")
-            error_response = f"I encountered an unexpected error: {str(wrapped_error)}"
-            conversation_manager.add_conversation(question, error_response)
-            return error_response
-
-    def query(
-        self,
-        question: str,
-        use_graph: bool | None = None,
-        thread_id: str | None = None,
-        user_expertise: str = "novice",
-        include_history: bool = ENABLE_CONVERSATION_HISTORY,
-    ) -> str:
-        """Execute a natural language query using the agent.
-
-        IMPORTANT: By default, queries are STATELESS - no conversation history.
-        Set include_history=True to enable conversation memory.
-
-        Args:
-            question: The natural language question to answer.
-            use_graph: Override for graph mode (None uses feature flag).
-            thread_id: Optional thread ID for conversation memory.
-            user_expertise: User expertise level for response calibration.
-            include_history: Whether to include conversation history. Default is False.
-
-        Returns:
-            The agent's response as a string.
-        """
-        # Determine whether to use graph mode based on feature flags
-        should_use_graph = use_graph
-        if should_use_graph is None:
-            # Check feature flags - use full graph mode if enabled
-            should_use_graph = self.config.features.enable_full_graph_mode
-
-        if should_use_graph:
-            return self._graph_query(question, thread_id, user_expertise)
-        else:
-            # Use the simple approach - STATELESS by default
-            return self.simple_query(question, thread_id, include_history=include_history)
-
-    def stream_query(self, question: str, thread_id: Optional[str] = None) -> Any:
-        """
-        Stream responses for real-time interaction.
-
-        Args:
-            question: Natural language question
-            thread_id: Optional thread ID for conversation memory
+            messages: List of message dicts with 'role' and 'content'
+            user_id: Optional user identifier
+            session_id: Optional session identifier
 
         Yields:
-            Streaming response chunks
+            Event dicts with 'type' key:
+            - {"type": "text", "content": "..."} - Text response
+            - {"type": "tool_call", "tool_name": "...", "args": {...}} - Tool invocation
+            - {"type": "tool_result", "tool_call_id": "...", "result": "..."} - Tool result
+            - {"type": "finish"} - Stream complete
         """
-        # Check rate limit before processing
-        self._check_rate_limit(thread_id or "default")
+        start_time = time.time()
+        tool_calls_count = 0
 
-        if not self.graph:
-            self.graph = self.graph_builder.build_graph()
+        # Convert to LangChain message format
+        lc_messages = [SystemMessage(content=SYSTEM_PROMPT)]
 
-        # Prepare initial state
-        initial_state = {
-            "messages": [HumanMessage(content=question)],
-            "context": {},
-            "iteration_count": 0,
-            "max_iterations": self.config.agent.max_iterations,
-        }
+        for msg in messages:
+            if msg["role"] == "user":
+                lc_messages.append(HumanMessage(content=msg["content"]))
+            elif msg["role"] == "assistant":
+                lc_messages.append(AIMessage(content=msg["content"]))
 
-        # Prepare config
-        config = {}
-        if thread_id and self.config.agent.enable_memory:
-            config = {"configurable": {"thread_id": thread_id}}
-        elif not thread_id:
-            config = {"configurable": {"thread_id": f"landuse-stream-{int(time.time())}"}}
+        # Tool execution loop
+        max_iterations = 10
+        iteration = 0
 
-        # Stream the response
-        try:
-            for chunk in self.graph.stream(initial_state, config=config):
-                yield chunk
-        except GraphExecutionError as e:
-            yield {"error": f"Graph streaming error: {str(e)}"}
-        except Exception as e:
-            wrapped_error = wrap_exception(e, "Streaming query")
-            yield {"error": f"Streaming error: {str(wrapped_error)}"}
+        while iteration < max_iterations:
+            iteration += 1
 
-    def create_subgraph(self, name: str, specialized_tools: list[BaseTool]) -> StateGraph:
+            try:
+                # Get response (may include tool calls)
+                response = await self.llm_with_tools.ainvoke(lc_messages)
+            except Exception as e:
+                logger.error(f"LLM invocation failed: {e}", exc_info=True)
+                yield {"type": "text", "content": f"Error communicating with Claude: {e}"}
+                yield {"type": "finish"}
+                return
+
+            # No tool calls - final response
+            if not response.tool_calls:
+                content = response.content
+                if isinstance(content, str):
+                    yield {"type": "text", "content": content}
+                elif isinstance(content, list):
+                    text_parts = []
+                    for block in content:
+                        if isinstance(block, str):
+                            text_parts.append(block)
+                        elif hasattr(block, "text"):
+                            text_parts.append(block.text)
+                        elif isinstance(block, dict) and "text" in block:
+                            text_parts.append(block["text"])
+                    yield {"type": "text", "content": "".join(text_parts)}
+                break
+
+            # Process tool calls
+            tool_calls_count += len(response.tool_calls)
+            tool_results = {}
+
+            for tool_call in response.tool_calls:
+                yield {
+                    "type": "tool_call",
+                    "tool_name": tool_call["name"],
+                    "tool_call_id": tool_call["id"],
+                    "args": tool_call["args"],
+                }
+
+                # Execute the tool
+                tool_func = {t.name: t for t in TOOLS}.get(tool_call["name"])
+                if tool_func:
+                    try:
+                        result = await tool_func.ainvoke(tool_call["args"])
+                        tool_results[tool_call["id"]] = result
+                        yield {
+                            "type": "tool_result",
+                            "tool_call_id": tool_call["id"],
+                            "result": result,
+                        }
+                    except Exception as e:
+                        error_result = f"Error executing tool: {e}"
+                        tool_results[tool_call["id"]] = error_result
+                        logger.error(f"Tool execution failed: {e}", exc_info=True)
+                        yield {
+                            "type": "tool_result",
+                            "tool_call_id": tool_call["id"],
+                            "result": error_result,
+                        }
+                else:
+                    error_result = f"Unknown tool: {tool_call['name']}"
+                    tool_results[tool_call["id"]] = error_result
+                    yield {
+                        "type": "tool_result",
+                        "tool_call_id": tool_call["id"],
+                        "result": error_result,
+                    }
+
+            # Add results to messages for next iteration
+            lc_messages.append(response)
+            for tool_call in response.tool_calls:
+                result = tool_results.get(tool_call["id"], "Tool execution failed")
+                lc_messages.append(
+                    ToolMessage(content=result, tool_call_id=tool_call["id"])
+                )
+
+        # Iteration limit reached
+        if iteration >= max_iterations:
+            logger.warning(f"Hit max_iterations limit ({max_iterations})")
+            yield {
+                "type": "text",
+                "content": "I apologize, but this query required more steps than expected. "
+                "Please try a simpler question.",
+            }
+
+        latency_ms = int((time.time() - start_time) * 1000)
+        logger.info(f"Query completed: {tool_calls_count} tool calls, {latency_ms}ms")
+
+        yield {"type": "finish"}
+
+    def query(self, question: str, **kwargs) -> str:
         """
-        Create a specialized subgraph for complex workflows.
-
-        This follows the 2025 pattern of using subgraphs for modularity.
+        Query the agent with a question.
 
         Args:
-            name: Name of the subgraph
-            specialized_tools: Tools specific to this subgraph
+            question: Natural language question about land use
 
         Returns:
-            Compiled subgraph
+            Agent's response as a string
         """
-        return self.graph_builder.create_subgraph(name, specialized_tools)
+        # Add to message history
+        self._messages.append({"role": "user", "content": question})
 
-    def create_map_subgraph(self) -> StateGraph:
-        """
-        Create a specialized subgraph for map-based analysis.
+        # Trim history if needed
+        if len(self._messages) > self._max_history * 2:
+            self._messages = self._messages[-self._max_history * 2:]
 
-        This subgraph adds geographic visualization capabilities.
+        # Run async stream and collect text
+        async def _run():
+            response_text = ""
+            async for event in self.stream(self._messages):
+                if event["type"] == "text":
+                    response_text = event["content"]
+            return response_text
 
-        Returns:
-            Compiled map analysis subgraph
-        """
-        # Import map tools only when needed
-        from landuse.tools.map_tools import create_choropleth_tool, create_heatmap_tool
+        response = asyncio.run(_run())
 
-        map_tools = [
-            create_execute_query_tool(self.config, self.db_connection, self.schema),
-            create_choropleth_tool(),
-            create_heatmap_tool(),
-            create_analysis_tool(),
-        ]
+        # Add response to history
+        self._messages.append({"role": "assistant", "content": response})
 
-        return self.create_subgraph("map_analysis", map_tools)
-
-    def _display_results_table(self, results: list[tuple], columns: list[str], title: str = "Query Results") -> None:
-        """Display query results in a rich table format."""
-        table = Table(title=title, show_header=True, header_style="bold magenta")
-
-        # Add columns
-        for col in columns:
-            table.add_column(col, style="cyan", no_wrap=False)
-
-        # Add rows (limit display)
-        display_limit = min(len(results), self.config.agent.default_display_limit)
-        for row in results[:display_limit]:
-            table.add_row(*[str(val) for val in row])
-
-        if len(results) > display_limit:
-            table.add_row(*["..." for _ in columns])
-            table.caption = f"Showing {display_limit} of {len(results)} rows"
-
-        self.console.print(table)
-
-    def clear_history(self, thread_id: str | None = None) -> None:
-        """Clear conversation history for a specific thread or all threads.
-
-        Args:
-            thread_id: If provided, clears only that thread's history.
-                      If None, clears ALL threads (backward compatible behavior).
-        """
-        if thread_id:
-            # Clear specific thread
-            self.clear_thread_history(thread_id)
-        else:
-            # Clear all threads (backward compatible)
-            for tid in list(self._conversation_managers.keys()):
-                self._conversation_managers[tid].clear_history()
-            self._conversation_managers.clear()
+        return response
 
     def chat(self) -> None:
         """Interactive chat interface for the agent."""
@@ -794,34 +289,28 @@ class LanduseAgent:
 
             except KeyboardInterrupt:
                 self.console.print("\n[yellow]Interrupted. Type 'exit' to quit.[/yellow]")
-            except (LanduseError, ToolExecutionError, GraphExecutionError) as e:
-                self.console.print(f"\n[red]Agent Error: {str(e)}[/red]")
             except Exception as e:
-                wrapped_error = wrap_exception(e, "Chat interaction")
-                self.console.print(f"\n[red]Unexpected Error: {str(wrapped_error)}[/red]")
+                self.console.print(f"\n[red]Error: {e}[/red]")
+                logger.error(f"Chat error: {e}", exc_info=True)
 
     def _show_help(self) -> None:
         """Show help information with example queries."""
         examples = [
+            "How much forest is in California?",
+            "Compare urban expansion between LM and HH scenarios",
             "Which states will see the most agricultural land loss?",
-            "Compare forest transitions between RCP45 and RCP85 scenarios",
-            "Show urbanization trends in California counties",
-            "What land use types are converting to urban?",
-            "Analyze cropland changes in the Midwest by 2070",
+            "What is converting to urban land in Texas?",
+            "Show me forest loss trends over time for North Carolina",
+            "Find the top 10 counties with most urban growth",
         ]
 
         self.console.print(
-            Panel.fit("\n".join([f"• {ex}" for ex in examples]), title="Example Questions", border_style="blue")
+            Panel.fit(
+                "\n".join([f"• {ex}" for ex in examples]),
+                title="Example Questions",
+                border_style="blue",
+            )
         )
-
-    @property
-    def model_name(self) -> str:
-        """Get the model name from configuration."""
-        return self.config.llm.model_name
-
-    def _get_schema_help(self) -> str:
-        """Get user-friendly schema information for display in the UI."""
-        return self.schema
 
     def __enter__(self):
         """Context manager entry."""
@@ -829,9 +318,8 @@ class LanduseAgent:
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         """Context manager exit - clean up resources."""
-        # Clean up database connection using manager
-        if hasattr(self, "database_manager"):
-            self.database_manager.close()
+        # Close the service connection
+        landuse_service.close()
 
 
 def main() -> None:

@@ -1,14 +1,24 @@
 # Agents package initialization
+"""
+RPA Land Use Analytics Agent.
 
-# Import the primary agent and components
+Simplified LangChain tool-calling agent for querying USDA Forest Service
+RPA Assessment land use projections.
+"""
+
+# Import the primary agent
+from .landuse_agent import LandUseAgent
+
 # Import constants and utilities for backward compatibility
 from .constants import (
     CHAT_EXAMPLES,
+    CLIMATE_MODELS,
     DB_CONFIG,
     DEFAULT_ASSUMPTIONS,
     MODEL_CONFIG,
     QUERY_EXAMPLES,
     RESPONSE_SECTIONS,
+    RPA_SCENARIOS,
     SCHEMA_INFO_TEMPLATE,
     STATE_NAMES,
 )
@@ -22,15 +32,18 @@ from .formatting import (
     format_row_values,
     get_summary_statistics,
 )
-from .landuse_agent import AgentState, LanduseAgent
 
 # Import prompts system
-from .prompts import get_system_prompt
+from .prompts import SYSTEM_PROMPT, get_system_prompt
+
+# Import tools
+from .tools import TOOLS
 
 __all__ = [
-    # Agent classes
-    "LanduseAgent",
-    "AgentState",
+    # Agent class
+    "LandUseAgent",
+    # Tools
+    "TOOLS",
     # Constants
     "STATE_NAMES",
     "SCHEMA_INFO_TEMPLATE",
@@ -40,6 +53,8 @@ __all__ = [
     "RESPONSE_SECTIONS",
     "DB_CONFIG",
     "MODEL_CONFIG",
+    "RPA_SCENARIOS",
+    "CLIMATE_MODELS",
     # Formatting utilities
     "clean_sql_query",
     "format_query_results",
@@ -50,5 +65,6 @@ __all__ = [
     "format_error",
     "format_response",
     # Prompts
+    "SYSTEM_PROMPT",
     "get_system_prompt",
 ]
