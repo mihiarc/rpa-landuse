@@ -30,12 +30,8 @@ class ConnectionConfig(BaseModel):
         description="Path to DuckDB file or ':memory:'",
     )
     read_only: bool = Field(default=True, description="Open in read-only mode")
-    memory_limit: Optional[str] = Field(
-        default=None, description="Memory limit for DuckDB"
-    )
-    threads: Optional[int] = Field(
-        default=None, description="Number of threads for DuckDB"
-    )
+    memory_limit: Optional[str] = Field(default=None, description="Memory limit for DuckDB")
+    threads: Optional[int] = Field(default=None, description="Number of threads for DuckDB")
 
 
 class DuckDBConnection:
@@ -77,9 +73,7 @@ class DuckDBConnection:
         if config:
             self._config = config
         else:
-            db_path = database or os.getenv(
-                "LANDUSE_DB_PATH", "data/processed/landuse_analytics.duckdb"
-            )
+            db_path = database or os.getenv("LANDUSE_DB_PATH", "data/processed/landuse_analytics.duckdb")
             self._config = ConnectionConfig(database=db_path, read_only=read_only)
 
         self._instance = None
@@ -111,9 +105,7 @@ class DuckDBConnection:
         try:
             return duckdb.connect(database=db, **kwargs)
         except Exception as e:
-            raise DatabaseConnectionError(
-                f"Failed to connect to DuckDB at {db}: {e}"
-            ) from e
+            raise DatabaseConnectionError(f"Failed to connect to DuckDB at {db}: {e}") from e
 
     def connect(self) -> "DuckDBConnection":
         """
@@ -139,9 +131,7 @@ class DuckDBConnection:
             self.connect()
         return self._instance
 
-    def query(
-        self, query: str, ttl: Optional[int] = 3600, use_cache: bool = True, **kwargs
-    ) -> pd.DataFrame:
+    def query(self, query: str, ttl: Optional[int] = 3600, use_cache: bool = True, **kwargs) -> pd.DataFrame:
         """
         Execute a query and return results as a DataFrame.
 
@@ -186,9 +176,7 @@ class DuckDBConnection:
 
         return df
 
-    def query_with_result(
-        self, query: str, ttl: Optional[int] = 3600
-    ) -> QueryResult:
+    def query_with_result(self, query: str, ttl: Optional[int] = 3600) -> QueryResult:
         """
         Execute a query and return a QueryResult object with metadata.
 
@@ -214,17 +202,11 @@ class DuckDBConnection:
             df = self.query(sql_obj.sql, ttl=ttl)
             execution_time = time.time() - start_time
 
-            return QueryResult(
-                success=True, data=df, execution_time=execution_time, query=sql_obj.sql
-            )
+            return QueryResult(success=True, data=df, execution_time=execution_time, query=sql_obj.sql)
         except ValueError as e:
-            return QueryResult(
-                success=False, error=f"SQL validation error: {str(e)}", query=query
-            )
+            return QueryResult(success=False, error=f"SQL validation error: {str(e)}", query=query)
         except (duckdb.Error, duckdb.CatalogException, duckdb.SyntaxException) as e:
-            return QueryResult(
-                success=False, error=f"Database error: {str(e)}", query=query
-            )
+            return QueryResult(success=False, error=f"Database error: {str(e)}", query=query)
         except Exception as e:
             wrapped_error = wrap_exception(e, "Query execution")
             return QueryResult(success=False, error=str(wrapped_error), query=query)

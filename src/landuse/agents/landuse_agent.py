@@ -41,7 +41,7 @@ from landuse.utils.security import RateLimiter
 # Hard token limits to prevent runaway context accumulation
 # GPT-4o has 128K context, but we want to stay well under to leave room for response
 MAX_CONTEXT_TOKENS = 100_000  # Hard cap - will trim if exceeded
-MAX_HISTORY_TOKENS = 8_000    # Max tokens for conversation history
+MAX_HISTORY_TOKENS = 8_000  # Max tokens for conversation history
 ENABLE_CONVERSATION_HISTORY = False  # DISABLED by default for stateless operation
 
 
@@ -136,8 +136,7 @@ class LanduseAgent:
 
         if effective_thread_id not in self._conversation_managers:
             self._conversation_managers[effective_thread_id] = ConversationManager(
-                max_history_length=self._max_history_length,
-                console=self.console
+                max_history_length=self._max_history_length, console=self.console
             )
 
         return self._conversation_managers[effective_thread_id]
@@ -170,9 +169,7 @@ class LanduseAgent:
         return False
 
     def _trim_messages_safely(
-        self,
-        messages: list[BaseMessage],
-        max_tokens: int = MAX_CONTEXT_TOKENS
+        self, messages: list[BaseMessage], max_tokens: int = MAX_CONTEXT_TOKENS
     ) -> list[BaseMessage]:
         """Trim messages to stay under token limit.
 
@@ -289,10 +286,7 @@ class LanduseAgent:
 
                 # Trim history to prevent token explosion
                 if history_messages:
-                    history_messages = self._trim_messages_safely(
-                        history_messages,
-                        max_tokens=MAX_HISTORY_TOKENS
-                    )
+                    history_messages = self._trim_messages_safely(history_messages, max_tokens=MAX_HISTORY_TOKENS)
                     messages.extend(history_messages)
 
                     if self.debug:
@@ -488,7 +482,7 @@ class LanduseAgent:
             wrapped_error = wrap_exception(e, "Simple query processing")
             error_msg = f"Unexpected error: {str(wrapped_error)}"
             # Only update history if enabled
-            if 'conversation_manager' in dir() and conversation_manager is not None:
+            if "conversation_manager" in dir() and conversation_manager is not None:
                 conversation_manager.add_conversation(question, error_msg)
             return error_msg
 
@@ -552,6 +546,7 @@ class LanduseAgent:
             # Prepare config with thread_id for memory
             # MemorySaver requires thread_id, so generate one if not provided
             import time
+
             effective_thread_id = thread_id or f"landuse-{int(time.time() * 1000)}"
             config = {"configurable": {"thread_id": effective_thread_id}}
 

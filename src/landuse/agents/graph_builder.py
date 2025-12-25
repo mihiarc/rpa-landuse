@@ -315,9 +315,7 @@ Remember the key RPA assumptions:
         else:
             if self.console:
                 self.console.print(f"[red]Query rejected: {response.get('reason', 'User declined')}[/red]")
-            rejection_msg = AIMessage(
-                content=f"Query was not approved: {response.get('reason', 'User declined')}"
-            )
+            rejection_msg = AIMessage(content=f"Query was not approved: {response.get('reason', 'User declined')}")
             return {
                 "messages": [rejection_msg],
                 "pending_sql_approval": None,

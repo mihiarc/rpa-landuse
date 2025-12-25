@@ -120,8 +120,9 @@ class TestConversationHistory:
         # Mock _get_conversation_manager to return the default conversation manager
         with patch.object(agent, "_get_conversation_manager", return_value=agent.conversation_manager):
             # First query - use include_history=True to enable history tracking
-            response1 = agent.query("Tell me about Texas forests", use_graph=False,
-                                   include_history=True, thread_id="test")
+            response1 = agent.query(
+                "Tell me about Texas forests", use_graph=False, include_history=True, thread_id="test"
+            )
             assert "Texas" in response1
 
             # Check history was updated
@@ -130,8 +131,7 @@ class TestConversationHistory:
             assert "Texas" in agent.conversation_manager.conversation_history[1][1]
 
             # Second query - should have context
-            response2 = agent.query("How about California?", use_graph=False,
-                                   include_history=True, thread_id="test")
+            response2 = agent.query("How about California?", use_graph=False, include_history=True, thread_id="test")
             assert "California" in response2
 
             # Check history now has both conversations
@@ -170,8 +170,7 @@ class TestConversationHistory:
         # Mock _get_conversation_manager to return the default conversation manager
         with patch.object(agent, "_get_conversation_manager", return_value=agent.conversation_manager):
             # Query should fail but still update history - enable history tracking
-            response = agent.query("This will fail", use_graph=False,
-                                  include_history=True, thread_id="test")
+            response = agent.query("This will fail", use_graph=False, include_history=True, thread_id="test")
 
         assert "error" in response.lower()
         assert len(agent.conversation_manager.conversation_history) == 2

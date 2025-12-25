@@ -262,17 +262,29 @@ class TestAgentState:
 
         # Full expected fields matching the enhanced AgentState
         expected_fields = {
-            "messages", "context", "iteration_count", "max_iterations",
-            "user_expertise", "explained_concepts", "preferred_scenarios",
-            "focus_states", "focus_time_range", "current_query_type",
-            "detected_scenarios", "detected_geography", "pending_sql_approval",
-            "thread_id", "user_id"
+            "messages",
+            "context",
+            "iteration_count",
+            "max_iterations",
+            "user_expertise",
+            "explained_concepts",
+            "preferred_scenarios",
+            "focus_states",
+            "focus_time_range",
+            "current_query_type",
+            "detected_scenarios",
+            "detected_geography",
+            "pending_sql_approval",
+            "thread_id",
+            "user_id",
         }
 
         actual_fields = set(AgentState.__annotations__.keys())
 
         # Verify all expected fields are present
-        assert expected_fields == actual_fields, f"State fields mismatch: expected {expected_fields}, got {actual_fields}"
+        assert expected_fields == actual_fields, (
+            f"State fields mismatch: expected {expected_fields}, got {actual_fields}"
+        )
 
         # Verify core fields are always present (backwards compatibility check)
         assert core_fields.issubset(actual_fields), "Core fields missing from AgentState"

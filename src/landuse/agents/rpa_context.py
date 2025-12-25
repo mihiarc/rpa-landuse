@@ -9,19 +9,56 @@ from typing import Any
 
 # US State name to abbreviation mapping for geography detection
 US_STATES = {
-    "alabama": "AL", "alaska": "AK", "arizona": "AZ", "arkansas": "AR",
-    "california": "CA", "colorado": "CO", "connecticut": "CT", "delaware": "DE",
-    "florida": "FL", "georgia": "GA", "hawaii": "HI", "idaho": "ID",
-    "illinois": "IL", "indiana": "IN", "iowa": "IA", "kansas": "KS",
-    "kentucky": "KY", "louisiana": "LA", "maine": "ME", "maryland": "MD",
-    "massachusetts": "MA", "michigan": "MI", "minnesota": "MN", "mississippi": "MS",
-    "missouri": "MO", "montana": "MT", "nebraska": "NE", "nevada": "NV",
-    "new hampshire": "NH", "new jersey": "NJ", "new mexico": "NM", "new york": "NY",
-    "north carolina": "NC", "north dakota": "ND", "ohio": "OH", "oklahoma": "OK",
-    "oregon": "OR", "pennsylvania": "PA", "rhode island": "RI", "south carolina": "SC",
-    "south dakota": "SD", "tennessee": "TN", "texas": "TX", "utah": "UT",
-    "vermont": "VT", "virginia": "VA", "washington": "WA", "west virginia": "WV",
-    "wisconsin": "WI", "wyoming": "WY",
+    "alabama": "AL",
+    "alaska": "AK",
+    "arizona": "AZ",
+    "arkansas": "AR",
+    "california": "CA",
+    "colorado": "CO",
+    "connecticut": "CT",
+    "delaware": "DE",
+    "florida": "FL",
+    "georgia": "GA",
+    "hawaii": "HI",
+    "idaho": "ID",
+    "illinois": "IL",
+    "indiana": "IN",
+    "iowa": "IA",
+    "kansas": "KS",
+    "kentucky": "KY",
+    "louisiana": "LA",
+    "maine": "ME",
+    "maryland": "MD",
+    "massachusetts": "MA",
+    "michigan": "MI",
+    "minnesota": "MN",
+    "mississippi": "MS",
+    "missouri": "MO",
+    "montana": "MT",
+    "nebraska": "NE",
+    "nevada": "NV",
+    "new hampshire": "NH",
+    "new jersey": "NJ",
+    "new mexico": "NM",
+    "new york": "NY",
+    "north carolina": "NC",
+    "north dakota": "ND",
+    "ohio": "OH",
+    "oklahoma": "OK",
+    "oregon": "OR",
+    "pennsylvania": "PA",
+    "rhode island": "RI",
+    "south carolina": "SC",
+    "south dakota": "SD",
+    "tennessee": "TN",
+    "texas": "TX",
+    "utah": "UT",
+    "vermont": "VT",
+    "virginia": "VA",
+    "washington": "WA",
+    "west virginia": "WV",
+    "wisconsin": "WI",
+    "wyoming": "WY",
 }
 
 # Region definitions for geographic queries
@@ -75,7 +112,6 @@ RPA_CONTEXT_LIBRARY: dict[str, dict[str, Any]] = {
         "category": "methodology",
         "priority": 2,
     },
-
     # === SCENARIO FRAMEWORK ===
     "scenario_framework": {
         "concept": "RPA Scenario Framework",
@@ -119,7 +155,6 @@ RPA_CONTEXT_LIBRARY: dict[str, dict[str, Any]] = {
         "category": "scenario",
         "priority": 2,
     },
-
     # === LAND USE PATTERNS ===
     "forest_to_urban": {
         "concept": "Forest-to-Urban Conversion Pattern",
@@ -157,7 +192,6 @@ RPA_CONTEXT_LIBRARY: dict[str, dict[str, Any]] = {
         "category": "pattern",
         "priority": 2,
     },
-
     # === DATA STRUCTURE ===
     "county_resolution": {
         "concept": "County-Level Resolution",
@@ -199,7 +233,6 @@ RPA_CONTEXT_LIBRARY: dict[str, dict[str, Any]] = {
         "category": "data",
         "priority": 2,
     },
-
     # === REGIONAL PATTERNS ===
     "southeast_hotspot": {
         "concept": "Southeast Urbanization Hotspot",
