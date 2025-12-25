@@ -8,7 +8,7 @@ from typing import Any, Optional
 
 from langchain_core.language_models import BaseChatModel
 from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, ToolMessage
-from langchain_core.messages.utils import trim_messages, count_tokens_approximately
+from langchain_core.messages.utils import count_tokens_approximately, trim_messages
 from langchain_core.tools import BaseTool
 from langgraph.graph import StateGraph
 from rich.console import Console

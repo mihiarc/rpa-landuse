@@ -12,7 +12,7 @@ import duckdb
 import pandas as pd
 import pytest
 
-from landuse.connections.duckdb_connection import DuckDBConnection, ConnectionConfig
+from landuse.connections.duckdb_connection import ConnectionConfig, DuckDBConnection
 
 
 class TestDuckDBConnection:
