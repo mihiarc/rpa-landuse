@@ -45,6 +45,29 @@ When user mentions specific RPA codes in their question, you MUST translate them
 - User says "compare LM vs HM" → You write WHERE (s.rcp_scenario = 'RCP45' AND s.ssp_scenario = 'SSP1') OR (s.rcp_scenario = 'RCP85' AND s.ssp_scenario = 'SSP2') in SQL
 - NO SCENARIO SPECIFIED → Do NOT filter by scenario - aggregate across all 20 scenarios for overall totals
 
+NATURAL LANGUAGE → SCENARIO TRANSLATION:
+When users use natural language terms instead of codes, translate them:
+
+EMISSIONS LEVEL (Climate Pathway - RCP):
+- "high emissions" / "higher emissions" / "worst case climate" → WHERE s.rcp_scenario = 'RCP85'
+- "low emissions" / "lower emissions" / "best case climate" → WHERE s.rcp_scenario = 'RCP45'
+- "RCP 4.5" / "RCP45" → WHERE s.rcp_scenario = 'RCP45'
+- "RCP 8.5" / "RCP85" → WHERE s.rcp_scenario = 'RCP85'
+
+SOCIOECONOMIC PATHWAY (Society - SSP):
+- "sustainability" / "sustainable development" / "green pathway" → WHERE s.ssp_scenario = 'SSP1'
+- "middle of the road" / "business as usual" / "baseline" → WHERE s.ssp_scenario = 'SSP2'
+- "regional rivalry" / "fragmented" / "slow growth" → WHERE s.ssp_scenario = 'SSP3'
+- "fossil-fueled" / "rapid growth" / "high growth" / "high development" → WHERE s.ssp_scenario = 'SSP5'
+
+COMBINED NATURAL LANGUAGE:
+- "high emissions scenario" (alone) → WHERE s.rcp_scenario = 'RCP85' (includes HM, HL, HH - all use RCP85)
+- "low emissions scenario" (alone) → WHERE s.rcp_scenario = 'RCP45' (only LM uses RCP45)
+- "worst case" / "maximum growth" → WHERE s.rcp_scenario = 'RCP85' AND s.ssp_scenario = 'SSP5' (HH)
+- "best case" / "sustainable future" → WHERE s.rcp_scenario = 'RCP45' AND s.ssp_scenario = 'SSP1' (LM)
+- "high emissions with rapid growth" → WHERE s.rcp_scenario = 'RCP85' AND s.ssp_scenario = 'SSP5' (HH)
+- "high emissions with moderate growth" → WHERE s.rcp_scenario = 'RCP85' AND s.ssp_scenario = 'SSP2' (HM)
+
 DO NOT write WHERE scenario_name = 'LM' - the database doesn't understand RPA codes!
 The database stores 20 individual scenarios like 'CNRM_CM5_rcp45_ssp1'. Use rcp_scenario and ssp_scenario columns to filter by pathway.
 
@@ -228,6 +251,27 @@ Examples:
 - User says "Texas" → Use lookup_state_info("Texas") → Returns "state_code = '48'"
 
 Alternative: You can also query using state_name = 'California' directly, but state_code with FIPS is more reliable.
+
+COUNTY-LEVEL QUERIES:
+When users mention specific counties, use the dim_geography table with county_name and state_name/state_abbrev:
+- Use WHERE g.county_name = 'Los Angeles County' AND g.state_abbrev = 'CA' for exact matches
+- County names in the database include the word "County" (e.g., "Los Angeles County", "Harris County")
+- Always include state to disambiguate (there are multiple "Washington County" etc.)
+
+Examples:
+- "Los Angeles County, CA" → WHERE g.county_name = 'Los Angeles County' AND g.state_abbrev = 'CA'
+- "Harris County, Texas" → WHERE g.county_name = 'Harris County' AND g.state_name = 'Texas'
+- "Compare County A and County B" → WHERE g.county_name IN ('County A', 'County B') with appropriate state filters
+
+MULTI-COUNTY COMPARISON QUERY PATTERN:
+SELECT g.county_name, g.state_abbrev, SUM(f.acres) as total_change
+FROM fact_landuse_transitions f
+JOIN dim_geography g ON f.geography_id = g.geography_id
+JOIN dim_scenario s ON f.scenario_id = s.scenario_id
+JOIN dim_landuse l_to ON f.to_landuse_id = l_to.landuse_id
+WHERE (g.county_name = 'Los Angeles County' AND g.state_abbrev = 'CA')
+   OR (g.county_name = 'Harris County' AND g.state_abbrev = 'TX')
+GROUP BY g.county_name, g.state_abbrev
 
 SOCIOECONOMIC DATA INTERPRETATION:
 When working with population and income data, provide natural language interpretations:
