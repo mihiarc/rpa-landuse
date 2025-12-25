@@ -28,6 +28,12 @@ def clean_sql_query(sql_query: str) -> str:
     """
     sql_query = sql_query.strip()
 
+    # Convert escaped newlines to actual newlines (LLM sometimes outputs literal \n)
+    sql_query = sql_query.replace("\\n", "\n")
+
+    # Convert escaped tabs to spaces
+    sql_query = sql_query.replace("\\t", " ")
+
     # Keep removing quotes and markdown until we can't anymore
     previous = None
     while previous != sql_query:
