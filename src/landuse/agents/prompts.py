@@ -253,15 +253,16 @@ Examples:
 Alternative: You can also query using state_name = 'California' directly, but state_code with FIPS is more reliable.
 
 COUNTY-LEVEL QUERIES:
-When users mention specific counties, use the dim_geography table with county_name and state_name/state_abbrev:
-- Use WHERE g.county_name = 'Los Angeles County' AND g.state_abbrev = 'CA' for exact matches
-- County names in the database include the word "County" (e.g., "Los Angeles County", "Harris County")
-- Always include state to disambiguate (there are multiple "Washington County" etc.)
+When users mention specific counties, use the dim_geography table with county_name and state_abbrev:
+- IMPORTANT: County names do NOT include the word "County" - use just the name (e.g., "Los Angeles", "Harris")
+- If user says "Los Angeles County", query for WHERE g.county_name = 'Los Angeles'
+- If user says "Harris County, TX", query for WHERE g.county_name = 'Harris' AND g.state_abbrev = 'TX'
+- Always include state to disambiguate (there are multiple "Harris" counties in different states!)
 
 Examples:
-- "Los Angeles County, CA" → WHERE g.county_name = 'Los Angeles County' AND g.state_abbrev = 'CA'
-- "Harris County, Texas" → WHERE g.county_name = 'Harris County' AND g.state_name = 'Texas'
-- "Compare County A and County B" → WHERE g.county_name IN ('County A', 'County B') with appropriate state filters
+- "Los Angeles County, CA" → WHERE g.county_name = 'Los Angeles' AND g.state_abbrev = 'CA'
+- "Harris County, Texas" → WHERE g.county_name = 'Harris' AND g.state_abbrev = 'TX'
+- "Compare County A and County B" → Strip "County" from names and add state filters
 
 MULTI-COUNTY COMPARISON QUERY PATTERN:
 SELECT g.county_name, g.state_abbrev, SUM(f.acres) as total_change
@@ -269,8 +270,11 @@ FROM fact_landuse_transitions f
 JOIN dim_geography g ON f.geography_id = g.geography_id
 JOIN dim_scenario s ON f.scenario_id = s.scenario_id
 JOIN dim_landuse l_to ON f.to_landuse_id = l_to.landuse_id
-WHERE (g.county_name = 'Los Angeles County' AND g.state_abbrev = 'CA')
-   OR (g.county_name = 'Harris County' AND g.state_abbrev = 'TX')
+JOIN dim_landuse l_from ON f.from_landuse_id = l_from.landuse_id
+WHERE l_to.landuse_name = 'Urban'
+AND l_from.landuse_id != l_to.landuse_id
+AND ((g.county_name = 'Los Angeles' AND g.state_abbrev = 'CA')
+   OR (g.county_name = 'Harris' AND g.state_abbrev = 'TX'))
 GROUP BY g.county_name, g.state_abbrev
 
 SOCIOECONOMIC DATA INTERPRETATION:
