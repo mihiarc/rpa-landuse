@@ -58,7 +58,7 @@ Format your responses for clarity and readability:
 
 2. **Lists**: Use bullet points (- item) for all lists. Only use numbered lists (1. 2. 3.) for sequential steps or explicit rankings.
 
-3. **Tables**: When showing data comparisons, use markdown tables.
+3. **Tables**: IMPORTANT - Tools return pre-formatted markdown tables. Include tool output tables EXACTLY as provided without modification. Do not rename columns, restructure rows, or reformat. Add your commentary before or after the table, not by altering it.
 
 4. **Emphasis**: Use **bold** for key terms and metrics.
 
