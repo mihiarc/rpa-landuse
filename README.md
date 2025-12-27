@@ -1,6 +1,6 @@
 # 🌲 RPA Land Use Analytics
 
-AI-powered analytics tool for USDA Forest Service RPA Assessment land use data. Built with a modern data stack (DuckDB, LangChain, GPT-4) to analyze county-level land use projections from the 2020 Resources Planning Act Assessment.
+AI-powered analytics tool for USDA Forest Service RPA Assessment land use data. Built with a modern data stack (DuckDB, LangChain, Claude Sonnet 4.5) to analyze county-level land use projections from the 2020 Resources Planning Act Assessment.
 
 ## ✨ Features
 
@@ -28,7 +28,7 @@ uv run python -c "import landuse; print('✅ Installation successful')"
 cp .env.example config/.env
 
 # Edit config/.env and add your API key:
-# OPENAI_API_KEY=your_openai_key_here      # For GPT models
+# ANTHROPIC_API_KEY=your_anthropic_key_here      # For Claude models
 ```
 
 ### 3. Set Up Database
@@ -58,9 +58,6 @@ npm install && npm run dev
 ```bash
 # Interactive terminal-based analysis
 uv run rpa-analytics
-
-# Or with specific model
-uv run rpa-analytics --model gpt-4o --verbose
 ```
 
 #### Option C: Direct Database Access
@@ -85,40 +82,24 @@ The application uses environment variables for configuration. Copy `.env.example
 
 ```bash
 # API Key (required)
-OPENAI_API_KEY=your_openai_key              # For GPT-4o-mini, GPT-4o models
-
-# Model Configuration  
-LANDUSE_MODEL=gpt-4o-mini                   # Model to use (gpt-4o-mini, gpt-4o, gpt-3.5-turbo)
-TEMPERATURE=0.1                             # Model temperature (0.0-2.0)
-MAX_TOKENS=4000                             # Maximum tokens per response
+ANTHROPIC_API_KEY=your_anthropic_key        # For Claude Sonnet 4.5
 
 # Database Configuration
-LANDUSE_DB_PATH=data/processed/landuse_analytics.duckdb
-LANDUSE_MAX_QUERY_ROWS=1000                 # Maximum rows returned by queries
-LANDUSE_DEFAULT_DISPLAY_LIMIT=50            # Default rows displayed to user
-
-# Agent Configuration
-LANDUSE_MAX_ITERATIONS=5                    # Maximum tool calls before stopping
-LANDUSE_MAX_EXECUTION_TIME=120              # Maximum seconds for query execution
-
-# Performance & Security
-ENABLE_RATE_LIMITING=true
-LANDUSE_RATE_LIMIT_CALLS=60                 # Max API calls per minute
-LOG_LEVEL=INFO                              # DEBUG, INFO, WARNING, ERROR
+LANDUSE_DATABASE__PATH=data/processed/landuse_analytics.duckdb
 ```
 
-### Modern Configuration System
-The application supports both legacy and modern configuration approaches:
+### Agent Usage
+```python
+from landuse.agents.landuse_agent import LandUseAgent
 
-- **Legacy Config**: Uses `LanduseConfig` class with individual environment variables
-- **Modern Config**: Uses `AppConfig` with nested Pydantic validation and `LANDUSE_` prefixed vars
+# Simple usage
+with LandUseAgent() as agent:
+    response = agent.query("How much forest is in California?")
+    print(response)
 
-### Command Line Options
-The CLI agent supports various configuration options:
-```bash
-uv run rpa-analytics --help                 # Show all options
-uv run rpa-analytics --model gpt-4o --verbose
-uv run rpa-analytics --max-iterations 10 --temperature 0.2
+# Interactive chat
+agent = LandUseAgent()
+agent.chat()  # Starts interactive CLI
 ```
 
 ## 📁 Project Structure
@@ -128,47 +109,27 @@ rpa-landuse/
 ├── 🤖 src/landuse/             # Core application modules
 │   ├── agents/                 # AI-powered analysis agents
 │   │   ├── agent.py           # Main CLI entry point (rpa-analytics)
-│   │   ├── landuse_agent.py   # LangGraph-based natural language agent
-│   │   ├── formatting.py      # Query result formatting with percentage changes
-│   │   ├── prompts.py         # Specialized system prompts
-│   │   └── prompt_selector.py # Automatic prompt selection
-│   ├── core/                  # Modern architecture components
-│   │   ├── app_config.py      # Pydantic-based unified configuration
-│   │   ├── container.py       # Dependency injection system
-│   │   └── interfaces.py      # Clean architectural interfaces
-│   ├── infrastructure/        # Production-ready infrastructure
-│   │   ├── cache.py          # Thread-safe caching with TTL
-│   │   ├── logging.py        # Structured JSON logging
-│   │   ├── metrics.py        # Performance metrics collection
-│   │   └── performance.py    # Decorator-based monitoring
+│   │   ├── landuse_agent.py   # Tool-calling agent with Claude Sonnet 4.5
+│   │   ├── tools.py           # 11 domain-specific tools (encapsulated SQL)
+│   │   ├── prompts.py         # System prompt with RPA context
+│   │   └── formatting.py      # Query result formatting
+│   ├── services/              # Business logic layer
+│   │   └── landuse_service.py # Database queries and formatting
 │   ├── connections/           # Database connection management
 │   │   └── duckdb_connection.py # Thread-safe DuckDB connection
-│   ├── tools/                # LangGraph agent tools
-│   │   ├── common_tools.py   # SQL execution and analysis tools
-│   │   └── map_generation_tool.py # Choropleth map generation
-│   └── security/             # Security and validation
-│       └── database_security.py # SQL injection prevention
-├── 🔧 scripts/               # Data processing and setup
-│   ├── converters/           # Data transformation utilities
-│   │   └── convert_to_duckdb.py # JSON → DuckDB star schema conversion
-│   └── setup/               # Database enhancement scripts
+│   └── converters/            # Data transformation utilities
+│       └── convert_to_duckdb.py # JSON → DuckDB star schema
 ├── 📊 data/
 │   ├── processed/           # Optimized database
 │   │   └── landuse_analytics.duckdb # 1.2GB star schema database
-│   └── ssp_projections/     # Socioeconomic projection data
-├── 🧪 tests/                # Comprehensive test suite (89.75% coverage)
-│   ├── unit/               # Unit tests for all modules
-│   ├── integration/        # Integration tests with real database  
-│   └── fixtures/           # Test data and mocking utilities
-├── 📚 docs/                # Extensive documentation
-│   ├── getting-started/    # Setup and configuration guides
-│   ├── agents/            # Agent architecture documentation
-│   ├── data/              # Database schema and data dictionary
-│   └── development/       # Architecture and testing guides
+│   └── raw/                 # Source data files
+├── 🧪 tests/                # Test suite
+│   ├── unit/               # Unit tests
+│   └── integration/        # Integration tests
+├── 📚 docs/                # Documentation
 ├── ⚙️ config/              # Configuration directory
-│   └── .env               # Environment variables (create from .env.example)
-├── 🌍 .env.example        # Environment configuration template
-└── 📋 pyproject.toml      # Modern Python project with uv
+│   └── .env               # Environment variables
+└── 📋 pyproject.toml      # Python project config
 ```
 
 ## 🗄️ Database Schema
@@ -365,33 +326,29 @@ The RPA Assessment projections reveal several important trends for land use in t
 This project showcases modern software engineering practices with a production-ready AI analytics platform:
 
 ### 🏗️ Core Technologies
-- **🤖 LangGraph + LangChain**: Advanced AI agent workflows with state management
+- **🤖 LangChain + Claude Sonnet 4.5**: Tool-calling agent with encapsulated SQL queries
 - **🦆 DuckDB**: High-performance analytical database with columnar storage
 - **🌐 FastAPI**: REST API backend with SSE streaming support
 - **🐍 Pydantic v2**: Type-safe data validation and configuration management
 - **📊 Rich Terminal UI**: Beautiful command-line interface with colors and formatting
-- **🧪 Comprehensive Testing**: 89.75% test coverage with 142+ unit and integration tests
 
-### 🔧 Modern Architecture (2025)
-- **Modular Design**: Single Responsibility Principle with 5 specialized managers
-- **Dependency Injection**: Clean architecture with `DependencyContainer` and interface abstractions
-- **Performance Monitoring**: Decorator-based timing with metrics collection and structured logging
-- **Configuration System**: Unified Pydantic-based `AppConfig` with environment variable integration
-- **Infrastructure Components**: Thread-safe caching, structured JSON logging, and performance metrics
+### 🔧 Agent Architecture (2025)
+- **Tool-Calling Pattern**: Claude picks the right tool, tool handles the SQL
+- **11 Domain Tools**: Each encapsulates specific query patterns (no SQL generation by LLM)
+- **Streaming Responses**: Real-time response generation with multi-turn tool calling
+- **Conversation Memory**: Sliding window history for context
 
-### 🤖 AI Agent Features  
-- **Cross-Dataset Integration**: Automatically combines land use, population, and economic data
-- **Time-Aware Analysis**: Includes temporal dimensions for percentage-based trend reporting
-- **Automatic Prompt Selection**: Detects query intent and applies specialized prompts for different domains
-- **Security-First**: SQL injection prevention with allowlist-based validation and comprehensive error handling
-- **Streaming Responses**: Real-time response generation with conversation memory and checkpointing
+### 🤖 AI Agent Features
+- **No SQL Generation**: All SQL is encapsulated in tools - prevents injection attacks
+- **Domain-Specific Tools**: Query land use, transitions, scenarios, time series, counties
+- **Rich Formatting**: Results formatted with state names, percentages, and summaries
+- **Streaming Support**: Real-time responses with conversation memory
 
 ### 🛡️ Production Quality
-- **Security**: Comprehensive SQL injection prevention, API key masking, rate limiting
-- **Error Handling**: Custom exception hierarchy with 10+ specific exception types  
-- **Performance**: Bulk loading optimization (5-10x faster), connection pooling, query caching
-- **Observability**: Real-time performance metrics, structured logging, health monitoring
-- **Testing**: Real functionality testing (no mocking of business logic), 89.75% coverage
+- **Security**: SQL encapsulation prevents injection - LLM never generates SQL
+- **Error Handling**: Custom exception hierarchy with contextual error messages
+- **Performance**: DuckDB columnar storage optimized for analytical queries
+- **Testing**: Comprehensive test suite with real database integration
 
 ## 📚 Data Source & Attribution
 

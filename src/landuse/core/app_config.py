@@ -41,7 +41,7 @@ class DatabaseConfig(BaseModel):
 class LLMConfig(BaseModel):
     """LLM configuration settings."""
 
-    model_name: str = Field(default="gpt-4o-mini", description="Name of the LLM model to use")
+    model_name: str = Field(default="claude-sonnet-4-5-20250929", description="Name of the LLM model to use")
     temperature: float = Field(default=0.2, ge=0.0, le=2.0, description="Temperature for LLM responses")
     max_tokens: int = Field(default=4000, ge=100, le=32000, description="Maximum tokens for LLM responses")
     timeout: int = Field(default=60, ge=1, le=600, description="LLM request timeout in seconds")
@@ -51,8 +51,8 @@ class LLMConfig(BaseModel):
     @classmethod
     def validate_model_name(cls, v: str) -> str:
         """Validate model name and check API key availability."""
-        if not os.getenv("OPENAI_API_KEY"):
-            raise ConfigurationError("OPENAI_API_KEY required for OpenAI models")
+        if not os.getenv("ANTHROPIC_API_KEY"):
+            raise ConfigurationError("ANTHROPIC_API_KEY required for Anthropic models")
         return v
 
 

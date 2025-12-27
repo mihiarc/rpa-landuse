@@ -19,7 +19,7 @@ import pytest
 # Add src to path
 sys.path.append(str(Path(__file__).parent.parent.parent / "src"))
 
-from landuse.agents.landuse_agent import LanduseAgent
+from landuse.agents.landuse_agent import LandUseAgent
 from landuse.core.app_config import AppConfig
 
 
@@ -38,7 +38,7 @@ def check_database_has_combined_scenarios(db_path: str) -> bool:
 
 
 @pytest.mark.integration
-@pytest.mark.skipif(not os.getenv("OPENAI_API_KEY"), reason="OpenAI API key required for integration tests")
+@pytest.mark.skipif(not os.getenv("ANTHROPIC_API_KEY"), reason="Anthropic API key required for integration tests")
 class TestCombinedScenariosAgent:
     """Integration tests for combined scenarios with agent system."""
 
@@ -60,7 +60,7 @@ class TestCombinedScenariosAgent:
     @pytest.fixture
     def agent(self, agent_config):
         """Create agent instance for testing."""
-        with LanduseAgent(agent_config) as agent:
+        with LandUseAgent(agent_config) as agent:
             yield agent
 
     def test_agent_uses_overall_by_default(self, agent, agent_config):
@@ -311,16 +311,16 @@ class TestDatabaseViews:
             assert "std_dev" in statistical_columns or "coefficient_variation" in statistical_columns
 
 
-def has_valid_openai_key():
-    """Check if a valid (non-test) OpenAI API key is available."""
-    key = os.getenv("OPENAI_API_KEY", "")
+def has_valid_anthropic_key():
+    """Check if a valid (non-test) Anthropic API key is available."""
+    key = os.getenv("ANTHROPIC_API_KEY", "")
     # Skip if no key or if it looks like a test key
     return key and not key.startswith("sk-test") and len(key) > 20
 
 
 @pytest.mark.integration
 @pytest.mark.skipif(
-    not has_valid_openai_key(), reason="Valid OpenAI API key required for end-to-end tests (test keys don't work)"
+    not has_valid_anthropic_key(), reason="Valid Anthropic API key required for end-to-end tests (test keys don't work)"
 )
 class TestEndToEndWorkflow:
     """End-to-end workflow tests for combined scenarios."""
@@ -337,7 +337,7 @@ class TestEndToEndWorkflow:
             database={"path": db_path}, agent={"max_iterations": 8, "enable_memory": True}, logging={"level": "WARNING"}
         )
 
-        with LanduseAgent(config) as agent:
+        with LandUseAgent(config) as agent:
             yield agent
 
     def test_conversation_flow_with_combined_scenarios(self, agent):

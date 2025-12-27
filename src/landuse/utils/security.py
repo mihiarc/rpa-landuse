@@ -286,8 +286,8 @@ class RateLimiter:
 class SecureConfig(BaseModel):
     """Secure configuration management with validation"""
 
-    openai_api_key: Optional[str] = Field(None, min_length=20)
-    landuse_model: str = Field("gpt-4o-mini", pattern="^(gpt-4|gpt-3.5)")
+    anthropic_api_key: Optional[str] = Field(None, min_length=20)
+    landuse_model: str = Field("claude-sonnet-4-5-20250929", pattern="^claude-")
     temperature: float = Field(0.1, ge=0.0, le=1.0)
     max_tokens: int = Field(4000, ge=1, le=8000)
     database_path: str = Field("data/processed/landuse_analytics.duckdb")
@@ -295,10 +295,10 @@ class SecureConfig(BaseModel):
     enable_logging: bool = Field(True)
     log_level: str = Field("INFO", pattern="^(DEBUG|INFO|WARNING|ERROR|CRITICAL)$")
 
-    @field_validator("openai_api_key")
+    @field_validator("anthropic_api_key")
     def validate_api_key(cls, v, info):
         """Validate API key format"""
-        if v and not v.startswith("sk-"):
+        if v and not v.startswith("sk-ant-"):
             logger.warning(f"Unusual {info.field_name} format detected")
         return v
 
@@ -321,8 +321,8 @@ class SecureConfig(BaseModel):
             load_dotenv(env_path)
 
         config_dict = {
-            "openai_api_key": os.getenv("OPENAI_API_KEY"),
-            "landuse_model": os.getenv("LANDUSE_MODEL", "gpt-4o-mini"),
+            "anthropic_api_key": os.getenv("ANTHROPIC_API_KEY"),
+            "landuse_model": os.getenv("LANDUSE_MODEL", "claude-sonnet-4-5-20250929"),
             "temperature": float(os.getenv("TEMPERATURE", "0.1")),
             "max_tokens": int(os.getenv("MAX_TOKENS", "4000")),
             "database_path": os.getenv("LANDUSE_DB_PATH", "data/processed/landuse_analytics.duckdb"),

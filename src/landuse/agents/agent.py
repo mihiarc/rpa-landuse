@@ -11,7 +11,7 @@ from typing import Optional
 
 from rich.console import Console
 
-from landuse.agents.landuse_agent import LanduseAgent
+from landuse.agents.landuse_agent import LandUseAgent
 from landuse.core.app_config import AppConfig
 
 
@@ -23,7 +23,7 @@ def main() -> None:
         epilog="""
 Examples:
   rpa-analytics                    # Start interactive session
-  rpa-analytics --model gpt-4o     # Use specific model
+  rpa-analytics --model claude-sonnet-4-5-20250929  # Use specific model
   rpa-analytics --verbose          # Enable verbose output
 
 For more information, visit: https://github.com/yourusername/rpa-landuse
@@ -78,7 +78,7 @@ For more information, visit: https://github.com/yourusername/rpa-landuse
         config = AppConfig.from_env(**config_overrides)
 
         # Initialize and start the agent
-        with LanduseAgent(config=config) as agent:
+        with LandUseAgent(config=config) as agent:
             if args.verbose:
                 console.print("[green]Starting RPA Land Use Analytics Agent...[/green]")
                 console.print(f"Model: {config.llm.model_name}")

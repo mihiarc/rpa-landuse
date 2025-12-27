@@ -71,7 +71,7 @@ class RetryConfig:
         "retry": "retry_if_exception_type((ConnectionError, TimeoutError))",
     }
 
-    # LLM operations (OpenAI)
+    # LLM operations (Anthropic)
     LLM_RETRY = {
         "stop": "stop_after_attempt(3)",
         "wait": "wait_exponential(multiplier=2, min=1, max=60)",
@@ -199,19 +199,19 @@ def network_retry(max_attempts: int = 5, min_wait: float = 2.0, max_wait: float 
 
 
 def _get_llm_retryable_exceptions() -> tuple:
-    """Get OpenAI exceptions that should trigger retries.
+    """Get Anthropic exceptions that should trigger retries.
 
     Returns:
         Tuple of exception types to retry on
     """
     try:
-        import openai
+        import anthropic
 
         return (
-            openai.RateLimitError,  # 429 - Rate limit exceeded
-            openai.APIConnectionError,  # Network connectivity issues
-            openai.APITimeoutError,  # Request timeout
-            openai.InternalServerError,  # 500 - Server error
+            anthropic.RateLimitError,  # 429 - Rate limit exceeded
+            anthropic.APIConnectionError,  # Network connectivity issues
+            anthropic.APITimeoutError,  # Request timeout
+            anthropic.InternalServerError,  # 500 - Server error
             ConnectionError,
             TimeoutError,
         )
@@ -222,9 +222,9 @@ def _get_llm_retryable_exceptions() -> tuple:
 def _is_rate_limit_error(exception: Exception) -> bool:
     """Check if exception is a rate limit error requiring longer backoff."""
     try:
-        import openai
+        import anthropic
 
-        return isinstance(exception, openai.RateLimitError)
+        return isinstance(exception, anthropic.RateLimitError)
     except ImportError:
         return False
 
@@ -236,7 +236,7 @@ def llm_retry(
     rate_limit_wait: float = 30.0,
 ):
     """
-    Retry decorator for LLM/OpenAI API calls with intelligent backoff.
+    Retry decorator for LLM/Anthropic API calls with intelligent backoff.
 
     Handles common LLM API errors including:
     - Rate limits (429) with extended backoff

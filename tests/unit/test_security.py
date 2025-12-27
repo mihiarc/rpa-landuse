@@ -313,14 +313,14 @@ class TestSecureConfig:
     def test_valid_config(self):
         """Test creation of valid configuration"""
         config = SecureConfig(
-            openai_api_key="sk-" + "a" * 48,
-            landuse_model="gpt-4o-mini",
+            anthropic_api_key="sk-ant-" + "a" * 48,
+            landuse_model="claude-sonnet-4-5-20250929",
             temperature=0.5,
             max_tokens=2000,
             database_path="data/processed/landuse_analytics.duckdb",
         )
 
-        assert config.openai_api_key.startswith("sk-")
+        assert config.anthropic_api_key.startswith("sk-ant-")
         assert config.temperature == 0.5
         assert config.max_tokens == 2000
 
@@ -346,7 +346,12 @@ class TestSecureConfig:
         with pytest.raises(ValueError, match="Database not found"):
             SecureConfig(database_path="nonexistent.db")
 
-    @patch.dict(os.environ, {"OPENAI_API_KEY": "sk-test" + "a" * 44, "TEMPERATURE": "0.7", "MAX_TOKENS": "3000"})
+    @patch.dict(os.environ, {
+        "ANTHROPIC_API_KEY": "sk-ant-test" + "a" * 44,
+        "LANDUSE_MODEL": "claude-sonnet-4-5-20250929",
+        "TEMPERATURE": "0.7",
+        "MAX_TOKENS": "3000"
+    })
     @patch("pathlib.Path.exists")
     def test_from_env(self, mock_exists):
         """Test loading configuration from environment"""
@@ -354,7 +359,8 @@ class TestSecureConfig:
 
         config = SecureConfig.from_env()
 
-        assert config.openai_api_key == os.environ["OPENAI_API_KEY"]
+        assert config.anthropic_api_key == os.environ["ANTHROPIC_API_KEY"]
+        assert config.landuse_model == "claude-sonnet-4-5-20250929"
         assert config.temperature == 0.7
         assert config.max_tokens == 3000
 

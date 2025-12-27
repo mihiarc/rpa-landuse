@@ -102,7 +102,7 @@ class AgentConfig(BaseModel):
     )
 
     # Model configuration
-    model_name: str = Field(default="gpt-4o-mini", description="LLM model to use")
+    model_name: str = Field(default="claude-sonnet-4-5-20250929", description="LLM model to use")
     temperature: float = Field(default=0.1, ge=0, le=2, description="Model temperature")
     max_tokens: int = Field(default=4000, gt=0, description="Maximum tokens in response")
 

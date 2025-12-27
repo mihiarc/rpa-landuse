@@ -77,7 +77,7 @@ uv run python scripts/agents/test_landuse_agent.py
 
 Both agents use:
 - **LangChain**: Agent framework and tool orchestration
-- **OpenAI GPT-4**: Natural language understanding
+- **Anthropic Claude**: Natural language understanding
 - **Rich**: Beautiful terminal interfaces
 - **Pydantic**: Data validation and parsing
 
@@ -85,7 +85,7 @@ Both agents use:
 ```
 Natural Language Query
         ↓
-    GPT-4 Processing
+    Claude Processing
         ↓
     Star Schema SQL Generation
         ↓
@@ -98,7 +98,7 @@ Natural Language Query
 ```
 Natural Language Query
         ↓
-    GPT-4 Processing
+    Claude Processing
         ↓
     Multi-Database Tool Selection
         ↓
@@ -144,7 +144,7 @@ Natural Language Query
 
 1. **Set up environment variables:**
    ```bash
-   export OPENAI_API_KEY="your-api-key-here"
+   export ANTHROPIC_API_KEY="your-api-key-here"
    ```
 
 2. **Install dependencies:**
