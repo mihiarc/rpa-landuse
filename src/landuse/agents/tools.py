@@ -21,9 +21,7 @@ logger = logging.getLogger(__name__)
 class LandUseAreaInput(BaseModel):
     """Input for land use area query."""
 
-    states: list[str] = Field(
-        description="Two-letter state codes (e.g., ['CA', 'TX', 'NC'])"
-    )
+    states: list[str] = Field(description="Two-letter state codes (e.g., ['CA', 'TX', 'NC'])")
     land_use: str | None = Field(
         default=None,
         description="Land use type to filter by: crop, pasture, forest, urban, or rangeland",
@@ -45,12 +43,8 @@ class LandUseTransitionsInput(BaseModel):
     from_use: str | None = Field(
         default=None, description="Source land use type (crop, pasture, forest, urban, rangeland)"
     )
-    to_use: str | None = Field(
-        default=None, description="Destination land use type"
-    )
-    year_range: str | None = Field(
-        default=None, description="Time period (e.g., '2020-2030', '2030-2040')"
-    )
+    to_use: str | None = Field(default=None, description="Destination land use type")
+    year_range: str | None = Field(default=None, description="Time period (e.g., '2020-2030', '2030-2040')")
     scenario: str | None = Field(default=None, description="Scenario code (LM, HM, HL, HH)")
 
 
@@ -82,9 +76,7 @@ class AgriculturalChangeInput(BaseModel):
     """Input for agricultural change query."""
 
     states: list[str] = Field(description="Two-letter state codes")
-    ag_type: str | None = Field(
-        default=None, description="Agricultural type: 'crop', 'pasture', or None for both"
-    )
+    ag_type: str | None = Field(default=None, description="Agricultural type: 'crop', 'pasture', or None for both")
     year_range: str | None = Field(default=None, description="Time period")
     scenario: str | None = Field(default=None, description="Scenario code (LM, HM, HL, HH)")
 
@@ -93,9 +85,7 @@ class ScenarioComparisonInput(BaseModel):
     """Input for scenario comparison."""
 
     states: list[str] = Field(description="Two-letter state codes")
-    metric: str = Field(
-        description="Metric to compare: 'urban_expansion', 'forest_loss', or 'ag_loss'"
-    )
+    metric: str = Field(description="Metric to compare: 'urban_expansion', 'forest_loss', or 'ag_loss'")
     scenarios: list[str] | None = Field(
         default=None,
         description="Scenarios to compare (default: all 4). Options: LM, HM, HL, HH",
@@ -107,9 +97,7 @@ class StateComparisonInput(BaseModel):
     """Input for state comparison."""
 
     states: list[str] = Field(description="Two-letter state codes to compare (2-10 states)")
-    metric: str = Field(
-        description="Metric to compare: 'urban_expansion', 'forest_loss', or 'land_area'"
-    )
+    metric: str = Field(description="Metric to compare: 'urban_expansion', 'forest_loss', or 'land_area'")
     scenario: str | None = Field(default=None, description="Scenario code")
     year: int | None = Field(default=None, description="Year filter")
 
@@ -139,9 +127,7 @@ class TopCountiesInput(BaseModel):
 
     metric: str = Field(description="Metric to rank by: 'urban_growth' or 'forest_loss'")
     limit: int = Field(default=10, description="Number of counties to return (1-50)")
-    states: list[str] | None = Field(
-        default=None, description="Optional state filter"
-    )
+    states: list[str] | None = Field(default=None, description="Optional state filter")
     scenario: str | None = Field(default=None, description="Scenario code")
 
 

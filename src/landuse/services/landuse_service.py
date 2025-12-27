@@ -40,19 +40,57 @@ LANDUSE_TYPES = {
 
 # US State abbreviations to full names
 STATE_NAMES = {
-    "AL": "Alabama", "AK": "Alaska", "AZ": "Arizona", "AR": "Arkansas",
-    "CA": "California", "CO": "Colorado", "CT": "Connecticut", "DE": "Delaware",
-    "FL": "Florida", "GA": "Georgia", "HI": "Hawaii", "ID": "Idaho",
-    "IL": "Illinois", "IN": "Indiana", "IA": "Iowa", "KS": "Kansas",
-    "KY": "Kentucky", "LA": "Louisiana", "ME": "Maine", "MD": "Maryland",
-    "MA": "Massachusetts", "MI": "Michigan", "MN": "Minnesota", "MS": "Mississippi",
-    "MO": "Missouri", "MT": "Montana", "NE": "Nebraska", "NV": "Nevada",
-    "NH": "New Hampshire", "NJ": "New Jersey", "NM": "New Mexico", "NY": "New York",
-    "NC": "North Carolina", "ND": "North Dakota", "OH": "Ohio", "OK": "Oklahoma",
-    "OR": "Oregon", "PA": "Pennsylvania", "RI": "Rhode Island", "SC": "South Carolina",
-    "SD": "South Dakota", "TN": "Tennessee", "TX": "Texas", "UT": "Utah",
-    "VT": "Vermont", "VA": "Virginia", "WA": "Washington", "WV": "West Virginia",
-    "WI": "Wisconsin", "WY": "Wyoming", "DC": "District of Columbia",
+    "AL": "Alabama",
+    "AK": "Alaska",
+    "AZ": "Arizona",
+    "AR": "Arkansas",
+    "CA": "California",
+    "CO": "Colorado",
+    "CT": "Connecticut",
+    "DE": "Delaware",
+    "FL": "Florida",
+    "GA": "Georgia",
+    "HI": "Hawaii",
+    "ID": "Idaho",
+    "IL": "Illinois",
+    "IN": "Indiana",
+    "IA": "Iowa",
+    "KS": "Kansas",
+    "KY": "Kentucky",
+    "LA": "Louisiana",
+    "ME": "Maine",
+    "MD": "Maryland",
+    "MA": "Massachusetts",
+    "MI": "Michigan",
+    "MN": "Minnesota",
+    "MS": "Mississippi",
+    "MO": "Missouri",
+    "MT": "Montana",
+    "NE": "Nebraska",
+    "NV": "Nevada",
+    "NH": "New Hampshire",
+    "NJ": "New Jersey",
+    "NM": "New Mexico",
+    "NY": "New York",
+    "NC": "North Carolina",
+    "ND": "North Dakota",
+    "OH": "Ohio",
+    "OK": "Oklahoma",
+    "OR": "Oregon",
+    "PA": "Pennsylvania",
+    "RI": "Rhode Island",
+    "SC": "South Carolina",
+    "SD": "South Dakota",
+    "TN": "Tennessee",
+    "TX": "Texas",
+    "UT": "Utah",
+    "VT": "Vermont",
+    "VA": "Virginia",
+    "WA": "Washington",
+    "WV": "West Virginia",
+    "WI": "Wisconsin",
+    "WY": "Wyoming",
+    "DC": "District of Columbia",
 }
 
 # Region mappings
@@ -204,20 +242,10 @@ class LandUseService:
         total_acres = float(df["total_acres"].sum())
 
         # Group by land use
-        by_landuse = (
-            df.groupby("landuse_name")["total_acres"]
-            .sum()
-            .sort_values(ascending=False)
-            .to_dict()
-        )
+        by_landuse = df.groupby("landuse_name")["total_acres"].sum().sort_values(ascending=False).to_dict()
 
         # Group by state
-        by_state = (
-            df.groupby("state_name")["total_acres"]
-            .sum()
-            .sort_values(ascending=False)
-            .to_dict()
-        )
+        by_state = df.groupby("state_name")["total_acres"].sum().sort_values(ascending=False).to_dict()
 
         return {
             "total_acres": total_acres,
@@ -310,10 +338,7 @@ class LandUseService:
 
         # Group by transition type
         transitions = (
-            df.groupby(["from_landuse", "to_landuse"])["transition_acres"]
-            .sum()
-            .sort_values(ascending=False)
-            .head(20)
+            df.groupby(["from_landuse", "to_landuse"])["transition_acres"].sum().sort_values(ascending=False).head(20)
         )
 
         transition_list = [
@@ -408,20 +433,10 @@ class LandUseService:
         total_expansion = float(df["expansion_acres"].sum())
 
         # By source land use
-        by_source = (
-            df.groupby("source_landuse")["expansion_acres"]
-            .sum()
-            .sort_values(ascending=False)
-            .to_dict()
-        )
+        by_source = df.groupby("source_landuse")["expansion_acres"].sum().sort_values(ascending=False).to_dict()
 
         # By state
-        by_state = (
-            df.groupby("state_name")["expansion_acres"]
-            .sum()
-            .sort_values(ascending=False)
-            .to_dict()
-        )
+        by_state = df.groupby("state_name")["expansion_acres"].sum().sort_values(ascending=False).to_dict()
 
         return {
             "total_expansion_acres": total_expansion,
@@ -620,28 +635,13 @@ class LandUseService:
         total_loss = float(loss_df["acres"].sum())
 
         # By ag type
-        by_ag_type = (
-            loss_df.groupby("ag_type")["acres"]
-            .sum()
-            .sort_values(ascending=False)
-            .to_dict()
-        )
+        by_ag_type = loss_df.groupby("ag_type")["acres"].sum().sort_values(ascending=False).to_dict()
 
         # By destination
-        by_destination = (
-            loss_df.groupby("to_use")["acres"]
-            .sum()
-            .sort_values(ascending=False)
-            .to_dict()
-        )
+        by_destination = loss_df.groupby("to_use")["acres"].sum().sort_values(ascending=False).to_dict()
 
         # By state
-        by_state = (
-            loss_df.groupby("state_name")["acres"]
-            .sum()
-            .sort_values(ascending=False)
-            .to_dict()
-        )
+        by_state = loss_df.groupby("state_name")["acres"].sum().sort_values(ascending=False).to_dict()
 
         return {
             "total_ag_loss_acres": total_loss,
@@ -995,12 +995,7 @@ class LandUseService:
             params = [geo_id] + year_params + scenario_params
             df = conn.execute(query, params).df()
 
-            by_landuse = (
-                df.groupby("landuse_name")["total_acres"]
-                .sum()
-                .sort_values(ascending=False)
-                .to_dict()
-            )
+            by_landuse = df.groupby("landuse_name")["total_acres"].sum().sort_values(ascending=False).to_dict()
 
             return {
                 "county": county_name,
@@ -1154,10 +1149,7 @@ class LandUseService:
                 "start": int(time_df["min_year"].iloc[0]),
                 "end": int(time_df["max_year"].iloc[0]),
             },
-            "scenarios": [
-                {"rcp": row["rcp_scenario"], "ssp": row["ssp_scenario"]}
-                for _, row in scenarios.iterrows()
-            ],
+            "scenarios": [{"rcp": row["rcp_scenario"], "ssp": row["ssp_scenario"]} for _, row in scenarios.iterrows()],
             "scenario_codes": list(SCENARIO_NAMES.keys()),
             "land_use_types": landuse_df["landuse_name"].tolist(),
             "source": "USDA Forest Service 2020 RPA Assessment",

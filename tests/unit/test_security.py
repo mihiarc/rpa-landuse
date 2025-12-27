@@ -346,12 +346,15 @@ class TestSecureConfig:
         with pytest.raises(ValueError, match="Database not found"):
             SecureConfig(database_path="nonexistent.db")
 
-    @patch.dict(os.environ, {
-        "ANTHROPIC_API_KEY": "sk-ant-test" + "a" * 44,
-        "LANDUSE_MODEL": "claude-sonnet-4-5-20250929",
-        "TEMPERATURE": "0.7",
-        "MAX_TOKENS": "3000"
-    })
+    @patch.dict(
+        os.environ,
+        {
+            "ANTHROPIC_API_KEY": "sk-ant-test" + "a" * 44,
+            "LANDUSE_MODEL": "claude-sonnet-4-5-20250929",
+            "TEMPERATURE": "0.7",
+            "MAX_TOKENS": "3000",
+        },
+    )
     @patch("pathlib.Path.exists")
     def test_from_env(self, mock_exists):
         """Test loading configuration from environment"""

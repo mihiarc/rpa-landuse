@@ -63,8 +63,7 @@ class LandUseAgent:
         api_key = os.getenv("ANTHROPIC_API_KEY")
         if not api_key:
             raise ValueError(
-                "ANTHROPIC_API_KEY environment variable is required. "
-                "Please set it in your environment or .env file."
+                "ANTHROPIC_API_KEY environment variable is required. Please set it in your environment or .env file."
             )
 
         # Initialize Claude
@@ -201,9 +200,7 @@ class LandUseAgent:
             lc_messages.append(response)
             for tool_call in response.tool_calls:
                 result = tool_results.get(tool_call["id"], "Tool execution failed")
-                lc_messages.append(
-                    ToolMessage(content=result, tool_call_id=tool_call["id"])
-                )
+                lc_messages.append(ToolMessage(content=result, tool_call_id=tool_call["id"]))
 
         # Iteration limit reached
         if iteration >= max_iterations:
@@ -234,7 +231,7 @@ class LandUseAgent:
 
         # Trim history if needed
         if len(self._messages) > self._max_history * 2:
-            self._messages = self._messages[-self._max_history * 2:]
+            self._messages = self._messages[-self._max_history * 2 :]
 
         # Run async stream and collect text
         async def _run():
