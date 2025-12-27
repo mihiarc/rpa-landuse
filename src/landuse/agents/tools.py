@@ -176,7 +176,7 @@ async def query_land_use_area(
         return f"Error: {result['error']}"
 
     # Format response
-    lines = [f"**Land Use Area**"]
+    lines = ["**Land Use Area**"]
 
     if land_use:
         lines.append(f"- **{land_use.title()}**: {result['total_acres_formatted']} acres")
@@ -224,7 +224,7 @@ async def query_land_use_transitions(
     if "error" in result:
         return f"Error: {result['error']}"
 
-    lines = [f"**Land Use Transitions**"]
+    lines = ["**Land Use Transitions**"]
     lines.append(f"- **Total Transition Area**: {result['total_formatted']} acres")
 
     if result.get("transitions"):
@@ -262,7 +262,7 @@ async def query_urban_expansion(
     if "error" in result:
         return f"Error: {result['error']}"
 
-    lines = [f"**Urban Expansion**"]
+    lines = ["**Urban Expansion**"]
     lines.append(f"- **Total New Urban Area**: {result['total_formatted']} acres")
 
     if result.get("by_source"):
@@ -308,7 +308,7 @@ async def query_forest_change(
     if "error" in result:
         return f"Error: {result['error']}"
 
-    lines = [f"**Forest Change**"]
+    lines = ["**Forest Change**"]
 
     if "forest_loss_acres" in result:
         lines.append(f"- **Forest Loss**: {result['forest_loss_formatted']} acres")
@@ -353,7 +353,7 @@ async def query_agricultural_change(
     if "error" in result:
         return f"Error: {result['error']}"
 
-    lines = [f"**Agricultural Land Changes**"]
+    lines = ["**Agricultural Land Changes**"]
     lines.append(f"- **Total Agricultural Loss**: {result['total_formatted']} acres")
 
     if result.get("by_ag_type"):
@@ -584,7 +584,7 @@ async def get_data_summary(geography: str | None = None) -> str:
 
     lines = ["**RPA Land Use Data Summary**"]
 
-    lines.append(f"\n**Coverage:**")
+    lines.append("\n**Coverage:**")
     lines.append(f"- Total Records: {result.get('total_records', 'N/A'):,}")
     lines.append(f"- Counties: {result.get('counties', 'N/A'):,}")
     lines.append(f"- States: {result.get('states', 'N/A')}")
@@ -593,7 +593,7 @@ async def get_data_summary(geography: str | None = None) -> str:
         tr = result["time_range"]
         lines.append(f"- Time Range: {tr['start']}-{tr['end']}")
 
-    lines.append(f"\n**Scenarios:**")
+    lines.append("\n**Scenarios:**")
     for code, name in [
         ("LM", "Lower-Moderate (RCP45/SSP1): Sustainability pathway"),
         ("HM", "High-Moderate (RCP85/SSP2): Middle Road"),
@@ -602,7 +602,7 @@ async def get_data_summary(geography: str | None = None) -> str:
     ]:
         lines.append(f"- {code}: {name}")
 
-    lines.append(f"\n**Land Use Types:**")
+    lines.append("\n**Land Use Types:**")
     for lu in result.get("land_use_types", []):
         lines.append(f"- {lu}")
 
