@@ -1,406 +1,220 @@
-# 🌲 RPA Land Use Analytics
+<div align="center">
 
-AI-powered analytics tool for USDA Forest Service RPA Assessment land use data. Built with a modern data stack (DuckDB, LangChain, Claude Sonnet 4.5) to analyze county-level land use projections from the 2020 Resources Planning Act Assessment.
+# RPA Land Use Analytics
 
-## ✨ Features
+### Ask questions about America's changing landscape. Get instant, data-driven answers.
 
-- **🤖 Natural Language Queries**: Ask questions like "Which scenarios show the most agricultural land loss?"
-- **🌐 Modern Web Frontend**: Next.js + React application with chat, analytics, and data explorer
-- **🦆 Modern Data Stack**: DuckDB star schema optimized for analytics
-- **📈 Rich Visualizations**: Choropleth maps, time series, and interactive charts
-- **🎨 Beautiful UI**: Rich terminal and web interfaces with professional formatting
-- **🌍 Climate Analysis**: Compare RCP/SSP scenarios and geographic patterns
+<br/>
 
-## 🚀 Quick Start
+[![Launch App](https://img.shields.io/badge/Launch%20App-rpalanduse.org-0066cc?style=for-the-badge&logo=rocket&logoColor=white)](https://rpalanduse.org)
 
-### 1. Install Dependencies
-```bash
-# Install all dependencies using uv
-uv sync
+<br/>
 
-# Verify installation
-uv run python -c "import landuse; print('✅ Installation successful')"
-```
+![Status](https://img.shields.io/badge/Status-Live-brightgreen?style=flat-square)
+![AI Powered](https://img.shields.io/badge/AI-Powered-blueviolet?style=flat-square)
+![Data](https://img.shields.io/badge/Counties-3%2C075-forestgreen?style=flat-square)
+![Projections](https://img.shields.io/badge/Projections-2020--2070-orange?style=flat-square)
+![License](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)
 
-### 2. Configure API Access
-```bash
-# Copy example environment file to config directory
-cp .env.example config/.env
+<br/>
 
-# Edit config/.env and add your API key:
-# ANTHROPIC_API_KEY=your_anthropic_key_here      # For Claude models
-```
+*Powered by official USDA Forest Service RPA Assessment data*
 
-### 3. Set Up Database
-```bash
-# If you have the raw data file, convert it to DuckDB
-uv run python scripts/converters/convert_to_duckdb.py
-
-# The database should be at: data/processed/landuse_analytics.duckdb
-```
-
-### 4. Run Applications
-
-#### Option A: Web Frontend (Recommended)
-See the [rpa-landuse-frontend](../rpa-landuse-frontend) directory for the Next.js web application.
-
-```bash
-# Navigate to frontend directory
-cd ../rpa-landuse-frontend
-
-# Install dependencies and run
-npm install && npm run dev
-
-# Open http://localhost:3000 in your browser
-```
-
-#### Option B: Command Line Agent
-```bash
-# Interactive terminal-based analysis
-uv run rpa-analytics
-```
-
-#### Option C: Direct Database Access
-```bash
-# Browser-based DuckDB UI
-duckdb data/processed/landuse_analytics.duckdb -ui
-
-# Command line SQL interface  
-duckdb data/processed/landuse_analytics.duckdb
-```
-
-### 5. Example Questions to Try
-- "Which states have the most urban expansion?"
-- "Compare forest loss between RCP45 and RCP85 scenarios"  
-- "Show population growth trends in California"
-- "What are the agricultural land transitions in Texas?"
-
-## ⚙️ Configuration
-
-### Environment Variables
-The application uses environment variables for configuration. Copy `.env.example` to `config/.env` and customize:
-
-```bash
-# API Key (required)
-ANTHROPIC_API_KEY=your_anthropic_key        # For Claude Sonnet 4.5
-
-# Database Configuration
-LANDUSE_DATABASE__PATH=data/processed/landuse_analytics.duckdb
-```
-
-### Agent Usage
-```python
-from landuse.agents.landuse_agent import LandUseAgent
-
-# Simple usage
-with LandUseAgent() as agent:
-    response = agent.query("How much forest is in California?")
-    print(response)
-
-# Interactive chat
-agent = LandUseAgent()
-agent.chat()  # Starts interactive CLI
-```
-
-## 📁 Project Structure
-
-```
-rpa-landuse/
-├── 🤖 src/landuse/             # Core application modules
-│   ├── agents/                 # AI-powered analysis agents
-│   │   ├── agent.py           # Main CLI entry point (rpa-analytics)
-│   │   ├── landuse_agent.py   # Tool-calling agent with Claude Sonnet 4.5
-│   │   ├── tools.py           # 11 domain-specific tools (encapsulated SQL)
-│   │   ├── prompts.py         # System prompt with RPA context
-│   │   └── formatting.py      # Query result formatting
-│   ├── services/              # Business logic layer
-│   │   └── landuse_service.py # Database queries and formatting
-│   ├── connections/           # Database connection management
-│   │   └── duckdb_connection.py # Thread-safe DuckDB connection
-│   └── converters/            # Data transformation utilities
-│       └── convert_to_duckdb.py # JSON → DuckDB star schema
-├── 📊 data/
-│   ├── processed/           # Optimized database
-│   │   └── landuse_analytics.duckdb # 1.2GB star schema database
-│   └── raw/                 # Source data files
-├── 🧪 tests/                # Test suite
-│   ├── unit/               # Unit tests
-│   └── integration/        # Integration tests
-├── 📚 docs/                # Documentation
-├── ⚙️ config/              # Configuration directory
-│   └── .env               # Environment variables
-└── 📋 pyproject.toml      # Python project config
-```
-
-## 🗄️ Database Schema
-
-**Modern DuckDB Star Schema** optimized for analytics:
-
-- **`fact_landuse_transitions`**: 5.4M records of land use changes
-- **`dim_scenario`**: 20 climate scenarios (RCP45/85, SSP1/5)
-- **`dim_geography`**: 3,075 US counties with FIPS codes
-- **`dim_landuse`**: 5 land use types (Crop, Pasture, Forest, etc.)
-- **`dim_time`**: 6 time periods (2012-2100)
-
-**Pre-built Views:**
-- `v_agriculture_transitions`: Agricultural land changes
-- `v_scenario_summary`: Aggregated scenario comparisons
-
-## 🎯 Key Capabilities
-
-### 🌐 Web Application
-The Next.js frontend provides:
-- **💬 Natural Language Chat**: Real-time conversation with AI agent, SSE streaming
-- **📈 Analytics Dashboard**: Interactive visualizations with Plotly.js
-- **🔍 Data Explorer**: SQL query interface with schema browser
-- **📥 Data Extraction**: Export query results in CSV/JSON formats
-
-### 🤖 Natural Language Analysis
-```
-🌾 Ask> "Which states have the most urban expansion?"
-
-🦆 Query executed with percentage-based formatting:
-┏━━━━━━━━━━━━┳━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃ State Name ┃ Start Year ┃ Urban Expansion Acres ┃ Urban Expansion Acres Pct ┃
-┃            ┃            ┃                       ┃ Change From 2025          ┃  
-┡━━━━━━━━━━━━╇━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
-│ California │ 2030       │ 184,553              │ +23.0%                    │
-│ Texas      │ 2030       │ 172,952              │ +23.5%                    │
-│ California │ 2050       │ 220,000              │ +46.7%                    │
-└────────────┴────────────┴───────────────────────┴────────────────────────────┘
-```
-
-### 🧠 Advanced AI Features
-- **Cross-Dataset Integration**: Automatically combines land use, population, and income data
-- **Percentage-Based Reporting**: Shows trends as percentage changes from 2025 baseline
-- **Automatic Prompt Selection**: Detects query intent and applies specialized prompts
-- **Time-Aware Analysis**: Always includes temporal dimensions for trend analysis
-- **Security Validation**: SQL injection prevention with allowlist-based validation
-
-### 📈 Business Intelligence
-- **Agricultural Impact**: Track farmland loss and conversion patterns with percentage trends
-- **Climate Scenarios**: Compare emission pathways (RCP45 vs RCP85) across time
-- **Demographic Analysis**: Population and income projections linked to land use changes  
-- **Geographic Patterns**: County and state-level analysis with choropleth maps
-- **Urbanization Pressure**: Development trends with percentage changes over time
-
-## 📖 About the RPA Assessment
-
-The Resources Planning Act (RPA) Assessment is a report prepared in response to the mandate in the 1974 Forest and Rangeland Renewable Resources Planning Act (Public Law 93-378, 88 Stat 475, as amended). The 2020 RPA Assessment is the sixth report in this series and provides a comprehensive analysis of the status, trends, and projected future of U.S. forests, forest product markets, rangelands, water, biodiversity, outdoor recreation, and the effects of socioeconomic and climatic change upon these resources.
-
-The Assessment evaluates conditions across all ownerships nationwide and projects resource trends from 2020 to 2070 across four scenarios with differing assumptions about:
-- U.S. and global population and economic growth
-- Technology change
-- Bioenergy preferences
-- Openness of international trade
-- Wood-energy consumption
-- Global climate change
-
-The results inform resource managers and policymakers as they develop strategies to sustain natural resources. Important differences are found regionally and locally, highlighting the need for flexible adaptation and management strategies. The USDA Forest Service uses these results to inform strategic planning and forest planning.
-
-## 🔬 Dataset Overview
-
-The data contains county-level land use projections from 2020-2070 based on an econometric model calibrated using observed transitions from 2001-2012 (National Resources Inventory data). These projections help understand how climate change and socioeconomic factors may reshape America's landscape.
-
-### Key Methodology Points
-- **Model Type**: Econometric model based on historical land use transitions
-- **Spatial Detail**: 3,075 counties in the conterminous United States  
-- **Time Periods**: Six projection periods from 2012 to 2100
-- **Scenarios**: 20 combinations of climate models and socioeconomic pathways
-- **Land Classes**: Forest, Crop, Pasture, Rangeland, and Urban
-- **Key Assumption**: Development is irreversible (urban land doesn't revert)
-- **Scope**: Private land only (public lands assumed unchanged)
-
-For detailed methodology, see [LAND_USE_METHODOLOGY.md](docs/LAND_USE_METHODOLOGY.md)
-
-### Land-use Change Model
-
-The land use projections were generated using a model that integrates climate, economic, and land quality factors:
-
-```mermaid
-graph LR
-    %% Data nodes (yellow ovals)
-    PRISM["PRISM Historical<br/>Climate"]:::data
-    NetReturns["Net Returns to Land<br/>Production"]:::data
-    SoilQuality["Soil Quality (NRI)"]:::data
-    MACA["MACA Climate<br/>Projections"]:::data
-    SSP["Downscaled SSP<br/>Projections"]:::data
-    
-    %% Ricardian Climate Functions box
-    subgraph RCF["Ricardian Climate Functions"]
-        Forest["Forest"]:::process
-        Crop["Crop"]:::process
-        Urban["Urban"]:::process
-    end
-    
-    %% Process nodes (gray rectangles)
-    LandUseModel["Land-use<br/>Change Model"]:::process
-    
-    %% Output nodes (red hexagons)
-    ClimateParam["Climate<br/>Parameterized<br/>Net Returns"]:::output
-    Transition["Transition<br/>Probability as<br/>Function of<br/>Climate / SSP"]:::output
-    SimulatedChange["Simulated Land<br/>Area Change<br/>(Gross & Net)"]:::output
-    
-    %% Simplified connections to the RCF box
-    PRISM --> RCF
-    NetReturns --> RCF
-    SoilQuality --> RCF
-    
-    %% Connections from RCF components to other nodes
-    Forest --> ClimateParam
-    Crop --> ClimateParam
-    Urban --> ClimateParam
-    
-    ClimateParam --> LandUseModel
-    LandUseModel --> Transition
-    MACA --> Transition
-    SSP --> Transition
-    
-    Transition --> SimulatedChange
-```
-
-This diagram shows how the RPA Land Use Model integrates various inputs:
-- Historical climate data (PRISM)
-- Economic factors (Net Returns to Land Production)
-- Land characteristics (Soil Quality from NRI)
-- Future climate projections (MACA)
-- Future socioeconomic projections (SSPs)
-
-These inputs flow through Ricardian Climate Functions for different land use system types, producing climate-parameterized net returns that feed into the land-use change model. The model generates transition probabilities as functions of climate and socioeconomic factors, ultimately producing the simulated land area changes found in this dataset.
-
-### RPA Integrated Scenarios
-
-For clarity and policy relevance, this application focuses on the 5 most important scenarios from the full dataset of 20 scenarios. These represent the key RPA Integrated scenarios plus the overall mean projection:
-
-- **Sustainable Development Pathway** (RCP4.5-SSP1) - *Most optimistic scenario*
-- **Climate Challenge Scenario** (RCP8.5-SSP3) - *Climate stress with economic challenges*
-- **Moderate Growth Scenario** (RCP8.5-SSP2) - *Middle-of-the-road scenario*
-- **High Development Scenario** (RCP8.5-SSP5) - *High development pressure*
-- **Ensemble Projection** - *Average across all 20 scenarios*
-
-Each ensemble scenario represents the mean projection across 5 different climate models (CNRM_CM5, HadGEM2_ES365, IPSL_CM5A_MR, MRI_CGCM3, NorESM1_M) to capture the range of climate uncertainty.
-
-**Climate & Economic Factors:**
-- **Climate projections**: RCP4.5 (lower warming) vs RCP8.5 (higher warming)
-- **Socioeconomic pathways**: SSP1-5 representing different population and economic growth patterns
-- **Policy focus**: These 5 scenarios provide the most relevant range for land use planning and policy decisions
-
-### Time Periods
-- Calibration period: 2012-2020 (Removed from data viewer)
-- Projection periods: 2020-2070 in 10-year intervals
-  - 2020-2030
-  - 2030-2040
-  - 2040-2050
-  - 2050-2060
-  - 2060-2070
-
-### Land Use Categories
-Transitions between five main land use types:
-- Cropland
-- Pasture land
-- Rangeland
-- Forest land
-- Urban developed land
-
-### Geographic Coverage
-- All counties in the conterminous United States
-- Counties identified by 5-digit FIPS codes
-- Organized into hierarchical regions (States → Subregions → Regions)
-
-## 🔍 Key Findings
-
-The RPA Assessment projections reveal several important trends for land use in the United States:
-
-- **Developed land area** is projected to increase in the future, while all non-developed land uses are projected to lose area. The most common source of new developed land is forest land.
-
-- **Forest land area** is projected to decrease under all scenarios, although at lower rates than projected by the 2010 Assessment. Overall forest land losses are projected to be between 1.9 and 3.7 percent by 2070.
-
-- **Climate and economic impacts** vary: Higher projected population and income growth lead to relatively less forest land, while hotter projected future climates lead to relatively more forest land.
-
-- **Sensitivity to factors**: Projected future land use change is more sensitive to the variation in economic factors across RPA scenarios than to the variation among climate projections.
-
-- **Regional variations**: The greatest increases in developed land use are projected for the RPA South Region, with highest forest land loss also projected in this region.
-
-## 📊 Technical Architecture
-
-This project showcases modern software engineering practices with a production-ready AI analytics platform:
-
-### 🏗️ Core Technologies
-- **🤖 LangChain + Claude Sonnet 4.5**: Tool-calling agent with encapsulated SQL queries
-- **🦆 DuckDB**: High-performance analytical database with columnar storage
-- **🌐 FastAPI**: REST API backend with SSE streaming support
-- **🐍 Pydantic v2**: Type-safe data validation and configuration management
-- **📊 Rich Terminal UI**: Beautiful command-line interface with colors and formatting
-
-### 🔧 Agent Architecture (2025)
-- **Tool-Calling Pattern**: Claude picks the right tool, tool handles the SQL
-- **11 Domain Tools**: Each encapsulates specific query patterns (no SQL generation by LLM)
-- **Streaming Responses**: Real-time response generation with multi-turn tool calling
-- **Conversation Memory**: Sliding window history for context
-
-### 🤖 AI Agent Features
-- **No SQL Generation**: All SQL is encapsulated in tools - prevents injection attacks
-- **Domain-Specific Tools**: Query land use, transitions, scenarios, time series, counties
-- **Rich Formatting**: Results formatted with state names, percentages, and summaries
-- **Streaming Support**: Real-time responses with conversation memory
-
-### 🛡️ Production Quality
-- **Security**: SQL encapsulation prevents injection - LLM never generates SQL
-- **Error Handling**: Custom exception hierarchy with contextual error messages
-- **Performance**: DuckDB columnar storage optimized for analytical queries
-- **Testing**: Comprehensive test suite with real database integration
-
-## 📚 Data Source & Attribution
-
-This project analyzes data from the **USDA Forest Service 2020 Resources Planning Act (RPA) Assessment**.
-
-### RPA Assessment
-**Official Website**: https://www.fs.usda.gov/research/rpa
-
-**Full Report Citation**: U.S. Department of Agriculture, Forest Service. 2023. Future of America's Forest and Rangelands: Forest Service 2020 Resources Planning Act Assessment. Gen. Tech. Rep. WO-102. Washington, DC. https://doi.org/10.2737/WO-GTR-102
-
-### Land Use Projections Dataset
-**Dataset Citation**: Mihiar, A.J.; Lewis, D.J.; Coulston, J.W. 2023. Land use projections for the 2020 RPA Assessment. Fort Collins, CO: Forest Service Research Data Archive. https://doi.org/10.2737/RDS-2023-0026
-
-**Usage**: Download the data from the link above and unzip the .json data file to `data/raw/county_landuse_projections_RPA.json`
-
-## 🧪 Testing & Development
-
-### Run Tests
-```bash
-# Run all tests with coverage
-uv run python -m pytest tests/ --cov=src --cov-report=term-missing
-
-# Run specific test categories  
-uv run python -m pytest tests/unit/          # Unit tests
-uv run python -m pytest tests/integration/   # Integration tests
-
-# Run with parallel execution
-uv run python -m pytest tests/ -n auto
-```
-
-### Development Tools
-```bash
-# Install development dependencies
-uv sync --group dev
-
-# Code quality checks
-uv run ruff check src/ tests/                # Linting
-uv run mypy src/                             # Type checking  
-uv run safety check                          # Security audit
-
-# Documentation
-mkdocs serve                                 # Local documentation server
-```
-
-### Testing Philosophy
-- **89.75% test coverage** with 142+ comprehensive tests
-- **Real functionality testing**: Uses actual API calls and database connections
-- **No business logic mocking**: Tests real agent behavior and data processing
-- **Integration testing**: Full end-to-end workflows with actual DuckDB database
+</div>
 
 ---
 
-**RPA Land Use Analytics** - Transforming America's land use data into actionable insights with modern AI 🌲
+## What You Can Discover
 
-*Ready to explore? Start with the command line agent: `uv run rpa-analytics`*
+Ask questions in plain English and get immediate answers from millions of land use records:
+
+<table>
+<tr>
+<td width="50%">
+
+**Urbanization & Development**
+> "Which states have the most urban expansion?"
+
+> "What's converting to urban land in California?"
+
+**Forest & Agriculture**
+> "How much forest will be lost by 2070?"
+
+> "Compare agricultural land changes across scenarios"
+
+</td>
+<td width="50%">
+
+**Climate Scenarios**
+> "How do RCP 4.5 and RCP 8.5 differ for my region?"
+
+> "Which scenario shows the highest forest loss?"
+
+**Regional Analysis**
+> "Show me land use trends in the Pacific Northwest"
+
+> "Which counties have the most farmland conversion?"
+
+</td>
+</tr>
+</table>
+
+---
+
+## How It Works
+
+<table>
+<tr>
+<td align="center" width="33%">
+<h3>1. Ask</h3>
+Type your question in plain English—no technical queries needed
+</td>
+<td align="center" width="33%">
+<h3>2. Analyze</h3>
+AI searches 5.4 million records from official USDA projections
+</td>
+<td align="center" width="33%">
+<h3>3. Discover</h3>
+Get formatted answers with supporting data and visualizations
+</td>
+</tr>
+</table>
+
+---
+
+## Features
+
+| Feature | Description |
+|:--------|:------------|
+| **AI Chat** | Ask complex questions about land use trends, climate impacts, and regional comparisons in natural language |
+| **Analytics Dashboard** | Interactive visualizations for land use distribution, climate scenarios, and urbanization patterns |
+| **Data Explorer** | SQL query interface with schema browser for custom analysis |
+| **Data Export** | Download filtered datasets in CSV, JSON, or Excel format |
+
+---
+
+## Data Coverage
+
+Our analytics are powered by the **USDA Forest Service 2020 RPA Assessment**—the authoritative source for long-term land use projections in the United States.
+
+| Dimension | Coverage |
+|:----------|:---------|
+| **Geographic** | 3,075 U.S. counties |
+| **Temporal** | 2020 – 2070 (50-year projections) |
+| **Climate Scenarios** | 5 integrated RCP-SSP scenarios |
+| **Land Use Types** | Cropland, Pasture, Forest, Urban, Rangeland |
+| **Records** | 5.4+ million land use transitions |
+
+---
+
+## Key Insights from the Data
+
+The RPA Assessment projections reveal important trends for America's landscape:
+
+- **Urban expansion is accelerating** — Developed land is projected to increase under all scenarios, primarily converting from forest
+- **Forest loss is widespread** — Overall forest land losses projected between 1.9% and 3.7% by 2070
+- **The South faces the greatest change** — Highest increases in developed land and forest loss are projected for the RPA South Region
+- **Economic factors drive change** — Land use projections are more sensitive to economic factors than climate variation
+
+---
+
+## About the RPA Assessment
+
+The [Resources Planning Act (RPA) Assessment](https://www.fs.usda.gov/research/rpa) is prepared by the USDA Forest Service in response to the 1974 Forest and Rangeland Renewable Resources Planning Act. The 2020 Assessment provides comprehensive analysis of U.S. forests, rangelands, and the effects of socioeconomic and climate change through 2070.
+
+**Data Citation:** Mihiar, A.J.; Lewis, D.J.; Coulston, J.W. 2023. *Land use projections for the 2020 RPA Assessment.* Fort Collins, CO: Forest Service Research Data Archive. [https://doi.org/10.2737/RDS-2023-0026](https://doi.org/10.2737/RDS-2023-0026)
+
+---
+
+<div align="center">
+
+### Ready to explore?
+
+[![Start Analyzing](https://img.shields.io/badge/Start%20Analyzing-rpalanduse.org-0066cc?style=for-the-badge&logo=rocket&logoColor=white)](https://rpalanduse.org)
+
+</div>
+
+---
+
+<details>
+<summary><strong>For Developers</strong></summary>
+
+### Architecture
+
+The platform consists of three components:
+
+| Component | Technology | Repository |
+|-----------|------------|------------|
+| **Frontend** | Next.js 15, React 19, Tailwind CSS | [rpa-landuse-frontend](https://github.com/mihiarc/rpa-landuse-frontend) |
+| **Backend API** | FastAPI, Python 3.11 | [rpa-landuse-backend](https://github.com/mihiarc/rpa-landuse-backend) |
+| **Analytics Core** | LangChain, Claude, DuckDB | This repository |
+
+### AI Agent Design
+
+The system uses a **tool-calling pattern** where Claude Sonnet 4.5 selects from 11 domain-specific tools. Each tool encapsulates SQL queries—the LLM never generates SQL directly, preventing injection attacks.
+
+**Tools available:**
+- `query_land_use_area` — Land use by state/type/year
+- `query_land_use_transitions` — What converts to what
+- `query_urban_expansion` — Urban development patterns
+- `query_forest_change` — Forest gain/loss analysis
+- `compare_scenarios` — RCP/SSP comparisons
+- `query_time_series` — Trends 2020-2070
+- And 5 more specialized tools
+
+### Quick Start
+
+```bash
+# Install dependencies
+uv sync
+
+# Configure API key
+cp .env.example config/.env
+# Edit config/.env with your ANTHROPIC_API_KEY
+
+# Run command-line agent
+uv run rpa-analytics
+```
+
+### Database
+
+The analytics database uses a **DuckDB star schema**:
+
+- `fact_landuse_transitions` — 5.4M records
+- `dim_scenario` — Climate scenarios
+- `dim_geography` — 3,075 counties
+- `dim_landuse` — 5 land use types
+- `dim_time` — Time periods
+
+### Testing
+
+```bash
+# Run all tests
+uv run pytest tests/ --cov=src/landuse
+
+# Run specific test categories
+uv run pytest tests/unit/          # Unit tests
+uv run pytest tests/integration/   # Integration tests
+```
+
+### Python API
+
+```python
+from landuse.agents.landuse_agent import LandUseAgent
+
+with LandUseAgent() as agent:
+    response = agent.query("How much forest is in California?")
+    print(response)
+```
+
+</details>
+
+---
+
+<div align="center">
+
+**[rpalanduse.org](https://rpalanduse.org)** | [GitHub](https://github.com/mihiarc/rpa-landuse) | [USDA RPA Assessment](https://www.fs.usda.gov/research/rpa)
+
+MIT License
+
+</div>
