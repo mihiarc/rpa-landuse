@@ -53,8 +53,8 @@ data/ssp_projections/
 !data/README.md
 !data/**/README.md
 
-# Note: DuckDB files are tracked with Git LFS
-# *.duckdb
+# DuckDB files (developers generate locally, production uses MotherDuck)
+*.duckdb
 
 # ===============================================
 # Configuration
@@ -157,4 +157,3 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
-data/processed/landuse_analytics.duckdb
