@@ -55,6 +55,7 @@ data/ssp_projections/
 
 # DuckDB files (developers generate locally, production uses MotherDuck)
 *.duckdb
+tests/fixtures/*.duckdb
 
 # ===============================================
 # Configuration

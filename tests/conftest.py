@@ -16,6 +16,22 @@ project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 sys.path.insert(0, str(project_root / "scripts"))
 
+
+def is_valid_duckdb(path: str) -> bool:
+    """Check if file is a valid DuckDB database (not an LFS pointer)."""
+    try:
+        conn = duckdb.connect(path, read_only=True)
+        conn.execute("SELECT 1").fetchone()
+        conn.close()
+        return True
+    except Exception:
+        return False
+
+
+# Determine test database path - use fixture if valid, otherwise skip
+_fixture_db_path = "tests/fixtures/test_landuse.duckdb"
+_fixture_valid = Path(_fixture_db_path).exists() and is_valid_duckdb(_fixture_db_path)
+
 # Test environment variables
 TEST_ENV = {
     "OPENAI_API_KEY": "sk-test1234567890123456789012345678901234567890123456",
@@ -24,7 +40,7 @@ TEST_ENV = {
     "MAX_TOKENS": "1000",
     "DEFAULT_QUERY_LIMIT": "100",
     "LOG_LEVEL": "DEBUG",
-    "LANDUSE_DB_PATH": "tests/fixtures/test_landuse.duckdb",
+    "LANDUSE_DB_PATH": _fixture_db_path if _fixture_valid else "",
 }
 
 

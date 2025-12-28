@@ -219,10 +219,16 @@ class TestDatabaseViews:
 
         db_path = os.getenv("LANDUSE_DB_PATH", "data/processed/landuse_analytics.duckdb")
 
-        if not Path(db_path).exists():
+        if not db_path or not Path(db_path).exists():
             pytest.skip(f"Database not found at {db_path}")
 
-        conn = duckdb.connect(db_path, read_only=True)
+        try:
+            conn = duckdb.connect(db_path, read_only=True)
+            # Verify it's a valid database
+            conn.execute("SELECT 1").fetchone()
+        except Exception as e:
+            pytest.skip(f"Invalid database at {db_path}: {e}")
+
         yield conn
         conn.close()
 
