@@ -385,10 +385,8 @@ async def compare_scenarios(
 
     if result.get("comparison"):
         lines.append("")
-        lines.append("| Scenario | Acres |")
-        lines.append("|----------|-------|")
         for code, data in result["comparison"].items():
-            lines.append(f"| {data['name']} | {data['formatted']} |")
+            lines.append(f"- **{data['name']}**: {data['formatted']} acres")
 
     if result.get("highest"):
         highest = result["comparison"].get(result["highest"], {})
@@ -428,10 +426,8 @@ async def compare_states(
 
     if result.get("comparison"):
         lines.append("")
-        lines.append("| Rank | State | Acres |")
-        lines.append("|------|-------|-------|")
         for i, data in enumerate(result["comparison"], 1):
-            lines.append(f"| {i} | {data['state_name']} | {data['formatted']} |")
+            lines.append(f"{i}. **{data['state_name']}**: {data['formatted']} acres")
 
     if result.get("scenario"):
         lines.append(f"\n*Scenario: {result['scenario']}*")
@@ -465,10 +461,8 @@ async def query_time_series(
 
     if result.get("time_series"):
         lines.append("")
-        lines.append("| Period | Acres |")
-        lines.append("|--------|-------|")
         for period in result["time_series"]:
-            lines.append(f"| {period['period']} | {period['formatted']} |")
+            lines.append(f"- **{period['period']}**: {period['formatted']} acres")
 
     if result.get("trend"):
         trend = result["trend"]
@@ -545,10 +539,8 @@ async def query_top_counties(
 
     if result.get("counties"):
         lines.append("")
-        lines.append("| Rank | County | State | Acres |")
-        lines.append("|------|--------|-------|-------|")
         for c in result["counties"]:
-            lines.append(f"| {c['rank']} | {c['county']} | {c['state']} | {c['formatted']} |")
+            lines.append(f"{c['rank']}. **{c['county']}**, {c['state']}: {c['formatted']} acres")
 
     if result.get("scenario"):
         lines.append(f"\n*Scenario: {result['scenario']}*")
