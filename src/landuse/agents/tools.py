@@ -384,7 +384,8 @@ async def compare_scenarios(
     lines = [f"**Scenario Comparison: {metric.replace('_', ' ').title()}**"]
 
     if result.get("comparison"):
-        lines.append("\n| Scenario | Acres |")
+        lines.append("")
+        lines.append("| Scenario | Acres |")
         lines.append("|----------|-------|")
         for code, data in result["comparison"].items():
             lines.append(f"| {data['name']} | {data['formatted']} |")
@@ -426,7 +427,8 @@ async def compare_states(
     lines = [f"**State Comparison: {metric.replace('_', ' ').title()}**"]
 
     if result.get("comparison"):
-        lines.append("\n| Rank | State | Acres |")
+        lines.append("")
+        lines.append("| Rank | State | Acres |")
         lines.append("|------|-------|-------|")
         for i, data in enumerate(result["comparison"], 1):
             lines.append(f"| {i} | {data['state_name']} | {data['formatted']} |")
@@ -462,7 +464,8 @@ async def query_time_series(
     lines = [f"**Time Series: {metric.replace('_', ' ').title()}**"]
 
     if result.get("time_series"):
-        lines.append("\n| Period | Acres |")
+        lines.append("")
+        lines.append("| Period | Acres |")
         lines.append("|--------|-------|")
         for period in result["time_series"]:
             lines.append(f"| {period['period']} | {period['formatted']} |")
@@ -541,7 +544,8 @@ async def query_top_counties(
     lines = [f"**Top {limit} Counties by {metric.replace('_', ' ').title()}**"]
 
     if result.get("counties"):
-        lines.append("\n| Rank | County | State | Acres |")
+        lines.append("")
+        lines.append("| Rank | County | State | Acres |")
         lines.append("|------|--------|-------|-------|")
         for c in result["counties"]:
             lines.append(f"| {c['rank']} | {c['county']} | {c['state']} | {c['formatted']} |")
