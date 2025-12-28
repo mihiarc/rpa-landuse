@@ -28,8 +28,15 @@ class TestCombinedScenariosImplementation:
     def db_path(self):
         """Get database path."""
         db_path = os.getenv("LANDUSE_DB_PATH", "data/processed/landuse_analytics.duckdb")
-        if not Path(db_path).exists():
-            pytest.skip(f"Database not found at {db_path}")
+        if not db_path or not Path(db_path).exists() or not Path(db_path).is_file():
+            pytest.skip(f"Database not found or invalid at {db_path}")
+        # Verify it's a valid DuckDB file
+        try:
+            conn = duckdb.connect(db_path, read_only=True)
+            conn.execute("SELECT 1").fetchone()
+            conn.close()
+        except Exception as e:
+            pytest.skip(f"Invalid database at {db_path}: {e}")
         return db_path
 
     def test_database_scenario_count(self, db_path):
