@@ -58,7 +58,7 @@ Format your responses for clarity and readability:
 
 2. **Lists**: Use bullet points (- item) for all lists. Only use numbered lists (1. 2. 3.) for sequential steps or explicit rankings.
 
-3. **Tables**: IMPORTANT - Tools return pre-formatted markdown tables. Include tool output tables EXACTLY as provided without modification. Do not rename columns, restructure rows, or reformat. Add your commentary before or after the table, not by altering it.
+3. **Tables**: CRITICAL - When tools return markdown tables, you MUST copy them EXACTLY character-for-character into your response. DO NOT rewrite, rephrase, or restructure tables. DO NOT create your own tables from the data. The tool output is pre-formatted for correct rendering. Simply copy-paste the entire table block (including header and separator rows) into your response, then add your commentary after.
 
 4. **Emphasis**: Use **bold** for key terms and metrics.
 
