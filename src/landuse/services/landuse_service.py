@@ -116,9 +116,13 @@ class LandUseService:
         self._connection: duckdb.DuckDBPyConnection | None = None
 
     def _get_connection(self) -> duckdb.DuckDBPyConnection:
-        """Get or create database connection."""
+        """Get or create database connection.
+
+        Note: read_only=False allows sharing connection config with other services
+        (e.g., AcademicUserService) that write to the same MotherDuck database.
+        """
         if self._connection is None:
-            self._connection = duckdb.connect(self.db_path, read_only=True)
+            self._connection = duckdb.connect(self.db_path, read_only=False)
         return self._connection
 
     def _scenario_filter(self, scenario: str | None) -> tuple[str, list]:
