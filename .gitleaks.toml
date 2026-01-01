@@ -1,0 +1,11 @@
+# Gitleaks configuration
+# https://github.com/gitleaks/gitleaks
+
+[extend]
+useDefault = true
+
+[allowlist]
+# Exclude detect-secrets baseline file (contains hashed representations, not real secrets)
+paths = [
+    '''\.secrets\.baseline$''',
+]
