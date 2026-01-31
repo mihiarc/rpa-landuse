@@ -1,7 +1,7 @@
 """
 Domain-specific tools for RPA Land Use Agent.
 
-Each tool encapsulates a specific query pattern and calls the LandUseService.
+Each tool encapsulates a specific query pattern and calls the LandUseAPI.
 The LLM never generates SQL - it just picks the right tool with the right parameters.
 """
 
@@ -10,9 +10,29 @@ import logging
 from langchain_core.tools import tool
 from pydantic import BaseModel, Field
 
-from ..services.landuse_service import landuse_service
+from landuse.api import LandUseAPI
 
 logger = logging.getLogger(__name__)
+
+# ============== API Instance (Lazy Initialization) ==============
+
+_api: LandUseAPI | None = None
+
+
+def _get_api() -> LandUseAPI:
+    """Get or create the API instance."""
+    global _api
+    if _api is None:
+        _api = LandUseAPI()
+    return _api
+
+
+def close_api() -> None:
+    """Close the API connection. Call on shutdown."""
+    global _api
+    if _api is not None:
+        _api.close()
+        _api = None
 
 
 # ============== Input Schemas ==============
@@ -141,7 +161,7 @@ class DataSummaryInput(BaseModel):
 
 
 @tool(args_schema=LandUseAreaInput)
-async def query_land_use_area(
+def query_land_use_area(
     states: list[str],
     land_use: str | None = None,
     year: int | None = None,
@@ -156,39 +176,12 @@ async def query_land_use_area(
     - Current vs future land area by type
     - How much of a specific land use is in certain states
     """
-    result = await landuse_service.query_area(states, land_use, year, scenario)
-
-    if "error" in result:
-        return f"Error: {result['error']}"
-
-    # Format response
-    lines = ["**Land Use Area**"]
-
-    if land_use:
-        lines.append(f"- **{land_use.title()}**: {result['total_acres_formatted']} acres")
-    else:
-        lines.append(f"- **Total Area**: {result['total_acres_formatted']} acres")
-
-    if result.get("by_landuse"):
-        lines.append("\n**By Land Use Type:**")
-        for lu, acres in result["by_landuse"].items():
-            lines.append(f"- {lu}: {acres} acres")
-
-    if result.get("by_state") and len(result["by_state"]) > 1:
-        lines.append("\n**By State:**")
-        for state, acres in result["by_state"].items():
-            lines.append(f"- {state}: {acres} acres")
-
-    if result.get("scenario"):
-        lines.append(f"\n*Scenario: {result['scenario']}*")
-
-    lines.append(f"\n*Source: {result.get('source', 'USDA Forest Service 2020 RPA Assessment')}*")
-
-    return "\n".join(lines)
+    result = _get_api().get_land_use_area(states, land_use, year, scenario)
+    return result.to_llm_string()
 
 
 @tool(args_schema=LandUseTransitionsInput)
-async def query_land_use_transitions(
+def query_land_use_transitions(
     states: list[str],
     from_use: str | None = None,
     to_use: str | None = None,
@@ -205,29 +198,12 @@ async def query_land_use_transitions(
     - Net land use changes
     - What specific land types are converting to
     """
-    result = await landuse_service.query_transitions(states, from_use, to_use, year_range, scenario)
-
-    if "error" in result:
-        return f"Error: {result['error']}"
-
-    lines = ["**Land Use Transitions**"]
-    lines.append(f"- **Total Transition Area**: {result['total_formatted']} acres")
-
-    if result.get("transitions"):
-        lines.append("\n**Top Transitions:**")
-        for t in result["transitions"][:10]:
-            lines.append(f"- {t['from']} → {t['to']}: {t['acres']} acres")
-
-    if result.get("scenario"):
-        lines.append(f"\n*Scenario: {result['scenario']}*")
-
-    lines.append(f"\n*Source: {result.get('source', 'USDA Forest Service 2020 RPA Assessment')}*")
-
-    return "\n".join(lines)
+    result = _get_api().get_transitions(states, from_use, to_use, year_range, scenario)
+    return result.to_llm_string()
 
 
 @tool(args_schema=UrbanExpansionInput)
-async def query_urban_expansion(
+def query_urban_expansion(
     states: list[str],
     year_range: str | None = None,
     scenario: str | None = None,
@@ -243,37 +219,12 @@ async def query_urban_expansion(
     - Development patterns over time
     - Which land uses are losing area to urbanization
     """
-    result = await landuse_service.query_urban_expansion(states, year_range, scenario, source_land_use)
-
-    if "error" in result:
-        return f"Error: {result['error']}"
-
-    lines = ["**Urban Expansion**"]
-    lines.append(f"- **Total New Urban Area**: {result['total_formatted']} acres")
-
-    if result.get("by_source"):
-        lines.append("\n**Source of New Urban Land:**")
-        for source, acres in result["by_source"].items():
-            lines.append(f"- From {source}: {acres} acres")
-
-    if result.get("by_state") and len(result["by_state"]) > 1:
-        lines.append("\n**By State:**")
-        for state, acres in list(result["by_state"].items())[:5]:
-            lines.append(f"- {state}: {acres} acres")
-
-    if result.get("note"):
-        lines.append(f"\n*Note: {result['note']}*")
-
-    if result.get("scenario"):
-        lines.append(f"\n*Scenario: {result['scenario']}*")
-
-    lines.append(f"\n*Source: {result.get('source', 'USDA Forest Service 2020 RPA Assessment')}*")
-
-    return "\n".join(lines)
+    result = _get_api().get_urban_expansion(states, year_range, scenario, source_land_use)
+    return result.to_llm_string()
 
 
 @tool(args_schema=ForestChangeInput)
-async def query_forest_change(
+def query_forest_change(
     states: list[str],
     year_range: str | None = None,
     scenario: str | None = None,
@@ -289,37 +240,12 @@ async def query_forest_change(
     - Forest area trends by scenario
     - How much forest a state will lose
     """
-    result = await landuse_service.query_forest_change(states, year_range, scenario, change_type)
-
-    if "error" in result:
-        return f"Error: {result['error']}"
-
-    lines = ["**Forest Change**"]
-
-    if "forest_loss_acres" in result:
-        lines.append(f"- **Forest Loss**: {result['forest_loss_formatted']} acres")
-        if result.get("loss_by_destination"):
-            lines.append("  - Converting to:")
-            for dest, acres in result["loss_by_destination"].items():
-                lines.append(f"    - {dest}: {acres} acres")
-
-    if "forest_gain_acres" in result:
-        lines.append(f"- **Forest Gain**: {result['forest_gain_formatted']} acres")
-
-    if "net_change_acres" in result:
-        direction = result.get("net_direction", "change")
-        lines.append(f"- **Net {direction.title()}**: {result['net_change_formatted']} acres")
-
-    if result.get("scenario"):
-        lines.append(f"\n*Scenario: {result['scenario']}*")
-
-    lines.append(f"\n*Source: {result.get('source', 'USDA Forest Service 2020 RPA Assessment')}*")
-
-    return "\n".join(lines)
+    result = _get_api().get_forest_change(states, year_range, scenario, change_type)
+    return result.to_llm_string()
 
 
 @tool(args_schema=AgriculturalChangeInput)
-async def query_agricultural_change(
+def query_agricultural_change(
     states: list[str],
     ag_type: str | None = None,
     year_range: str | None = None,
@@ -334,34 +260,12 @@ async def query_agricultural_change(
     - Agricultural land to urban conversion
     - Farming land availability projections
     """
-    result = await landuse_service.query_agricultural_change(states, ag_type, year_range, scenario)
-
-    if "error" in result:
-        return f"Error: {result['error']}"
-
-    lines = ["**Agricultural Land Changes**"]
-    lines.append(f"- **Total Agricultural Loss**: {result['total_formatted']} acres")
-
-    if result.get("by_ag_type"):
-        lines.append("\n**By Agricultural Type:**")
-        for ag, acres in result["by_ag_type"].items():
-            lines.append(f"- {ag}: {acres} acres")
-
-    if result.get("by_destination"):
-        lines.append("\n**Converting To:**")
-        for dest, acres in result["by_destination"].items():
-            lines.append(f"- {dest}: {acres} acres")
-
-    if result.get("scenario"):
-        lines.append(f"\n*Scenario: {result['scenario']}*")
-
-    lines.append(f"\n*Source: {result.get('source', 'USDA Forest Service 2020 RPA Assessment')}*")
-
-    return "\n".join(lines)
+    result = _get_api().get_agricultural_change(states, ag_type, year_range, scenario)
+    return result.to_llm_string()
 
 
 @tool(args_schema=ScenarioComparisonInput)
-async def compare_scenarios(
+def compare_scenarios(
     states: list[str],
     metric: str,
     scenarios: list[str] | None = None,
@@ -376,33 +280,12 @@ async def compare_scenarios(
     - Scenario-specific impacts
     - LM vs HM vs HL vs HH comparisons
     """
-    result = await landuse_service.compare_scenarios(states, metric, scenarios, year)
-
-    if "error" in result:
-        return f"Error: {result['error']}"
-
-    lines = [f"**Scenario Comparison: {metric.replace('_', ' ').title()}**"]
-
-    if result.get("comparison"):
-        lines.append("")
-        for code, data in result["comparison"].items():
-            lines.append(f"- **{data['name']}**: {data['formatted']} acres")
-
-    if result.get("highest"):
-        highest = result["comparison"].get(result["highest"], {})
-        lines.append(f"\n**Highest**: {highest.get('name', result['highest'])}")
-
-    if result.get("lowest"):
-        lowest = result["comparison"].get(result["lowest"], {})
-        lines.append(f"**Lowest**: {lowest.get('name', result['lowest'])}")
-
-    lines.append(f"\n*Source: {result.get('source', 'USDA Forest Service 2020 RPA Assessment')}*")
-
-    return "\n".join(lines)
+    result = _get_api().compare_scenarios(states, metric, scenarios)
+    return result.to_llm_string()
 
 
 @tool(args_schema=StateComparisonInput)
-async def compare_states(
+def compare_states(
     states: list[str],
     metric: str,
     scenario: str | None = None,
@@ -417,28 +300,12 @@ async def compare_states(
     - Regional differences
     - Top/bottom states for a metric
     """
-    result = await landuse_service.compare_states(states, metric, scenario, year)
-
-    if "error" in result:
-        return f"Error: {result['error']}"
-
-    lines = [f"**State Comparison: {metric.replace('_', ' ').title()}**"]
-
-    if result.get("comparison"):
-        lines.append("")
-        for i, data in enumerate(result["comparison"], 1):
-            lines.append(f"{i}. **{data['state_name']}**: {data['formatted']} acres")
-
-    if result.get("scenario"):
-        lines.append(f"\n*Scenario: {result['scenario']}*")
-
-    lines.append(f"\n*Source: {result.get('source', 'USDA Forest Service 2020 RPA Assessment')}*")
-
-    return "\n".join(lines)
+    result = _get_api().compare_states(states, metric, scenario, year)
+    return result.to_llm_string()
 
 
 @tool(args_schema=TimeSeriesInput)
-async def query_time_series(
+def query_time_series(
     states: list[str],
     metric: str,
     scenario: str | None = None,
@@ -452,33 +319,12 @@ async def query_time_series(
     - Trajectory comparisons
     - Historical vs projected patterns
     """
-    result = await landuse_service.query_time_series(states, metric, scenario)
-
-    if "error" in result:
-        return f"Error: {result['error']}"
-
-    lines = [f"**Time Series: {metric.replace('_', ' ').title()}**"]
-
-    if result.get("time_series"):
-        lines.append("")
-        for period in result["time_series"]:
-            lines.append(f"- **{period['period']}**: {period['formatted']} acres")
-
-    if result.get("trend"):
-        trend = result["trend"]
-        lines.append(f"\n**Trend**: {trend['direction'].title()}")
-        lines.append(f"- Change: {trend['change_acres']} acres ({trend['change_percent']})")
-
-    if result.get("scenario"):
-        lines.append(f"\n*Scenario: {result['scenario']}*")
-
-    lines.append(f"\n*Source: {result.get('source', 'USDA Forest Service 2020 RPA Assessment')}*")
-
-    return "\n".join(lines)
+    result = _get_api().get_time_series(states, metric, scenario)
+    return result.to_llm_string()
 
 
 @tool(args_schema=CountyQueryInput)
-async def query_by_county(
+def query_by_county(
     state: str,
     county: str,
     metric: str = "area",
@@ -493,29 +339,12 @@ async def query_by_county(
     - Local land use patterns
     - Specific county analysis
     """
-    result = await landuse_service.query_by_county(state, county, metric, year, scenario)
-
-    if "error" in result:
-        return f"Error: {result['error']}"
-
-    lines = [f"**{result['county']}, {result['state']}**"]
-    lines.append(f"- FIPS: {result.get('fips', 'N/A')}")
-
-    if result.get("by_landuse"):
-        lines.append("\n**Land Use Breakdown:**")
-        for lu, acres in result["by_landuse"].items():
-            lines.append(f"- {lu}: {acres} acres")
-
-    if result.get("scenario"):
-        lines.append(f"\n*Scenario: {result['scenario']}*")
-
-    lines.append(f"\n*Source: {result.get('source', 'USDA Forest Service 2020 RPA Assessment')}*")
-
-    return "\n".join(lines)
+    result = _get_api().get_county_data(state, county, year, scenario)
+    return result.to_llm_string()
 
 
 @tool(args_schema=TopCountiesInput)
-async def query_top_counties(
+def query_top_counties(
     metric: str,
     limit: int = 10,
     states: list[str] | None = None,
@@ -530,28 +359,12 @@ async def query_top_counties(
     - Counties with most forest loss
     - Top development hotspots
     """
-    result = await landuse_service.query_top_counties(metric, limit, states, scenario)
-
-    if "error" in result:
-        return f"Error: {result['error']}"
-
-    lines = [f"**Top {limit} Counties by {metric.replace('_', ' ').title()}**"]
-
-    if result.get("counties"):
-        lines.append("")
-        for c in result["counties"]:
-            lines.append(f"{c['rank']}. **{c['county']}**, {c['state']}: {c['formatted']} acres")
-
-    if result.get("scenario"):
-        lines.append(f"\n*Scenario: {result['scenario']}*")
-
-    lines.append(f"\n*Source: {result.get('source', 'USDA Forest Service 2020 RPA Assessment')}*")
-
-    return "\n".join(lines)
+    result = _get_api().get_top_counties(metric, limit, states, scenario)
+    return result.to_llm_string()
 
 
 @tool(args_schema=DataSummaryInput)
-async def get_data_summary(geography: str | None = None) -> str:
+def get_data_summary(geography: str | None = None) -> str:
     """
     Get summary statistics about available data.
 
@@ -562,41 +375,8 @@ async def get_data_summary(geography: str | None = None) -> str:
     - Geographic coverage
     - Available scenarios
     """
-    result = await landuse_service.get_data_summary(geography)
-
-    lines = ["**RPA Land Use Data Summary**"]
-
-    lines.append("\n**Coverage:**")
-    lines.append(f"- Total Records: {result.get('total_records', 'N/A'):,}")
-    lines.append(f"- Counties: {result.get('counties', 'N/A'):,}")
-    lines.append(f"- States: {result.get('states', 'N/A')}")
-
-    if result.get("time_range"):
-        tr = result["time_range"]
-        lines.append(f"- Time Range: {tr['start']}-{tr['end']}")
-
-    lines.append("\n**Scenarios:**")
-    for code, name in [
-        ("LM", "Lower-Moderate (RCP45/SSP1): Sustainability pathway"),
-        ("HM", "High-Moderate (RCP85/SSP2): Middle Road"),
-        ("HL", "High-Low (RCP85/SSP3): Regional Rivalry"),
-        ("HH", "High-High (RCP85/SSP5): Fossil Development"),
-    ]:
-        lines.append(f"- {code}: {name}")
-
-    lines.append("\n**Land Use Types:**")
-    for lu in result.get("land_use_types", []):
-        lines.append(f"- {lu}")
-
-    if result.get("coverage"):
-        lines.append(f"\n*Coverage: {result['coverage']}*")
-
-    if result.get("key_assumption"):
-        lines.append(f"*Key Assumption: {result['key_assumption']}*")
-
-    lines.append(f"\n*Source: {result.get('source', 'USDA Forest Service 2020 RPA Assessment')}*")
-
-    return "\n".join(lines)
+    result = _get_api().get_data_summary()
+    return result.to_llm_string()
 
 
 # ============== Tool List ==============

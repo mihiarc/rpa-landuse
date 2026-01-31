@@ -34,9 +34,8 @@ from rich.console import Console
 from rich.panel import Panel
 
 from landuse.agents.prompts import SYSTEM_PROMPT
-from landuse.agents.tools import TOOLS
+from landuse.agents.tools import TOOLS, close_api
 from landuse.core.app_config import AppConfig
-from landuse.services.landuse_service import landuse_service
 
 logger = logging.getLogger(__name__)
 
@@ -167,11 +166,11 @@ class LandUseAgent:
                     "args": tool_call["args"],
                 }
 
-                # Execute the tool
+                # Execute the tool (sync - tools now use synchronous API)
                 tool_func = {t.name: t for t in TOOLS}.get(tool_call["name"])
                 if tool_func:
                     try:
-                        result = await tool_func.ainvoke(tool_call["args"])
+                        result = tool_func.invoke(tool_call["args"])
                         tool_results[tool_call["id"]] = result
                         yield {
                             "type": "tool_result",
@@ -315,8 +314,8 @@ class LandUseAgent:
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         """Context manager exit - clean up resources."""
-        # Close the service connection
-        landuse_service.close()
+        # Close the API connection
+        close_api()
 
 
 def main() -> None:

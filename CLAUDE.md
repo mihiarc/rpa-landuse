@@ -188,9 +188,10 @@ All SQL is encapsulated in tools - the LLM never generates SQL directly:
 - `query_top_counties`: Top counties by metric
 - `get_data_summary`: Data coverage info
 
-**LandUse Service** (`src/landuse/services/landuse_service.py`):
+**LandUse API** (`src/landuse/api/client.py`):
+- Synchronous Python API for querying land use data
+- Returns Pydantic models with `to_llm_string()` for Claude
 - Handles all database queries with proper SQL
-- Returns formatted results for tools
 - Manages DuckDB connections
 
 **Data Converter** (`src/landuse/converters/convert_to_duckdb.py`):
@@ -344,7 +345,7 @@ User Question
 ├─────────────────────────────────────────┤
 │  1. Convert to LangChain messages       │
 │  2. Call LLM with tools                 │
-│  3. Execute tool calls                  │
+│  3. Execute tool calls (sync)           │
 │  4. Return tool results to LLM          │
 │  5. Get final response                  │
 └─────────────────────────────────────────┘
@@ -352,7 +353,7 @@ User Question
      ▼
 ┌─────────────────────────────────────────┐
 │         11 Domain Tools                 │
-│  (Each encapsulates SQL queries)        │
+│  (Sync functions using LandUseAPI)      │
 ├─────────────────────────────────────────┤
 │  query_land_use_area                    │
 │  query_land_use_transitions             │
@@ -369,13 +370,21 @@ User Question
      │
      ▼
 ┌─────────────────────────────────────────┐
-│         LandUseService                  │
-│  (DuckDB queries + formatting)          │
+│         LandUseAPI                      │
+│  (Pydantic models + to_llm_string())    │
+└─────────────────────────────────────────┘
+     │
+     ▼
+┌─────────────────────────────────────────┐
+│         DuckDB                          │
+│  (Star schema queries)                  │
 └─────────────────────────────────────────┘
 ```
 
 ### Key Files
 - `src/landuse/agents/landuse_agent.py` - Main agent with Claude integration
-- `src/landuse/agents/tools.py` - 11 domain-specific tools with Pydantic schemas
+- `src/landuse/agents/tools.py` - 11 domain-specific tools (sync, call LandUseAPI)
 - `src/landuse/agents/prompts.py` - System prompt with RPA context
-- `src/landuse/services/landuse_service.py` - Database queries and formatting
+- `src/landuse/api/client.py` - LandUseAPI with Pydantic models
+- `src/landuse/api/models.py` - Result models with to_llm_string()
+- `src/landuse/api/queries.py` - SQL query builders
