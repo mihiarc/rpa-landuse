@@ -132,6 +132,38 @@ class LoggingConfig(BaseModel):
         return v.upper()
 
 
+class BackendConfig(BaseModel):
+    """Backend API configuration for FastAPI deployment."""
+
+    # CORS configuration
+    cors_origins: list[str] = Field(
+        default=[
+            "http://localhost:3000",
+            "http://127.0.0.1:3000",
+            "https://rpa-landuse-frontend.netlify.app",
+            "https://rpalanduse.org",
+            "https://www.rpalanduse.org",
+        ],
+        description="Allowed CORS origins",
+    )
+
+    # Authentication
+    auth_password_hash: Optional[str] = Field(default=None, description="bcrypt hash of the shared password")
+    auth_jwt_secret: Optional[str] = Field(default=None, description="Secret key for JWT signing")
+    auth_access_token_expire: int = Field(default=1800, description="Access token expiry in seconds (default 30 min)")
+    auth_refresh_token_expire: int = Field(default=604800, description="Refresh token expiry in seconds (default 7 days)")
+
+    # Academic tier
+    academic_tier_enabled: bool = Field(default=True, description="Enable free academic tier with email-only registration")
+    academic_daily_query_limit: int = Field(default=50, description="Maximum AI queries per day for academic users")
+    academic_user_db_path: str = Field(default="md:landuse_analytics", description="DuckDB/MotherDuck path for academic user storage")
+
+    @property
+    def auth_enabled(self) -> bool:
+        """Check if authentication is configured."""
+        return bool(self.auth_password_hash and self.auth_jwt_secret)
+
+
 class AppConfig(BaseSettings):
     """
     Unified application configuration with dependency injection support.
@@ -155,6 +187,7 @@ class AppConfig(BaseSettings):
     security: SecurityConfig = Field(default_factory=SecurityConfig)
     features: FeatureConfig = Field(default_factory=FeatureConfig)
     logging: LoggingConfig = Field(default_factory=LoggingConfig)
+    backend: BackendConfig = Field(default_factory=BackendConfig)
 
     # Application metadata
     app_name: str = Field(default="RPA Land Use Analytics")
